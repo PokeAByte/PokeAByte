@@ -1,0 +1,226 @@
+﻿:root {
+    --bg-color: rgb(36, 36, 36);
+    /* Text Color */
+    --text-color-primary: rgb(255, 255, 255);
+    --text-color-menu: rgb(255, 255, 255);
+    --text-color-menu-hover: rgb(190, 190, 190);
+    /* Tabs and Panels */
+    --border-color: rgb(79, 79, 89);
+    --tab-bg-color-active: rgb(35, 67, 108);
+    --tab-bg-color-inactive: rgb(71, 71, 71);
+    --content-bg-color: rgb(21, 22, 23);
+    /* Tables */
+    --table-border-color: var(--border-color);
+    --table-row-bg-one: var(var(--content-bg-color));
+    --table-row-bg-two: rgb(48, 48, 51);
+    /* Dropdowns */
+    --dropdown-bg-color: rgb(39, 57, 83);
+    --dropdown-action-bg-color: rgb(48, 82, 122);
+    /* Treeview */
+    --treeview-node-margin-left: 16;
+    --treeview-node-hover-bg: rgb(39, 57, 83);
+    /* Buttons */
+    --button-primary-bg-color: rgb(41, 74, 122);
+    --button-secondary-bg-color: rgb(50, 50, 50);
+    /* Hex Editor */
+    --hex-editor-bg-color: rgb(32, 50, 77);
+    /* Menu */
+    --header-menu-dropdown-text-color: rgb(20, 20, 20);
+    --header-menu-dropdown-bg-color: rgb(182, 182, 182);
+}
+
+/* Bulma overrides -- eventually move to sass */
+.button.is-primary {
+    background-color: var(--button-primary-bg-color);
+}
+
+    .button.is-primary:hover {
+        background-color: var(--button-primary-bg-color);
+    }
+
+.button.is-secondary {
+    background-color: var(--button-secondary-bg-color);
+    border-color: var(--button-secondary-bg-color);
+    color: white;
+}
+
+    .button.is-secondary:hover {
+        background-color: var(--button-secondary-bg-color);
+        border-color: var(--button-secondary-bg-color);
+        color: white;
+    }
+
+.checkbox:hover, .radio:hover {
+    color: gray;
+}
+
+select.input.is-dark {
+    border-color: var(--bg-color);
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+}
+/* End Bulma overrides */
+
+/* Media Queries */
+/* Sidebar mode */
+@media (max-width: 474px) {
+    .gh-center-panel .commands-td, .gh-center-panel .commands-th, .bytes-td, .bytes-th {
+        display: none;
+    }
+}
+/* End Media Queries */
+
+html, body {
+    height: 100%;
+    color: var(--text-color-primary);
+    background-color: var(--bg-color);
+}
+
+body {
+    line-height: 1.3;
+    text-rendering: optimizeLegibility;
+    font-size: 13px;
+}
+
+#header {
+    height: 38px;
+    line-height: 38px;
+    padding-left: 32px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    #header .header-menu-item {
+        padding-right: 48px;
+    }
+
+        #header .header-menu-item:hover {
+            color: var(--text-color-menu-hover)
+        }
+
+.gh-panel {
+    margin-top: 16px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+    .gh-panel > .gh-panel-header {
+        display: inline-block;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-left: 6px;
+        padding-right: 16px;
+        background-color: var(--tab-bg-color-active);
+    }
+
+        .gh-panel > .gh-panel-header.active {
+            background-color: var(--tab-bg-color-active);
+        }
+
+        .gh-panel > .gh-panel-header.inactive {
+            background-color: var(--tab-bg-color-inactive);
+        }
+
+    .gh-panel > .gh-panel-content {
+        padding: 8px;
+        background-color: var(--content-bg-color);
+        border-top: 1px solid var(--tab-bg-color-active);
+    }
+
+
+/* Table */
+.gh-table {
+    width: 100%;
+}
+
+    .gh-table th {
+        text-align: left;
+        border: 1px solid var(--table-border-color);
+    }
+
+    .gh-table th,
+    .gh-table td {
+        padding-left: 4px;
+        border: 1px solid var(--table-border-color);
+    }
+
+    .gh-table tr:nth-child(even) {
+        background-color: var(--table-row-bg-one);
+    }
+
+    .gh-table tr:nth-child(odd) {
+        background-color: var(--table-row-bg-two);
+    }
+
+
+/* Treeview */
+.treeitem-node:hover {
+    background-color: var(--treeview-node-hover-bg)
+}
+
+.treeitem-node .commands {
+    float: right;
+    height: 16px;
+}
+
+.treeitem-node .cmd-button svg {
+    height: 0px;
+}
+
+.treeitem-node .cmd-button svg.active {
+    height: 16px;
+}
+
+.treeitem-node:hover .cmd-button svg {
+    height: 16px;
+}
+
+
+/* Hexdecimal Editor */
+.hex-editor {
+    background-color: var(--bg-color);
+}
+
+.hex-editor-item {
+    display: inline-block;
+    text-align: center;
+    width: 48px;
+    height: 48px;
+    font-size: large;
+    background-color: var(--bg-color);
+    border: none;
+    color: var(--text-color-primary);
+}
+
+
+/* Buttons */
+.cmd-button {
+    display: inline-block;
+    width: 32px;
+    height: 16px;
+}
+
+/* Utility */
+
+.displayPropertyBytes {
+    font-family: monospace;
+}
+
+.byte {
+    white-space: pre;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 80vh;
+}
+
+.sprite {
+    display: inline;
+    width: 16px;
+    height: 16px;
+}

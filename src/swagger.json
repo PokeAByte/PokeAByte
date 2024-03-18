@@ -1,0 +1,563 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "GameHook API",
+        "contact": {
+            "name": "GameHook",
+            "url": "https://gamehook.io/"
+        },
+        "license": {
+            "name": "GNU Affero General Public License v3.0",
+            "url": "https://github.com/gamehook-io/gamehook/blob/main/LICENSE.txt"
+        },
+        "version": "v1"
+    },
+    "paths": {
+        "/driver/memory": {
+            "put": {
+                "tags": [
+                    "Driver"
+                ],
+                "summary": "Write bytes back to the driver manually.",
+                "operationId": "WriteMemory",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMemoryModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/files/mappers": {
+            "get": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Returns a list of all mapper files available inside of the /mappers folder.",
+                "operationId": "GetMapperFiles",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MapperFileModel"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {},
+        "/mapper": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns the mapper that was loaded, with all properties (populated with data).",
+                "operationId": "GetMapper",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MapperModel"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Changes the active mapper.",
+                "operationId": "ChangeMapper",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MapperReplaceModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/mapper/meta": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns the meta section of the mapper file.",
+                "operationId": "GetMeta",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MapperMetaModel"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mapper/values/{path}": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns a specific property's value by it's path.",
+                "operationId": "GetValueAsync",
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/mapper/properties": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns all properties loaded from the mapper.",
+                "operationId": "GetProperties",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PropertyModel"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mapper/properties/{path}": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns a specific property by it's path.",
+                "operationId": "GetProperty",
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PropertyModel"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mapper/set-property-value": {
+            "post": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Updates a property's value.",
+                "operationId": "UpdatePropertyValueAsync",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePropertyValueModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/mapper/set-property-bytes": {
+            "post": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Updates a property's bytes.",
+                "operationId": "UpdatePropertyBytesAsync",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePropertyBytesModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/mapper/set-property-frozen": {
+            "post": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Updates a property's frozen status.",
+                "operationId": "FreezePropertyAsync",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePropertyFreezeModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/mapper/glossary": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns the glossary section of the mapper file.",
+                "operationId": "GetGlossary",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "$ref": "#/components/schemas/GlossaryItemModel"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mapper/glossary/{key}": {
+            "get": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Returns a specific glossary by it's key.",
+                "operationId": "GetGlossaryPage",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GlossaryItemModel"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/favicon.ico": {},
+        "/site.css": {},
+        "/dist/gameHookMapperClient.js": {}
+    },
+    "components": {
+        "schemas": {
+            "GlossaryItemModel": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "value": {
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "MapperFileModel": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "MapperMetaModel": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "gameName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gamePlatform": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "mapperReleaseVersion": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "MapperModel": {
+                "type": "object",
+                "properties": {
+                    "meta": {
+                        "$ref": "#/components/schemas/MapperMetaModel"
+                    },
+                    "properties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PropertyModel"
+                        },
+                        "nullable": true
+                    },
+                    "glossary": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/GlossaryItemModel"
+                            }
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "MapperReplaceModel": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "driver": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PropertyModel": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "memoryContainer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "address": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "length": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bits": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "nullable": true
+                    },
+                    "bytes": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "nullable": true
+                    },
+                    "isFrozen": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "isReadOnly": {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateMemoryModel": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "bytes": {
+                        "type": "string",
+                        "format": "byte",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdatePropertyBytesModel": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bytes": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "nullable": true
+                    },
+                    "freeze": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdatePropertyFreezeModel": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "freeze": {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdatePropertyValueModel": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "nullable": true
+                    },
+                    "freeze": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        }
+    }
+}

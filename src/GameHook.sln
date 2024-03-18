@@ -1,0 +1,83 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.Domain", "GameHook.Domain\GameHook.Domain.csproj", "{763C59A7-0206-4B5B-A985-037CBA779C1E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{E5684EF8-81FB-46A0-ADBE-96DFDF572469}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{652E9253-C266-4861-B770-BD5268A6822D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.WebAPI", "GameHook.WebAPI\GameHook.WebAPI.csproj", "{5C10057D-621F-4750-AE42-8C2DADBFFB24}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.WPF", "GameHook.WPF\GameHook.WPF.csproj", "{3BACB562-5D99-41FA-8E58-7E3F1E59D349}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.Application", "GameHook.Application\GameHook.Application.csproj", "{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{273B00BF-3D40-4A1D-B38A-C707E0B79C8A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.IntegrationTests", "GameHook.IntegrationTests\GameHook.IntegrationTests.csproj", "{ED38E792-3262-4885-970E-CA4B0AC62265}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.Utility.BuildMapperBindings", "GameHook.Utility.BuildMapperBindings\GameHook.Utility.BuildMapperBindings.csproj", "{79ADB9C3-64ED-4930-B136-45461C123CA2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integrations", "Integrations", "{9CFA7630-43D7-4CA0-BCC8-47DD45E60A7F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.Integrations.BizHawk", "GameHook.Integrations.BizHawk\GameHook.Integrations.BizHawk.csproj", "{5E962838-5311-4C0E-ADC6-8B5EEB127C1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHook.Infrastructure", "GameHook.Infrastructure\GameHook.Infrastructure.csproj", "{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{763C59A7-0206-4B5B-A985-037CBA779C1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{763C59A7-0206-4B5B-A985-037CBA779C1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{763C59A7-0206-4B5B-A985-037CBA779C1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{763C59A7-0206-4B5B-A985-037CBA779C1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C10057D-621F-4750-AE42-8C2DADBFFB24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C10057D-621F-4750-AE42-8C2DADBFFB24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C10057D-621F-4750-AE42-8C2DADBFFB24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C10057D-621F-4750-AE42-8C2DADBFFB24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BACB562-5D99-41FA-8E58-7E3F1E59D349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BACB562-5D99-41FA-8E58-7E3F1E59D349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BACB562-5D99-41FA-8E58-7E3F1E59D349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BACB562-5D99-41FA-8E58-7E3F1E59D349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED38E792-3262-4885-970E-CA4B0AC62265}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED38E792-3262-4885-970E-CA4B0AC62265}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED38E792-3262-4885-970E-CA4B0AC62265}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED38E792-3262-4885-970E-CA4B0AC62265}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79ADB9C3-64ED-4930-B136-45461C123CA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79ADB9C3-64ED-4930-B136-45461C123CA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79ADB9C3-64ED-4930-B136-45461C123CA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79ADB9C3-64ED-4930-B136-45461C123CA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E962838-5311-4C0E-ADC6-8B5EEB127C1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E962838-5311-4C0E-ADC6-8B5EEB127C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E962838-5311-4C0E-ADC6-8B5EEB127C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E962838-5311-4C0E-ADC6-8B5EEB127C1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{763C59A7-0206-4B5B-A985-037CBA779C1E} = {E5684EF8-81FB-46A0-ADBE-96DFDF572469}
+		{5C10057D-621F-4750-AE42-8C2DADBFFB24} = {652E9253-C266-4861-B770-BD5268A6822D}
+		{3BACB562-5D99-41FA-8E58-7E3F1E59D349} = {652E9253-C266-4861-B770-BD5268A6822D}
+		{0B0903C2-7564-4DC0-88A4-80B9BDD7EBA8} = {E5684EF8-81FB-46A0-ADBE-96DFDF572469}
+		{79ADB9C3-64ED-4930-B136-45461C123CA2} = {273B00BF-3D40-4A1D-B38A-C707E0B79C8A}
+		{5E962838-5311-4C0E-ADC6-8B5EEB127C1D} = {9CFA7630-43D7-4CA0-BCC8-47DD45E60A7F}
+		{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5} = {E5684EF8-81FB-46A0-ADBE-96DFDF572469}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {856C15D5-5EB2-49C8-A5C3-7A81D3FC2D78}
+	EndGlobalSection
+EndGlobal
