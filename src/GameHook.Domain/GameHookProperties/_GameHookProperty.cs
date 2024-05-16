@@ -13,6 +13,8 @@ namespace GameHook.Domain.GameHookProperties
 
             MemoryContainer = attributes.MemoryContainer;
             AddressString = attributes.Address;
+            PointerAddressString = attributes.PointerAddress;
+            PointerAddressOffset = attributes.PointerAddressOffset;
             Length = attributes.Length;
             Size = attributes.Size;
             Bits = attributes.Bits;
@@ -31,7 +33,7 @@ namespace GameHook.Domain.GameHookProperties
 
             BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
         }
-
+        
         protected IGameHookInstance Instance { get; }
         public string Path { get; }
         public string Type { get; }

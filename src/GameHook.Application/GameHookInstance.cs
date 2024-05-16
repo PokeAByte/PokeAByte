@@ -148,7 +148,12 @@ namespace GameHook.Application
                         .SetValue("__mapper", Mapper)
                         .SetValue("__memory", MemoryContainerManager)
                         .SetValue("__driver", Driver);
-
+#if DEBUG
+                    //Add a simple way to log js for testing purposes
+                    JavascriptEngine
+                        .SetValue("sleep", new Action<int>(Thread.Sleep))
+                        .SetValue("log", new Action<object>(Console.WriteLine));
+#endif
                     JavascriptModuleInstance = JavascriptEngine.Modules.Import(MapperFilesystemProvider.GetRelativePath(javascriptAbsolutePath));
 
                     HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");

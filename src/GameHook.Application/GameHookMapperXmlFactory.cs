@@ -108,6 +108,8 @@ namespace GameHook.Application
                             AfterReadValueExpression = x.GetOptionalAttributeValue("after-read-value-expression"),
                             AfterReadValueFunction = x.GetOptionalAttributeValue("after-read-value-function"),
                             BeforeWriteValueFunction = x.GetOptionalAttributeValue("before-write-value-function"),
+                            PointerAddress = x.GetOptionalAttributeValue("pointer-address"),
+                            PointerAddressOffset = x.GetOptionalAttributeValueAsInt("pointer-address-offset") ?? 0,
                         };
 
                         if (type == "binaryCodedDecimal") return new BinaryCodedDecimalProperty(instance, variables);
