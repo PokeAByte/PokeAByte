@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "AndrewSandbox\Sa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHook.Contracts", "GameHook.Contracts\GameHook.Contracts.csproj", "{97B82323-4389-4891-A51B-47A7FF09AA68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHook.UnitTests", "GameHook.UnitTests\GameHook.UnitTests.csproj", "{9BEF5DD4-BDD0-411C-9243-4B421ABB0637}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{97B82323-4389-4891-A51B-47A7FF09AA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97B82323-4389-4891-A51B-47A7FF09AA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97B82323-4389-4891-A51B-47A7FF09AA68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BEF5DD4-BDD0-411C-9243-4B421ABB0637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BEF5DD4-BDD0-411C-9243-4B421ABB0637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BEF5DD4-BDD0-411C-9243-4B421ABB0637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BEF5DD4-BDD0-411C-9243-4B421ABB0637}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

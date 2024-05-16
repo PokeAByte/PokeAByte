@@ -1,5 +1,5 @@
 ﻿using System.IO.MemoryMappedFiles;
-using GameHook.Contracts.PokemonEmerald;
+using GameHook.Contracts.Generation3;
 using GameHook.Domain;
 using GameHook.Domain.Implementations;
 using GameHook.Domain.Interfaces;
