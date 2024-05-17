@@ -11,10 +11,10 @@ public class PokemonStructure
     #region Data Structure
 
     //Personality value 	u32 	0x00 	4 	0 
-    public uint PersonalityValue { get; set; }
+    public uint PersonalityValue { get; private init; }
 
     //OT ID 	u32 	0x04 	4 	4 
-    public uint OriginalTrainerId { get; set; }
+    public uint OriginalTrainerId { get; private init; }
 
     //Nickname 	u8[10] 	0x08 	10 	8 
     private byte[] _nickname = [];
@@ -164,6 +164,14 @@ public class PokemonStructure
         return byteData.ToArray();
     }
 
+    public uint[] AsUIntArray()
+    {
+        var data = AsByteArray();
+        List<uint> arr = new(25);  
+        for (var i = 0; i < data.Length; i += 4)
+            arr.Add(BitConverter.ToUInt32(data, i));
+        return arr.ToArray();
+    }
     public void UpdateChecksum()
     {
         Checksum = (ushort)(GrowthSubstructure.GetSum() +

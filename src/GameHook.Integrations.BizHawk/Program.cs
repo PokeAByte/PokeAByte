@@ -37,6 +37,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
     private SharedPlatformConstants.PlatformEntry? Platform = null;
     private int? FrameSkip = null;
 
+    private MemoryWriterListener _memoryWriterListener;
     public GameHookIntegrationForm()
     {
         ShowInTaskbar = false;
@@ -54,8 +55,21 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
         GameHookData_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("GAMEHOOK_BIZHAWK_DATA.bin", SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
         GameHookData_Accessor = GameHookData_MemoryMappedFile.CreateViewAccessor();
+        _memoryWriterListener = new();
+        _memoryWriterListener.StartServer();
+        _memoryWriterListener.ClientData += ReadFromClient;
     }
 
+    private void ReadFromClient(byte[] clientData)
+    {
+        var memoryDomain = MemoryDomains?["EWRAM"] ?? throw new Exception($"Memory domain not found.");
+        memoryDomain.Enter();
+        for (int i = 0; i < clientData.Length; i++)
+        {
+            memoryDomain.PokeByte(0x244EC + i, clientData[i]);
+        }
+        memoryDomain.Exit();
+    }
     public override void Restart()
     {
         var data = new byte[SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE];
@@ -85,7 +99,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
             MainLabel.Text = $"Sending {System} data to GameHook...";
         }
     }
-
+    
     protected override void UpdateAfter()
     {
         try

@@ -3,6 +3,7 @@ using GameHook.Contracts.Generation3;
 using GameHook.Domain;
 using GameHook.Domain.Implementations;
 using GameHook.Domain.Interfaces;
+using GameHook.UnitTests;
 using GameHook.Utility.YmlToXml;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
@@ -23,17 +24,15 @@ class Program
     private const int FILE_SIZE = 4 * 1024 * 1024;
     static void Main(string[] args)
     {
-        var pokeData = Mem();
-        var party1 = pokeData["EWRAM"][0x244EC..(0x244EC+100)];
         try
         {
-            var pkStruct = PokemonStructure.Create(party1);
-            Console.WriteLine(pkStruct.PersonalityValue);
-            Console.WriteLine(pkStruct.OriginalTrainerId);
-            Console.WriteLine(pkStruct.GrowthSubstructure.Species);
-            Console.WriteLine(pkStruct.Checksum);
-            pkStruct.UpdateChecksum();
-            Console.WriteLine(pkStruct.Checksum);
+            //Connect to bizhawk and get poke data
+            var biz = new BizHawkHelper();
+            var slotOneData = biz.GetPokemonFromParty(0);
+            var pokeStruct = PokemonStructure.Create(slotOneData);
+            pokeStruct.GrowthSubstructure.Species = 0xF9;
+            pokeStruct.UpdateChecksum();
+            var buffer = pokeStruct.AsByteArray();
             
         }
         catch (Exception e)
