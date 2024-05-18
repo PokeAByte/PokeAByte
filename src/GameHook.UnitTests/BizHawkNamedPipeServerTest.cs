@@ -3,6 +3,7 @@ using System.IO.Pipes;
 using System.Text;
 using GameHook.Contracts;
 using GameHook.Contracts.Generation3;
+using Sandbox;
 using InvalidOperationException = System.InvalidOperationException;
 
 namespace GameHook.UnitTests;
@@ -36,20 +37,30 @@ public class BizHawkNamedPipeServerTest
     {
         try
         {
-            //create the pipe
-            NamedPipeClientStream pipeStream = new NamedPipeClientStream
-                (".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-            pipeStream.Connect(100);
-        
-            //Connect to bizhawk and get poke data
+            NamedPipeClient client = new();
             var biz = new BizHawkHelper();
             var slotOneData = biz.GetPokemonFromParty(0);
             var pokeStruct = PokemonStructure.Create(slotOneData);
-            pokeStruct.GrowthSubstructure.Species = 0xF9;
+            pokeStruct.GrowthSubstructure.Species = 0xF7;
             pokeStruct.UpdateChecksum();
-            var buffer = pokeStruct.AsByteArray();
+            var pokeBytes = pokeStruct.AsByteArray();
+            var contract = new MemoryContract<byte[]>()
+            {
+                Data = pokeBytes,
+                DataLength = pokeBytes.Length,
+                MemoryAddressStart = 0x244EC,
+                BizHawkIdentifier = "EWRAM"
+            };
+            client.OpenClientPipe("BizHawk_Named_Pipe", contract);
+            //create the pipe
+            /*NamedPipeClientStream pipeStream = new NamedPipeClientStream
+                (".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            pipeStream.Connect(100);
+
+            //Connect to bizhawk and get poke data
+
             pipeStream.BeginWrite
-                (buffer, 0, buffer.Length, AsyncSend, pipeStream);
+                (buffer, 0, buffer.Length, AsyncSend, pipeStream);*/
         }
         catch (Exception e)
         {
@@ -57,7 +68,7 @@ public class BizHawkNamedPipeServerTest
             throw;
         }
     }
-    private const string _pipeName = "GameHook_BizHawk_Pipe";
+    private const string _pipeName = "BizHawk_Named_Pipe";
     private bool SendData()
     {
         try

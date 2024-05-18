@@ -9,6 +9,7 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using GameHook.Contracts;
 
 namespace GameHookIntegration;
 
@@ -36,8 +37,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
     private SharedPlatformConstants.PlatformEntry? Platform = null;
     private int? FrameSkip = null;
-
-    private MemoryWriterListener _memoryWriterListener;
+    
     public GameHookIntegrationForm()
     {
         ShowInTaskbar = false;
@@ -55,18 +55,23 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
         GameHookData_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("GAMEHOOK_BIZHAWK_DATA.bin", SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
         GameHookData_Accessor = GameHookData_MemoryMappedFile.CreateViewAccessor();
-        _memoryWriterListener = new();
-        _memoryWriterListener.StartServer();
-        _memoryWriterListener.ClientData += ReadFromClient;
+
+        var namedPipeServer = new NamedPipeServer();
+        namedPipeServer.ClientDataHandler += ReadFromClient;
+        namedPipeServer.StartServer("BizHawk_Named_Pipe");
     }
 
-    private void ReadFromClient(byte[] clientData)
+    private void ReadFromClient(MemoryContract<byte[]>? clientData)
     {
-        var memoryDomain = MemoryDomains?["EWRAM"] ?? throw new Exception($"Memory domain not found.");
+        if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))
+            return;
+        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier] ?? 
+                           throw new Exception($"Memory domain not found.");
         memoryDomain.Enter();
-        for (int i = 0; i < clientData.Length; i++)
+        for (int i = 0; i < clientData.Data.Length; i++)
         {
-            memoryDomain.PokeByte(0x244EC + i, clientData[i]);
+            //0x244EC
+            memoryDomain.PokeByte(clientData.MemoryAddressStart + i, clientData.Data[i]);
         }
         memoryDomain.Exit();
     }

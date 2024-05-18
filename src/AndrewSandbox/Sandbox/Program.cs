@@ -1,9 +1,8 @@
 ﻿using System.IO.MemoryMappedFiles;
-using GameHook.Contracts.Generation3;
+using GameHook.Contracts;
 using GameHook.Domain;
 using GameHook.Domain.Implementations;
 using GameHook.Domain.Interfaces;
-using GameHook.UnitTests;
 using GameHook.Utility.YmlToXml;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
@@ -24,7 +23,20 @@ class Program
     private const int FILE_SIZE = 4 * 1024 * 1024;
     static void Main(string[] args)
     {
-        try
+        var clientData = new byte[100];
+        for (var i = 0; i < 100; i++)
+        {
+            clientData[i] = (byte)i;
+        }
+        NamedPipeClient client = new();
+        client.OpenClientPipe("test", new MemoryContract<byte[]>
+        {
+            Data = clientData,
+            DataLength = clientData.Length,
+            BizHawkIdentifier = "",
+            MemoryAddressStart = 0x0L
+        });
+        /*try
         {
             //Connect to bizhawk and get poke data
             var biz = new BizHawkHelper();
@@ -33,14 +45,14 @@ class Program
             pokeStruct.GrowthSubstructure.Species = 0xF9;
             pokeStruct.UpdateChecksum();
             var buffer = pokeStruct.AsByteArray();
-            
+
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
-        }
-        
+        }*/
+
 
         /*
         var i = 0;
