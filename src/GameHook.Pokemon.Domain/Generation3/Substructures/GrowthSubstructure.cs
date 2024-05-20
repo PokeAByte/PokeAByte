@@ -1,4 +1,4 @@
-﻿namespace GameHook.Contracts.Generation3.Substructures;
+﻿namespace GameHook.Pokemon.Domain.Generation3.Substructures;
 
 public class GrowthSubstructure : Substructure
 {

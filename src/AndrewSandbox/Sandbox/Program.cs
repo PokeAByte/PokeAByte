@@ -10,14 +10,7 @@ using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.TypeInspectors;
 
 namespace Sandbox;
-/*
-0xCD = S
-0xE3 = o
-0xE4 = p
-0xDC = h
-0xDD = i
-0xD9 = e
-*/
+
 class Program
 {
     private const int FILE_SIZE = 4 * 1024 * 1024;

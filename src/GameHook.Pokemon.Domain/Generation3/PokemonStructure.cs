@@ -1,6 +1,6 @@
-﻿using GameHook.Contracts.Generation3.Substructures;
+﻿using GameHook.Pokemon.Domain.Generation3.Substructures;
 
-namespace GameHook.Contracts.Generation3;
+namespace GameHook.Pokemon.Domain.Generation3;
 
 public class PokemonStructure
 {
@@ -180,5 +180,9 @@ public class PokemonStructure
                             MiscellaneousSubstructure.GetSum());
     }
 
+    public void UpdateStats()
+    {
+        
+    }
     #endregion
 }

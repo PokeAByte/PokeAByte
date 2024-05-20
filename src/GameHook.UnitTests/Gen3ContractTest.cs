@@ -1,4 +1,4 @@
-using GameHook.Contracts.Generation3;
+using GameHook.Pokemon.Domain.Generation3;
 
 namespace GameHook.UnitTests;
 

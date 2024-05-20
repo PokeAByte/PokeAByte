@@ -2,7 +2,7 @@
 using System.IO.Pipes;
 using System.Text;
 using GameHook.Contracts;
-using GameHook.Contracts.Generation3;
+using GameHook.Pokemon.Domain.Generation3;
 using Sandbox;
 using InvalidOperationException = System.InvalidOperationException;
 
