@@ -1,13 +1,13 @@
 ﻿using System.IO.MemoryMappedFiles;
-using GameHook.Contracts;
-using GameHook.Domain;
 using GameHook.Domain.Implementations;
 using GameHook.Domain.Interfaces;
+using GameHook.Integrations.BizHawk;
 using GameHook.Utility.YmlToXml;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.TypeInspectors;
+using SharedPlatformConstants = GameHook.Domain.SharedPlatformConstants;
 
 namespace Sandbox;
 
@@ -16,6 +16,12 @@ class Program
     private const int FILE_SIZE = 4 * 1024 * 1024;
     static void Main(string[] args)
     {
+        uint address = 0x20244EC;
+        var addr = address & 0x00FFFFF;
+        Console.WriteLine(addr.ToString("x8"));
+        //var yaml = ReadYaml();
+        //File.WriteAllText("Reference.xml", yaml.Glossary.ToString());
+
         var clientData = new byte[100];
         for (var i = 0; i < 100; i++)
         {

@@ -18,7 +18,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AndrewSandbox\Sandbox\Sandbox.csproj" />
-      <ProjectReference Include="..\GameHook.Contracts\GameHook.Contracts.csproj" />
       <ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
       <ProjectReference Include="..\GameHook.Pokemon.Domain\GameHook.Pokemon.Domain.csproj" />
     </ItemGroup>

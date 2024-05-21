@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
-using GameHook.Contracts;
 
-namespace GameHookIntegration;
+namespace GameHook.Integrations.BizHawk;
 
 public delegate void ClientDataHandler(MemoryContract<byte[]>? memoryContract);
 

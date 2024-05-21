@@ -22,7 +22,4 @@
 		<Reference Include="BizHawk.Emulation.Common" HintPath="$(BIZHAWK_HOME)dll/BizHawk.Emulation.Common.dll" />
 		<Reference Include="BizHawk.WinForms.Controls" HintPath="$(BIZHAWK_HOME)dll/BizHawk.WinForms.Controls.dll" />
 	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\GameHook.Contracts\GameHook.Contracts.csproj" />
-	</ItemGroup>
 </Project>

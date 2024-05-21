@@ -1,7 +1,7 @@
-﻿using System.Runtime.Serialization;
+﻿using System.IO;
 using System.Xml.Serialization;
 
-namespace GameHook.Contracts;
+namespace GameHook.Integrations.BizHawk;
 
 public record MemoryContract<T>
 {

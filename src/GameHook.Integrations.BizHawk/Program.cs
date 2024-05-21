@@ -1,7 +1,3 @@
-using BizHawk.Client.Common;
-using BizHawk.Client.EmuHawk;
-using BizHawk.Common;
-using BizHawk.Emulation.Common;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,9 +5,12 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using GameHook.Contracts;
+using BizHawk.Client.Common;
+using BizHawk.Client.EmuHawk;
+using BizHawk.Common;
+using BizHawk.Emulation.Common;
 
-namespace GameHookIntegration;
+namespace GameHook.Integrations.BizHawk;
 
 [ExternalTool("GameHook Integration")]
 public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, IDisposable

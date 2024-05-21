@@ -59,4 +59,4 @@ function readPlayerDataFunction(obj) {
     }
 }
 
-export { preprocessor, readPlayerDataFunction };
+export { readPlayerDataFunction };

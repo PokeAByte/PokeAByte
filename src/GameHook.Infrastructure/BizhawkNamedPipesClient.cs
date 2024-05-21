@@ -1,33 +1,35 @@
 ﻿using System.IO.Pipes;
 using GameHook.Integrations.BizHawk;
 
-namespace Sandbox;
+namespace GameHook.Infrastructure;
 
-public class NamedPipeClient
+public static class BizhawkNamedPipesClient
 {
-    public void OpenClientPipe(string  pipeName, MemoryContract<byte[]> contact, int timeoutMs = 100)
+    public const string PipeName = "BizHawk_Named_Pipe";
+
+    public static void WriteToBizhawk(MemoryContract<byte[]> contract, int timeoutMs = 100)
     {
         try
         {
             NamedPipeClientStream client = new(".", 
-                pipeName,
+                PipeName,
                 PipeDirection.Out,
                 PipeOptions.Asynchronous);
+            var contractBytes = contract.Serialize();
             client.Connect(timeoutMs);
-            var serializeData = contact.Serialize();
-            client.BeginWrite(serializeData, 
+            client.BeginWrite(contractBytes, 
                 0, 
-                serializeData.Length, 
+                contractBytes.Length, 
                 SendAsync, 
                 client);  
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
         }
     }
-
-    private void SendAsync(IAsyncResult iar)
+    private static void SendAsync(IAsyncResult iar)
     {
         if (iar.AsyncState is null) 
             throw new InvalidOperationException("Named pipe client is null.");

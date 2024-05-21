@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using System.Text.Json;
 using YamlDotNet.Serialization;
 
@@ -637,7 +638,7 @@ public record Pointers
 #endregion
 
 #region Glossary
-public record Glossary
+public record Glossary 
 {
     public Dictionary<string, string> Palette { get; set; }
     public Dictionary<string, string> MainState { get; set; }
@@ -663,11 +664,39 @@ public record Glossary
     public Dictionary<string, string> PokemonSpecies { get; set; }
     public Dictionary<string, string> TrainerClasses { get; set; }
     public Dictionary<string, string> MapName { get; set; }
+    public override string ToString()
+    {       
+        PropertyInfo[] properties = typeof(Glossary).GetProperties();
+        var glossaryString = "";
+        foreach (PropertyInfo property in properties)
+        {
+            var propVal = property.GetValue(this);
+            if(propVal is not Dictionary<string, string> propDict)
+                continue;
+            glossaryString += $"<{JsonNamingPolicy.CamelCase.ConvertName(property.Name)}>\n";
+            foreach (var dict in propDict)
+            {
+                if (string.IsNullOrWhiteSpace(dict.Value))
+                    glossaryString += $"\t<entry key=\"{dict.Key}\" />\n";
+                else
+                    glossaryString += $"\t<entry key=\"{dict.Key}\" value=\"{dict.Value}\"/>\n";
+            }
+            glossaryString += $"</{JsonNamingPolicy.CamelCase.ConvertName(property.Name)}>\n";
+        }
+
+        return glossaryString;
+    }
 }
 public record PokemonGlossary
 {
     public int PokedexNumber { get; set; }
     public string Name { get; set; }
+    public override string ToString()
+    {
+        return $"<entry key=\"PokedexNumber\" value=\"${PokedexNumber}\"/>\n"
+            + $"<entry key=\"Name\" value=\"{Name}\" />\n";
+
+    }
 }
 
 #endregion

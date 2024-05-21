@@ -17,6 +17,66 @@
             <property name="nickname" type="string" address="{address}+8" length="10" />
             <property name="species" type="int" address="{address}+32" length="2" reference="pokemon"/>
             <property name="level" type="int" address="{address}+84" />
+            <property name="expPoints" type="uint" length="4" address="{address}+36" />
+            <property name="friendship" type="int" address="{address}+41"/>
+            <property name="nature" type="uint" length="4" address="{address}+0" after-read-value-expression="x % 25" reference="natures"/>
+            <property name="pokerus" type="int" address="{address} + 85" />
+            <property name="itemHeld" type="int" length="2" reference="items" address="{address} + 34"/>
+            <property name="statusCondition" type="int" reference="statusConditions" address="{address} + 80" />
+            <property name="gender_threshold" type="uint" length="4" after-read-value-expression="x % 256" />
+            <stats>
+                <property name="hp" type="int" length="2" address="{address}+86"/>
+                <property name="maxHp" type="int" length="2" address="{address}+88"/>
+                <property name="attack" type="int" length="2" address="{address}+90"/>
+                <property name="defense" type="int" length="2" address="{address}+92"/>
+                <property name="speed" type="int" length="2" address="{address}+94"/>
+                <property name="specialAttack" type="int" length="2" address="{address}+96"/>
+                <property name="specialDefense" type="int" length="2" address="{address}+98"/>
+            </stats>
+            <ivsEggsAbility>
+                <property name="ivEggAbilityBlock" type="uint" length="4" address="{address}+72"/>
+                <property name="ivHp" type="int" length="4" address="{address}+72" bits="0-4"/>
+                <property name="ivAttack" type="int" length="4" address="{address}+72" bits="5-9"/>
+                <property name="ivDefense" type="int" length="4" address="{address}+72" bits="10-14"/>
+                <property name="ivSpeed" type="int" length="4" address="{address}+72" bits="15-19"/>
+                <property name="ivSpecialAttack" type="int" length="4" address="{address}+72" bits="20-24"/>
+                <property name="ivSpecialDefense" type="int" length="4" address="{address}+72" bits="25-29"/>
+                <property name="isEgg" type="bool" length="4" address="{address}+72" bits="30"/>
+                <property name="ability" type="bool" length="4" address="{address}+72" bits="31"/>
+            </ivsEggsAbility>
+            <evs>
+                <property name="evHp" type="int" length="2" address="{address}"/>
+                <property name="evAttack" type="int" length="2" address="{address}"/>
+                <property name="evDefense" type="int" length="2" address="{address}"/>
+                <property name="evSpeed" type="int" length="2" address="{address}"/>
+                <property name="evSpecialAttack" type="int" length="2" address="{address}"/>
+                <property name="evSpecialDefense" type="int" length="2" address="{address}"/>
+            </evs>
+            <moves>
+                <property name="move1" type="int" length="2" reference="moves" address="{address}+44"/>
+                <property name="move2" type="int" length="2" reference="moves" address="{address}+46"/>
+                <property name="move3" type="int" length="2" reference="moves" address="{address}+48"/>
+                <property name="move4" type="int" length="2" reference="moves" address="{address}+50"/>
+                <property name="move1pp" type="int" address="{address}+52" />
+                <property name="move2pp" type="int" address="{address}+53" />
+                <property name="move3pp" type="int" address="{address}+54" />
+                <property name="move4pp" type="int" address="{address}+55" />
+                <property name="move1ppUp" type="int" address="{address}+40" bits="0-1"/>
+                <property name="move2ppUp" type="int" address="{address}+40" bits="2-3"/>
+                <property name="move3ppUp" type="int" address="{address}+40" bits="4-5"/>
+                <property name="move4ppUp" type="int" address="{address}+40" bits="6-7"/>
+            </moves>
+            <misc>
+                <property name="language" address="{address}+18" type="int" reference="language" />
+                <property name="isBadEgg" address="{address}+19" type="bool" bits="0" />
+                <property name="hasSpecies" address="{address}+19" type="bool" bits="1" />
+                <property name="useEggName" address="{address}+19" type="bool" bits="2" />
+                <property name="otName" address="{address}+20" type="string" length="7" />
+                <property name="markingCircle" address="{address}+27" type="bool" bits="0" />
+                <property name="markingSquare" address="{address}+27" type="bool" bits="1" />
+                <property name="markingTriangle" address="{address}+27" type="bool" bits="2" />
+                <property name="markingHeart" address="{address}+27" type="bool" bits="3" />
+            </misc>
         </pokemonInParty>
         <battleStructure>
             
@@ -39,140 +99,1146 @@
         </player>        
     </properties>
     <references>
-        <gender>        
-            <entry key="0x00" value="Male" />
-            <entry key="0x01" value="Female" />
+        <palette>
+            <entry key="411332407" value="MAIN MENU"/>
+            <entry key="1744306176" value="NEW GAME"/>
+            <entry key="900344134" value="RESET"/>
+        </palette>
+        <mainState>
+            <entry key="0" />
+            <entry key="134766085" value="Overworld"/>
+            <entry key="134455025" value="Battle"/>
+        </mainState>
+        <subState>
+            <entry key="0" />
+            <entry key="134766173" value="Overworld"/>
+            <entry key="134448161" value="Battle"/>
+            <entry key="134766161" value="Battle Animation"/>
+            <entry key="134442925" value="Black Transition"/>
+            <entry key="134767153" value="Black Transition"/>
+            <entry key="135147013" value="Black Transition"/>
+            <entry key="135415441" value="Black Transition"/>
+            <entry key="135492097" value="Black Transition"/>
+            <entry key="135134613" value="Black Transition"/>
+            <entry key="134766793" value="Black Transition"/>
+            <entry key="134766541" value="Black Transition"/>
+            <entry key="135134565" value="Mart Menu Opening"/>
+            <entry key="134766589" value="Transition to Overworld"/>
+            <entry key="135416021" value="Fly Menu"/>
+            <entry key="134440801" value="Intro to Battle"/>
+            <entry key="135987633" value="Party Menu"/>
+            <entry key="135966045" value="Bag"/>
+            <entry key="136082433" value="Pokenav"/>
+            <entry key="135014161" value="Trainer Card"/>
+            <entry key="134980785" value="Options Menu"/>
+            <entry key="134985589" value="Pokedex"/>
+            <entry key="135712429" value="Owners"/>
+            <entry key="135711745" value="Intro Cinematic"/>
+            <entry key="135711829" value="White Screen"/>
+            <entry key="134916005" value="Transition to Title Screen"/>
+            <entry key="134916909" value="Title Screen"/>
+            <entry key="134411887" value="Transition to Main Menu"/>
+            <entry key="134411953" value="Main Menu"/>
+            <entry key="134766997" value="Black Transition"/>
+            <entry key="134766837" value="Transition to Overworld"/>
+            <entry key="134985013" value="Opening Pokedex"/>
+            <entry key="135987681" value="Opening Party Menu"/>
+            <entry key="135966093" value="Opening Bag"/>
+            <entry key="136082001" value="Opening Pokenav"/>
+            <entry key="135015553" value="Opening Trainer Card"/>
+            <entry key="134980829" value="Opening Options"/>
+            <entry key="135155545" value="Naming Screen"/>
+            <entry key="135036245" value="PC"/>
+        </subState>
+        <battleAction>
+            <entry key="0x00" value="USE_MOVE"/>
+            <entry key="0x01" value="USE_ITEM"/>
+            <entry key="0x02" value="SWITCH"/>
+            <entry key="0x03" value="RUN"/>
+            <entry key="0x04" value="SAFARI_WATCH_CAREFULLY"/>
+            <entry key="0x05" value="SAFARI_BALL"/>
+            <entry key="0x06" value="SAFARI_BAIT"/>
+            <entry key="0x07" value="SAFARI_GO_NEAR"/>
+            <entry key="0x08" value="SAFARI_RUN"/>
+            <entry key="0x09" value="TEACHER_THROW"/>
+            <entry key="0x0A" value="EXEC_SCRIPT"/>
+            <entry key="0x0B" value="TRY_FINISH"/>
+            <entry key="0x0C" value="FINISHED"/>
+            <entry key="0x0D" value="NOTHING_FAINTED"/>
+            <entry key="0xFF" value="NONE"/>
+        </battleAction>
+        <stageModifiers>
+            <entry key="0x00" value="-6"/>
+            <entry key="0x01" value="-5"/>
+            <entry key="0x02" value="-4"/>
+            <entry key="0x03" value="-3"/>
+            <entry key="0x04" value="-2"/>
+            <entry key="0x05" value="-1"/>
+            <entry key="0x06" value="0"/>
+            <entry key="0x07" value="1"/>
+            <entry key="0x08" value="2"/>
+            <entry key="0x09" value="3"/>
+            <entry key="0x0A" value="4"/>
+            <entry key="0x0B" value="5"/>
+            <entry key="0x0C" value="6"/>
+            <entry key="0x0D" value="6"/>
+            <entry key="0x0E" />
+            <entry key="0x0F" />
+            <entry key="0x14" />
+        </stageModifiers>
+        <gender>
+            <entry key="0x00" value="Male"/>
+            <entry key="0x01" value="Female"/>
         </gender>
+        <walkRunState>
+            <entry key="0x00" />
+            <entry key="0x21" value="Walk (Post event)"/>
+            <entry key="0x01" value="Walk"/>
+            <entry key="0x81" value="Run"/>
+        </walkRunState>
+        <bagPockets>
+            <entry key="0x00" value="Items"/>
+            <entry key="0x01" value="Key Items"/>
+            <entry key="0x02" value="Pokeballs"/>
+            <entry key="0x03" value="TMs?"/>
+            <entry key="0x04" value="HMs?"/>
+        </bagPockets>
+        <pokemonTypes>
+            <entry key="0x00" value="Normal"/>
+            <entry key="0x01" value="Fighting"/>
+            <entry key="0x02" value="Flying"/>
+            <entry key="0x03" value="Poison"/>
+            <entry key="0x04" value="Ground"/>
+            <entry key="0x05" value="Rock"/>
+            <entry key="0x06" value="Bug"/>
+            <entry key="0x07" value="Ghost"/>
+            <entry key="0x08" value="Steel"/>
+            <entry key="0x09" value="Mystery"/>
+            <entry key="0x0A" value="Fire"/>
+            <entry key="0x0B" value="Water"/>
+            <entry key="0x0C" value="Grass"/>
+            <entry key="0x0D" value="Electric"/>
+            <entry key="0x0E" value="Psychic"/>
+            <entry key="0x0F" value="Ice"/>
+            <entry key="0x10" value="Dragon"/>
+            <entry key="0x11" value="Dark"/>
+        </pokemonTypes>
+        <battleOutcome>
+            <entry key="0x00" />
+            <entry key="0x01" value="WON"/>
+            <entry key="0x02" value="LOST"/>
+            <entry key="0x03" value="DRAW"/>
+            <entry key="0x04" value="RAN"/>
+            <entry key="0x05" value="PLAYER_TELEPORTED"/>
+            <entry key="0x06" value="POKEMON_FLED"/>
+            <entry key="0x07" value="CAUGHT"/>
+            <entry key="0x08" value="NO_SAFARI_BALLS"/>
+            <entry key="0x09" value="FORFEITED"/>
+            <entry key="0x0A" value="POKEMON_TELEPORTED"/>
+        </battleOutcome>
+        <battleWeather>
+            <entry key="0" />
+            <entry key="1" value="Rain"/>
+            <entry key="8" value="Sandstorm"/>
+            <entry key="24" value="Sandstorm"/>
+            <entry key="32" value="Sun"/>
+            <entry key="128" value="Hail"/>
+        </battleWeather>
+        <battleDialogue>
+            <entry key="0x00" />
+            <entry key="0x10" value="Player Not In Control"/>
+            <entry key="0x12" value="Player Control"/>
+            <entry key="0x14" value="Selecting Move"/>
+            <entry key="0x15" value="Bag"/>
+            <entry key="0x16" value="Party Screen"/>
+        </battleDialogue>
+        <statusConditions>
+            <entry key="0" />
+            <entry key="1" value="Asleep"/>
+            <entry key="2" value="Asleep"/>
+            <entry key="3" value="Asleep"/>
+            <entry key="4" value="Asleep"/>
+            <entry key="5" value="Asleep"/>
+            <entry key="6" value="Asleep"/>
+            <entry key="7" value="Asleep"/>
+            <entry key="8" value="Poisoned"/>
+            <entry key="16" value="Burned"/>
+            <entry key="32" value="Frozen"/>
+            <entry key="64" value="Paralyzed"/>
+            <entry key="128" value="Badly Posioned"/>
+        </statusConditions>
+        <abilities>
+            <entry key="0" />
+            <entry key="1" value="STENCH"/>
+            <entry key="2" value="DRIZZLE"/>
+            <entry key="3" value="SPEED BOOST"/>
+            <entry key="4" value="BATTLE ARMOR"/>
+            <entry key="5" value="STURDY"/>
+            <entry key="6" value="DAMP"/>
+            <entry key="7" value="LIMBER"/>
+            <entry key="8" value="SAND VEIL"/>
+            <entry key="9" value="STATIC"/>
+            <entry key="10" value="VOLT ABSORB"/>
+            <entry key="11" value="WATER ABSORB"/>
+            <entry key="12" value="OBLIVIOUS"/>
+            <entry key="13" value="CLOULD NINE"/>
+            <entry key="14" value="COMPOUND EYES"/>
+            <entry key="15" value="INSOMNIA"/>
+            <entry key="16" value="COLOR CHANGE"/>
+            <entry key="17" value="IMMUNITY"/>
+            <entry key="18" value="FLASH FIRE"/>
+            <entry key="19" value="SHIELD DUST"/>
+            <entry key="20" value="OWN TEMPO"/>
+            <entry key="21" value="SUCTION CUPS"/>
+            <entry key="22" value="INTIMIDATE"/>
+            <entry key="23" value="SHADOW TAG"/>
+            <entry key="24" value="ROUGH SKIN"/>
+            <entry key="25" value="WONDER GUARD"/>
+            <entry key="26" value="LEVITATE"/>
+            <entry key="27" value="EFFECT SPORE"/>
+            <entry key="28" value="SYNCHRONIZE"/>
+            <entry key="29" value="CLEAR BODY"/>
+            <entry key="30" value="NATURAL CARE"/>
+            <entry key="31" value="LIGHTNING ROD"/>
+            <entry key="32" value="SERENE GRACE"/>
+            <entry key="33" value="SWIFT SWIM"/>
+            <entry key="34" value="CHLOROPHYLL"/>
+            <entry key="35" value="ILLUMINATE"/>
+            <entry key="36" value="TRACE"/>
+            <entry key="37" value="HUGE POWER"/>
+            <entry key="38" value="POISON POINT"/>
+            <entry key="39" value="INNER FOCUS"/>
+            <entry key="40" value="MAGMA ARMOR"/>
+            <entry key="41" value="WATER VEIL"/>
+            <entry key="42" value="MAGNET PULL"/>
+            <entry key="43" value="SOUNDPROOF"/>
+            <entry key="44" value="RAIN DISH"/>
+            <entry key="45" value="SAND STREAM"/>
+            <entry key="46" value="PRESSURE"/>
+            <entry key="47" value="THICK FAT"/>
+            <entry key="48" value="EARLY BIRD"/>
+            <entry key="49" value="FLAME BODY"/>
+            <entry key="50" value="RUN AWAY"/>
+            <entry key="51" value="KEEN EYE"/>
+            <entry key="52" value="HYPER CUTTER"/>
+            <entry key="53" value="PICKUP"/>
+            <entry key="54" value="TRUANT"/>
+            <entry key="55" value="HUSTLE"/>
+            <entry key="56" value="CUTE CHARM"/>
+            <entry key="57" value="PLUS"/>
+            <entry key="58" value="MINUS"/>
+            <entry key="59" value="FORECAST"/>
+            <entry key="60" value="STICKY HOLD"/>
+            <entry key="61" value="SHED SKIN"/>
+            <entry key="62" value="GUTS"/>
+            <entry key="63" value="MARVEL SCALE"/>
+            <entry key="64" value="LIQUID OOZE"/>
+            <entry key="65" value="OVERGROW"/>
+            <entry key="66" value="BLAZE"/>
+            <entry key="67" value="TORRENT"/>
+            <entry key="68" value="SWARM"/>
+            <entry key="69" value="ROCK HEAD"/>
+            <entry key="70" value="DROUGHT"/>
+            <entry key="71" value="ARENA TRAP"/>
+            <entry key="72" value="VITAL SPIRIT"/>
+            <entry key="73" value="WHITE SMOKE"/>
+            <entry key="74" value="PURE POWER"/>
+            <entry key="75" value="SHELL ARMOR"/>
+            <entry key="76" value="CACOPHONY"/>
+            <entry key="77" value="AIR LOCK"/>
+        </abilities>
+        <natures>
+            <entry key="0" value="Hardy"/>
+            <entry key="1" value="Lonely"/>
+            <entry key="2" value="Brave"/>
+            <entry key="3" value="Adamant"/>
+            <entry key="4" value="Naughty"/>
+            <entry key="5" value="Bold"/>
+            <entry key="6" value="Docile"/>
+            <entry key="7" value="Relaxed"/>
+            <entry key="8" value="Impish"/>
+            <entry key="9" value="Lax"/>
+            <entry key="10" value="Timid"/>
+            <entry key="11" value="Hasty"/>
+            <entry key="12" value="Serious"/>
+            <entry key="13" value="Jolly"/>
+            <entry key="14" value="Naive"/>
+            <entry key="15" value="Modest"/>
+            <entry key="16" value="Mild"/>
+            <entry key="17" value="Quiet"/>
+            <entry key="18" value="Bashful"/>
+            <entry key="19" value="Rash"/>
+            <entry key="20" value="Calm"/>
+            <entry key="21" value="Gentle"/>
+            <entry key="22" value="Sassy"/>
+            <entry key="23" value="Careful"/>
+            <entry key="24" value="Quirky"/>
+        </natures>
+        <moves>
+            <entry key="0" />
+            <entry key="1" value="POUND"/>
+            <entry key="2" value="KARATE CHOP"/>
+            <entry key="3" value="DOUBLE SLAP"/>
+            <entry key="4" value="COMET PUNCH"/>
+            <entry key="5" value="MEGA PUNCH"/>
+            <entry key="6" value="PAY DAY"/>
+            <entry key="7" value="FIRE PUNCH"/>
+            <entry key="8" value="ICE PUNCH"/>
+            <entry key="9" value="ThunderPunch"/>
+            <entry key="10" value="SCRATCH"/>
+            <entry key="11" value="VICEGRIP"/>
+            <entry key="12" value="GUILLOTINE"/>
+            <entry key="13" value="RAZOR WIND"/>
+            <entry key="14" value="SWORDS DANCE"/>
+            <entry key="15" value="CUT"/>
+            <entry key="16" value="GUST"/>
+            <entry key="17" value="WING ATTACK"/>
+            <entry key="18" value="WHIRLWIND"/>
+            <entry key="19" value="FLY"/>
+            <entry key="20" value="BIND"/>
+            <entry key="21" value="SLAM"/>
+            <entry key="22" value="VINE WHIP"/>
+            <entry key="23" value="STOMP"/>
+            <entry key="24" value="DOUBLE KICK"/>
+            <entry key="25" value="MEGA KICK"/>
+            <entry key="26" value="JUMP KICK"/>
+            <entry key="27" value="ROLLING KICK"/>
+            <entry key="28" value="Sand-Attack"/>
+            <entry key="29" value="HEADBUTT"/>
+            <entry key="30" value="HORN ATTACK"/>
+            <entry key="31" value="FURY ATTACK"/>
+            <entry key="32" value="HORN DRILL"/>
+            <entry key="33" value="TACKLE"/>
+            <entry key="34" value="BODY SLAM"/>
+            <entry key="35" value="WRAP"/>
+            <entry key="36" value="TAKE DOWN"/>
+            <entry key="37" value="THRASH"/>
+            <entry key="38" value="DOUBLE EDGE"/>
+            <entry key="39" value="TAIL WHIP"/>
+            <entry key="40" value="POISON STING"/>
+            <entry key="41" value="TWINEEDLE"/>
+            <entry key="42" value="PIN MISSILE"/>
+            <entry key="43" value="LEER"/>
+            <entry key="44" value="BITE"/>
+            <entry key="45" value="GROWL"/>
+            <entry key="46" value="ROAR"/>
+            <entry key="47" value="SING"/>
+            <entry key="48" value="SUPERSONIC"/>
+            <entry key="49" value="SonicBoom"/>
+            <entry key="50" value="DISABLE"/>
+            <entry key="51" value="ACID"/>
+            <entry key="52" value="EMBER"/>
+            <entry key="53" value="FLAMETHROWER"/>
+            <entry key="54" value="MIST"/>
+            <entry key="55" value="WATER GUN"/>
+            <entry key="56" value="HYDRO PUMP"/>
+            <entry key="57" value="SURF"/>
+            <entry key="58" value="ICE BEAM"/>
+            <entry key="59" value="BLIZZARD"/>
+            <entry key="60" value="PSYBEAM"/>
+            <entry key="61" value="BUBBLEBEAM"/>
+            <entry key="62" value="AURORA BEAM"/>
+            <entry key="63" value="HYPER BEAM"/>
+            <entry key="64" value="PECK"/>
+            <entry key="65" value="DRILL PECK"/>
+            <entry key="66" value="SUBMISSION"/>
+            <entry key="67" value="LOW KICK"/>
+            <entry key="68" value="COUNTER"/>
+            <entry key="69" value="SEISMIC TOSS"/>
+            <entry key="70" value="STRENGTH"/>
+            <entry key="71" value="ABSORB"/>
+            <entry key="72" value="MEGA DRAIN"/>
+            <entry key="73" value="LEECH SEED"/>
+            <entry key="74" value="GROWTH"/>
+            <entry key="75" value="RAZOR LEAF"/>
+            <entry key="76" value="SOLARBEAM"/>
+            <entry key="77" value="PoisonPowder"/>
+            <entry key="78" value="STUN SPORE"/>
+            <entry key="79" value="SLEEP POWDER"/>
+            <entry key="80" value="PETAL DANCE"/>
+            <entry key="81" value="STRING SHOT"/>
+            <entry key="82" value="DRAGON RAGE"/>
+            <entry key="83" value="FIRE SPIN"/>
+            <entry key="84" value="THUNDERSHOCK"/>
+            <entry key="85" value="THUNDERBOLT"/>
+            <entry key="86" value="THUNDER WAVE"/>
+            <entry key="87" value="THUNDER"/>
+            <entry key="88" value="ROCK THROW"/>
+            <entry key="89" value="EARTHQUAKE"/>
+            <entry key="90" value="FISSURE"/>
+            <entry key="91" value="DIG"/>
+            <entry key="92" value="TOXIC"/>
+            <entry key="93" value="CONFUSION"/>
+            <entry key="94" value="PSYCHIC"/>
+            <entry key="95" value="HYPNOSIS"/>
+            <entry key="96" value="MEDITATE"/>
+            <entry key="97" value="AGILITY"/>
+            <entry key="98" value="QUICK ATTACK"/>
+            <entry key="99" value="RAGE"/>
+            <entry key="100" value="TELEPORT"/>
+            <entry key="101" value="NIGHT SHADE"/>
+            <entry key="102" value="MIMIC"/>
+            <entry key="103" value="SCREECH"/>
+            <entry key="104" value="DOUBLE TEAM"/>
+            <entry key="105" value="RECOVER"/>
+            <entry key="106" value="HARDEN"/>
+            <entry key="107" value="MINIMIZE"/>
+            <entry key="108" value="SMOKESCREEN"/>
+            <entry key="109" value="CONFUSE RAY"/>
+            <entry key="110" value="WITHDRAW"/>
+            <entry key="111" value="DEFENSE CURL"/>
+            <entry key="112" value="BARRIER"/>
+            <entry key="113" value="LIGHT SCREEN"/>
+            <entry key="114" value="HAZE"/>
+            <entry key="115" value="REFLECT"/>
+            <entry key="116" value="FOCUS ENERGY"/>
+            <entry key="117" value="BIDE"/>
+            <entry key="118" value="METRONOME"/>
+            <entry key="119" value="MIRROR MOVE"/>
+            <entry key="120" value="Selfdestruct"/>
+            <entry key="121" value="EGG BOMB"/>
+            <entry key="122" value="LICK"/>
+            <entry key="123" value="SMOG"/>
+            <entry key="124" value="SLUDGE"/>
+            <entry key="125" value="BONE CLUB"/>
+            <entry key="126" value="FIRE BLAST"/>
+            <entry key="127" value="WATERFALL"/>
+            <entry key="128" value="CLAMP"/>
+            <entry key="129" value="SWIFT"/>
+            <entry key="130" value="SKULL BASH"/>
+            <entry key="131" value="SPIKE CANNON"/>
+            <entry key="132" value="CONSTRICT"/>
+            <entry key="133" value="AMNESIA"/>
+            <entry key="134" value="KINESIS"/>
+            <entry key="135" value="SOFT BOILED"/>
+            <entry key="136" value="HI JUMP KICK"/>
+            <entry key="137" value="GLARE"/>
+            <entry key="138" value="DREAM EATER"/>
+            <entry key="139" value="POISON GAS"/>
+            <entry key="140" value="BARRAGE"/>
+            <entry key="141" value="LEECH LIFE"/>
+            <entry key="142" value="LOVELY KISS"/>
+            <entry key="143" value="SKY ATTACK"/>
+            <entry key="144" value="TRANSFORM"/>
+            <entry key="145" value="BUBBLE"/>
+            <entry key="146" value="DIZZY PUNCH"/>
+            <entry key="147" value="SPORE"/>
+            <entry key="148" value="FLASH"/>
+            <entry key="149" value="PSYWAVE"/>
+            <entry key="150" value="SPLASH"/>
+            <entry key="151" value="ACID ARMOR"/>
+            <entry key="152" value="CRABHAMMER"/>
+            <entry key="153" value="EXPLOSION"/>
+            <entry key="154" value="FURY SWIPES"/>
+            <entry key="155" value="BONEMERANG"/>
+            <entry key="156" value="REST"/>
+            <entry key="157" value="ROCK SLIDE"/>
+            <entry key="158" value="HYPER FANG"/>
+            <entry key="159" value="SHARPEN"/>
+            <entry key="160" value="CONVERSION"/>
+            <entry key="161" value="TRI ATTACK"/>
+            <entry key="162" value="SUPER FANG"/>
+            <entry key="163" value="SLASH"/>
+            <entry key="164" value="SUBSTITUTE"/>
+            <entry key="165" value="STRUGGLE"/>
+            <entry key="166" value="SKETCH"/>
+            <entry key="167" value="TRIPLE KICK"/>
+            <entry key="168" value="THIEF"/>
+            <entry key="169" value="SPIDER WEB"/>
+            <entry key="170" value="MIND READER"/>
+            <entry key="171" value="NIGHTMARE"/>
+            <entry key="172" value="FLAME WHEEL"/>
+            <entry key="173" value="SNORE"/>
+            <entry key="174" value="CURSE"/>
+            <entry key="175" value="FLAIL"/>
+            <entry key="176" value="CONVERSION 2"/>
+            <entry key="177" value="AEROBLAST"/>
+            <entry key="178" value="COTTON SPORE"/>
+            <entry key="179" value="REVERSAL"/>
+            <entry key="180" value="SPITE"/>
+            <entry key="181" value="POWDER SNOW"/>
+            <entry key="182" value="PROTECT"/>
+            <entry key="183" value="MACH PUNCH"/>
+            <entry key="184" value="SCARY FACE"/>
+            <entry key="185" value="FAINT ATTACK"/>
+            <entry key="186" value="SWEET KISS"/>
+            <entry key="187" value="BELLY DRUM"/>
+            <entry key="188" value="SLUDGE BOMB"/>
+            <entry key="189" value="MUD-SLAP"/>
+            <entry key="190" value="OCTAZOOKA"/>
+            <entry key="191" value="SPIKES"/>
+            <entry key="192" value="ZAP CANNON"/>
+            <entry key="193" value="FORESIGHT"/>
+            <entry key="194" value="DESTINY BOND"/>
+            <entry key="195" value="PERISH SONG"/>
+            <entry key="196" value="ICY WIND"/>
+            <entry key="197" value="DETECT"/>
+            <entry key="198" value="BONE RUSH"/>
+            <entry key="199" value="LOCK ON"/>
+            <entry key="200" value="OUTRAGE"/>
+            <entry key="201" value="SANDSTORM"/>
+            <entry key="202" value="GIGA DRAIN"/>
+            <entry key="203" value="ENDURE"/>
+            <entry key="204" value="CHARM"/>
+            <entry key="205" value="ROLLOUT"/>
+            <entry key="206" value="FALSE SWIPE"/>
+            <entry key="207" value="SWAGGER"/>
+            <entry key="208" value="MILK DRINK"/>
+            <entry key="209" value="SPARK"/>
+            <entry key="210" value="FURY CUTTER"/>
+            <entry key="211" value="STEEL WING"/>
+            <entry key="212" value="MEAN LOOK"/>
+            <entry key="213" value="ATTRACT"/>
+            <entry key="214" value="SLEEP TALK"/>
+            <entry key="215" value="HEAL BELL"/>
+            <entry key="216" value="RETURN"/>
+            <entry key="217" value="PRESENT"/>
+            <entry key="218" value="FRUSTRATION"/>
+            <entry key="219" value="SAFEGUARD"/>
+            <entry key="220" value="PAIN SPLIT"/>
+            <entry key="221" value="SACRED FIRE"/>
+            <entry key="222" value="MAGNITUDE"/>
+            <entry key="223" value="DYNAMIC PUNCH"/>
+            <entry key="224" value="MEGAHORN"/>
+            <entry key="225" value="DRAGONBREATH"/>
+            <entry key="226" value="BATON PASS"/>
+            <entry key="227" value="ENCORE"/>
+            <entry key="228" value="PURSUIT"/>
+            <entry key="229" value="RAPID SPIN"/>
+            <entry key="230" value="SWEET SCENT"/>
+            <entry key="231" value="IRON TAIL"/>
+            <entry key="232" value="METAL CLAW"/>
+            <entry key="233" value="VITAL THROW"/>
+            <entry key="234" value="MORNING SUN"/>
+            <entry key="235" value="SYNTHESIS"/>
+            <entry key="236" value="MOONLIGHT"/>
+            <entry key="237" value="HIDDEN POWER"/>
+            <entry key="238" value="CROSS CHOP"/>
+            <entry key="239" value="TWISTER"/>
+            <entry key="240" value="RAIN DANCE"/>
+            <entry key="241" value="SUNNY DAY"/>
+            <entry key="242" value="CRUNCH"/>
+            <entry key="243" value="MIRROR COAT"/>
+            <entry key="244" value="PSYCH UP"/>
+            <entry key="245" value="EXTREME SPEED"/>
+            <entry key="246" value="AncientPower"/>
+            <entry key="247" value="SHADOW BALL"/>
+            <entry key="248" value="FUTURE SIGHT"/>
+            <entry key="249" value="ROCK SMASH"/>
+            <entry key="250" value="WHIRLPOOL"/>
+            <entry key="251" value="BEAT UP"/>
+            <entry key="252" value="FAKE OUT"/>
+            <entry key="253" value="UPROAR"/>
+            <entry key="254" value="STOCKPILE"/>
+            <entry key="255" value="SPIT UP"/>
+            <entry key="256" value="SWALLOW"/>
+            <entry key="257" value="HEAT WAVE"/>
+            <entry key="258" value="HAIL"/>
+            <entry key="259" value="TORMENT"/>
+            <entry key="260" value="FLATTER"/>
+            <entry key="261" value="WILL O WISP"/>
+            <entry key="262" value="MEMENTO"/>
+            <entry key="263" value="FACADE"/>
+            <entry key="264" value="FOCUS PUNCH"/>
+            <entry key="265" value="SmellingSalt"/>
+            <entry key="266" value="FOLLOW ME"/>
+            <entry key="267" value="NATURE POWER"/>
+            <entry key="268" value="CHARGE"/>
+            <entry key="269" value="TAUNT"/>
+            <entry key="270" value="HELPING HAND"/>
+            <entry key="271" value="TRICK"/>
+            <entry key="272" value="ROLE PLAY"/>
+            <entry key="273" value="WISH"/>
+            <entry key="274" value="ASSIST"/>
+            <entry key="275" value="INGRAIN"/>
+            <entry key="276" value="SUPERPOWER"/>
+            <entry key="277" value="MAGIC COAT"/>
+            <entry key="278" value="RECYCLE"/>
+            <entry key="279" value="REVENGE"/>
+            <entry key="280" value="BRICK BREAK"/>
+            <entry key="281" value="YAWN"/>
+            <entry key="282" value="KNOCK OFF"/>
+            <entry key="283" value="ENDEAVOR"/>
+            <entry key="284" value="ERUPTION"/>
+            <entry key="285" value="SKILL SWAP"/>
+            <entry key="286" value="IMPRISON"/>
+            <entry key="287" value="REFRESH"/>
+            <entry key="288" value="GRUDGE"/>
+            <entry key="289" value="SNATCH"/>
+            <entry key="290" value="SECRET POWER"/>
+            <entry key="291" value="DIVE"/>
+            <entry key="292" value="ARM THRUST"/>
+            <entry key="293" value="CAMOUFLAGE"/>
+            <entry key="294" value="TAIL GLOW"/>
+            <entry key="295" value="LUSTER PURGE"/>
+            <entry key="296" value="MIST BALL"/>
+            <entry key="297" value="FeatherDance"/>
+            <entry key="298" value="TEETER DANCE"/>
+            <entry key="299" value="BLAZE KICK"/>
+            <entry key="300" value="MUD SPORT"/>
+            <entry key="301" value="ICE BALL"/>
+            <entry key="302" value="NEEDLE ARM"/>
+            <entry key="303" value="SLACK OFF"/>
+            <entry key="304" value="HYPER VOICE"/>
+            <entry key="305" value="POISON FANG"/>
+            <entry key="306" value="CRUSH CLAW"/>
+            <entry key="307" value="BLAST BURN"/>
+            <entry key="308" value="HYDRO CANNON"/>
+            <entry key="309" value="METEOR MASH"/>
+            <entry key="310" value="ASTONISH"/>
+            <entry key="311" value="WEATHER BALL"/>
+            <entry key="312" value="AROMATHERAPY"/>
+            <entry key="313" value="FAKE TEARS"/>
+            <entry key="314" value="AIR CUTTER"/>
+            <entry key="315" value="OVERHEAT"/>
+            <entry key="316" value="ODOR SLEUTH"/>
+            <entry key="317" value="ROCK TOMB"/>
+            <entry key="318" value="SILVER WIND"/>
+            <entry key="319" value="METAL SOUND"/>
+            <entry key="320" value="GRASSWHISTLE"/>
+            <entry key="321" value="TICKLE"/>
+            <entry key="322" value="COSMIC POWER"/>
+            <entry key="323" value="WATER SPOUT"/>
+            <entry key="324" value="SIGNAL BEAM"/>
+            <entry key="325" value="SHADOW PUNCH"/>
+            <entry key="326" value="EXTRASENSORY"/>
+            <entry key="327" value="SKY UPPERCUT"/>
+            <entry key="328" value="SAND TOMB"/>
+            <entry key="329" value="SHEER COLD"/>
+            <entry key="330" value="MUDDY WATER"/>
+            <entry key="331" value="BULLET SEED"/>
+            <entry key="332" value="AERIAL ACE"/>
+            <entry key="333" value="ICICLE SPEAR"/>
+            <entry key="334" value="IRON DEFENSE"/>
+            <entry key="335" value="BLOCK"/>
+            <entry key="336" value="HOWL"/>
+            <entry key="337" value="DRAGON CLAW"/>
+            <entry key="338" value="FRENZY PLANT"/>
+            <entry key="339" value="BULK UP"/>
+            <entry key="340" value="BOUNCE"/>
+            <entry key="341" value="MUD SHOT"/>
+            <entry key="342" value="POISON TAIL"/>
+            <entry key="343" value="COVET"/>
+            <entry key="344" value="VOLT TACKLE"/>
+            <entry key="345" value="MAGICAL LEAF"/>
+            <entry key="346" value="WATER SPORT"/>
+            <entry key="347" value="CALM MIND"/>
+            <entry key="348" value="LEAF BLADE"/>
+            <entry key="349" value="DRAGON DANCE"/>
+            <entry key="350" value="ROCK BLAST"/>
+            <entry key="351" value="SHOCK WAVE"/>
+            <entry key="352" value="WATER PULSE"/>
+            <entry key="353" value="DOOM DESIRE"/>
+            <entry key="354" value="PSYCHO BOOST"/>
+        </moves>
+        <items>
+            <entry key="1" value="MASTER BALL"/>
+            <entry key="2" value="ULTRA BALL"/>
+            <entry key="3" value="GREAT BALL"/>
+            <entry key="4" value="POKE BALL"/>
+            <entry key="5" value="SAFARI BALL"/>
+            <entry key="6" value="NET BALL"/>
+            <entry key="7" value="DIVE BALL"/>
+            <entry key="8" value="NEST BALL"/>
+            <entry key="9" value="REPEAT BALL"/>
+            <entry key="10" value="TIMER BALL"/>
+            <entry key="11" value="LUXURY BALL"/>
+            <entry key="12" value="PREMIER BALL"/>
+            <entry key="13" value="POTION"/>
+            <entry key="14" value="ANTIDOTE"/>
+            <entry key="15" value="BURN HEAL"/>
+            <entry key="16" value="ICE HEAL"/>
+            <entry key="17" value="AWAKENING"/>
+            <entry key="18" value="PARALYZE HEAL"/>
+            <entry key="19" value="FULL RESTORE"/>
+            <entry key="20" value="MAX POTION"/>
+            <entry key="21" value="HYPER POTION"/>
+            <entry key="22" value="SUPER POTION"/>
+            <entry key="23" value="FULL HEAL"/>
+            <entry key="24" value="REVIVE"/>
+            <entry key="25" value="MAX REVIVE"/>
+            <entry key="26" value="FRESH WATER"/>
+            <entry key="27" value="SODA POP"/>
+            <entry key="28" value="LEMONADE"/>
+            <entry key="29" value="MOOMOO MILK"/>
+            <entry key="30" value="ENERGY POWDER"/>
+            <entry key="31" value="ENERGY ROOT"/>
+            <entry key="32" value="HEAL POWDER"/>
+            <entry key="33" value="REVIVAL HERB"/>
+            <entry key="34" value="ETHER"/>
+            <entry key="35" value="MAX ETHER"/>
+            <entry key="36" value="ELIXIR"/>
+            <entry key="37" value="MAX ELIXIR"/>
+            <entry key="38" value="LAVA COOKIE"/>
+            <entry key="39" value="BLUE FLUTE"/>
+            <entry key="40" value="YELLOW FLUTE"/>
+            <entry key="41" value="RED FLUTE"/>
+            <entry key="42" value="BLACK FLUTE"/>
+            <entry key="43" value="WHITE FLUTE"/>
+            <entry key="44" value="BERRY JUICE"/>
+            <entry key="45" value="SACRED ASH"/>
+            <entry key="46" value="SHOAL SALT"/>
+            <entry key="47" value="SHOAL SHELL"/>
+            <entry key="48" value="RED SHARD"/>
+            <entry key="49" value="BLUE SHARD"/>
+            <entry key="50" value="YELLOW SHARD"/>
+            <entry key="51" value="GREEN SHARD"/>
+            <entry key="52" value="034"/>
+            <entry key="53" value="035"/>
+            <entry key="54" value="036"/>
+            <entry key="55" value="037"/>
+            <entry key="56" value="038"/>
+            <entry key="57" value="039"/>
+            <entry key="58" value="03A"/>
+            <entry key="59" value="03B"/>
+            <entry key="60" value="03C"/>
+            <entry key="61" value="03D"/>
+            <entry key="62" value="03E"/>
+            <entry key="63" value="HP UP"/>
+            <entry key="64" value="PROTEIN"/>
+            <entry key="65" value="IRON"/>
+            <entry key="66" value="CARBOS"/>
+            <entry key="67" value="CALCIUM"/>
+            <entry key="68" value="RARE CANDY"/>
+            <entry key="69" value="PP UP"/>
+            <entry key="70" value="ZINC"/>
+            <entry key="71" value="PP MAX"/>
+            <entry key="72" value="048"/>
+            <entry key="73" value="GUARD SPEC"/>
+            <entry key="74" value="DIRE HIT"/>
+            <entry key="75" value="X ATTACK"/>
+            <entry key="76" value="X DEFEND"/>
+            <entry key="77" value="X SPEED"/>
+            <entry key="78" value="X ACCURACY"/>
+            <entry key="79" value="X SPECIAL"/>
+            <entry key="80" value="POKE DOLL"/>
+            <entry key="81" value="FLUFFY TAIL"/>
+            <entry key="82" value="052"/>
+            <entry key="83" value="SUPER REPEL"/>
+            <entry key="84" value="MAX REPEL"/>
+            <entry key="85" value="ESCAPE ROPE"/>
+            <entry key="86" value="REPEL"/>
+            <entry key="87" value="057"/>
+            <entry key="88" value="058"/>
+            <entry key="89" value="059"/>
+            <entry key="90" value="05A"/>
+            <entry key="91" value="05B"/>
+            <entry key="92" value="05C"/>
+            <entry key="93" value="SUN STONE"/>
+            <entry key="94" value="MOON STONE"/>
+            <entry key="95" value="FIRE STONE"/>
+            <entry key="96" value="THUNDER STONE"/>
+            <entry key="97" value="WATER STONE"/>
+            <entry key="98" value="LEAF STONE"/>
+            <entry key="99" value="063"/>
+            <entry key="100" value="064"/>
+            <entry key="101" value="065"/>
+            <entry key="102" value="066"/>
+            <entry key="103" value="TINY MUSHROOM"/>
+            <entry key="104" value="BIG MUSHROOM"/>
+            <entry key="105" value="069"/>
+            <entry key="106" value="PEARL"/>
+            <entry key="107" value="BIG PEARL"/>
+            <entry key="108" value="STARDUST"/>
+            <entry key="109" value="STAR PIECE"/>
+            <entry key="110" value="NUGGET"/>
+            <entry key="111" value="HEART SCALE"/>
+            <entry key="112" value="070"/>
+            <entry key="113" value="071"/>
+            <entry key="114" value="072"/>
+            <entry key="115" value="073"/>
+            <entry key="116" value="074"/>
+            <entry key="117" value="075"/>
+            <entry key="118" value="076"/>
+            <entry key="119" value="077"/>
+            <entry key="120" value="078"/>
+            <entry key="121" value="ORANGE MAIL"/>
+            <entry key="122" value="HARBOR MAIL"/>
+            <entry key="123" value="GLITTER MAIL"/>
+            <entry key="124" value="MECH MAIL"/>
+            <entry key="125" value="WOOD MAIL"/>
+            <entry key="126" value="WAVE MAIL"/>
+            <entry key="127" value="BEAD MAIL"/>
+            <entry key="128" value="SHADOW MAIL"/>
+            <entry key="129" value="TROPIC MAIL"/>
+            <entry key="130" value="DREAM MAIL"/>
+            <entry key="131" value="FAB MAIL"/>
+            <entry key="132" value="RETRO MAIL"/>
+            <entry key="133" value="CHERI BERRY"/>
+            <entry key="134" value="CHESTO BERRY"/>
+            <entry key="135" value="PECHA BERRY"/>
+            <entry key="136" value="RAWST BERRY"/>
+            <entry key="137" value="ASPEAR BERRY"/>
+            <entry key="138" value="LEPPA BERRY"/>
+            <entry key="139" value="ORAN BERRY"/>
+            <entry key="140" value="PERSIM BERRY"/>
+            <entry key="141" value="LUM BERRY"/>
+            <entry key="142" value="SITRUS BERRY"/>
+            <entry key="143" value="FIGY BERRY"/>
+            <entry key="144" value="WIKI BERRY"/>
+            <entry key="145" value="MAGO BERRY"/>
+            <entry key="146" value="AGUAV BERRY"/>
+            <entry key="147" value="IAPAPA BERRY"/>
+            <entry key="148" value="RAZZ BERRY"/>
+            <entry key="149" value="BLUK BERRY"/>
+            <entry key="150" value="NANAB BERRY"/>
+            <entry key="151" value="WEPEAR BERRY"/>
+            <entry key="152" value="PINAP BERRY"/>
+            <entry key="153" value="POMEG BERRY"/>
+            <entry key="154" value="KELPSY BERRY"/>
+            <entry key="155" value="QUALOT BERRY"/>
+            <entry key="156" value="HONDEW BERRY"/>
+            <entry key="157" value="GREPA BERRY"/>
+            <entry key="158" value="TAMATO BERRY"/>
+            <entry key="159" value="CORNN BERRY"/>
+            <entry key="160" value="MAGOST BERRY"/>
+            <entry key="161" value="RABUTA BERRY"/>
+            <entry key="162" value="NOMEL BERRY"/>
+            <entry key="163" value="SPELON BERRY"/>
+            <entry key="164" value="PAMTRE BERRY"/>
+            <entry key="165" value="WATMEL BERRY"/>
+            <entry key="166" value="DURIN BERRY"/>
+            <entry key="167" value="BELUE BERRY"/>
+            <entry key="168" value="LIECHI BERRY"/>
+            <entry key="169" value="GANLON BERRY"/>
+            <entry key="170" value="SALAC BERRY"/>
+            <entry key="171" value="PETAYA BERRY"/>
+            <entry key="172" value="APICOT BERRY"/>
+            <entry key="173" value="LANSAT BERRY"/>
+            <entry key="174" value="STARF BERRY"/>
+            <entry key="175" value="ENIGMA BERRY"/>
+            <entry key="176" value="UNUSED BERRY 1"/>
+            <entry key="177" value="UNUSED BERRY 2"/>
+            <entry key="178" value="UNUSED BERRY 3"/>
+            <entry key="179" value="BRIGHT POWDER"/>
+            <entry key="180" value="WHITE HERB"/>
+            <entry key="181" value="MACHO BRACE"/>
+            <entry key="182" value="EXP SHARE"/>
+            <entry key="183" value="QUICK CLAW"/>
+            <entry key="184" value="SOOTHE BELL"/>
+            <entry key="185" value="MENTAL HERB"/>
+            <entry key="186" value="CHOICE BAND"/>
+            <entry key="187" value="KINGS ROCK"/>
+            <entry key="188" value="SILVER POWDER"/>
+            <entry key="189" value="AMULET COIN"/>
+            <entry key="190" value="CLEANSE TAG"/>
+            <entry key="191" value="SOUL DEW"/>
+            <entry key="192" value="DEEP SEA TOOTH"/>
+            <entry key="193" value="DEEP SEA SCALE"/>
+            <entry key="194" value="SMOKE BALL"/>
+            <entry key="195" value="EVERSTONE"/>
+            <entry key="196" value="FOCUS BAND"/>
+            <entry key="197" value="LUCKY EGG"/>
+            <entry key="198" value="SCOPE LENS"/>
+            <entry key="199" value="METAL COAT"/>
+            <entry key="200" value="LEFTOVERS"/>
+            <entry key="201" value="DRAGON SCALE"/>
+            <entry key="202" value="LIGHT BALL"/>
+            <entry key="203" value="SOFT SAND"/>
+            <entry key="204" value="HARD STONE"/>
+            <entry key="205" value="MIRACLE SEED"/>
+            <entry key="206" value="BLACK GLASSES"/>
+            <entry key="207" value="BLACK BELT"/>
+            <entry key="208" value="MAGNET"/>
+            <entry key="209" value="MYSTIC WATER"/>
+            <entry key="210" value="SHARP BEAK"/>
+            <entry key="211" value="POISON BARB"/>
+            <entry key="212" value="NEVERMELTICE"/>
+            <entry key="213" value="SPELL TAG"/>
+            <entry key="214" value="TWISTED SPOON"/>
+            <entry key="215" value="CHARCOAL"/>
+            <entry key="216" value="DRAGON FANG"/>
+            <entry key="217" value="SILK SCARF"/>
+            <entry key="218" value="UP GRADE"/>
+            <entry key="219" value="SHELL BELL"/>
+            <entry key="220" value="SEA INCENSE"/>
+            <entry key="221" value="LAX INCENSE"/>
+            <entry key="222" value="LUCKY PUNCH"/>
+            <entry key="223" value="METAL POWDER"/>
+            <entry key="224" value="THICK CLUB"/>
+            <entry key="225" value="STICK"/>
+            <entry key="226" value="0E2"/>
+            <entry key="227" value="0E3"/>
+            <entry key="228" value="0E4"/>
+            <entry key="229" value="0E5"/>
+            <entry key="230" value="0E6"/>
+            <entry key="231" value="0E7"/>
+            <entry key="232" value="0E8"/>
+            <entry key="233" value="0E9"/>
+            <entry key="234" value="0EA"/>
+            <entry key="235" value="0EB"/>
+            <entry key="236" value="0EC"/>
+            <entry key="237" value="0ED"/>
+            <entry key="238" value="0EE"/>
+            <entry key="239" value="0EF"/>
+            <entry key="240" value="0F0"/>
+            <entry key="241" value="0F1"/>
+            <entry key="242" value="0F2"/>
+            <entry key="243" value="0F3"/>
+            <entry key="244" value="0F4"/>
+            <entry key="245" value="0F5"/>
+            <entry key="246" value="0F6"/>
+            <entry key="247" value="0F7"/>
+            <entry key="248" value="0F8"/>
+            <entry key="249" value="0F9"/>
+            <entry key="250" value="0FA"/>
+            <entry key="251" value="0FB"/>
+            <entry key="252" value="0FC"/>
+            <entry key="253" value="0FD"/>
+            <entry key="254" value="RED SCARF"/>
+            <entry key="255" value="BLUE SCARF"/>
+            <entry key="256" value="PINK SCARF"/>
+            <entry key="257" value="GREEN SCARF"/>
+            <entry key="258" value="YELLOW SCARF"/>
+            <entry key="259" value="MACH BIKE"/>
+            <entry key="260" value="COIN CASE"/>
+            <entry key="261" value="ITEMFINDER"/>
+            <entry key="262" value="OLD ROD"/>
+            <entry key="263" value="GOOD ROD"/>
+            <entry key="264" value="SUPER ROD"/>
+            <entry key="265" value="SS TICKET"/>
+            <entry key="266" value="CONTEST PASS"/>
+            <entry key="267" value="10B"/>
+            <entry key="268" value="WAILMER PAIL"/>
+            <entry key="269" value="DEVON GOODS"/>
+            <entry key="270" value="SOOT SACK"/>
+            <entry key="271" value="BASEMENT KEY"/>
+            <entry key="272" value="ACRO BIKE"/>
+            <entry key="273" value="POKEBLOCK CASE"/>
+            <entry key="274" value="LETTER"/>
+            <entry key="275" value="EON TICKET"/>
+            <entry key="276" value="RED ORB"/>
+            <entry key="277" value="BLUE ORB"/>
+            <entry key="278" value="SCANNER"/>
+            <entry key="279" value="GO GOGGLES"/>
+            <entry key="280" value="METEORITE"/>
+            <entry key="281" value="ROOM 1 KEY"/>
+            <entry key="282" value="ROOM 2 KEY"/>
+            <entry key="283" value="ROOM 4 KEY"/>
+            <entry key="284" value="ROOM 6 KEY"/>
+            <entry key="285" value="STORAGE KEY"/>
+            <entry key="286" value="ROOT FOSSIL"/>
+            <entry key="287" value="CLAW FOSSIL"/>
+            <entry key="288" value="DEVON SCOPE"/>
+            <entry key="289" value="TM01"/>
+            <entry key="290" value="TM02"/>
+            <entry key="291" value="TM03"/>
+            <entry key="292" value="TM04"/>
+            <entry key="293" value="TM05"/>
+            <entry key="294" value="TM06"/>
+            <entry key="295" value="TM07"/>
+            <entry key="296" value="TM08"/>
+            <entry key="297" value="TM09"/>
+            <entry key="298" value="TM10"/>
+            <entry key="299" value="TM11"/>
+            <entry key="300" value="TM12"/>
+            <entry key="301" value="TM13"/>
+            <entry key="302" value="TM14"/>
+            <entry key="303" value="TM15"/>
+            <entry key="304" value="TM16"/>
+            <entry key="305" value="TM17"/>
+            <entry key="306" value="TM18"/>
+            <entry key="307" value="TM19"/>
+            <entry key="308" value="TM20"/>
+            <entry key="309" value="TM21"/>
+            <entry key="310" value="TM22"/>
+            <entry key="311" value="TM23"/>
+            <entry key="312" value="TM24"/>
+            <entry key="313" value="TM25"/>
+            <entry key="314" value="TM26"/>
+            <entry key="315" value="TM27"/>
+            <entry key="316" value="TM28"/>
+            <entry key="317" value="TM29"/>
+            <entry key="318" value="TM30"/>
+            <entry key="319" value="TM31"/>
+            <entry key="320" value="TM32"/>
+            <entry key="321" value="TM33"/>
+            <entry key="322" value="TM34"/>
+            <entry key="323" value="TM35"/>
+            <entry key="324" value="TM36"/>
+            <entry key="325" value="TM37"/>
+            <entry key="326" value="TM38"/>
+            <entry key="327" value="TM39"/>
+            <entry key="328" value="TM40"/>
+            <entry key="329" value="TM41"/>
+            <entry key="330" value="TM42"/>
+            <entry key="331" value="TM43"/>
+            <entry key="332" value="TM44"/>
+            <entry key="333" value="TM45"/>
+            <entry key="334" value="TM46"/>
+            <entry key="335" value="TM47"/>
+            <entry key="336" value="TM48"/>
+            <entry key="337" value="TM49"/>
+            <entry key="338" value="TM50"/>
+            <entry key="339" value="HM01"/>
+            <entry key="340" value="HM02"/>
+            <entry key="341" value="HM03"/>
+            <entry key="342" value="HM04"/>
+            <entry key="343" value="HM05"/>
+            <entry key="344" value="HM06"/>
+            <entry key="345" value="HM07"/>
+            <entry key="346" value="HM08"/>
+            <entry key="347" value="15B"/>
+            <entry key="348" value="15C"/>
+            <entry key="349" value="OAKS PARCEL"/>
+            <entry key="350" value="POKE FLUTE"/>
+            <entry key="351" value="SECRET KEY"/>
+            <entry key="352" value="BIKE VOUCHER"/>
+            <entry key="353" value="GOLD TEETH"/>
+            <entry key="354" value="OLD AMBER"/>
+            <entry key="355" value="CARD KEY"/>
+            <entry key="356" value="LIFT KEY"/>
+            <entry key="357" value="HELIX FOSSIL"/>
+            <entry key="358" value="DOME FOSSIL"/>
+            <entry key="359" value="SILPH SCOPE"/>
+            <entry key="360" value="BICYCLE"/>
+            <entry key="361" value="TOWN MAP"/>
+            <entry key="362" value="VS SEEKER"/>
+            <entry key="363" value="FAME CHECKER"/>
+            <entry key="364" value="TM CASE"/>
+            <entry key="365" value="BERRY POUCH"/>
+            <entry key="366" value="TEACHY TV"/>
+            <entry key="367" value="TRI PASS"/>
+            <entry key="368" value="RAINBOW PASS"/>
+            <entry key="369" value="TEA"/>
+            <entry key="370" value="MYSTIC TICKET"/>
+            <entry key="371" value="AURORA TICKET"/>
+            <entry key="372" value="POWDER JAR"/>
+            <entry key="373" value="RUBY"/>
+            <entry key="374" value="SAPPHIRE"/>
+            <entry key="375" value="MAGMA EMBLEM"/>
+            <entry key="376" value="OLD SEA MAP"/>
+        </items>
         <defaultCharacterMap>
             <entry key="0x00" />
-            <entry key="0x01" value="À" />
-            <entry key="0x02" value="Á" />
-            <entry key="0x03" value="Â" />
-            <entry key="0x04" value="ç" />
-            <entry key="0x05" value="È" />
-            <entry key="0x06" value="É" />
-            <entry key="0x07" value="Ê" />
-            <entry key="0x08" value="Ë" />
-            <entry key="0x09" value="Ì" />
+            <entry key="0x01" value="À"/>
+            <entry key="0x02" value="Á"/>
+            <entry key="0x03" value="Â"/>
+            <entry key="0x04" value="ç"/>
+            <entry key="0x05" value="È"/>
+            <entry key="0x06" value="É"/>
+            <entry key="0x07" value="Ê"/>
+            <entry key="0x08" value="Ë"/>
+            <entry key="0x09" value="Ì"/>
             <entry key="0x0A" />
-            <entry key="0x0B" value="Î" />
-            <entry key="0x0C" value="Ï" />
-            <entry key="0x0D" value="Ò" />
-            <entry key="0x0E" value="Ó" />
-            <entry key="0x0F" value="Ô" />
-            <entry key="0x10" value="Œ" />
-            <entry key="0x11" value="Ù" />
-            <entry key="0x12" value="Ú" />
-            <entry key="0x13" value="Û" />
-            <entry key="0x14" value="Ñ" />
-            <entry key="0x15" value="ß" />
-            <entry key="0x16" value="à" />
-            <entry key="0x17" value="á" />
+            <entry key="0x0B" value="Î"/>
+            <entry key="0x0C" value="Ï"/>
+            <entry key="0x0D" value="Ò"/>
+            <entry key="0x0E" value="Ó"/>
+            <entry key="0x0F" value="Ô"/>
+            <entry key="0x10" value="Œ"/>
+            <entry key="0x11" value="Ù"/>
+            <entry key="0x12" value="Ú"/>
+            <entry key="0x13" value="Û"/>
+            <entry key="0x14" value="Ñ"/>
+            <entry key="0x15" value="ß"/>
+            <entry key="0x16" value="à"/>
+            <entry key="0x17" value="á"/>
             <entry key="0x18" />
-            <entry key="0x19" value="ç" />
-            <entry key="0x1A" value="è" />
-            <entry key="0x1B" value="é" />
-            <entry key="0x1C" value="ê" />
-            <entry key="0x1D" value="ë" />
-            <entry key="0x1E" value="ì" />
+            <entry key="0x19" value="ç"/>
+            <entry key="0x1A" value="è"/>
+            <entry key="0x1B" value="é"/>
+            <entry key="0x1C" value="ê"/>
+            <entry key="0x1D" value="ë"/>
+            <entry key="0x1E" value="ì"/>
             <entry key="0x1F" />
-            <entry key="0x20" value="î" />
-            <entry key="0x21" value="ï" />
-            <entry key="0x22" value="ò" />
-            <entry key="0x23" value="ó" />
-            <entry key="0x24" value="ô" />
-            <entry key="0x25" value="œ" />
-            <entry key="0x26" value="ù" />
-            <entry key="0x27" value="ú" />
-            <entry key="0x28" value="û" />
-            <entry key="0x29" value="ñ" />
-            <entry key="0x2A" value="ͦ" />
-            <entry key="0x2B" value="ͣ" />
-            <entry key="0x2C" value="ͤ ͬ" />
-            <entry key="0x2D" value="&amp;" />
-            <entry key="0x2E" value="+" />
+            <entry key="0x20" value="î"/>
+            <entry key="0x21" value="ï"/>
+            <entry key="0x22" value="ò"/>
+            <entry key="0x23" value="ó"/>
+            <entry key="0x24" value="ô"/>
+            <entry key="0x25" value="œ"/>
+            <entry key="0x26" value="ù"/>
+            <entry key="0x27" value="ú"/>
+            <entry key="0x28" value="û"/>
+            <entry key="0x29" value="ñ"/>
+            <entry key="0x2A" value="ͦ"/>
+            <entry key="0x2B" value="ͣ"/>
+            <entry key="0x2C" value="ͤ ͬ"/>
+            <entry key="0x2D" value="&amp;"/>
+            <entry key="0x2E" value="+"/>
             <entry key="0x2F" />
             <entry key="0x30" />
             <entry key="0x31" />
             <entry key="0x32" />
             <entry key="0x33" />
-            <entry key="0x34" value="Lv" />
-            <entry key="0x35" value="=" />
-            <entry key="0x36" value=";" />
-            <entry key="0xA0" value="ͬͤ" />
-            <entry key="0xA1" value="0" />
-            <entry key="0xA2" value="1" />
-            <entry key="0xA3" value="2" />
-            <entry key="0xA4" value="3" />
-            <entry key="0xA5" value="4" />
-            <entry key="0xA6" value="5" />
-            <entry key="0xA7" value="6" />
-            <entry key="0xA8" value="7" />
-            <entry key="0xA9" value="8" />
-            <entry key="0xAA" value="9" />
-            <entry key="0xAB" value="!" />
-            <entry key="0xAC" value="?" />
-            <entry key="0xAD" value="." />
-            <entry key="0xBB" value="A" />
-            <entry key="0xBC" value="B" />
-            <entry key="0xBD" value="C" />
-            <entry key="0xBE" value="D" />
-            <entry key="0xBF" value="E" />
-            <entry key="0xC0" value="F" />
-            <entry key="0xC1" value="G" />
-            <entry key="0xC2" value="H" />
-            <entry key="0xC3" value="I" />
-            <entry key="0xC4" value="J" />
-            <entry key="0xC5" value="K" />
-            <entry key="0xC6" value="L" />
-            <entry key="0xC7" value="M" />
-            <entry key="0xC8" value="N" />
-            <entry key="0xC9" value="O" />
-            <entry key="0xCA" value="P" />
-            <entry key="0xCB" value="Q" />
-            <entry key="0xCC" value="R" />
-            <entry key="0xCD" value="S" />
-            <entry key="0xCE" value="T" />
-            <entry key="0xCF" value="U" />
-            <entry key="0xD0" value="V" />
-            <entry key="0xD1" value="W" />
-            <entry key="0xD2" value="X" />
-            <entry key="0xD3" value="Y" />
-            <entry key="0xD4" value="Z" />
-            <entry key="0xD5" value="a" />
-            <entry key="0xD6" value="b" />
-            <entry key="0xD7" value="c" />
-            <entry key="0xD8" value="d" />
-            <entry key="0xD9" value="e" />
-            <entry key="0xDA" value="f" />
-            <entry key="0xDB" value="g" />
-            <entry key="0xDC" value="h" />
-            <entry key="0xDD" value="i" />
-            <entry key="0xDE" value="j" />
-            <entry key="0xDF" value="k" />
-            <entry key="0xE0" value="l" />
-            <entry key="0xE1" value="m" />
-            <entry key="0xE2" value="n" />
-            <entry key="0xE3" value="o" />
-            <entry key="0xE4" value="p" />
-            <entry key="0xE5" value="q" />
-            <entry key="0xE6" value="r" />
-            <entry key="0xE7" value="s" />
-            <entry key="0xE8" value="t" />
-            <entry key="0xE9" value="u" />
-            <entry key="0xEA" value="v" />
-            <entry key="0xEB" value="w" />
-            <entry key="0xEC" value="x" />
-            <entry key="0xED" value="y" />
-            <entry key="0xEE" value="z" />
-            <entry key="0xEF" value="▶" />
-            <entry key="0xF0" value=":" />
-            <entry key="0xF1" value="Ä" />
-            <entry key="0xF2" value="Ö" />
-            <entry key="0xF3" value="Ü" />
-            <entry key="0xF4" value="ä" />
-            <entry key="0xF5" value="ö" />
-            <entry key="0xF6" value="ü" />
+            <entry key="0x34" value="Lv"/>
+            <entry key="0x35" value="="/>
+            <entry key="0x36" value=";"/>
+            <entry key="0xA0" value="ͬͤ"/>
+            <entry key="0xA1" value="0"/>
+            <entry key="0xA2" value="1"/>
+            <entry key="0xA3" value="2"/>
+            <entry key="0xA4" value="3"/>
+            <entry key="0xA5" value="4"/>
+            <entry key="0xA6" value="5"/>
+            <entry key="0xA7" value="6"/>
+            <entry key="0xA8" value="7"/>
+            <entry key="0xA9" value="8"/>
+            <entry key="0xAA" value="9"/>
+            <entry key="0xAB" value="!"/>
+            <entry key="0xAC" value="?"/>
+            <entry key="0xAD" value="."/>
+            <entry key="0xBB" value="A"/>
+            <entry key="0xBC" value="B"/>
+            <entry key="0xBD" value="C"/>
+            <entry key="0xBE" value="D"/>
+            <entry key="0xBF" value="E"/>
+            <entry key="0xC0" value="F"/>
+            <entry key="0xC1" value="G"/>
+            <entry key="0xC2" value="H"/>
+            <entry key="0xC3" value="I"/>
+            <entry key="0xC4" value="J"/>
+            <entry key="0xC5" value="K"/>
+            <entry key="0xC6" value="L"/>
+            <entry key="0xC7" value="M"/>
+            <entry key="0xC8" value="N"/>
+            <entry key="0xC9" value="O"/>
+            <entry key="0xCA" value="P"/>
+            <entry key="0xCB" value="Q"/>
+            <entry key="0xCC" value="R"/>
+            <entry key="0xCD" value="S"/>
+            <entry key="0xCE" value="T"/>
+            <entry key="0xCF" value="U"/>
+            <entry key="0xD0" value="V"/>
+            <entry key="0xD1" value="W"/>
+            <entry key="0xD2" value="X"/>
+            <entry key="0xD3" value="Y"/>
+            <entry key="0xD4" value="Z"/>
+            <entry key="0xD5" value="a"/>
+            <entry key="0xD6" value="b"/>
+            <entry key="0xD7" value="c"/>
+            <entry key="0xD8" value="d"/>
+            <entry key="0xD9" value="e"/>
+            <entry key="0xDA" value="f"/>
+            <entry key="0xDB" value="g"/>
+            <entry key="0xDC" value="h"/>
+            <entry key="0xDD" value="i"/>
+            <entry key="0xDE" value="j"/>
+            <entry key="0xDF" value="k"/>
+            <entry key="0xE0" value="l"/>
+            <entry key="0xE1" value="m"/>
+            <entry key="0xE2" value="n"/>
+            <entry key="0xE3" value="o"/>
+            <entry key="0xE4" value="p"/>
+            <entry key="0xE5" value="q"/>
+            <entry key="0xE6" value="r"/>
+            <entry key="0xE7" value="s"/>
+            <entry key="0xE8" value="t"/>
+            <entry key="0xE9" value="u"/>
+            <entry key="0xEA" value="v"/>
+            <entry key="0xEB" value="w"/>
+            <entry key="0xEC" value="x"/>
+            <entry key="0xED" value="y"/>
+            <entry key="0xEE" value="z"/>
+            <entry key="0xEF" value="▶"/>
+            <entry key="0xF0" value=":"/>
+            <entry key="0xF1" value="Ä"/>
+            <entry key="0xF2" value="Ö"/>
+            <entry key="0xF3" value="Ü"/>
+            <entry key="0xF4" value="ä"/>
+            <entry key="0xF5" value="ö"/>
+            <entry key="0xF6" value="ü"/>
             <entry key="0xF7" />
             <entry key="0xF8" />
             <entry key="0xF9" />
@@ -183,6 +1249,2227 @@
             <entry key="0xFE" />
             <entry key="0xFF" />
         </defaultCharacterMap>
+        <language>
+            <entry key="0x01" value="Japanese"/>
+            <entry key="0x02" value="English"/>
+            <entry key="0x03" value="French"/>
+            <entry key="0x04" value="Italian"/>
+            <entry key="0x05" value="German"/>
+            <entry key="0x06" value="Korean"/>
+            <entry key="0x07" value="Spanish"/>
+        </language>
+        <pokemonPokedexNumbers>
+            <entry key="0x00" />
+            <entry key="0x01" value="1"/>
+            <entry key="0x02" value="2"/>
+            <entry key="0x03" value="3"/>
+            <entry key="0x04" value="4"/>
+            <entry key="0x05" value="5"/>
+            <entry key="0x06" value="6"/>
+            <entry key="0x07" value="7"/>
+            <entry key="0x08" value="8"/>
+            <entry key="0x09" value="9"/>
+            <entry key="0x0A" value="10"/>
+            <entry key="0x0B" value="11"/>
+            <entry key="0x0C" value="12"/>
+            <entry key="0x0D" value="13"/>
+            <entry key="0x0E" value="14"/>
+            <entry key="0x0F" value="15"/>
+            <entry key="0x10" value="16"/>
+            <entry key="0x11" value="17"/>
+            <entry key="0x12" value="18"/>
+            <entry key="0x13" value="19"/>
+            <entry key="0x14" value="20"/>
+            <entry key="0x15" value="21"/>
+            <entry key="0x16" value="22"/>
+            <entry key="0x17" value="23"/>
+            <entry key="0x18" value="24"/>
+            <entry key="0x19" value="25"/>
+            <entry key="0x1A" value="26"/>
+            <entry key="0x1B" value="27"/>
+            <entry key="0x1C" value="28"/>
+            <entry key="0x1D" value="29"/>
+            <entry key="0x1E" value="30"/>
+            <entry key="0x1F" value="31"/>
+            <entry key="0x20" value="32"/>
+            <entry key="0x21" value="33"/>
+            <entry key="0x22" value="34"/>
+            <entry key="0x23" value="35"/>
+            <entry key="0x24" value="36"/>
+            <entry key="0x25" value="37"/>
+            <entry key="0x26" value="38"/>
+            <entry key="0x27" value="39"/>
+            <entry key="0x28" value="40"/>
+            <entry key="0x29" value="41"/>
+            <entry key="0x2A" value="42"/>
+            <entry key="0x2B" value="43"/>
+            <entry key="0x2C" value="44"/>
+            <entry key="0x2D" value="45"/>
+            <entry key="0x2E" value="46"/>
+            <entry key="0x2F" value="47"/>
+            <entry key="0x30" value="48"/>
+            <entry key="0x31" value="49"/>
+            <entry key="0x32" value="50"/>
+            <entry key="0x33" value="51"/>
+            <entry key="0x34" value="52"/>
+            <entry key="0x35" value="53"/>
+            <entry key="0x36" value="54"/>
+            <entry key="0x37" value="55"/>
+            <entry key="0x38" value="56"/>
+            <entry key="0x39" value="57"/>
+            <entry key="0x3A" value="58"/>
+            <entry key="0x3B" value="59"/>
+            <entry key="0x3C" value="60"/>
+            <entry key="0x3D" value="61"/>
+            <entry key="0x3E" value="62"/>
+            <entry key="0x3F" value="63"/>
+            <entry key="0x40" value="64"/>
+            <entry key="0x41" value="65"/>
+            <entry key="0x42" value="66"/>
+            <entry key="0x43" value="67"/>
+            <entry key="0x44" value="68"/>
+            <entry key="0x45" value="69"/>
+            <entry key="0x46" value="70"/>
+            <entry key="0x47" value="71"/>
+            <entry key="0x48" value="72"/>
+            <entry key="0x49" value="73"/>
+            <entry key="0x4A" value="74"/>
+            <entry key="0x4B" value="75"/>
+            <entry key="0x4C" value="76"/>
+            <entry key="0x4D" value="77"/>
+            <entry key="0x4E" value="78"/>
+            <entry key="0x4F" value="79"/>
+            <entry key="0x50" value="80"/>
+            <entry key="0x51" value="81"/>
+            <entry key="0x52" value="82"/>
+            <entry key="0x53" value="83"/>
+            <entry key="0x54" value="84"/>
+            <entry key="0x55" value="85"/>
+            <entry key="0x56" value="86"/>
+            <entry key="0x57" value="87"/>
+            <entry key="0x58" value="88"/>
+            <entry key="0x59" value="89"/>
+            <entry key="0x5A" value="90"/>
+            <entry key="0x5B" value="91"/>
+            <entry key="0x5C" value="92"/>
+            <entry key="0x5D" value="93"/>
+            <entry key="0x5E" value="94"/>
+            <entry key="0x5F" value="95"/>
+            <entry key="0x60" value="96"/>
+            <entry key="0x61" value="97"/>
+            <entry key="0x62" value="98"/>
+            <entry key="0x63" value="99"/>
+            <entry key="0x64" value="100"/>
+            <entry key="0x65" value="101"/>
+            <entry key="0x66" value="102"/>
+            <entry key="0x67" value="103"/>
+            <entry key="0x68" value="104"/>
+            <entry key="0x69" value="105"/>
+            <entry key="0x6A" value="106"/>
+            <entry key="0x6B" value="107"/>
+            <entry key="0x6C" value="108"/>
+            <entry key="0x6D" value="109"/>
+            <entry key="0x6E" value="110"/>
+            <entry key="0x6F" value="111"/>
+            <entry key="0x70" value="112"/>
+            <entry key="0x71" value="113"/>
+            <entry key="0x72" value="114"/>
+            <entry key="0x73" value="115"/>
+            <entry key="0x74" value="116"/>
+            <entry key="0x75" value="117"/>
+            <entry key="0x76" value="118"/>
+            <entry key="0x77" value="119"/>
+            <entry key="0x78" value="120"/>
+            <entry key="0x79" value="121"/>
+            <entry key="0x7A" value="122"/>
+            <entry key="0x7B" value="123"/>
+            <entry key="0x7C" value="124"/>
+            <entry key="0x7D" value="125"/>
+            <entry key="0x7E" value="126"/>
+            <entry key="0x7F" value="127"/>
+            <entry key="0x80" value="128"/>
+            <entry key="0x81" value="129"/>
+            <entry key="0x82" value="130"/>
+            <entry key="0x83" value="131"/>
+            <entry key="0x84" value="132"/>
+            <entry key="0x85" value="133"/>
+            <entry key="0x86" value="134"/>
+            <entry key="0x87" value="135"/>
+            <entry key="0x88" value="136"/>
+            <entry key="0x89" value="137"/>
+            <entry key="0x8A" value="138"/>
+            <entry key="0x8B" value="139"/>
+            <entry key="0x8C" value="140"/>
+            <entry key="0x8D" value="141"/>
+            <entry key="0x8E" value="142"/>
+            <entry key="0x8F" value="143"/>
+            <entry key="0x90" value="144"/>
+            <entry key="0x91" value="145"/>
+            <entry key="0x92" value="146"/>
+            <entry key="0x93" value="147"/>
+            <entry key="0x94" value="148"/>
+            <entry key="0x95" value="149"/>
+            <entry key="0x96" value="150"/>
+            <entry key="0x97" value="151"/>
+            <entry key="0x98" value="152"/>
+            <entry key="0x99" value="153"/>
+            <entry key="0x9A" value="154"/>
+            <entry key="0x9B" value="155"/>
+            <entry key="0x9C" value="156"/>
+            <entry key="0x9D" value="157"/>
+            <entry key="0x9E" value="158"/>
+            <entry key="0x9F" value="159"/>
+            <entry key="0xA0" value="160"/>
+            <entry key="0xA1" value="161"/>
+            <entry key="0xA2" value="162"/>
+            <entry key="0xA3" value="163"/>
+            <entry key="0xA4" value="164"/>
+            <entry key="0xA5" value="165"/>
+            <entry key="0xA6" value="166"/>
+            <entry key="0xA7" value="167"/>
+            <entry key="0xA8" value="168"/>
+            <entry key="0xA9" value="169"/>
+            <entry key="0xAA" value="170"/>
+            <entry key="0xAB" value="171"/>
+            <entry key="0xAC" value="172"/>
+            <entry key="0xAD" value="173"/>
+            <entry key="0xAE" value="174"/>
+            <entry key="0xAF" value="175"/>
+            <entry key="0xB0" value="176"/>
+            <entry key="0xB1" value="177"/>
+            <entry key="0xB2" value="178"/>
+            <entry key="0xB3" value="179"/>
+            <entry key="0xB4" value="180"/>
+            <entry key="0xB5" value="181"/>
+            <entry key="0xB6" value="182"/>
+            <entry key="0xB7" value="183"/>
+            <entry key="0xB8" value="184"/>
+            <entry key="0xB9" value="185"/>
+            <entry key="0xBA" value="186"/>
+            <entry key="0xBB" value="187"/>
+            <entry key="0xBC" value="188"/>
+            <entry key="0xBD" value="189"/>
+            <entry key="0xBE" value="190"/>
+            <entry key="0xBF" value="191"/>
+            <entry key="0xC0" value="192"/>
+            <entry key="0xC1" value="193"/>
+            <entry key="0xC2" value="194"/>
+            <entry key="0xC3" value="195"/>
+            <entry key="0xC4" value="196"/>
+            <entry key="0xC5" value="197"/>
+            <entry key="0xC6" value="198"/>
+            <entry key="0xC7" value="199"/>
+            <entry key="0xC8" value="200"/>
+            <entry key="0xC9" value="201"/>
+            <entry key="0xCA" value="202"/>
+            <entry key="0xCB" value="203"/>
+            <entry key="0xCC" value="204"/>
+            <entry key="0xCD" value="205"/>
+            <entry key="0xCE" value="206"/>
+            <entry key="0xCF" value="207"/>
+            <entry key="0xD0" value="208"/>
+            <entry key="0xD1" value="209"/>
+            <entry key="0xD2" value="210"/>
+            <entry key="0xD3" value="211"/>
+            <entry key="0xD4" value="212"/>
+            <entry key="0xD5" value="213"/>
+            <entry key="0xD6" value="214"/>
+            <entry key="0xD7" value="215"/>
+            <entry key="0xD8" value="216"/>
+            <entry key="0xD9" value="217"/>
+            <entry key="0xDA" value="218"/>
+            <entry key="0xDB" value="219"/>
+            <entry key="0xDC" value="220"/>
+            <entry key="0xDD" value="221"/>
+            <entry key="0xDE" value="222"/>
+            <entry key="0xDF" value="223"/>
+            <entry key="0xE0" value="224"/>
+            <entry key="0xE1" value="225"/>
+            <entry key="0xE2" value="226"/>
+            <entry key="0xE3" value="227"/>
+            <entry key="0xE4" value="228"/>
+            <entry key="0xE5" value="229"/>
+            <entry key="0xE6" value="230"/>
+            <entry key="0xE7" value="231"/>
+            <entry key="0xE8" value="232"/>
+            <entry key="0xE9" value="233"/>
+            <entry key="0xEA" value="234"/>
+            <entry key="0xEB" value="235"/>
+            <entry key="0xEC" value="236"/>
+            <entry key="0xED" value="237"/>
+            <entry key="0xEE" value="238"/>
+            <entry key="0xEF" value="239"/>
+            <entry key="0xF0" value="240"/>
+            <entry key="0xF1" value="241"/>
+            <entry key="0xF2" value="242"/>
+            <entry key="0xF3" value="243"/>
+            <entry key="0xF4" value="244"/>
+            <entry key="0xF5" value="245"/>
+            <entry key="0xF6" value="246"/>
+            <entry key="0xF7" value="247"/>
+            <entry key="0xF8" value="248"/>
+            <entry key="0xF9" value="249"/>
+            <entry key="0xFA" value="250"/>
+            <entry key="0xFB" value="251"/>
+            <entry key="0xFC" />
+            <entry key="0xFD" />
+            <entry key="0xFE" />
+            <entry key="0xFF" />
+            <entry key="0x100" />
+            <entry key="0x101" />
+            <entry key="0x102" />
+            <entry key="0x103" />
+            <entry key="0x104" />
+            <entry key="0x105" />
+            <entry key="0x106" />
+            <entry key="0x107" />
+            <entry key="0x108" />
+            <entry key="0x109" />
+            <entry key="0x10A" />
+            <entry key="0x10B" />
+            <entry key="0x10C" />
+            <entry key="0x10D" />
+            <entry key="0x10E" />
+            <entry key="0x10F" />
+            <entry key="0x110" />
+            <entry key="0x111" />
+            <entry key="0x112" />
+            <entry key="0x113" />
+            <entry key="0x114" />
+            <entry key="0x115" value="252"/>
+            <entry key="0x116" value="253"/>
+            <entry key="0x117" value="254"/>
+            <entry key="0x118" value="255"/>
+            <entry key="0x119" value="256"/>
+            <entry key="0x11A" value="257"/>
+            <entry key="0x11B" value="258"/>
+            <entry key="0x11C" value="259"/>
+            <entry key="0x11D" value="260"/>
+            <entry key="0x11E" value="261"/>
+            <entry key="0x11F" value="262"/>
+            <entry key="0x120" value="263"/>
+            <entry key="0x121" value="264"/>
+            <entry key="0x122" value="265"/>
+            <entry key="0x123" value="266"/>
+            <entry key="0x124" value="267"/>
+            <entry key="0x125" value="268"/>
+            <entry key="0x126" value="269"/>
+            <entry key="0x127" value="270"/>
+            <entry key="0x128" value="271"/>
+            <entry key="0x129" value="272"/>
+            <entry key="0x12A" value="273"/>
+            <entry key="0x12B" value="274"/>
+            <entry key="0x12C" value="275"/>
+            <entry key="0x12D" value="290"/>
+            <entry key="0x12E" value="291"/>
+            <entry key="0x12F" value="292"/>
+            <entry key="0x130" value="276"/>
+            <entry key="0x131" value="277"/>
+            <entry key="0x132" value="285"/>
+            <entry key="0x133" value="286"/>
+            <entry key="0x134" value="327"/>
+            <entry key="0x135" value="278"/>
+            <entry key="0x136" value="279"/>
+            <entry key="0x137" value="283"/>
+            <entry key="0x138" value="284"/>
+            <entry key="0x139" value="320"/>
+            <entry key="0x13A" value="321"/>
+            <entry key="0x13B" value="300"/>
+            <entry key="0x13C" value="301"/>
+            <entry key="0x13D" value="352"/>
+            <entry key="0x13E" value="343"/>
+            <entry key="0x13F" value="344"/>
+            <entry key="0x140" value="299"/>
+            <entry key="0x141" value="324"/>
+            <entry key="0x142" value="302"/>
+            <entry key="0x143" value="339"/>
+            <entry key="0x144" value="340"/>
+            <entry key="0x145" value="370"/>
+            <entry key="0x146" value="341"/>
+            <entry key="0x147" value="342"/>
+            <entry key="0x148" value="349"/>
+            <entry key="0x149" value="350"/>
+            <entry key="0x14A" value="318"/>
+            <entry key="0x14B" value="319"/>
+            <entry key="0x14C" value="328"/>
+            <entry key="0x14D" value="329"/>
+            <entry key="0x14E" value="330"/>
+            <entry key="0x14F" value="296"/>
+            <entry key="0x150" value="297"/>
+            <entry key="0x151" value="309"/>
+            <entry key="0x152" value="310"/>
+            <entry key="0x153" value="322"/>
+            <entry key="0x154" value="323"/>
+            <entry key="0x155" value="363"/>
+            <entry key="0x156" value="364"/>
+            <entry key="0x157" value="365"/>
+            <entry key="0x158" value="331"/>
+            <entry key="0x159" value="332"/>
+            <entry key="0x15A" value="361"/>
+            <entry key="0x15B" value="362"/>
+            <entry key="0x15C" value="337"/>
+            <entry key="0x15D" value="338"/>
+            <entry key="0x15E" value="298"/>
+            <entry key="0x15F" value="325"/>
+            <entry key="0x160" value="326"/>
+            <entry key="0x161" value="311"/>
+            <entry key="0x162" value="312"/>
+            <entry key="0x163" value="303"/>
+            <entry key="0x164" value="307"/>
+            <entry key="0x165" value="308"/>
+            <entry key="0x166" value="333"/>
+            <entry key="0x167" value="334"/>
+            <entry key="0x168" value="360"/>
+            <entry key="0x169" value="355"/>
+            <entry key="0x16A" value="356"/>
+            <entry key="0x16B" value="315"/>
+            <entry key="0x16C" value="287"/>
+            <entry key="0x16D" value="288"/>
+            <entry key="0x16E" value="289"/>
+            <entry key="0x16F" value="316"/>
+            <entry key="0x170" value="317"/>
+            <entry key="0x171" value="357"/>
+            <entry key="0x172" value="293"/>
+            <entry key="0x173" value="294"/>
+            <entry key="0x174" value="295"/>
+            <entry key="0x175" value="366"/>
+            <entry key="0x176" value="367"/>
+            <entry key="0x177" value="368"/>
+            <entry key="0x178" value="359"/>
+            <entry key="0x179" value="353"/>
+            <entry key="0x17A" value="354"/>
+            <entry key="0x17B" value="336"/>
+            <entry key="0x17C" value="335"/>
+            <entry key="0x17D" value="369"/>
+            <entry key="0x17E" value="304"/>
+            <entry key="0x17F" value="305"/>
+            <entry key="0x180" value="306"/>
+            <entry key="0x181" value="351"/>
+            <entry key="0x182" value="313"/>
+            <entry key="0x183" value="314"/>
+            <entry key="0x184" value="345"/>
+            <entry key="0x185" value="346"/>
+            <entry key="0x186" value="347"/>
+            <entry key="0x187" value="348"/>
+            <entry key="0x188" value="280"/>
+            <entry key="0x189" value="281"/>
+            <entry key="0x18A" value="282"/>
+            <entry key="0x18B" value="371"/>
+            <entry key="0x18C" value="372"/>
+            <entry key="0x18D" value="373"/>
+            <entry key="0x18E" value="374"/>
+            <entry key="0x18F" value="375"/>
+            <entry key="0x190" value="376"/>
+            <entry key="0x191" value="377"/>
+            <entry key="0x192" value="378"/>
+            <entry key="0x193" value="379"/>
+            <entry key="0x194" value="382"/>
+            <entry key="0x195" value="383"/>
+            <entry key="0x196" value="384"/>
+            <entry key="0x197" value="380"/>
+            <entry key="0x198" value="381"/>
+            <entry key="0x199" value="385"/>
+            <entry key="0x19A" value="386"/>
+            <entry key="0x19B" value="358"/>
+            <entry key="0x19C" />
+            <entry key="0x19D" value="201"/>
+            <entry key="0x19E" value="201"/>
+        </pokemonPokedexNumbers>
+        <pokemonSpecies>
+            <entry key="0x00" />
+            <entry key="0x01" value="Bulbasaur"/>
+            <entry key="0x02" value="Ivysaur"/>
+            <entry key="0x03" value="Venusaur"/>
+            <entry key="0x04" value="Charmander"/>
+            <entry key="0x05" value="Charmeleon"/>
+            <entry key="0x06" value="Charizard"/>
+            <entry key="0x07" value="Squirtle"/>
+            <entry key="0x08" value="Wartortle"/>
+            <entry key="0x09" value="Blastoise"/>
+            <entry key="0x0A" value="Caterpie"/>
+            <entry key="0x0B" value="Metapod"/>
+            <entry key="0x0C" value="Butterfree"/>
+            <entry key="0x0D" value="Weedle"/>
+            <entry key="0x0E" value="Kakuna"/>
+            <entry key="0x0F" value="Beedrill"/>
+            <entry key="0x10" value="Pidgey"/>
+            <entry key="0x11" value="Pidgeotto"/>
+            <entry key="0x12" value="Pidgeot"/>
+            <entry key="0x13" value="Rattata"/>
+            <entry key="0x14" value="Raticate"/>
+            <entry key="0x15" value="Spearow"/>
+            <entry key="0x16" value="Fearow"/>
+            <entry key="0x17" value="Ekans"/>
+            <entry key="0x18" value="Arbok"/>
+            <entry key="0x19" value="Pikachu"/>
+            <entry key="0x1A" value="Raichu"/>
+            <entry key="0x1B" value="Sandshrew"/>
+            <entry key="0x1C" value="Sandslash"/>
+            <entry key="0x1D" value="NidoranF"/>
+            <entry key="0x1E" value="Nidorina"/>
+            <entry key="0x1F" value="Nidoqueen"/>
+            <entry key="0x20" value="NidoranM"/>
+            <entry key="0x21" value="Nidorino"/>
+            <entry key="0x22" value="Nidoking"/>
+            <entry key="0x23" value="Clefairy"/>
+            <entry key="0x24" value="Clefable"/>
+            <entry key="0x25" value="Vulpix"/>
+            <entry key="0x26" value="Ninetales"/>
+            <entry key="0x27" value="Jigglypuff"/>
+            <entry key="0x28" value="Wigglytuff"/>
+            <entry key="0x29" value="Zubat"/>
+            <entry key="0x2A" value="Golbat"/>
+            <entry key="0x2B" value="Oddish"/>
+            <entry key="0x2C" value="Gloom"/>
+            <entry key="0x2D" value="Vileplume"/>
+            <entry key="0x2E" value="Paras"/>
+            <entry key="0x2F" value="Parasect"/>
+            <entry key="0x30" value="Venonat"/>
+            <entry key="0x31" value="Venomoth"/>
+            <entry key="0x32" value="Diglett"/>
+            <entry key="0x33" value="Dugtrio"/>
+            <entry key="0x34" value="Meowth"/>
+            <entry key="0x35" value="Persian"/>
+            <entry key="0x36" value="Psyduck"/>
+            <entry key="0x37" value="Golduck"/>
+            <entry key="0x38" value="Mankey"/>
+            <entry key="0x39" value="Primeape"/>
+            <entry key="0x3A" value="Growlithe"/>
+            <entry key="0x3B" value="Arcanine"/>
+            <entry key="0x3C" value="Poliwag"/>
+            <entry key="0x3D" value="Poliwhirl"/>
+            <entry key="0x3E" value="Poliwrath"/>
+            <entry key="0x3F" value="Abra"/>
+            <entry key="0x40" value="Kadabra"/>
+            <entry key="0x41" value="Alakazam"/>
+            <entry key="0x42" value="Machop"/>
+            <entry key="0x43" value="Machoke"/>
+            <entry key="0x44" value="Machamp"/>
+            <entry key="0x45" value="Bellsprout"/>
+            <entry key="0x46" value="Weepinbell"/>
+            <entry key="0x47" value="Victreebel"/>
+            <entry key="0x48" value="Tentacool"/>
+            <entry key="0x49" value="Tentacruel"/>
+            <entry key="0x4A" value="Geodude"/>
+            <entry key="0x4B" value="Graveler"/>
+            <entry key="0x4C" value="Golem"/>
+            <entry key="0x4D" value="Ponyta"/>
+            <entry key="0x4E" value="Rapidash"/>
+            <entry key="0x4F" value="Slowpoke"/>
+            <entry key="0x50" value="Slowbro"/>
+            <entry key="0x51" value="Magnemite"/>
+            <entry key="0x52" value="Magneton"/>
+            <entry key="0x53" value="Farfetch'd"/>
+            <entry key="0x54" value="Doduo"/>
+            <entry key="0x55" value="Dodrio"/>
+            <entry key="0x56" value="Seel"/>
+            <entry key="0x57" value="Dewgong"/>
+            <entry key="0x58" value="Grimer"/>
+            <entry key="0x59" value="Muk"/>
+            <entry key="0x5A" value="Shellder"/>
+            <entry key="0x5B" value="Cloyster"/>
+            <entry key="0x5C" value="Gastly"/>
+            <entry key="0x5D" value="Haunter"/>
+            <entry key="0x5E" value="Gengar"/>
+            <entry key="0x5F" value="Onix"/>
+            <entry key="0x60" value="Drowzee"/>
+            <entry key="0x61" value="Hypno"/>
+            <entry key="0x62" value="Krabby"/>
+            <entry key="0x63" value="Kingler"/>
+            <entry key="0x64" value="Voltorb"/>
+            <entry key="0x65" value="Electrode"/>
+            <entry key="0x66" value="Exeggcute"/>
+            <entry key="0x67" value="Exeggutor"/>
+            <entry key="0x68" value="Cubone"/>
+            <entry key="0x69" value="Marowak"/>
+            <entry key="0x6A" value="Hitmonlee"/>
+            <entry key="0x6B" value="Hitmonchan"/>
+            <entry key="0x6C" value="Lickitung"/>
+            <entry key="0x6D" value="Koffing"/>
+            <entry key="0x6E" value="Weezing"/>
+            <entry key="0x6F" value="Rhyhorn"/>
+            <entry key="0x70" value="Rhydon"/>
+            <entry key="0x71" value="Chansey"/>
+            <entry key="0x72" value="Tangela"/>
+            <entry key="0x73" value="Kangaskhan"/>
+            <entry key="0x74" value="Horsea"/>
+            <entry key="0x75" value="Seadra"/>
+            <entry key="0x76" value="Goldeen"/>
+            <entry key="0x77" value="Seaking"/>
+            <entry key="0x78" value="Staryu"/>
+            <entry key="0x79" value="Starmie"/>
+            <entry key="0x7A" value="Mr. Mime"/>
+            <entry key="0x7B" value="Scyther"/>
+            <entry key="0x7C" value="Jynx"/>
+            <entry key="0x7D" value="Electabuzz"/>
+            <entry key="0x7E" value="Magmar"/>
+            <entry key="0x7F" value="Pinsir"/>
+            <entry key="0x80" value="Tauros"/>
+            <entry key="0x81" value="Magikarp"/>
+            <entry key="0x82" value="Gyarados"/>
+            <entry key="0x83" value="Lapras"/>
+            <entry key="0x84" value="Ditto"/>
+            <entry key="0x85" value="Eevee"/>
+            <entry key="0x86" value="Vaporeon"/>
+            <entry key="0x87" value="Jolteon"/>
+            <entry key="0x88" value="Flareon"/>
+            <entry key="0x89" value="Porygon"/>
+            <entry key="0x8A" value="Omanyte"/>
+            <entry key="0x8B" value="Omastar"/>
+            <entry key="0x8C" value="Kabuto"/>
+            <entry key="0x8D" value="Kabutops"/>
+            <entry key="0x8E" value="Aerodactyl"/>
+            <entry key="0x8F" value="Snorlax"/>
+            <entry key="0x90" value="Articuno"/>
+            <entry key="0x91" value="Zapdos"/>
+            <entry key="0x92" value="Moltres"/>
+            <entry key="0x93" value="Dratini"/>
+            <entry key="0x94" value="Dragonair"/>
+            <entry key="0x95" value="Dragonite"/>
+            <entry key="0x96" value="Mewtwo"/>
+            <entry key="0x97" value="Mew"/>
+            <entry key="0x98" value="Chikorita"/>
+            <entry key="0x99" value="Bayleef"/>
+            <entry key="0x9A" value="Meganium"/>
+            <entry key="0x9B" value="Cyndaquil"/>
+            <entry key="0x9C" value="Quilava"/>
+            <entry key="0x9D" value="Typhlosion"/>
+            <entry key="0x9E" value="Totodile"/>
+            <entry key="0x9F" value="Croconaw"/>
+            <entry key="0xA0" value="Feraligatr"/>
+            <entry key="0xA1" value="Sentret"/>
+            <entry key="0xA2" value="Furret"/>
+            <entry key="0xA3" value="Hoothoot"/>
+            <entry key="0xA4" value="Noctowl"/>
+            <entry key="0xA5" value="Ledyba"/>
+            <entry key="0xA6" value="Ledian"/>
+            <entry key="0xA7" value="Spinarak"/>
+            <entry key="0xA8" value="Ariados"/>
+            <entry key="0xA9" value="Crobat"/>
+            <entry key="0xAA" value="Chinchou"/>
+            <entry key="0xAB" value="Lanturn"/>
+            <entry key="0xAC" value="Pichu"/>
+            <entry key="0xAD" value="Cleffa"/>
+            <entry key="0xAE" value="Igglybuff"/>
+            <entry key="0xAF" value="Togepi"/>
+            <entry key="0xB0" value="Togetic"/>
+            <entry key="0xB1" value="Natu"/>
+            <entry key="0xB2" value="Xatu"/>
+            <entry key="0xB3" value="Mareep"/>
+            <entry key="0xB4" value="Flaaffy"/>
+            <entry key="0xB5" value="Ampharos"/>
+            <entry key="0xB6" value="Bellossom"/>
+            <entry key="0xB7" value="Marill"/>
+            <entry key="0xB8" value="Azumarill"/>
+            <entry key="0xB9" value="Sudowoodo"/>
+            <entry key="0xBA" value="Politoed"/>
+            <entry key="0xBB" value="Hoppip"/>
+            <entry key="0xBC" value="Skiploom"/>
+            <entry key="0xBD" value="Jumpluff"/>
+            <entry key="0xBE" value="Aipom"/>
+            <entry key="0xBF" value="Sunkern"/>
+            <entry key="0xC0" value="Sunflora"/>
+            <entry key="0xC1" value="Yanma"/>
+            <entry key="0xC2" value="Wooper"/>
+            <entry key="0xC3" value="Quagsire"/>
+            <entry key="0xC4" value="Espeon"/>
+            <entry key="0xC5" value="Umbreon"/>
+            <entry key="0xC6" value="Murkrow"/>
+            <entry key="0xC7" value="Slowking"/>
+            <entry key="0xC8" value="Misdreavus"/>
+            <entry key="0xC9" value="Unown"/>
+            <entry key="0xCA" value="Wobbuffet"/>
+            <entry key="0xCB" value="Girafarig"/>
+            <entry key="0xCC" value="Pineco"/>
+            <entry key="0xCD" value="Forretress"/>
+            <entry key="0xCE" value="Dunsparce"/>
+            <entry key="0xCF" value="Gligar"/>
+            <entry key="0xD0" value="Steelix"/>
+            <entry key="0xD1" value="Snubbull"/>
+            <entry key="0xD2" value="Granbull"/>
+            <entry key="0xD3" value="Qwillfish"/>
+            <entry key="0xD4" value="Scizor"/>
+            <entry key="0xD5" value="Shuckle"/>
+            <entry key="0xD6" value="Heracross"/>
+            <entry key="0xD7" value="Sneasel"/>
+            <entry key="0xD8" value="Teddiursa"/>
+            <entry key="0xD9" value="Ursaring"/>
+            <entry key="0xDA" value="Slugma"/>
+            <entry key="0xDB" value="Magcargo"/>
+            <entry key="0xDC" value="Swinub"/>
+            <entry key="0xDD" value="Piloswine"/>
+            <entry key="0xDE" value="Corsola"/>
+            <entry key="0xDF" value="Remoraid"/>
+            <entry key="0xE0" value="Octillery"/>
+            <entry key="0xE1" value="Delibird"/>
+            <entry key="0xE2" value="Mantine"/>
+            <entry key="0xE3" value="Skarmory"/>
+            <entry key="0xE4" value="Houndour"/>
+            <entry key="0xE5" value="Houndoom"/>
+            <entry key="0xE6" value="Kingdra"/>
+            <entry key="0xE7" value="Phanpy"/>
+            <entry key="0xE8" value="Donphan"/>
+            <entry key="0xE9" value="Porygon2"/>
+            <entry key="0xEA" value="Stantler"/>
+            <entry key="0xEB" value="Smeargle"/>
+            <entry key="0xEC" value="Tyrogue"/>
+            <entry key="0xED" value="Hitmontop"/>
+            <entry key="0xEE" value="Smoochum"/>
+            <entry key="0xEF" value="Elekid"/>
+            <entry key="0xF0" value="Magby"/>
+            <entry key="0xF1" value="Miltank"/>
+            <entry key="0xF2" value="Blissey"/>
+            <entry key="0xF3" value="Raikou"/>
+            <entry key="0xF4" value="Entei"/>
+            <entry key="0xF5" value="Suicune"/>
+            <entry key="0xF6" value="Larvitar"/>
+            <entry key="0xF7" value="Pupitar"/>
+            <entry key="0xF8" value="Tyranitar"/>
+            <entry key="0xF9" value="Lugia"/>
+            <entry key="0xFA" value="Ho-oh"/>
+            <entry key="0xFB" value="Celebi"/>
+            <entry key="0xFC" />
+            <entry key="0xFD" />
+            <entry key="0xFE" />
+            <entry key="0xFF" />
+            <entry key="0x100" />
+            <entry key="0x101" />
+            <entry key="0x102" />
+            <entry key="0x103" />
+            <entry key="0x104" />
+            <entry key="0x105" />
+            <entry key="0x106" />
+            <entry key="0x107" />
+            <entry key="0x108" />
+            <entry key="0x109" />
+            <entry key="0x10A" />
+            <entry key="0x10B" />
+            <entry key="0x10C" />
+            <entry key="0x10D" />
+            <entry key="0x10E" />
+            <entry key="0x10F" />
+            <entry key="0x110" />
+            <entry key="0x111" />
+            <entry key="0x112" />
+            <entry key="0x113" />
+            <entry key="0x114" />
+            <entry key="0x115" value="Treecko"/>
+            <entry key="0x116" value="Grovyle"/>
+            <entry key="0x117" value="Sceptile"/>
+            <entry key="0x118" value="Torchic"/>
+            <entry key="0x119" value="Combusken"/>
+            <entry key="0x11A" value="Blaziken"/>
+            <entry key="0x11B" value="Mudkip"/>
+            <entry key="0x11C" value="Marshtomp"/>
+            <entry key="0x11D" value="Swampert"/>
+            <entry key="0x11E" value="Poochyena"/>
+            <entry key="0x11F" value="Mightyena"/>
+            <entry key="0x120" value="Zigzagoon"/>
+            <entry key="0x121" value="Linoone"/>
+            <entry key="0x122" value="Wurmple"/>
+            <entry key="0x123" value="Silcoon"/>
+            <entry key="0x124" value="Beautifly"/>
+            <entry key="0x125" value="Cascoon"/>
+            <entry key="0x126" value="Dustox"/>
+            <entry key="0x127" value="Lotad"/>
+            <entry key="0x128" value="Lombre"/>
+            <entry key="0x129" value="Ludicolo"/>
+            <entry key="0x12A" value="Seedot"/>
+            <entry key="0x12B" value="Nuzleaf"/>
+            <entry key="0x12C" value="Shiftry"/>
+            <entry key="0x12D" value="Nincada"/>
+            <entry key="0x12E" value="Ninjask"/>
+            <entry key="0x12F" value="Shedinja"/>
+            <entry key="0x130" value="Taillow"/>
+            <entry key="0x131" value="Swellow"/>
+            <entry key="0x132" value="Shroomish"/>
+            <entry key="0x133" value="Breloom"/>
+            <entry key="0x134" value="Spinda"/>
+            <entry key="0x135" value="Wingull"/>
+            <entry key="0x136" value="Pelipper"/>
+            <entry key="0x137" value="Surskit"/>
+            <entry key="0x138" value="Masquerain"/>
+            <entry key="0x139" value="Wailmer"/>
+            <entry key="0x13A" value="Wailord"/>
+            <entry key="0x13B" value="Skitty"/>
+            <entry key="0x13C" value="Delcatty"/>
+            <entry key="0x13D" value="Kecleon"/>
+            <entry key="0x13E" value="Baltoy"/>
+            <entry key="0x13F" value="Claydol"/>
+            <entry key="0x140" value="Nosepass"/>
+            <entry key="0x141" value="Torkoal"/>
+            <entry key="0x142" value="Sableye"/>
+            <entry key="0x143" value="Barboach"/>
+            <entry key="0x144" value="Whiscash"/>
+            <entry key="0x145" value="Luvdisc"/>
+            <entry key="0x146" value="Corphish"/>
+            <entry key="0x147" value="Crawdaunt"/>
+            <entry key="0x148" value="Feebas"/>
+            <entry key="0x149" value="Milotic"/>
+            <entry key="0x14A" value="Carvanha"/>
+            <entry key="0x14B" value="Sharpedo"/>
+            <entry key="0x14C" value="Trapinch"/>
+            <entry key="0x14D" value="Vibrava"/>
+            <entry key="0x14E" value="Flygon"/>
+            <entry key="0x14F" value="Makuhita"/>
+            <entry key="0x150" value="Hariyama"/>
+            <entry key="0x151" value="Electrike"/>
+            <entry key="0x152" value="Manectric"/>
+            <entry key="0x153" value="Numel"/>
+            <entry key="0x154" value="Camerupt"/>
+            <entry key="0x155" value="Spheal"/>
+            <entry key="0x156" value="Sealeo"/>
+            <entry key="0x157" value="Walrein"/>
+            <entry key="0x158" value="Cacnea"/>
+            <entry key="0x159" value="Cacturne"/>
+            <entry key="0x15A" value="Snorunt"/>
+            <entry key="0x15B" value="Glalie"/>
+            <entry key="0x15C" value="Lunatone"/>
+            <entry key="0x15D" value="Solrock"/>
+            <entry key="0x15E" value="Azurill"/>
+            <entry key="0x15F" value="Spoink"/>
+            <entry key="0x160" value="Grumpig"/>
+            <entry key="0x161" value="Plusle"/>
+            <entry key="0x162" value="Minun"/>
+            <entry key="0x163" value="Mawile"/>
+            <entry key="0x164" value="Meditite"/>
+            <entry key="0x165" value="Medicham"/>
+            <entry key="0x166" value="Swablu"/>
+            <entry key="0x167" value="Altaria"/>
+            <entry key="0x168" value="Wynaut"/>
+            <entry key="0x169" value="Duskull"/>
+            <entry key="0x16A" value="Dusclops"/>
+            <entry key="0x16B" value="Roselia"/>
+            <entry key="0x16C" value="Slakoth"/>
+            <entry key="0x16D" value="Vigoroth"/>
+            <entry key="0x16E" value="Slaking"/>
+            <entry key="0x16F" value="Gulpin"/>
+            <entry key="0x170" value="Swalot"/>
+            <entry key="0x171" value="Tropius"/>
+            <entry key="0x172" value="Whismur"/>
+            <entry key="0x173" value="Loudred"/>
+            <entry key="0x174" value="Exploud"/>
+            <entry key="0x175" value="Clamperl"/>
+            <entry key="0x176" value="Huntail"/>
+            <entry key="0x177" value="Gorebyss"/>
+            <entry key="0x178" value="Absol"/>
+            <entry key="0x179" value="Shuppet"/>
+            <entry key="0x17A" value="Banette"/>
+            <entry key="0x17B" value="Seviper"/>
+            <entry key="0x17C" value="Zangoose"/>
+            <entry key="0x17D" value="Relicanth"/>
+            <entry key="0x17E" value="Aron"/>
+            <entry key="0x17F" value="Lairon"/>
+            <entry key="0x180" value="Aggron"/>
+            <entry key="0x181" value="Castform"/>
+            <entry key="0x182" value="Volbeat"/>
+            <entry key="0x183" value="Illumise"/>
+            <entry key="0x184" value="Lileep"/>
+            <entry key="0x185" value="Cradily"/>
+            <entry key="0x186" value="Anorith"/>
+            <entry key="0x187" value="Armaldo"/>
+            <entry key="0x188" value="Ralts"/>
+            <entry key="0x189" value="Kirlia"/>
+            <entry key="0x18A" value="Gardevoir"/>
+            <entry key="0x18B" value="Bagon"/>
+            <entry key="0x18C" value="Shelgon"/>
+            <entry key="0x18D" value="Salamence"/>
+            <entry key="0x18E" value="Beldum"/>
+            <entry key="0x18F" value="Metang"/>
+            <entry key="0x190" value="Metagross"/>
+            <entry key="0x191" value="Regirock"/>
+            <entry key="0x192" value="Regice"/>
+            <entry key="0x193" value="Registeel"/>
+            <entry key="0x194" value="Kyogre"/>
+            <entry key="0x195" value="Groudon"/>
+            <entry key="0x196" value="Rayquaza"/>
+            <entry key="0x197" value="Latias"/>
+            <entry key="0x198" value="Latios"/>
+            <entry key="0x199" value="Jirachi"/>
+            <entry key="0x19A" value="Deoxys"/>
+            <entry key="0x19B" value="Chimecho"/>
+            <entry key="0x19C" value="Pokemon Egg"/>
+            <entry key="0x19D" value="Unown"/>
+            <entry key="0x19E" value="Unown"/>
+        </pokemonSpecies>
+        <trainerClasses>
+            <entry key="0x0000" />
+            <entry key="0x0001" value="HIKER_SAWYER_1"/>
+            <entry key="0x0002" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_1"/>
+            <entry key="0x0003" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_2"/>
+            <entry key="0x0004" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_3"/>
+            <entry key="0x0005" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_4"/>
+            <entry key="0x0006" value="TEAM_AQUA_GRUNT_SEAFLOOR_CAVERN_1"/>
+            <entry key="0x0007" value="TEAM_AQUA_GRUNT_SEAFLOOR_CAVERN_2"/>
+            <entry key="0x0008" value="TEAM_AQUA_GRUNT_SEAFLOOR_CAVERN_3"/>
+            <entry key="0x0009" value="PKMN_BREEDER_GABRIELLE_1"/>
+            <entry key="0x000a" value="TEAM_AQUA_GRUNT_PETALBURG_WOODS"/>
+            <entry key="0x000b" value="COOLTRAINER_MARCEL"/>
+            <entry key="0x000c" value="BIRD_KEEPER_ALBERTO"/>
+            <entry key="0x000d" value="COLLECTOR_ED"/>
+            <entry key="0x000e" value="TEAM_AQUA_GRUNT_SEAFLOOR_CAVERN_4"/>
+            <entry key="0x000f" value="SWIMMER_M_DECLAN"/>
+            <entry key="0x0010" value="TEAM_AQUA_GRUNT_RUSTURF_TUNNEL"/>
+            <entry key="0x0011" value="TEAM_AQUA_GRUNT_WEATHER_INST_1"/>
+            <entry key="0x0012" value="TEAM_AQUA_GRUNT_WEATHER_INST_2"/>
+            <entry key="0x0013" value="TEAM_AQUA_GRUNT_WEATHER_INST_3"/>
+            <entry key="0x0014" value="TEAM_AQUA_GRUNT_MUSEUM_1"/>
+            <entry key="0x0015" value="TEAM_AQUA_GRUNT_MUSEUM_2"/>
+            <entry key="0x0016" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_1"/>
+            <entry key="0x0017" value="TEAM_AQUA_GRUNT_MT_PYRE_1"/>
+            <entry key="0x0018" value="TEAM_AQUA_GRUNT_MT_PYRE_2"/>
+            <entry key="0x0019" value="TEAM_AQUA_GRUNT_MT_PYRE_3"/>
+            <entry key="0x001a" value="TEAM_AQUA_GRUNT_WEATHER_INST_4"/>
+            <entry key="0x001b" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_5"/>
+            <entry key="0x001c" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_6"/>
+            <entry key="0x001d" value="EXPERT_FREDRICK"/>
+            <entry key="0x001e" value="AQUA_ADMIN_MATT"/>
+            <entry key="0x001f" value="BLACK_BELT_ZANDER"/>
+            <entry key="0x0020" value="AQUA_ADMIN_SHELLY_WEATHER_INSTITUTE"/>
+            <entry key="0x0021" value="AQUA_ADMIN_SHELLY_SEAFLOOR_CAVERN"/>
+            <entry key="0x0022" value="AQUA_LEADER_ARCHIE"/>
+            <entry key="0x0023" value="HEX_MANIAC_LEAH"/>
+            <entry key="0x0024" value="AROMA_LADY_DAISY"/>
+            <entry key="0x0025" value="AROMA_LADY_ROSE_1"/>
+            <entry key="0x0026" value="COOLTRAINER_FELIX"/>
+            <entry key="0x0027" value="AROMA_LADY_VIOLET"/>
+            <entry key="0x0028" value="AROMA_LADY_ROSE_2"/>
+            <entry key="0x0029" value="AROMA_LADY_ROSE_3"/>
+            <entry key="0x002a" value="AROMA_LADY_ROSE_4"/>
+            <entry key="0x002b" value="AROMA_LADY_ROSE_5"/>
+            <entry key="0x002c" value="RUIN_MANIAC_DUSTY_1"/>
+            <entry key="0x002d" value="RUIN_MANIAC_CHIP"/>
+            <entry key="0x002e" value="RUIN_MANIAC_FOSTER"/>
+            <entry key="0x002f" value="RUIN_MANIAC_DUSTY_2"/>
+            <entry key="0x0030" value="RUIN_MANIAC_DUSTY_3"/>
+            <entry key="0x0031" value="RUIN_MANIAC_DUSTY_4"/>
+            <entry key="0x0032" value="RUIN_MANIAC_DUSTY_5"/>
+            <entry key="0x0033" value="INTERVIEWER_GABBY_AND_TY_1"/>
+            <entry key="0x0034" value="INTERVIEWER_GABBY_AND_TY_2"/>
+            <entry key="0x0035" value="INTERVIEWER_GABBY_AND_TY_3"/>
+            <entry key="0x0036" value="INTERVIEWER_GABBY_AND_TY_4"/>
+            <entry key="0x0037" value="INTERVIEWER_GABBY_AND_TY_5"/>
+            <entry key="0x0038" value="INTERVIEWER_GABBY_AND_TY_6"/>
+            <entry key="0x0039" value="TUBER_F_LOLA_1"/>
+            <entry key="0x003a" value="TUBER_F_AUSTINA"/>
+            <entry key="0x003b" value="TUBER_F_GWEN"/>
+            <entry key="0x003c" value="TUBER_F_LOLA_2"/>
+            <entry key="0x003d" value="TUBER_F_LOLA_3"/>
+            <entry key="0x003e" value="TUBER_F_LOLA_4"/>
+            <entry key="0x003f" value="TUBER_F_LOLA_5"/>
+            <entry key="0x0040" value="TUBER_M_RICKY_1"/>
+            <entry key="0x0041" value="TUBER_M_SIMON"/>
+            <entry key="0x0042" value="TUBER_M_CHARLIE"/>
+            <entry key="0x0043" value="TUBER_M_RICKY_2"/>
+            <entry key="0x0044" value="TUBER_M_RICKY_3"/>
+            <entry key="0x0045" value="TUBER_M_RICKY_4"/>
+            <entry key="0x0046" value="TUBER_M_RICKY_5"/>
+            <entry key="0x0047" value="COOLTRAINER_RANDALL"/>
+            <entry key="0x0048" value="COOLTRAINER_PARKER"/>
+            <entry key="0x0049" value="COOLTRAINER_GEORGE"/>
+            <entry key="0x004a" value="COOLTRAINER_BERKE"/>
+            <entry key="0x004b" value="COOLTRAINER_BRAXTON"/>
+            <entry key="0x004c" value="COOLTRAINER_VINCENT"/>
+            <entry key="0x004d" value="COOLTRAINER_LEROY"/>
+            <entry key="0x004e" value="COOLTRAINER_WILTON_1"/>
+            <entry key="0x004f" value="COOLTRAINER_EDGAR"/>
+            <entry key="0x0050" value="COOLTRAINER_ALBERT"/>
+            <entry key="0x0051" value="COOLTRAINER_SAMUEL"/>
+            <entry key="0x0052" value="COOLTRAINER_VITO"/>
+            <entry key="0x0053" value="COOLTRAINER_OWEN"/>
+            <entry key="0x0054" value="COOLTRAINER_WILTON_2"/>
+            <entry key="0x0055" value="COOLTRAINER_WILTON_3"/>
+            <entry key="0x0056" value="COOLTRAINER_WILTON_4"/>
+            <entry key="0x0057" value="COOLTRAINER_WILTON_5"/>
+            <entry key="0x0058" value="COOLTRAINER_WARREN"/>
+            <entry key="0x0059" value="COOLTRAINER_MARY"/>
+            <entry key="0x005a" value="COOLTRAINER_ALEXIA"/>
+            <entry key="0x005b" value="COOLTRAINER_JODY"/>
+            <entry key="0x005c" value="COOLTRAINER_WENDY"/>
+            <entry key="0x005d" value="COOLTRAINER_KEIRA"/>
+            <entry key="0x005e" value="COOLTRAINER_BROOKE_1"/>
+            <entry key="0x005f" value="COOLTRAINER_JENNIFER"/>
+            <entry key="0x0060" value="COOLTRAINER_HOPE"/>
+            <entry key="0x0061" value="COOLTRAINER_SHANNON"/>
+            <entry key="0x0062" value="COOLTRAINER_MICHELLE"/>
+            <entry key="0x0063" value="COOLTRAINER_CAROLINE"/>
+            <entry key="0x0064" value="COOLTRAINER_JULIE"/>
+            <entry key="0x0065" value="COOLTRAINER_BROOKE_2"/>
+            <entry key="0x0066" value="COOLTRAINER_BROOKE_3"/>
+            <entry key="0x0067" value="COOLTRAINER_BROOKE_4"/>
+            <entry key="0x0068" value="COOLTRAINER_BROOKE_5"/>
+            <entry key="0x0069" value="HEX_MANIAC_PATRICIA"/>
+            <entry key="0x006a" value="HEX_MANIAC_KINDRA"/>
+            <entry key="0x006b" value="HEX_MANIAC_TAMMY"/>
+            <entry key="0x006c" value="HEX_MANIAC_VALERIE_1"/>
+            <entry key="0x006d" value="HEX_MANIAC_TASHA"/>
+            <entry key="0x006e" value="HEX_MANIAC_VALERIE_2"/>
+            <entry key="0x006f" value="HEX_MANIAC_VALERIE_3"/>
+            <entry key="0x0070" value="HEX_MANIAC_VALERIE_4"/>
+            <entry key="0x0071" value="HEX_MANIAC_VALERIE_5"/>
+            <entry key="0x0072" value="LADY_CINDY_1"/>
+            <entry key="0x0073" value="LADY_DAPHNE"/>
+            <entry key="0x0074" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_2"/>
+            <entry key="0x0075" value="LADY_CINDY_2"/>
+            <entry key="0x0076" value="LADY_BRIANNA"/>
+            <entry key="0x0077" value="LADY_NAOMI"/>
+            <entry key="0x0078" value="LADY_CINDY_3"/>
+            <entry key="0x0079" value="LADY_CINDY_4"/>
+            <entry key="0x007a" value="LADY_CINDY_5"/>
+            <entry key="0x007b" value="LADY_CINDY_6"/>
+            <entry key="0x007c" value="BEAUTY_MELISSA"/>
+            <entry key="0x007d" value="BEAUTY_SHEILA"/>
+            <entry key="0x007e" value="BEAUTY_SHIRLEY"/>
+            <entry key="0x007f" value="BEAUTY_JESSICA_1"/>
+            <entry key="0x0080" value="BEAUTY_CONNIE"/>
+            <entry key="0x0081" value="BEAUTY_BRIDGET"/>
+            <entry key="0x0082" value="BEAUTY_OLIVIA"/>
+            <entry key="0x0083" value="BEAUTY_TIFFANY"/>
+            <entry key="0x0084" value="BEAUTY_JESSICA_2"/>
+            <entry key="0x0085" value="BEAUTY_JESSICA_3"/>
+            <entry key="0x0086" value="BEAUTY_JESSICA_4"/>
+            <entry key="0x0087" value="BEAUTY_JESSICA_5"/>
+            <entry key="0x0088" value="RICH_BOY_WINSTON_1"/>
+            <entry key="0x0089" value="EXPERT_MOLLIE"/>
+            <entry key="0x008a" value="RICH_BOY_GARRET"/>
+            <entry key="0x008b" value="RICH_BOY_WINSTON_2"/>
+            <entry key="0x008c" value="RICH_BOY_WINSTON_3"/>
+            <entry key="0x008d" value="RICH_BOY_WINSTON_4"/>
+            <entry key="0x008e" value="RICH_BOY_WINSTON_5"/>
+            <entry key="0x008f" value="POKEMANIAC_STEVE_1"/>
+            <entry key="0x0090" value="BEAUTY_THALIA_1"/>
+            <entry key="0x0091" value="POKEMANIAC_MARK"/>
+            <entry key="0x0092" value="TEAM_MAGMA_GRUNT_MT_CHIMNEY_1"/>
+            <entry key="0x0093" value="POKEMANIAC_STEVE_2"/>
+            <entry key="0x0094" value="POKEMANIAC_STEVE_3"/>
+            <entry key="0x0095" value="POKEMANIAC_STEVE_4"/>
+            <entry key="0x0096" value="POKEMANIAC_STEVE_5"/>
+            <entry key="0x0097" value="SWIMMER_M_LUIS"/>
+            <entry key="0x0098" value="SWIMMER_M_DOMINIK"/>
+            <entry key="0x0099" value="SWIMMER_M_DOUGLAS"/>
+            <entry key="0x009a" value="SWIMMER_M_DARRIN"/>
+            <entry key="0x009b" value="SWIMMER_M_TONY_1"/>
+            <entry key="0x009c" value="SWIMMER_M_JEROME"/>
+            <entry key="0x009d" value="SWIMMER_M_MATTHEW"/>
+            <entry key="0x009e" value="SWIMMER_M_DAVID"/>
+            <entry key="0x009f" value="SWIMMER_M_SPENCER"/>
+            <entry key="0x00a0" value="SWIMMER_M_ROLAND"/>
+            <entry key="0x00a1" value="SWIMMER_M_NOLEN"/>
+            <entry key="0x00a2" value="SWIMMER_M_STAN"/>
+            <entry key="0x00a3" value="SWIMMER_M_BARRY"/>
+            <entry key="0x00a4" value="SWIMMER_M_DEAN"/>
+            <entry key="0x00a5" value="SWIMMER_M_RODNEY"/>
+            <entry key="0x00a6" value="SWIMMER_M_RICHARD"/>
+            <entry key="0x00a7" value="SWIMMER_M_HERMAN"/>
+            <entry key="0x00a8" value="SWIMMER_M_SANTIAGO"/>
+            <entry key="0x00a9" value="SWIMMER_M_GILBERT"/>
+            <entry key="0x00aa" value="SWIMMER_M_FRANKLIN"/>
+            <entry key="0x00ab" value="SWIMMER_M_KEVIN"/>
+            <entry key="0x00ac" value="SWIMMER_M_JACK"/>
+            <entry key="0x00ad" value="SWIMMER_M_DUDLEY"/>
+            <entry key="0x00ae" value="SWIMMER_M_CHAD"/>
+            <entry key="0x00af" value="SWIMMER_M_TONY_2"/>
+            <entry key="0x00b0" value="SWIMMER_M_TONY_3"/>
+            <entry key="0x00b1" value="SWIMMER_M_TONY_4"/>
+            <entry key="0x00b2" value="SWIMMER_M_TONY_5"/>
+            <entry key="0x00b3" value="BLACK_BELT_TAKAO"/>
+            <entry key="0x00b4" value="BLACK_BELT_HITOSHI"/>
+            <entry key="0x00b5" value="BLACK_BELT_KIYO"/>
+            <entry key="0x00b6" value="BLACK_BELT_KOICHI"/>
+            <entry key="0x00b7" value="BLACK_BELT_NOB_1"/>
+            <entry key="0x00b8" value="BLACK_BELT_NOB_2"/>
+            <entry key="0x00b9" value="BLACK_BELT_NOB_3"/>
+            <entry key="0x00ba" value="BLACK_BELT_NOB_4"/>
+            <entry key="0x00bb" value="BLACK_BELT_NOB_5"/>
+            <entry key="0x00bc" value="BLACK_BELT_YUJI"/>
+            <entry key="0x00bd" value="BLACK_BELT_DAISUKE"/>
+            <entry key="0x00be" value="BLACK_BELT_ATSUSHI"/>
+            <entry key="0x00bf" value="GUITARIST_KIRK"/>
+            <entry key="0x00c0" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_7"/>
+            <entry key="0x00c1" value="TEAM_AQUA_GRUNT_AQUA_HIDEOUT_8"/>
+            <entry key="0x00c2" value="GUITARIST_SHAWN"/>
+            <entry key="0x00c3" value="GUITARIST_FERNANDO_1"/>
+            <entry key="0x00c4" value="GUITARIST_DALTON_1"/>
+            <entry key="0x00c5" value="GUITARIST_DALTON_2"/>
+            <entry key="0x00c6" value="GUITARIST_DALTON_3"/>
+            <entry key="0x00c7" value="GUITARIST_DALTON_4"/>
+            <entry key="0x00c8" value="GUITARIST_DALTON_5"/>
+            <entry key="0x00c9" value="KINDLER_COLE"/>
+            <entry key="0x00ca" value="KINDLER_JEFF"/>
+            <entry key="0x00cb" value="KINDLER_AXLE"/>
+            <entry key="0x00cc" value="KINDLER_JACE"/>
+            <entry key="0x00cd" value="KINDLER_KEEGAN"/>
+            <entry key="0x00ce" value="KINDLER_BERNIE_1"/>
+            <entry key="0x00cf" value="KINDLER_BERNIE_2"/>
+            <entry key="0x00d0" value="KINDLER_BERNIE_3"/>
+            <entry key="0x00d1" value="KINDLER_BERNIE_4"/>
+            <entry key="0x00d2" value="KINDLER_BERNIE_5"/>
+            <entry key="0x00d3" value="CAMPER_DREW"/>
+            <entry key="0x00d4" value="CAMPER_BEAU"/>
+            <entry key="0x00d5" value="CAMPER_LARRY"/>
+            <entry key="0x00d6" value="CAMPER_SHANE"/>
+            <entry key="0x00d7" value="CAMPER_JUSTIN"/>
+            <entry key="0x00d8" value="CAMPER_ETHAN_1"/>
+            <entry key="0x00d9" value="PICNICKER_AUTUMN"/>
+            <entry key="0x00da" value="CAMPER_TRAVIS"/>
+            <entry key="0x00db" value="CAMPER_ETHAN_2"/>
+            <entry key="0x00dc" value="CAMPER_ETHAN_3"/>
+            <entry key="0x00dd" value="CAMPER_ETHAN_4"/>
+            <entry key="0x00de" value="CAMPER_ETHAN_5"/>
+            <entry key="0x00df" value="BUG_MANIAC_BRENT"/>
+            <entry key="0x00e0" value="BUG_MANIAC_DONALD"/>
+            <entry key="0x00e1" value="BUG_MANIAC_TAYLOR"/>
+            <entry key="0x00e2" value="BUG_MANIAC_JEFFREY_1"/>
+            <entry key="0x00e3" value="BUG_MANIAC_DEREK"/>
+            <entry key="0x00e4" value="BUG_MANIAC_JEFFREY_2"/>
+            <entry key="0x00e5" value="BUG_MANIAC_JEFFREY_3"/>
+            <entry key="0x00e6" value="BUG_MANIAC_JEFFREY_4"/>
+            <entry key="0x00e7" value="BUG_MANIAC_JEFFREY_5"/>
+            <entry key="0x00e8" value="PSYCHIC_EDWARD"/>
+            <entry key="0x00e9" value="PSYCHIC_PRESTON"/>
+            <entry key="0x00ea" value="PSYCHIC_VIRGIL"/>
+            <entry key="0x00eb" value="PSYCHIC_BLAKE"/>
+            <entry key="0x00ec" value="PSYCHIC_WILLIAM"/>
+            <entry key="0x00ed" value="PSYCHIC_JOSHUA"/>
+            <entry key="0x00ee" value="PSYCHIC_CAMERON_1"/>
+            <entry key="0x00ef" value="PSYCHIC_CAMERON_2"/>
+            <entry key="0x00f0" value="PSYCHIC_CAMERON_3"/>
+            <entry key="0x00f1" value="PSYCHIC_CAMERON_4"/>
+            <entry key="0x00f2" value="PSYCHIC_CAMERON_5"/>
+            <entry key="0x00f3" value="PSYCHIC_JACLYN"/>
+            <entry key="0x00f4" value="PSYCHIC_HANNAH"/>
+            <entry key="0x00f5" value="PSYCHIC_SAMANTHA"/>
+            <entry key="0x00f6" value="PSYCHIC_MAURA"/>
+            <entry key="0x00f7" value="PSYCHIC_KAYLA"/>
+            <entry key="0x00f8" value="PSYCHIC_ALEXIS"/>
+            <entry key="0x00f9" value="PSYCHIC_JACKI_1"/>
+            <entry key="0x00fa" value="PSYCHIC_JACKI_2"/>
+            <entry key="0x00fb" value="PSYCHIC_JACKI_3"/>
+            <entry key="0x00fc" value="PSYCHIC_JACKI_4"/>
+            <entry key="0x00fd" value="PSYCHIC_JACKI_5"/>
+            <entry key="0x00fe" value="GENTLEMAN_WALTER_1"/>
+            <entry key="0x00ff" value="GENTLEMAN_MICAH"/>
+            <entry key="0x0100" value="GENTLEMAN_THOMAS"/>
+            <entry key="0x0101" value="GENTLEMAN_WALTER_2"/>
+            <entry key="0x0102" value="GENTLEMAN_WALTER_3"/>
+            <entry key="0x0103" value="GENTLEMAN_WALTER_4"/>
+            <entry key="0x0104" value="GENTLEMAN_WALTER_5"/>
+            <entry key="0x0105" value="ELITE_FOUR_SIDNEY"/>
+            <entry key="0x0106" value="ELITE_FOUR_PHOEBE"/>
+            <entry key="0x0107" value="ELITE_FOUR_GLACIA"/>
+            <entry key="0x0108" value="ELITE_FOUR_DRAKE"/>
+            <entry key="0x0109" value="LEADER_ROXANNE_1"/>
+            <entry key="0x010a" value="LEADER_BRAWLY_1"/>
+            <entry key="0x010b" value="LEADER_WATTSON_1"/>
+            <entry key="0x010c" value="LEADER_FLANNERY_1"/>
+            <entry key="0x010d" value="LEADER_NORMAN_1"/>
+            <entry key="0x010e" value="LEADER_WINONA_1"/>
+            <entry key="0x010f" value="LEADER_TATE_AND_LIZA_1"/>
+            <entry key="0x0110" value="LEADER_JUAN_1"/>
+            <entry key="0x0111" value="SCHOOL_KID_JERRY_1"/>
+            <entry key="0x0112" value="SCHOOL_KID_TED"/>
+            <entry key="0x0113" value="SCHOOL_KID_PAUL"/>
+            <entry key="0x0114" value="SCHOOL_KID_JERRY_2"/>
+            <entry key="0x0115" value="SCHOOL_KID_JERRY_3"/>
+            <entry key="0x0116" value="SCHOOL_KID_JERRY_4"/>
+            <entry key="0x0117" value="SCHOOL_KID_JERRY_5"/>
+            <entry key="0x0118" value="SCHOOL_KID_KAREN_1"/>
+            <entry key="0x0119" value="SCHOOL_KID_GEORGIA"/>
+            <entry key="0x011a" value="SCHOOL_KID_KAREN_2"/>
+            <entry key="0x011b" value="SCHOOL_KID_KAREN_3"/>
+            <entry key="0x011c" value="SCHOOL_KID_KAREN_4"/>
+            <entry key="0x011d" value="SCHOOL_KID_KAREN_5"/>
+            <entry key="0x011e" value="SR_AND_JR_KATE_AND_JOY"/>
+            <entry key="0x011f" value="SR_AND_JR_ANNA_AND_MEG_1"/>
+            <entry key="0x0120" value="SR_AND_JR_ANNA_AND_MEG_2"/>
+            <entry key="0x0121" value="SR_AND_JR_ANNA_AND_MEG_3"/>
+            <entry key="0x0122" value="SR_AND_JR_ANNA_AND_MEG_4"/>
+            <entry key="0x0123" value="SR_AND_JR_ANNA_AND_MEG_5"/>
+            <entry key="0x0124" value="WINSTRATE_VICTOR"/>
+            <entry key="0x0125" value="POKEFAN_MIGUEL_1"/>
+            <entry key="0x0126" value="POKEFAN_COLTON"/>
+            <entry key="0x0127" value="POKEFAN_MIGUEL_2"/>
+            <entry key="0x0128" value="POKEFAN_MIGUEL_3"/>
+            <entry key="0x0129" value="POKEFAN_MIGUEL_4"/>
+            <entry key="0x012a" value="POKEFAN_MIGUEL_5"/>
+            <entry key="0x012b" value="WINSTRATE_VICTORIA"/>
+            <entry key="0x012c" value="POKEFAN_VANESSA"/>
+            <entry key="0x012d" value="POKEFAN_BETHANY"/>
+            <entry key="0x012e" value="POKEFAN_ISABEL_1"/>
+            <entry key="0x012f" value="POKEFAN_ISABEL_2"/>
+            <entry key="0x0130" value="POKEFAN_ISABEL_3"/>
+            <entry key="0x0131" value="POKEFAN_ISABEL_4"/>
+            <entry key="0x0132" value="POKEFAN_ISABEL_5"/>
+            <entry key="0x0133" value="EXPERT_TIMOTHY_1"/>
+            <entry key="0x0134" value="EXPERT_TIMOTHY_2"/>
+            <entry key="0x0135" value="EXPERT_TIMOTHY_3"/>
+            <entry key="0x0136" value="EXPERT_TIMOTHY_4"/>
+            <entry key="0x0137" value="EXPERT_TIMOTHY_5"/>
+            <entry key="0x0138" value="WINSTRATE_VICKY"/>
+            <entry key="0x0139" value="EXPERT_SHELBY_1"/>
+            <entry key="0x013a" value="EXPERT_SHELBY_2"/>
+            <entry key="0x013b" value="EXPERT_SHELBY_3"/>
+            <entry key="0x013c" value="EXPERT_SHELBY_4"/>
+            <entry key="0x013d" value="EXPERT_SHELBY_5"/>
+            <entry key="0x013e" value="YOUNGSTER_CALVIN_1"/>
+            <entry key="0x013f" value="YOUNGSTER_BILLY"/>
+            <entry key="0x0140" value="YOUNGSTER_JOSH"/>
+            <entry key="0x0141" value="YOUNGSTER_TOMMY"/>
+            <entry key="0x0142" value="YOUNGSTER_JOEY"/>
+            <entry key="0x0143" value="YOUNGSTER_BEN"/>
+            <entry key="0x0144" value="COOLTRAINER_QUINCY"/>
+            <entry key="0x0145" value="COOLTRAINER_KATELYNN"/>
+            <entry key="0x0146" value="YOUNGSTER_JAYLEN"/>
+            <entry key="0x0147" value="YOUNGSTER_DILLON"/>
+            <entry key="0x0148" value="YOUNGSTER_CALVIN_2"/>
+            <entry key="0x0149" value="YOUNGSTER_CALVIN_3"/>
+            <entry key="0x014a" value="YOUNGSTER_CALVIN_4"/>
+            <entry key="0x014b" value="YOUNGSTER_CALVIN_5"/>
+            <entry key="0x014c" value="YOUNGSTER_EDDIE"/>
+            <entry key="0x014d" value="YOUNGSTER_ALLEN"/>
+            <entry key="0x014e" value="YOUNGSTER_TIMMY"/>
+            <entry key="0x014f" value="CHAMPION_WALLACE"/>
+            <entry key="0x0150" value="FISHERMAN_ANDREW"/>
+            <entry key="0x0151" value="FISHERMAN_IVAN"/>
+            <entry key="0x0152" value="FISHERMAN_CLAUDE"/>
+            <entry key="0x0153" value="FISHERMAN_ELLIOT_1"/>
+            <entry key="0x0154" value="FISHERMAN_NED"/>
+            <entry key="0x0155" value="FISHERMAN_DALE"/>
+            <entry key="0x0156" value="FISHERMAN_NOLAN"/>
+            <entry key="0x0157" value="FISHERMAN_BARNY"/>
+            <entry key="0x0158" value="FISHERMAN_WADE"/>
+            <entry key="0x0159" value="FISHERMAN_CARTER"/>
+            <entry key="0x015a" value="FISHERMAN_ELLIOT_2"/>
+            <entry key="0x015b" value="FISHERMAN_ELLIOT_3"/>
+            <entry key="0x015c" value="FISHERMAN_ELLIOT_4"/>
+            <entry key="0x015d" value="FISHERMAN_ELLIOT_5"/>
+            <entry key="0x015e" value="FISHERMAN_RONALD"/>
+            <entry key="0x015f" value="TRIATHLETE_JACOB"/>
+            <entry key="0x0160" value="TRIATHLETE_ANTHONY"/>
+            <entry key="0x0161" value="TRIATHLETE_BENJAMIN_1"/>
+            <entry key="0x0162" value="TRIATHLETE_BENJAMIN_2"/>
+            <entry key="0x0163" value="TRIATHLETE_BENJAMIN_3"/>
+            <entry key="0x0164" value="TRIATHLETE_BENJAMIN_4"/>
+            <entry key="0x0165" value="TRIATHLETE_BENJAMIN_5"/>
+            <entry key="0x0166" value="TRIATHLETE_ABIGAIL_1"/>
+            <entry key="0x0167" value="TRIATHLETE_JASMINE"/>
+            <entry key="0x0168" value="TRIATHLETE_ABIGAIL_2"/>
+            <entry key="0x0169" value="TRIATHLETE_ABIGAIL_3"/>
+            <entry key="0x016a" value="TRIATHLETE_ABIGAIL_4"/>
+            <entry key="0x016b" value="TRIATHLETE_ABIGAIL_5"/>
+            <entry key="0x016c" value="TRIATHLETE_DYLAN_1"/>
+            <entry key="0x016d" value="TRIATHLETE_DYLAN_2"/>
+            <entry key="0x016e" value="TRIATHLETE_DYLAN_3"/>
+            <entry key="0x016f" value="TRIATHLETE_DYLAN_4"/>
+            <entry key="0x0170" value="TRIATHLETE_DYLAN_5"/>
+            <entry key="0x0171" value="TRIATHLETE_MARIA_1"/>
+            <entry key="0x0172" value="TRIATHLETE_MARIA_2"/>
+            <entry key="0x0173" value="TRIATHLETE_MARIA_3"/>
+            <entry key="0x0174" value="TRIATHLETE_MARIA_4"/>
+            <entry key="0x0175" value="TRIATHLETE_MARIA_5"/>
+            <entry key="0x0176" value="TRIATHLETE_CAMDEN"/>
+            <entry key="0x0177" value="YOUNGSTER_DEMETRIUS"/>
+            <entry key="0x0178" value="TRIATHLETE_ISAIAH_1"/>
+            <entry key="0x0179" value="TRIATHLETE_PABLO_1"/>
+            <entry key="0x017a" value="TRIATHLETE_CHASE"/>
+            <entry key="0x017b" value="TRIATHLETE_ISAIAH_2"/>
+            <entry key="0x017c" value="TRIATHLETE_ISAIAH_3"/>
+            <entry key="0x017d" value="TRIATHLETE_ISAIAH_4"/>
+            <entry key="0x017e" value="TRIATHLETE_ISAIAH_5"/>
+            <entry key="0x017f" value="TRIATHLETE_ISOBEL"/>
+            <entry key="0x0180" value="TRIATHLETE_DONNY"/>
+            <entry key="0x0181" value="TRIATHLETE_TALIA"/>
+            <entry key="0x0182" value="TRIATHLETE_KATELYN_1"/>
+            <entry key="0x0183" value="TRIATHLETE_ALLISON"/>
+            <entry key="0x0184" value="TRIATHLETE_KATELYN_2"/>
+            <entry key="0x0185" value="TRIATHLETE_KATELYN_3"/>
+            <entry key="0x0186" value="TRIATHLETE_KATELYN_4"/>
+            <entry key="0x0187" value="TRIATHLETE_KATELYN_5"/>
+            <entry key="0x0188" value="DRAGON_TAMER_NICOLAS_1"/>
+            <entry key="0x0189" value="DRAGON_TAMER_NICOLAS_2"/>
+            <entry key="0x018a" value="DRAGON_TAMER_NICOLAS_3"/>
+            <entry key="0x018b" value="DRAGON_TAMER_NICOLAS_4"/>
+            <entry key="0x018c" value="DRAGON_TAMER_NICOLAS_5"/>
+            <entry key="0x018d" value="DRAGON_TAMER_AARON"/>
+            <entry key="0x018e" value="BIRD_KEEPER_PERRY"/>
+            <entry key="0x018f" value="BIRD_KEEPER_HUGH"/>
+            <entry key="0x0190" value="BIRD_KEEPER_PHIL"/>
+            <entry key="0x0191" value="BIRD_KEEPER_JARED"/>
+            <entry key="0x0192" value="BIRD_KEEPER_HUMBERTO"/>
+            <entry key="0x0193" value="BIRD_KEEPER_PRESLEY"/>
+            <entry key="0x0194" value="BIRD_KEEPER_EDWARDO"/>
+            <entry key="0x0195" value="BIRD_KEEPER_COLIN"/>
+            <entry key="0x0196" value="BIRD_KEEPER_ROBERT_1"/>
+            <entry key="0x0197" value="BIRD_KEEPER_BENNY"/>
+            <entry key="0x0198" value="BIRD_KEEPER_CHESTER"/>
+            <entry key="0x0199" value="BIRD_KEEPER_ROBERT_2"/>
+            <entry key="0x019a" value="BIRD_KEEPER_ROBERT_3"/>
+            <entry key="0x019b" value="BIRD_KEEPER_ROBERT_4"/>
+            <entry key="0x019c" value="BIRD_KEEPER_ROBERT_5"/>
+            <entry key="0x019d" value="BIRD_KEEPER_ALEX"/>
+            <entry key="0x019e" value="BIRD_KEEPER_BECK"/>
+            <entry key="0x019f" value="NINJA_BOY_YASU"/>
+            <entry key="0x01a0" value="NINJA_BOY_TAKASHI"/>
+            <entry key="0x01a1" value="COOLTRAINER_DIANNE"/>
+            <entry key="0x01a2" value="TUBER_F_JANI"/>
+            <entry key="0x01a3" value="NINJA_BOY_LAO_1"/>
+            <entry key="0x01a4" value="NINJA_BOY_LUNG"/>
+            <entry key="0x01a5" value="NINJA_BOY_LAO_2"/>
+            <entry key="0x01a6" value="NINJA_BOY_LAO_3"/>
+            <entry key="0x01a7" value="NINJA_BOY_LAO_4"/>
+            <entry key="0x01a8" value="NINJA_BOY_LAO_5"/>
+            <entry key="0x01a9" value="BATTLE_GIRL_JOCELYN"/>
+            <entry key="0x01aa" value="BATTLE_GIRL_LAURA"/>
+            <entry key="0x01ab" value="BATTLE_GIRL_CYNDY_1"/>
+            <entry key="0x01ac" value="BATTLE_GIRL_CORA"/>
+            <entry key="0x01ad" value="BATTLE_GIRL_PAULA"/>
+            <entry key="0x01ae" value="BATTLE_GIRL_CYNDY_2"/>
+            <entry key="0x01af" value="BATTLE_GIRL_CYNDY_3"/>
+            <entry key="0x01b0" value="BATTLE_GIRL_CYNDY_4"/>
+            <entry key="0x01b1" value="BATTLE_GIRL_CYNDY_5"/>
+            <entry key="0x01b2" value="PARASOL_LADY_MADELINE_1"/>
+            <entry key="0x01b3" value="PARASOL_LADY_CLARISSA"/>
+            <entry key="0x01b4" value="PARASOL_LADY_ANGELICA"/>
+            <entry key="0x01b5" value="PARASOL_LADY_MADELINE_2"/>
+            <entry key="0x01b6" value="PARASOL_LADY_MADELINE_3"/>
+            <entry key="0x01b7" value="PARASOL_LADY_MADELINE_4"/>
+            <entry key="0x01b8" value="PARASOL_LADY_MADELINE_5"/>
+            <entry key="0x01b9" value="SWIMMER_F_BEVERLY"/>
+            <entry key="0x01ba" value="SWIMMER_F_IMANI"/>
+            <entry key="0x01bb" value="SWIMMER_F_KYLA"/>
+            <entry key="0x01bc" value="SWIMMER_F_DENISE"/>
+            <entry key="0x01bd" value="SWIMMER_F_BETH"/>
+            <entry key="0x01be" value="SWIMMER_F_TARA"/>
+            <entry key="0x01bf" value="SWIMMER_F_MISSY"/>
+            <entry key="0x01c0" value="SWIMMER_F_ALICE"/>
+            <entry key="0x01c1" value="SWIMMER_F_JENNY_1"/>
+            <entry key="0x01c2" value="SWIMMER_F_GRACE"/>
+            <entry key="0x01c3" value="SWIMMER_F_TANYA"/>
+            <entry key="0x01c4" value="SWIMMER_F_SHARON"/>
+            <entry key="0x01c5" value="SWIMMER_F_NIKKI"/>
+            <entry key="0x01c6" value="SWIMMER_F_BRENDA"/>
+            <entry key="0x01c7" value="SWIMMER_F_KATIE"/>
+            <entry key="0x01c8" value="SWIMMER_F_SUSIE"/>
+            <entry key="0x01c9" value="SWIMMER_F_KARA"/>
+            <entry key="0x01ca" value="SWIMMER_F_DANA"/>
+            <entry key="0x01cb" value="SWIMMER_F_SIENNA"/>
+            <entry key="0x01cc" value="SWIMMER_F_DEBRA"/>
+            <entry key="0x01cd" value="SWIMMER_F_LINDA"/>
+            <entry key="0x01ce" value="SWIMMER_F_KAYLEE"/>
+            <entry key="0x01cf" value="SWIMMER_F_LAUREL"/>
+            <entry key="0x01d0" value="SWIMMER_F_CARLEE"/>
+            <entry key="0x01d1" value="SWIMMER_F_JENNY_2"/>
+            <entry key="0x01d2" value="SWIMMER_F_JENNY_3"/>
+            <entry key="0x01d3" value="SWIMMER_F_JENNY_4"/>
+            <entry key="0x01d4" value="SWIMMER_F_JENNY_5"/>
+            <entry key="0x01d5" value="PICNICKER_HEIDI"/>
+            <entry key="0x01d6" value="PICNICKER_BECKY"/>
+            <entry key="0x01d7" value="PICNICKER_CAROL"/>
+            <entry key="0x01d8" value="PICNICKER_NANCY"/>
+            <entry key="0x01d9" value="PICNICKER_MARTHA"/>
+            <entry key="0x01da" value="PICNICKER_DIANA_1"/>
+            <entry key="0x01db" value="PSYCHIC_CEDRIC"/>
+            <entry key="0x01dc" value="PICNICKER_IRENE"/>
+            <entry key="0x01dd" value="PICNICKER_DIANA_2"/>
+            <entry key="0x01de" value="PICNICKER_DIANA_3"/>
+            <entry key="0x01df" value="PICNICKER_DIANA_4"/>
+            <entry key="0x01e0" value="PICNICKER_DIANA_5"/>
+            <entry key="0x01e1" value="TWINS_AMY_AND_LIV_1"/>
+            <entry key="0x01e2" value="TWINS_AMY_AND_LIV_2"/>
+            <entry key="0x01e3" value="TWINS_GINA_AND_MIA_1"/>
+            <entry key="0x01e4" value="TWINS_MIU_AND_YUKI"/>
+            <entry key="0x01e5" value="TWINS_AMY_AND_LIV_3"/>
+            <entry key="0x01e6" value="TWINS_GINA_AND_MIA_2"/>
+            <entry key="0x01e7" value="TWINS_AMY_AND_LIV_4"/>
+            <entry key="0x01e8" value="TWINS_AMY_AND_LIV_5"/>
+            <entry key="0x01e9" value="TWINS_AMY_AND_LIV_6"/>
+            <entry key="0x01ea" value="SAILOR_HUEY"/>
+            <entry key="0x01eb" value="SAILOR_EDMOND"/>
+            <entry key="0x01ec" value="SAILOR_ERNEST_1"/>
+            <entry key="0x01ed" value="SAILOR_DWAYNE"/>
+            <entry key="0x01ee" value="SAILOR_PHILLIP"/>
+            <entry key="0x01ef" value="SAILOR_LEONARD"/>
+            <entry key="0x01f0" value="SAILOR_DUNCAN"/>
+            <entry key="0x01f1" value="SAILOR_ERNEST_2"/>
+            <entry key="0x01f2" value="SAILOR_ERNEST_3"/>
+            <entry key="0x01f3" value="SAILOR_ERNEST_4"/>
+            <entry key="0x01f4" value="SAILOR_ERNEST_5"/>
+            <entry key="0x01f5" value="HIKER_ELI"/>
+            <entry key="0x01f6" value="POKEFAN_ANNIKA"/>
+            <entry key="0x01f7" value="COOLTRAINER_2_JAZMYN"/>
+            <entry key="0x01f8" value="NINJA_BOY_JONAS"/>
+            <entry key="0x01f9" value="PARASOL_LADY_KAYLEY"/>
+            <entry key="0x01fa" value="EXPERT_AURON"/>
+            <entry key="0x01fb" value="SAILOR_KELVIN"/>
+            <entry key="0x01fc" value="COOLTRAINER_MARLEY"/>
+            <entry key="0x01fd" value="BATTLE_GIRL_REYNA"/>
+            <entry key="0x01fe" value="SAILOR_HUDSON"/>
+            <entry key="0x01ff" value="EXPERT_CONOR"/>
+            <entry key="0x0200" value="COLLECTOR_EDWIN_1"/>
+            <entry key="0x0201" value="COLLECTOR_HECTOR"/>
+            <entry key="0x0202" value="MAGMA_ADMIN_TABITHA_MOSSDEEP"/>
+            <entry key="0x0203" value="COLLECTOR_EDWIN_2"/>
+            <entry key="0x0204" value="COLLECTOR_EDWIN_3"/>
+            <entry key="0x0205" value="COLLECTOR_EDWIN_4"/>
+            <entry key="0x0206" value="COLLECTOR_EDWIN_5"/>
+            <entry key="0x0207" value="RIVAL_WALLY_VR_1"/>
+            <entry key="0x0208" value="RIVAL_BRENDAN_ROUTE_103_MUDKIP"/>
+            <entry key="0x0209" value="RIVAL_BRENDAN_ROUTE_110_MUDKIP"/>
+            <entry key="0x020a" value="RIVAL_BRENDAN_ROUTE_119_MUDKIP"/>
+            <entry key="0x020b" value="RIVAL_BRENDAN_ROUTE_103_TREECKO"/>
+            <entry key="0x020c" value="RIVAL_BRENDAN_ROUTE_110_TREECKO"/>
+            <entry key="0x020d" value="RIVAL_BRENDAN_ROUTE_119_TREECKO"/>
+            <entry key="0x020e" value="RIVAL_BRENDAN_ROUTE_103_TORCHIC"/>
+            <entry key="0x020f" value="RIVAL_BRENDAN_ROUTE_110_TORCHIC"/>
+            <entry key="0x0210" value="RIVAL_BRENDAN_ROUTE_119_TORCHIC"/>
+            <entry key="0x0211" value="RIVAL_MAY_ROUTE_103_MUDKIP"/>
+            <entry key="0x0212" value="RIVAL_MAY_ROUTE_110_MUDKIP"/>
+            <entry key="0x0213" value="RIVAL_MAY_ROUTE_119_MUDKIP"/>
+            <entry key="0x0214" value="RIVAL_MAY_ROUTE_103_TREECKO"/>
+            <entry key="0x0215" value="RIVAL_MAY_ROUTE_110_TREECKO"/>
+            <entry key="0x0216" value="RIVAL_MAY_ROUTE_119_TREECKO"/>
+            <entry key="0x0217" value="RIVAL_MAY_ROUTE_103_TORCHIC"/>
+            <entry key="0x0218" value="RIVAL_MAY_ROUTE_110_TORCHIC"/>
+            <entry key="0x0219" value="RIVAL_MAY_ROUTE_119_TORCHIC"/>
+            <entry key="0x021a" value="PKMN_BREEDER_ISAAC_1"/>
+            <entry key="0x021b" value="BUG_CATCHER_DAVIS"/>
+            <entry key="0x021c" value="COOLTRAINER_MITCHELL"/>
+            <entry key="0x021d" value="PKMN_BREEDER_ISAAC_2"/>
+            <entry key="0x021e" value="PKMN_BREEDER_ISAAC_3"/>
+            <entry key="0x021f" value="PKMN_BREEDER_ISAAC_4"/>
+            <entry key="0x0220" value="PKMN_BREEDER_ISAAC_5"/>
+            <entry key="0x0221" value="PKMN_BREEDER_LYDIA_1"/>
+            <entry key="0x0222" value="COOLTRAINER_HALLE"/>
+            <entry key="0x0223" value="RUIN_MANIAC_GARRISON"/>
+            <entry key="0x0224" value="PKMN_BREEDER_LYDIA_2"/>
+            <entry key="0x0225" value="PKMN_BREEDER_LYDIA_3"/>
+            <entry key="0x0226" value="PKMN_BREEDER_LYDIA_4"/>
+            <entry key="0x0227" value="PKMN_BREEDER_LYDIA_5"/>
+            <entry key="0x0228" value="PKMN_RANGER_JACKSON_1"/>
+            <entry key="0x0229" value="PKMN_RANGER_LORENZO"/>
+            <entry key="0x022a" value="PKMN_RANGER_SEBASTIAN"/>
+            <entry key="0x022b" value="PKMN_RANGER_JACKSON_2"/>
+            <entry key="0x022c" value="PKMN_RANGER_JACKSON_3"/>
+            <entry key="0x022d" value="PKMN_RANGER_JACKSON_4"/>
+            <entry key="0x022e" value="PKMN_RANGER_JACKSON_5"/>
+            <entry key="0x022f" value="PKMN_RANGER_CATHERINE_1"/>
+            <entry key="0x0230" value="PKMN_RANGER_JENNA"/>
+            <entry key="0x0231" value="PKMN_RANGER_SOPHIA"/>
+            <entry key="0x0232" value="PKMN_RANGER_CATHERINE_2"/>
+            <entry key="0x0233" value="PKMN_RANGER_CATHERINE_3"/>
+            <entry key="0x0234" value="PKMN_RANGER_CATHERINE_4"/>
+            <entry key="0x0235" value="PKMN_RANGER_CATHERINE_5"/>
+            <entry key="0x0236" value="TRIATHLETE_JULIO"/>
+            <entry key="0x0237" value="TEAM_AQUA_GRUNT_SEAFLOOR_CAVERN_5"/>
+            <entry key="0x0238" value="TEAM_MAGMA_GRUNT_UNUSED"/>
+            <entry key="0x0239" value="TEAM_AQUA_GRUNT_MT_PYRE_4"/>
+            <entry key="0x023a" value="TEAM_MAGMA_GRUNT_JAGGED_PASS"/>
+            <entry key="0x023b" value="HIKER_MARC"/>
+            <entry key="0x023c" value="SAILOR_BRENDEN"/>
+            <entry key="0x023d" value="BATTLE_GIRL_LILITH"/>
+            <entry key="0x023e" value="BLACK_BELT_CRISTIAN"/>
+            <entry key="0x023f" value="HEX_MANIAC_SYLVIA"/>
+            <entry key="0x0240" value="SWIMMER_M_LEONARDO"/>
+            <entry key="0x0241" value="COOLTRAINER_ATHENA"/>
+            <entry key="0x0242" value="SWIMMER_M_HARRISON"/>
+            <entry key="0x0243" value="TEAM_MAGMA_GRUNT_MT_CHIMNEY_2"/>
+            <entry key="0x0244" value="SWIMMER_M_CLARENCE"/>
+            <entry key="0x0245" value="PSYCHIC_TERRY"/>
+            <entry key="0x0246" value="GENTLEMAN_NATE"/>
+            <entry key="0x0247" value="HEX_MANIAC_KATHLEEN"/>
+            <entry key="0x0248" value="GENTLEMAN_CLIFFORD"/>
+            <entry key="0x0249" value="PSYCHIC_NICHOLAS"/>
+            <entry key="0x024a" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_3"/>
+            <entry key="0x024b" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_4"/>
+            <entry key="0x024c" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_5"/>
+            <entry key="0x024d" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_6"/>
+            <entry key="0x024e" value="TEAM_MAGMA_GRUNT_SPACE_CENTER_7"/>
+            <entry key="0x024f" value="PSYCHIC_MACEY"/>
+            <entry key="0x0250" value="RIVAL_BRENDAN_RUSTBORO_TREECKO"/>
+            <entry key="0x0251" value="RIVAL_BRENDAN_RUSTBORO_MUDKIP"/>
+            <entry key="0x0252" value="EXPERT_PAXTON"/>
+            <entry key="0x0253" value="TRIATHLETE_ISABELLA"/>
+            <entry key="0x0254" value="TEAM_AQUA_GRUNT_WEATHER_INST_5"/>
+            <entry key="0x0255" value="MAGMA_ADMIN_TABITHA_MT_CHIMNEY"/>
+            <entry key="0x0256" value="COOLTRAINER_JONATHAN"/>
+            <entry key="0x0257" value="RIVAL_BRENDAN_RUSTBORO_TORCHIC"/>
+            <entry key="0x0258" value="RIVAL_MAY_RUSTBORO_MUDKIP"/>
+            <entry key="0x0259" value="MAGMA_LEADER_MAXIE_MAGMA_HIDEOUT"/>
+            <entry key="0x025a" value="MAGMA_LEADER_MAXIE_MT_CHIMNEY"/>
+            <entry key="0x025b" value="LASS_TIANA"/>
+            <entry key="0x025c" value="LASS_HALEY_1"/>
+            <entry key="0x025d" value="LASS_JANICE"/>
+            <entry key="0x025e" value="WINSTRATE_VIVI"/>
+            <entry key="0x025f" value="LASS_HALEY_2"/>
+            <entry key="0x0260" value="LASS_HALEY_3"/>
+            <entry key="0x0261" value="LASS_HALEY_4"/>
+            <entry key="0x0262" value="LASS_HALEY_5"/>
+            <entry key="0x0263" value="LASS_SALLY"/>
+            <entry key="0x0264" value="LASS_ROBIN"/>
+            <entry key="0x0265" value="LASS_ANDREA"/>
+            <entry key="0x0266" value="LASS_CRISSY"/>
+            <entry key="0x0267" value="BUG_CATCHER_RICK"/>
+            <entry key="0x0268" value="BUG_CATCHER_LYLE"/>
+            <entry key="0x0269" value="BUG_CATCHER_JOSE"/>
+            <entry key="0x026a" value="BUG_CATCHER_DOUG"/>
+            <entry key="0x026b" value="BUG_CATCHER_GREG"/>
+            <entry key="0x026c" value="BUG_CATCHER_KENT"/>
+            <entry key="0x026d" value="BUG_CATCHER_JAMES_1"/>
+            <entry key="0x026e" value="BUG_CATCHER_JAMES_2"/>
+            <entry key="0x026f" value="BUG_CATCHER_JAMES_3"/>
+            <entry key="0x0270" value="BUG_CATCHER_JAMES_4"/>
+            <entry key="0x0271" value="BUG_CATCHER_JAMES_5"/>
+            <entry key="0x0272" value="HIKER_BRICE"/>
+            <entry key="0x0273" value="HIKER_TRENT_1"/>
+            <entry key="0x0274" value="HIKER_LENNY"/>
+            <entry key="0x0275" value="HIKER_LUCAS_1"/>
+            <entry key="0x0276" value="HIKER_ALAN"/>
+            <entry key="0x0277" value="HIKER_CLARK"/>
+            <entry key="0x0278" value="HIKER_ERIC"/>
+            <entry key="0x0279" value="HIKER_LUCAS_2"/>
+            <entry key="0x027a" value="HIKER_MIKE_1"/>
+            <entry key="0x027b" value="HIKER_MIKE_2"/>
+            <entry key="0x027c" value="HIKER_TRENT_2"/>
+            <entry key="0x027d" value="HIKER_TRENT_3"/>
+            <entry key="0x027e" value="HIKER_TRENT_4"/>
+            <entry key="0x027f" value="HIKER_TRENT_5"/>
+            <entry key="0x0280" value="YOUNG_COUPLE_DEZ_AND_LUKE"/>
+            <entry key="0x0281" value="YOUNG_COUPLE_LEA_AND_JED"/>
+            <entry key="0x0282" value="YOUNG_COUPLE_KIRA_AND_DAN_1"/>
+            <entry key="0x0283" value="YOUNG_COUPLE_KIRA_AND_DAN_2"/>
+            <entry key="0x0284" value="YOUNG_COUPLE_KIRA_AND_DAN_3"/>
+            <entry key="0x0285" value="YOUNG_COUPLE_KIRA_AND_DAN_4"/>
+            <entry key="0x0286" value="YOUNG_COUPLE_KIRA_AND_DAN_5"/>
+            <entry key="0x0287" value="BEAUTY_JOHANNA"/>
+            <entry key="0x0288" value="COOLTRAINER_GERALD"/>
+            <entry key="0x0289" value="BATTLE_GIRL_VIVIAN"/>
+            <entry key="0x028a" value="BATTLE_GIRL_DANIELLE"/>
+            <entry key="0x028b" value="NINJA_BOY_HIDEO"/>
+            <entry key="0x028c" value="NINJA_BOY_KEIGO"/>
+            <entry key="0x028d" value="NINJA_BOY_RILEY"/>
+            <entry key="0x028e" value="CAMPER_FLINT"/>
+            <entry key="0x028f" value="PICNICKER_ASHLEY"/>
+            <entry key="0x0290" value="RIVAL_WALLY_MAUVILLE"/>
+            <entry key="0x0291" value="RIVAL_WALLY_VR_2"/>
+            <entry key="0x0292" value="RIVAL_WALLY_VR_3"/>
+            <entry key="0x0293" value="RIVAL_WALLY_VR_4"/>
+            <entry key="0x0294" value="RIVAL_WALLY_VR_5"/>
+            <entry key="0x0295" value="RIVAL_BRENDAN_LILYCOVE_MUDKIP"/>
+            <entry key="0x0296" value="RIVAL_BRENDAN_LILYCOVE_TREECKO"/>
+            <entry key="0x0297" value="RIVAL_BRENDAN_LILYCOVE_TORCHIC"/>
+            <entry key="0x0298" value="RIVAL_MAY_LILYCOVE_MUDKIP"/>
+            <entry key="0x0299" value="RIVAL_MAY_LILYCOVE_TREECKO"/>
+            <entry key="0x029a" value="RIVAL_MAY_LILYCOVE_TORCHIC"/>
+            <entry key="0x029b" value="FISHERMAN_JONAH"/>
+            <entry key="0x029c" value="FISHERMAN_HENRY"/>
+            <entry key="0x029d" value="FISHERMAN_ROGER"/>
+            <entry key="0x029e" value="COOLTRAINER_ALEXA"/>
+            <entry key="0x029f" value="COOLTRAINER_RUBEN"/>
+            <entry key="0x02a0" value="BLACK_BELT_KOJI_1"/>
+            <entry key="0x02a1" value="FISHERMAN_WAYNE"/>
+            <entry key="0x02a2" value="BIRD_KEEPER_AIDAN"/>
+            <entry key="0x02a3" value="SWIMMER_M_REED"/>
+            <entry key="0x02a4" value="SWIMMER_F_TISHA"/>
+            <entry key="0x02a5" value="TWINS_TORI_AND_TIA"/>
+            <entry key="0x02a6" value="SR_AND_JR_KIM_AND_IRIS"/>
+            <entry key="0x02a7" value="SR_AND_JR_TYRA_AND_IVY"/>
+            <entry key="0x02a8" value="YOUNG_COUPLE_MEL_AND_PAUL"/>
+            <entry key="0x02a9" value="OLD_COUPLE_JOHN_AND_JAY_1"/>
+            <entry key="0x02aa" value="OLD_COUPLE_JOHN_AND_JAY_2"/>
+            <entry key="0x02ab" value="OLD_COUPLE_JOHN_AND_JAY_3"/>
+            <entry key="0x02ac" value="OLD_COUPLE_JOHN_AND_JAY_4"/>
+            <entry key="0x02ad" value="OLD_COUPLE_JOHN_AND_JAY_5"/>
+            <entry key="0x02ae" value="SIS_AND_BRO_RELI_AND_IAN"/>
+            <entry key="0x02af" value="SIS_AND_BRO_LILA_AND_ROY_1"/>
+            <entry key="0x02b0" value="SIS_AND_BRO_LILA_AND_ROY_2"/>
+            <entry key="0x02b1" value="SIS_AND_BRO_LILA_AND_ROY_3"/>
+            <entry key="0x02b2" value="SIS_AND_BRO_LILA_AND_ROY_4"/>
+            <entry key="0x02b3" value="SIS_AND_BRO_LILA_AND_ROY_5"/>
+            <entry key="0x02b4" value="SIS_AND_BRO_LISA_AND_RAY"/>
+            <entry key="0x02b5" value="FISHERMAN_CHRIS"/>
+            <entry key="0x02b6" value="RICH_BOY_DAWSON"/>
+            <entry key="0x02b7" value="LADY_SARAH"/>
+            <entry key="0x02b8" value="FISHERMAN_DARIAN"/>
+            <entry key="0x02b9" value="TUBER_F_HAILEY"/>
+            <entry key="0x02ba" value="TUBER_M_CHANDLER"/>
+            <entry key="0x02bb" value="POKEFAN_KALEB"/>
+            <entry key="0x02bc" value="GUITARIST_JOSEPH"/>
+            <entry key="0x02bd" value="TRIATHLETE_ALYSSA"/>
+            <entry key="0x02be" value="GUITARIST_MARCOS"/>
+            <entry key="0x02bf" value="BLACK_BELT_RHETT"/>
+            <entry key="0x02c0" value="CAMPER_TYRON"/>
+            <entry key="0x02c1" value="AROMA_LADY_CELINA"/>
+            <entry key="0x02c2" value="PICNICKER_BIANCA"/>
+            <entry key="0x02c3" value="KINDLER_HAYDEN"/>
+            <entry key="0x02c4" value="PICNICKER_SOPHIE"/>
+            <entry key="0x02c5" value="BIRD_KEEPER_COBY"/>
+            <entry key="0x02c6" value="CAMPER_LAWRENCE"/>
+            <entry key="0x02c7" value="POKEMANIAC_WYATT"/>
+            <entry key="0x02c8" value="PICNICKER_ANGELINA"/>
+            <entry key="0x02c9" value="FISHERMAN_KAI"/>
+            <entry key="0x02ca" value="PICNICKER_CHARLOTTE"/>
+            <entry key="0x02cb" value="YOUNGSTER_DEANDRE"/>
+            <entry key="0x02cc" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_1"/>
+            <entry key="0x02cd" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_2"/>
+            <entry key="0x02ce" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_3"/>
+            <entry key="0x02cf" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_4"/>
+            <entry key="0x02d0" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_5"/>
+            <entry key="0x02d1" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_6"/>
+            <entry key="0x02d2" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_7"/>
+            <entry key="0x02d3" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_8"/>
+            <entry key="0x02d4" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_9"/>
+            <entry key="0x02d5" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_10"/>
+            <entry key="0x02d6" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_11"/>
+            <entry key="0x02d7" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_12"/>
+            <entry key="0x02d8" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_13"/>
+            <entry key="0x02d9" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_14"/>
+            <entry key="0x02da" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_15"/>
+            <entry key="0x02db" value="TEAM_MAGMA_GRUNT_MAGMA_HIDEOUT_16"/>
+            <entry key="0x02dc" value="MAGMA_ADMIN_TABITHA_MAGMA_HIDEOUT"/>
+            <entry key="0x02dd" value="COOLTRAINER_DARCY"/>
+            <entry key="0x02de" value="MAGMA_LEADER_MAXIE_MOSSDEEP"/>
+            <entry key="0x02df" value="SWIMMER_M_PETE"/>
+            <entry key="0x02e0" value="SWIMMER_F_ISABELLE"/>
+            <entry key="0x02e1" value="RUIN_MANIAC_ANDRES_1"/>
+            <entry key="0x02e2" value="BIRD_KEEPER_JOSUE"/>
+            <entry key="0x02e3" value="TRIATHLETE_CAMRON"/>
+            <entry key="0x02e4" value="SAILOR_CORY_1"/>
+            <entry key="0x02e5" value="COOLTRAINER_CAROLINA"/>
+            <entry key="0x02e6" value="BIRD_KEEPER_ELIJAH"/>
+            <entry key="0x02e7" value="PICNICKER_CELIA"/>
+            <entry key="0x02e8" value="RUIN_MANIAC_BRYAN"/>
+            <entry key="0x02e9" value="CAMPER_BRANDEN"/>
+            <entry key="0x02ea" value="KINDLER_BRYANT"/>
+            <entry key="0x02eb" value="AROMA_LADY_SHAYLA"/>
+            <entry key="0x02ec" value="TRIATHLETE_KYRA"/>
+            <entry key="0x02ed" value="NINJA_BOY_JAIDEN"/>
+            <entry key="0x02ee" value="PSYCHIC_ALIX"/>
+            <entry key="0x02ef" value="BATTLE_GIRL_HELENE"/>
+            <entry key="0x02f0" value="PSYCHIC_MARLENE"/>
+            <entry key="0x02f1" value="HIKER_DEVAN"/>
+            <entry key="0x02f2" value="YOUNGSTER_JOHNSON"/>
+            <entry key="0x02f3" value="TRIATHLETE_MELINA"/>
+            <entry key="0x02f4" value="PSYCHIC_BRANDI"/>
+            <entry key="0x02f5" value="BATTLE_GIRL_AISHA"/>
+            <entry key="0x02f6" value="EXPERT_MAKAYLA"/>
+            <entry key="0x02f7" value="GUITARIST_FABIAN"/>
+            <entry key="0x02f8" value="KINDLER_DAYTON"/>
+            <entry key="0x02f9" value="PARASOL_LADY_RACHEL"/>
+            <entry key="0x02fa" value="COOLTRAINER_LEONEL"/>
+            <entry key="0x02fb" value="BATTLE_GIRL_CALLIE"/>
+            <entry key="0x02fc" value="BUG_MANIAC_CALE"/>
+            <entry key="0x02fd" value="PKMN_BREEDER_MYLES"/>
+            <entry key="0x02fe" value="PKMN_BREEDER_PAT"/>
+            <entry key="0x02ff" value="COOLTRAINER_CRISTIN_1"/>
+            <entry key="0x0300" value="RIVAL_MAY_RUSTBORO_TREECKO"/>
+            <entry key="0x0301" value="RIVAL_MAY_RUSTBORO_TORCHIC"/>
+            <entry key="0x0302" value="LEADER_ROXANNE_2"/>
+            <entry key="0x0303" value="LEADER_ROXANNE_3"/>
+            <entry key="0x0304" value="LEADER_ROXANNE_4"/>
+            <entry key="0x0305" value="LEADER_ROXANNE_5"/>
+            <entry key="0x0306" value="LEADER_BRAWLY_2"/>
+            <entry key="0x0307" value="LEADER_BRAWLY_3"/>
+            <entry key="0x0308" value="LEADER_BRAWLY_4"/>
+            <entry key="0x0309" value="LEADER_BRAWLY_5"/>
+            <entry key="0x030a" value="LEADER_WATTSON_2"/>
+            <entry key="0x030b" value="LEADER_WATTSON_3"/>
+            <entry key="0x030c" value="LEADER_WATTSON_4"/>
+            <entry key="0x030d" value="LEADER_WATTSON_5"/>
+            <entry key="0x030e" value="LEADER_FLANNERY_2"/>
+            <entry key="0x030f" value="LEADER_FLANNERY_3"/>
+            <entry key="0x0310" value="LEADER_FLANNERY_4"/>
+            <entry key="0x0311" value="LEADER_FLANNERY_5"/>
+            <entry key="0x0312" value="LEADER_NORMAN_2"/>
+            <entry key="0x0313" value="LEADER_NORMAN_3"/>
+            <entry key="0x0314" value="LEADER_NORMAN_4"/>
+            <entry key="0x0315" value="LEADER_NORMAN_5"/>
+            <entry key="0x0316" value="LEADER_WINONA_2"/>
+            <entry key="0x0317" value="LEADER_WINONA_3"/>
+            <entry key="0x0318" value="LEADER_WINONA_4"/>
+            <entry key="0x0319" value="LEADER_WINONA_5"/>
+            <entry key="0x031a" value="LEADER_TATE_AND_LIZA_2"/>
+            <entry key="0x031b" value="LEADER_TATE_AND_LIZA_3"/>
+            <entry key="0x031c" value="LEADER_TATE_AND_LIZA_4"/>
+            <entry key="0x031d" value="LEADER_TATE_AND_LIZA_5"/>
+            <entry key="0x031e" value="LEADER_JUAN_2"/>
+            <entry key="0x031f" value="LEADER_JUAN_3"/>
+            <entry key="0x0320" value="LEADER_JUAN_4"/>
+            <entry key="0x0321" value="LEADER_JUAN_5"/>
+            <entry key="0x0322" value="BUG_MANIAC_ANGELO"/>
+            <entry key="0x0323" value="BIRD_KEEPER_DARIUS"/>
+            <entry key="0x0324" value="RIVAL_STEVEN"/>
+            <entry key="0x0325" value="SALON_MAIDEN_ANABEL"/>
+            <entry key="0x0326" value="DOME_ACE_TUCKER"/>
+            <entry key="0x0327" value="PALACE_MAVEN_SPENSER"/>
+            <entry key="0x0328" value="ARENA_TYCOON_GRETA"/>
+            <entry key="0x0329" value="FACTORY_HEAD_NOLAND"/>
+            <entry key="0x032a" value="PIKE_QUEEN_LUCY"/>
+            <entry key="0x032b" value="PYRAMID_KING_BRANDON"/>
+            <entry key="0x032c" value="RUIN_MANIAC_ANDRES_2"/>
+            <entry key="0x032d" value="RUIN_MANIAC_ANDRES_3"/>
+            <entry key="0x032e" value="RUIN_MANIAC_ANDRES_4"/>
+            <entry key="0x032f" value="RUIN_MANIAC_ANDRES_5"/>
+            <entry key="0x0330" value="SAILOR_CORY_2"/>
+            <entry key="0x0331" value="SAILOR_CORY_3"/>
+            <entry key="0x0332" value="SAILOR_CORY_4"/>
+            <entry key="0x0333" value="SAILOR_CORY_5"/>
+            <entry key="0x0334" value="TRIATHLETE_PABLO_2"/>
+            <entry key="0x0335" value="TRIATHLETE_PABLO_3"/>
+            <entry key="0x0336" value="TRIATHLETE_PABLO_4"/>
+            <entry key="0x0337" value="TRIATHLETE_PABLO_5"/>
+            <entry key="0x0338" value="BLACK_BELT_KOJI_2"/>
+            <entry key="0x0339" value="BLACK_BELT_KOJI_3"/>
+            <entry key="0x033a" value="BLACK_BELT_KOJI_4"/>
+            <entry key="0x033b" value="BLACK_BELT_KOJI_5"/>
+            <entry key="0x033c" value="COOLTRAINER_CRISTIN_2"/>
+            <entry key="0x033d" value="COOLTRAINER_CRISTIN_3"/>
+            <entry key="0x033e" value="COOLTRAINER_CRISTIN_4"/>
+            <entry key="0x033f" value="COOLTRAINER_CRISTIN_5"/>
+            <entry key="0x0340" value="GUITARIST_FERNANDO_2"/>
+            <entry key="0x0341" value="GUITARIST_FERNANDO_3"/>
+            <entry key="0x0342" value="GUITARIST_FERNANDO_4"/>
+            <entry key="0x0343" value="GUITARIST_FERNANDO_5"/>
+            <entry key="0x0344" value="HIKER_SAWYER_2"/>
+            <entry key="0x0345" value="HIKER_SAWYER_3"/>
+            <entry key="0x0346" value="HIKER_SAWYER_4"/>
+            <entry key="0x0347" value="HIKER_SAWYER_5"/>
+            <entry key="0x0348" value="PKMN_BREEDER_GABRIELLE_2"/>
+            <entry key="0x0349" value="PKMN_BREEDER_GABRIELLE_3"/>
+            <entry key="0x034a" value="PKMN_BREEDER_GABRIELLE_4"/>
+            <entry key="0x034b" value="PKMN_BREEDER_GABRIELLE_5"/>
+            <entry key="0x034c" value="BEAUTY_THALIA_2"/>
+            <entry key="0x034d" value="BEAUTY_THALIA_3"/>
+            <entry key="0x034e" value="BEAUTY_THALIA_4"/>
+            <entry key="0x034f" value="BEAUTY_THALIA_5"/>
+            <entry key="0x0350" value="PSYCHIC_MARIELA"/>
+            <entry key="0x0351" value="PSYCHIC_ALVARO"/>
+            <entry key="0x0352" value="GENTLEMAN_EVERETT"/>
+            <entry key="0x0353" value="RIVAL_RED"/>
+            <entry key="0x0354" value="RIVAL_LEAF"/>
+            <entry key="0x0355" value="RS_PROTAG_BRENDAN_PLACEHOLDER"/>
+            <entry key="0x0356" value="RS_PROTAG_MAY_PLACEHOLDER"/>
+        </trainerClasses>
+        <mapName>
+            <entry key="0x0000" value="PETALBURG_CITY"/>
+            <entry key="0x0100" value="SLATEPORT_CITY"/>
+            <entry key="0x0200" value="MAUVILLE_CITY"/>
+            <entry key="0x0300" value="RUSTBORO_CITY"/>
+            <entry key="0x0400" value="FORTREE_CITY"/>
+            <entry key="0x0500" value="LILYCOVE_CITY"/>
+            <entry key="0x0600" value="MOSSDEEP_CITY"/>
+            <entry key="0x0700" value="SOOTOPOLIS_CITY"/>
+            <entry key="0x0800" value="EVER_GRANDE_CITY"/>
+            <entry key="0x0900" value="LITTLEROOT_TOWN"/>
+            <entry key="0x0a00" value="OLDALE_TOWN"/>
+            <entry key="0x0b00" value="DEWFORD_TOWN"/>
+            <entry key="0x0c00" value="LAVARIDGE_TOWN"/>
+            <entry key="0x0d00" value="FALLARBOR_TOWN"/>
+            <entry key="0x0e00" value="VERDANTURF_TOWN"/>
+            <entry key="0x0f00" value="PACIFIDLOG_TOWN"/>
+            <entry key="0x1000" value="ROUTE 101"/>
+            <entry key="0x1100" value="ROUTE 102"/>
+            <entry key="0x1200" value="ROUTE 103"/>
+            <entry key="0x1300" value="ROUTE 104"/>
+            <entry key="0x1400" value="ROUTE 105"/>
+            <entry key="0x1500" value="ROUTE 106"/>
+            <entry key="0x1600" value="ROUTE 107"/>
+            <entry key="0x1700" value="ROUTE 108"/>
+            <entry key="0x1800" value="ROUTE 109"/>
+            <entry key="0x1900" value="ROUTE 110"/>
+            <entry key="0x1a00" value="ROUTE 111"/>
+            <entry key="0x1b00" value="ROUTE 112"/>
+            <entry key="0x1c00" value="ROUTE 113"/>
+            <entry key="0x1d00" value="ROUTE 114"/>
+            <entry key="0x1e00" value="ROUTE 115"/>
+            <entry key="0x1f00" value="ROUTE 116"/>
+            <entry key="0x2000" value="ROUTE 117"/>
+            <entry key="0x2100" value="ROUTE 118"/>
+            <entry key="0x2200" value="ROUTE 119"/>
+            <entry key="0x2300" value="ROUTE 120"/>
+            <entry key="0x2400" value="ROUTE 121"/>
+            <entry key="0x2500" value="ROUTE 122"/>
+            <entry key="0x2600" value="ROUTE 123"/>
+            <entry key="0x2700" value="ROUTE 124"/>
+            <entry key="0x2800" value="ROUTE 125"/>
+            <entry key="0x2900" value="ROUTE 126"/>
+            <entry key="0x2a00" value="ROUTE 127"/>
+            <entry key="0x2b00" value="ROUTE 128"/>
+            <entry key="0x2c00" value="ROUTE 129"/>
+            <entry key="0x2d00" value="ROUTE 130"/>
+            <entry key="0x2e00" value="ROUTE 131"/>
+            <entry key="0x2f00" value="ROUTE 132"/>
+            <entry key="0x3000" value="ROUTE 133"/>
+            <entry key="0x3100" value="ROUTE 134"/>
+            <entry key="0x3200" value="UNDERWATER_ROUTE 124"/>
+            <entry key="0x3300" value="UNDERWATER_ROUTE 126"/>
+            <entry key="0x3400" value="UNDERWATER_ROUTE 127"/>
+            <entry key="0x3500" value="UNDERWATER_ROUTE 128"/>
+            <entry key="0x3600" value="UNDERWATER_ROUTE 129"/>
+            <entry key="0x3700" value="UNDERWATER_ROUTE 105"/>
+            <entry key="0x3800" value="UNDERWATER_ROUTE 125"/>
+            <entry key="0x0001" value="LITTLEROOT_TOWN - BRENDANS_HOUSE_1F"/>
+            <entry key="0x0101" value="LITTLEROOT_TOWN - BRENDANS_HOUSE_2F"/>
+            <entry key="0x0201" value="LITTLEROOT_TOWN - MAYS_HOUSE_1F"/>
+            <entry key="0x0301" value="LITTLEROOT_TOWN - MAYS_HOUSE_2F"/>
+            <entry key="0x0401" value="LITTLEROOT_TOWN - PROFESSOR_BIRCHS_LAB"/>
+            <entry key="0x0002" value="OLDALE_TOWN - HOUSE1"/>
+            <entry key="0x0102" value="OLDALE_TOWN - HOUSE2"/>
+            <entry key="0x0202" value="OLDALE_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0302" value="OLDALE_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0402" value="OLDALE_TOWN - MART"/>
+            <entry key="0x0003" value="DEWFORD_TOWN - HOUSE1"/>
+            <entry key="0x0103" value="DEWFORD_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0203" value="DEWFORD_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0303" value="DEWFORD_TOWN - GYM"/>
+            <entry key="0x0403" value="DEWFORD_TOWN - HALL"/>
+            <entry key="0x0503" value="DEWFORD_TOWN - HOUSE2"/>
+            <entry key="0x0004" value="LAVARIDGE_TOWN - HERB_SHOP"/>
+            <entry key="0x0104" value="LAVARIDGE_TOWN - GYM_1F"/>
+            <entry key="0x0204" value="LAVARIDGE_TOWN - GYM_B1F"/>
+            <entry key="0x0304" value="LAVARIDGE_TOWN - HOUSE"/>
+            <entry key="0x0404" value="LAVARIDGE_TOWN - MART"/>
+            <entry key="0x0504" value="LAVARIDGE_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0604" value="LAVARIDGE_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0005" value="FALLARBOR_TOWN - MART"/>
+            <entry key="0x0105" value="FALLARBOR_TOWN - BATTLE_TENT_LOBBY"/>
+            <entry key="0x0205" value="FALLARBOR_TOWN - BATTLE_TENT_CORRIDOR"/>
+            <entry key="0x0305" value="FALLARBOR_TOWN - BATTLE_TENT_BATTLE_ROOM"/>
+            <entry key="0x0405" value="FALLARBOR_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0505" value="FALLARBOR_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0605" value="FALLARBOR_TOWN - COZMOS_HOUSE"/>
+            <entry key="0x0705" value="FALLARBOR_TOWN - MOVE_RELEARNERS_HOUSE"/>
+            <entry key="0x0006" value="VERDANTURF_TOWN - BATTLE_TENT_LOBBY"/>
+            <entry key="0x0106" value="VERDANTURF_TOWN - BATTLE_TENT_CORRIDOR"/>
+            <entry key="0x0206" value="VERDANTURF_TOWN - BATTLE_TENT_BATTLE_ROOM"/>
+            <entry key="0x0306" value="VERDANTURF_TOWN - MART"/>
+            <entry key="0x0406" value="VERDANTURF_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0506" value="VERDANTURF_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0606" value="VERDANTURF_TOWN - WANDAS_HOUSE"/>
+            <entry key="0x0706" value="VERDANTURF_TOWN - FRIENDSHIP_RATERS_HOUSE"/>
+            <entry key="0x0806" value="VERDANTURF_TOWN - HOUSE"/>
+            <entry key="0x0007" value="PACIFIDLOG_TOWN - POKEMON_CENTER_1F"/>
+            <entry key="0x0107" value="PACIFIDLOG_TOWN - POKEMON_CENTER_2F"/>
+            <entry key="0x0207" value="PACIFIDLOG_TOWN - HOUSE1"/>
+            <entry key="0x0307" value="PACIFIDLOG_TOWN - HOUSE2"/>
+            <entry key="0x0407" value="PACIFIDLOG_TOWN - HOUSE3"/>
+            <entry key="0x0507" value="PACIFIDLOG_TOWN - HOUSE4"/>
+            <entry key="0x0607" value="PACIFIDLOG_TOWN - HOUSE5"/>
+            <entry key="0x0008" value="PETALBURG_CITY - WALLYS_HOUSE"/>
+            <entry key="0x0108" value="PETALBURG_CITY - GYM"/>
+            <entry key="0x0208" value="PETALBURG_CITY - HOUSE1"/>
+            <entry key="0x0308" value="PETALBURG_CITY - HOUSE2"/>
+            <entry key="0x0408" value="PETALBURG_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x0508" value="PETALBURG_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x0608" value="PETALBURG_CITY - MART"/>
+            <entry key="0x0009" value="SLATEPORT_CITY - STERNS_SHIPYARD_1F"/>
+            <entry key="0x0109" value="SLATEPORT_CITY - STERNS_SHIPYARD_2F"/>
+            <entry key="0x0209" value="SLATEPORT_CITY - BATTLE_TENT_LOBBY"/>
+            <entry key="0x0309" value="SLATEPORT_CITY - BATTLE_TENT_CORRIDOR"/>
+            <entry key="0x0409" value="SLATEPORT_CITY - BATTLE_TENT_BATTLE_ROOM"/>
+            <entry key="0x0509" value="SLATEPORT_CITY - NAME_RATERS_HOUSE"/>
+            <entry key="0x0609" value="SLATEPORT_CITY - POKEMON_FAN_CLUB"/>
+            <entry key="0x0709" value="SLATEPORT_CITY - OCEANIC_MUSEUM_1F"/>
+            <entry key="0x0809" value="SLATEPORT_CITY - OCEANIC_MUSEUM_2F"/>
+            <entry key="0x0909" value="SLATEPORT_CITY - HARBOR"/>
+            <entry key="0x0a09" value="SLATEPORT_CITY - HOUSE"/>
+            <entry key="0x0b09" value="SLATEPORT_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x0c09" value="SLATEPORT_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x0d09" value="SLATEPORT_CITY - MART"/>
+            <entry key="0x000a" value="MAUVILLE_CITY - GYM"/>
+            <entry key="0x010a" value="MAUVILLE_CITY - BIKE_SHOP"/>
+            <entry key="0x020a" value="MAUVILLE_CITY - HOUSE1"/>
+            <entry key="0x030a" value="MAUVILLE_CITY - GAME_CORNER"/>
+            <entry key="0x040a" value="MAUVILLE_CITY - HOUSE2"/>
+            <entry key="0x050a" value="MAUVILLE_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x060a" value="MAUVILLE_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x070a" value="MAUVILLE_CITY - MART"/>
+            <entry key="0x000b" value="RUSTBORO_CITY - DEVON_CORP_1F"/>
+            <entry key="0x010b" value="RUSTBORO_CITY - DEVON_CORP_2F"/>
+            <entry key="0x020b" value="RUSTBORO_CITY - DEVON_CORP_3F"/>
+            <entry key="0x030b" value="RUSTBORO_CITY - GYM"/>
+            <entry key="0x040b" value="RUSTBORO_CITY - POKEMON_SCHOOL"/>
+            <entry key="0x050b" value="RUSTBORO_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x060b" value="RUSTBORO_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x070b" value="RUSTBORO_CITY - MART"/>
+            <entry key="0x080b" value="RUSTBORO_CITY - FLAT1_1F"/>
+            <entry key="0x090b" value="RUSTBORO_CITY - FLAT1_2F"/>
+            <entry key="0x0a0b" value="RUSTBORO_CITY - HOUSE1"/>
+            <entry key="0x0b0b" value="RUSTBORO_CITY - CUTTERS_HOUSE"/>
+            <entry key="0x0c0b" value="RUSTBORO_CITY - HOUSE2"/>
+            <entry key="0x0d0b" value="RUSTBORO_CITY - FLAT2_1F"/>
+            <entry key="0x0e0b" value="RUSTBORO_CITY - FLAT2_2F"/>
+            <entry key="0x0f0b" value="RUSTBORO_CITY - FLAT2_3F"/>
+            <entry key="0x100b" value="RUSTBORO_CITY - HOUSE3"/>
+            <entry key="0x000c" value="FORTREE_CITY - HOUSE1"/>
+            <entry key="0x010c" value="FORTREE_CITY - GYM"/>
+            <entry key="0x020c" value="FORTREE_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x030c" value="FORTREE_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x040c" value="FORTREE_CITY - MART"/>
+            <entry key="0x050c" value="FORTREE_CITY - HOUSE2"/>
+            <entry key="0x060c" value="FORTREE_CITY - HOUSE3"/>
+            <entry key="0x070c" value="FORTREE_CITY - HOUSE4"/>
+            <entry key="0x080c" value="FORTREE_CITY - HOUSE5"/>
+            <entry key="0x090c" value="FORTREE_CITY - DECORATION_SHOP"/>
+            <entry key="0x000d" value="LILYCOVE_CITY - COVE_LILY_MOTEL_1F"/>
+            <entry key="0x010d" value="LILYCOVE_CITY - COVE_LILY_MOTEL_2F"/>
+            <entry key="0x020d" value="LILYCOVE_CITY - LILYCOVE_MUSEUM_1F"/>
+            <entry key="0x030d" value="LILYCOVE_CITY - LILYCOVE_MUSEUM_2F"/>
+            <entry key="0x040d" value="LILYCOVE_CITY - CONTEST_LOBBY"/>
+            <entry key="0x050d" value="LILYCOVE_CITY - CONTEST_HALL"/>
+            <entry key="0x060d" value="LILYCOVE_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x070d" value="LILYCOVE_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x080d" value="LILYCOVE_CITY - UNUSED_MART"/>
+            <entry key="0x090d" value="LILYCOVE_CITY - POKEMON_TRAINER_FAN_CLUB"/>
+            <entry key="0x0a0d" value="LILYCOVE_CITY - HARBOR"/>
+            <entry key="0x0b0d" value="LILYCOVE_CITY - MOVE_DELETERS_HOUSE"/>
+            <entry key="0x0c0d" value="LILYCOVE_CITY - HOUSE1"/>
+            <entry key="0x0d0d" value="LILYCOVE_CITY - HOUSE2"/>
+            <entry key="0x0e0d" value="LILYCOVE_CITY - HOUSE3"/>
+            <entry key="0x0f0d" value="LILYCOVE_CITY - HOUSE4"/>
+            <entry key="0x100d" value="LILYCOVE_CITY - DEPARTMENT_STORE_1F"/>
+            <entry key="0x110d" value="LILYCOVE_CITY - DEPARTMENT_STORE_2F"/>
+            <entry key="0x120d" value="LILYCOVE_CITY - DEPARTMENT_STORE_3F"/>
+            <entry key="0x130d" value="LILYCOVE_CITY - DEPARTMENT_STORE_4F"/>
+            <entry key="0x140d" value="LILYCOVE_CITY - DEPARTMENT_STORE_5F"/>
+            <entry key="0x150d" value="LILYCOVE_CITY - DEPARTMENT_STORE_ROOFTOP"/>
+            <entry key="0x160d" value="LILYCOVE_CITY - DEPARTMENT_STORE_ELEVATOR"/>
+            <entry key="0x000e" value="MOSSDEEP_CITY - GYM"/>
+            <entry key="0x010e" value="MOSSDEEP_CITY - HOUSE1"/>
+            <entry key="0x020e" value="MOSSDEEP_CITY - HOUSE2"/>
+            <entry key="0x030e" value="MOSSDEEP_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x040e" value="MOSSDEEP_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x050e" value="MOSSDEEP_CITY - MART"/>
+            <entry key="0x060e" value="MOSSDEEP_CITY - HOUSE3"/>
+            <entry key="0x070e" value="MOSSDEEP_CITY - STEVENS_HOUSE"/>
+            <entry key="0x080e" value="MOSSDEEP_CITY - HOUSE4"/>
+            <entry key="0x090e" value="MOSSDEEP_CITY - SPACE_CENTER_1F"/>
+            <entry key="0x0a0e" value="MOSSDEEP_CITY - SPACE_CENTER_2F"/>
+            <entry key="0x0b0e" value="MOSSDEEP_CITY - GAME_CORNER_1F"/>
+            <entry key="0x0c0e" value="MOSSDEEP_CITY - GAME_CORNER_B1F"/>
+            <entry key="0x000f" value="SOOTOPOLIS_CITY - GYM_1F"/>
+            <entry key="0x010f" value="SOOTOPOLIS_CITY - GYM_B1F"/>
+            <entry key="0x020f" value="SOOTOPOLIS_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x030f" value="SOOTOPOLIS_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x040f" value="SOOTOPOLIS_CITY - MART"/>
+            <entry key="0x050f" value="SOOTOPOLIS_CITY - HOUSE1"/>
+            <entry key="0x060f" value="SOOTOPOLIS_CITY - HOUSE2"/>
+            <entry key="0x070f" value="SOOTOPOLIS_CITY - HOUSE3"/>
+            <entry key="0x080f" value="SOOTOPOLIS_CITY - HOUSE4"/>
+            <entry key="0x090f" value="SOOTOPOLIS_CITY - HOUSE5"/>
+            <entry key="0x0a0f" value="SOOTOPOLIS_CITY - HOUSE6"/>
+            <entry key="0x0b0f" value="SOOTOPOLIS_CITY - HOUSE7"/>
+            <entry key="0x0c0f" value="SOOTOPOLIS_CITY - LOTAD_AND_SEEDOT_HOUSE"/>
+            <entry key="0x0d0f" value="SOOTOPOLIS_CITY - MYSTERY_EVENTS_HOUSE_1F"/>
+            <entry key="0x0e0f" value="SOOTOPOLIS_CITY - MYSTERY_EVENTS_HOUSE_B1F"/>
+            <entry key="0x0010" value="EVER_GRANDE_CITY - SIDNEYS_ROOM"/>
+            <entry key="0x0110" value="EVER_GRANDE_CITY - PHOEBES_ROOM"/>
+            <entry key="0x0210" value="EVER_GRANDE_CITY - GLACIAS_ROOM"/>
+            <entry key="0x0310" value="EVER_GRANDE_CITY - DRAKES_ROOM"/>
+            <entry key="0x0410" value="EVER_GRANDE_CITY - CHAMPIONS_ROOM"/>
+            <entry key="0x0510" value="EVER_GRANDE_CITY - HALL1"/>
+            <entry key="0x0610" value="EVER_GRANDE_CITY - HALL2"/>
+            <entry key="0x0710" value="EVER_GRANDE_CITY - HALL3"/>
+            <entry key="0x0810" value="EVER_GRANDE_CITY - HALL4"/>
+            <entry key="0x0910" value="EVER_GRANDE_CITY - HALL5"/>
+            <entry key="0x0a10" value="EVER_GRANDE_CITY - POKEMON_LEAGUE_1F"/>
+            <entry key="0x0b10" value="EVER_GRANDE_CITY - HALL_OF_FAME"/>
+            <entry key="0x0c10" value="EVER_GRANDE_CITY - POKEMON_CENTER_1F"/>
+            <entry key="0x0d10" value="EVER_GRANDE_CITY - POKEMON_CENTER_2F"/>
+            <entry key="0x0e10" value="EVER_GRANDE_CITY - POKEMON_LEAGUE_2F"/>
+            <entry key="0x0011" value="ROUTE 104 - MR_BRINEYS_HOUSE"/>
+            <entry key="0x0111" value="ROUTE 104 - PRETTY_PETAL_FLOWER_SHOP"/>
+            <entry key="0x0012" value="ROUTE 111 - WINSTRATE_FAMILYS_HOUSE"/>
+            <entry key="0x0112" value="ROUTE 111 - OLD_LADYS_REST_STOP"/>
+            <entry key="0x0013" value="ROUTE 112 - CABLE_CAR_STATION"/>
+            <entry key="0x0113" value="MT_CHIMNEY$CABLE_CAR_STATION"/>
+            <entry key="0x0014" value="ROUTE 114 - FOSSIL_MANIACS_HOUSE"/>
+            <entry key="0x0114" value="ROUTE 114 - FOSSIL_MANIACS_TUNNEL"/>
+            <entry key="0x0214" value="ROUTE 114 - LANETTES_HOUSE"/>
+            <entry key="0x0015" value="ROUTE 116 - TUNNELERS_REST_HOUSE"/>
+            <entry key="0x0016" value="ROUTE 117 - POKEMON_DAY_CARE"/>
+            <entry key="0x0017" value="ROUTE 121 - SAFARI_ZONE_ENTRANCE"/>
+            <entry key="0x0018" value="METEOR_FALLS - 1F_1R"/>
+            <entry key="0x0118" value="METEOR_FALLS - 1F_2R"/>
+            <entry key="0x0218" value="METEOR_FALLS - B1F_1R"/>
+            <entry key="0x0318" value="METEOR_FALLS - B1F_2R"/>
+            <entry key="0x0418" value="RUSTURF_TUNNEL"/>
+            <entry key="0x0518" value="UNDERWATER_SOOTOPOLIS_CITY"/>
+            <entry key="0x0618" value="DESERT_RUINS"/>
+            <entry key="0x0718" value="GRANITE_CAVE - 1F"/>
+            <entry key="0x0818" value="GRANITE_CAVE - B1F"/>
+            <entry key="0x0918" value="GRANITE_CAVE - B2F"/>
+            <entry key="0x0a18" value="GRANITE_CAVE - STEVENS_ROOM"/>
+            <entry key="0x0b18" value="PETALBURG_WOODS"/>
+            <entry key="0x0c18" value="MT_CHIMNEY"/>
+            <entry key="0x0d18" value="JAGGED_PASS"/>
+            <entry key="0x0e18" value="FIERY_PATH"/>
+            <entry key="0x0f18" value="MT_PYRE - 1F"/>
+            <entry key="0x1018" value="MT_PYRE - 2F"/>
+            <entry key="0x1118" value="MT_PYRE - 3F"/>
+            <entry key="0x1218" value="MT_PYRE - 4F"/>
+            <entry key="0x1318" value="MT_PYRE - 5F"/>
+            <entry key="0x1418" value="MT_PYRE - 6F"/>
+            <entry key="0x1518" value="MT_PYRE - EXTERIOR"/>
+            <entry key="0x1618" value="MT_PYRE - SUMMIT"/>
+            <entry key="0x1718" value="AQUA_HIDEOUT - 1F"/>
+            <entry key="0x1818" value="AQUA_HIDEOUT - B1F"/>
+            <entry key="0x1918" value="AQUA_HIDEOUT - B2F"/>
+            <entry key="0x1a18" value="UNDERWATER_SEAFLOOR_CAVERN"/>
+            <entry key="0x1b18" value="SEAFLOOR_CAVERN - ENTRANCE"/>
+            <entry key="0x1c18" value="SEAFLOOR_CAVERN - ROOM1"/>
+            <entry key="0x1d18" value="SEAFLOOR_CAVERN - ROOM2"/>
+            <entry key="0x1e18" value="SEAFLOOR_CAVERN - ROOM3"/>
+            <entry key="0x1f18" value="SEAFLOOR_CAVERN - ROOM4"/>
+            <entry key="0x2018" value="SEAFLOOR_CAVERN - ROOM5"/>
+            <entry key="0x2118" value="SEAFLOOR_CAVERN - ROOM6"/>
+            <entry key="0x2218" value="SEAFLOOR_CAVERN - ROOM7"/>
+            <entry key="0x2318" value="SEAFLOOR_CAVERN - ROOM8"/>
+            <entry key="0x2418" value="SEAFLOOR_CAVERN - ROOM9"/>
+            <entry key="0x2518" value="CAVE_OF_ORIGIN - ENTRANCE"/>
+            <entry key="0x2618" value="CAVE_OF_ORIGIN - 1F"/>
+            <entry key="0x2718" value="CAVE_OF_ORIGIN - UNUSED_RUBY_SAPPHIRE_MAP1"/>
+            <entry key="0x2818" value="CAVE_OF_ORIGIN - UNUSED_RUBY_SAPPHIRE_MAP2"/>
+            <entry key="0x2918" value="CAVE_OF_ORIGIN - UNUSED_RUBY_SAPPHIRE_MAP3"/>
+            <entry key="0x2a18" value="CAVE_OF_ORIGIN - B1F"/>
+            <entry key="0x2b18" value="VICTORY_ROAD - 1F"/>
+            <entry key="0x2c18" value="VICTORY_ROAD - B1F"/>
+            <entry key="0x2d18" value="VICTORY_ROAD - B2F"/>
+            <entry key="0x2e18" value="SHOAL_CAVE$LOW_TIDE_ENTRANCE_ROOM"/>
+            <entry key="0x2f18" value="SHOAL_CAVE$LOW_TIDE_INNER_ROOM"/>
+            <entry key="0x3018" value="SHOAL_CAVE$LOW_TIDE_STAIRS_ROOM"/>
+            <entry key="0x3118" value="SHOAL_CAVE$LOW_TIDE_LOWER_ROOM"/>
+            <entry key="0x3218" value="SHOAL_CAVE$HIGH_TIDE_ENTRANCE_ROOM"/>
+            <entry key="0x3318" value="SHOAL_CAVE$HIGH_TIDE_INNER_ROOM"/>
+            <entry key="0x3418" value="NEW_MAUVILLE - ENTRANCE"/>
+            <entry key="0x3518" value="NEW_MAUVILLE - INSIDE"/>
+            <entry key="0x3618" value="ABANDONED_SHIP - DECK"/>
+            <entry key="0x3718" value="ABANDONED_SHIP - CORRIDORS_1F"/>
+            <entry key="0x3818" value="ABANDONED_SHIP - ROOMS_1F"/>
+            <entry key="0x3918" value="ABANDONED_SHIP - CORRIDORS_B1F"/>
+            <entry key="0x3a18" value="ABANDONED_SHIP - ROOMS_B1F"/>
+            <entry key="0x3b18" value="ABANDONED_SHIP - ROOMS2_B1F"/>
+            <entry key="0x3c18" value="ABANDONED_SHIP - UNDERWATER1"/>
+            <entry key="0x3d18" value="ABANDONED_SHIP - ROOM_B1F"/>
+            <entry key="0x3e18" value="ABANDONED_SHIP - ROOMS2_1F"/>
+            <entry key="0x3f18" value="ABANDONED_SHIP - CAPTAINS_OFFICE"/>
+            <entry key="0x4018" value="ABANDONED_SHIP - UNDERWATER2"/>
+            <entry key="0x4118" value="ABANDONED_SHIP - HIDDEN_FLOOR_CORRIDORS"/>
+            <entry key="0x4218" value="ABANDONED_SHIP - HIDDEN_FLOOR_ROOMS"/>
+            <entry key="0x4318" value="ISLAND_CAVE"/>
+            <entry key="0x4418" value="ANCIENT_TOMB"/>
+            <entry key="0x4518" value="UNDERWATER_ROUTE 134"/>
+            <entry key="0x4618" value="UNDERWATER_SEALED_CHAMBER"/>
+            <entry key="0x4718" value="SEALED_CHAMBER - OUTER_ROOM"/>
+            <entry key="0x4818" value="SEALED_CHAMBER - INNER_ROOM"/>
+            <entry key="0x4918" value="SCORCHED_SLAB"/>
+            <entry key="0x4a18" value="AQUA_HIDEOUT - UNUSED_RUBY_MAP1"/>
+            <entry key="0x4b18" value="AQUA_HIDEOUT - UNUSED_RUBY_MAP2"/>
+            <entry key="0x4c18" value="AQUA_HIDEOUT - UNUSED_RUBY_MAP3"/>
+            <entry key="0x4d18" value="SKY_PILLAR - ENTRANCE"/>
+            <entry key="0x4e18" value="SKY_PILLAR - OUTSIDE"/>
+            <entry key="0x4f18" value="SKY_PILLAR - 1F"/>
+            <entry key="0x5018" value="SKY_PILLAR - 2F"/>
+            <entry key="0x5118" value="SKY_PILLAR - 3F"/>
+            <entry key="0x5218" value="SKY_PILLAR - 4F"/>
+            <entry key="0x5318" value="SHOAL_CAVE - LOW_TIDE_ICE_ROOM"/>
+            <entry key="0x5418" value="SKY_PILLAR - 5F"/>
+            <entry key="0x5518" value="SKY_PILLAR - TOP"/>
+            <entry key="0x5618" value="MAGMA_HIDEOUT - 1F"/>
+            <entry key="0x5718" value="MAGMA_HIDEOUT - 2F_1R"/>
+            <entry key="0x5818" value="MAGMA_HIDEOUT - 2F_2R"/>
+            <entry key="0x5918" value="MAGMA_HIDEOUT - 3F_1R"/>
+            <entry key="0x5a18" value="MAGMA_HIDEOUT - 3F_2R"/>
+            <entry key="0x5b18" value="MAGMA_HIDEOUT - 4F"/>
+            <entry key="0x5c18" value="MAGMA_HIDEOUT - 3F_3R"/>
+            <entry key="0x5d18" value="MAGMA_HIDEOUT - 2F_3R"/>
+            <entry key="0x5e18" value="MIRAGE_TOWER - 1F"/>
+            <entry key="0x5f18" value="MIRAGE_TOWER - 2F"/>
+            <entry key="0x6018" value="MIRAGE_TOWER - 3F"/>
+            <entry key="0x6118" value="MIRAGE_TOWER - 4F"/>
+            <entry key="0x6218" value="DESERT_UNDERPASS"/>
+            <entry key="0x6318" value="ARTISAN_CAVE - B1F"/>
+            <entry key="0x6418" value="ARTISAN_CAVE - 1F"/>
+            <entry key="0x6518" value="UNDERWATER_MARINE_CAVE"/>
+            <entry key="0x6618" value="MARINE_CAVE - ENTRANCE"/>
+            <entry key="0x6718" value="MARINE_CAVE - END"/>
+            <entry key="0x6818" value="TERRA_CAVE - ENTRANCE"/>
+            <entry key="0x6918" value="TERRA_CAVE - END"/>
+            <entry key="0x6a18" value="ALTERING_CAVE"/>
+            <entry key="0x6b18" value="METEOR_FALLS - STEVENS_CAVE"/>
+            <entry key="0x0019" value="SECRET_BASE - RED_CAVE1"/>
+            <entry key="0x0119" value="SECRET_BASE - BROWN_CAVE1"/>
+            <entry key="0x0219" value="SECRET_BASE - BLUE_CAVE1"/>
+            <entry key="0x0319" value="SECRET_BASE - YELLOW_CAVE1"/>
+            <entry key="0x0419" value="SECRET_BASE - TREE1"/>
+            <entry key="0x0519" value="SECRET_BASE - SHRUB1"/>
+            <entry key="0x0619" value="SECRET_BASE - RED_CAVE2"/>
+            <entry key="0x0719" value="SECRET_BASE - BROWN_CAVE2"/>
+            <entry key="0x0819" value="SECRET_BASE - BLUE_CAVE2"/>
+            <entry key="0x0919" value="SECRET_BASE - YELLOW_CAVE2"/>
+            <entry key="0x0a19" value="SECRET_BASE - TREE2"/>
+            <entry key="0x0b19" value="SECRET_BASE - SHRUB2"/>
+            <entry key="0x0c19" value="SECRET_BASE - RED_CAVE3"/>
+            <entry key="0x0d19" value="SECRET_BASE - BROWN_CAVE3"/>
+            <entry key="0x0e19" value="SECRET_BASE - BLUE_CAVE3"/>
+            <entry key="0x0f19" value="SECRET_BASE - YELLOW_CAVE3"/>
+            <entry key="0x1019" value="SECRET_BASE - TREE3"/>
+            <entry key="0x1119" value="SECRET_BASE - SHRUB3"/>
+            <entry key="0x1219" value="SECRET_BASE - RED_CAVE4"/>
+            <entry key="0x1319" value="SECRET_BASE - BROWN_CAVE4"/>
+            <entry key="0x1419" value="SECRET_BASE - BLUE_CAVE4"/>
+            <entry key="0x1519" value="SECRET_BASE - YELLOW_CAVE4"/>
+            <entry key="0x1619" value="SECRET_BASE - TREE4"/>
+            <entry key="0x1719" value="SECRET_BASE - SHRUB4"/>
+            <entry key="0x1819" value="BATTLE_COLOSSEUM_2P"/>
+            <entry key="0x1919" value="TRADE_CENTER"/>
+            <entry key="0x1a19" value="RECORD_CORNER"/>
+            <entry key="0x1b19" value="BATTLE_COLOSSEUM_4P"/>
+            <entry key="0x1c19" value="CONTEST_HALL"/>
+            <entry key="0x1d19" value="UNUSED_CONTEST_HALL1"/>
+            <entry key="0x1e19" value="UNUSED_CONTEST_HALL2"/>
+            <entry key="0x1f19" value="UNUSED_CONTEST_HALL3"/>
+            <entry key="0x2019" value="UNUSED_CONTEST_HALL4"/>
+            <entry key="0x2119" value="UNUSED_CONTEST_HALL5"/>
+            <entry key="0x2219" value="UNUSED_CONTEST_HALL6"/>
+            <entry key="0x2319" value="CONTEST_HALL_BEAUTY"/>
+            <entry key="0x2419" value="CONTEST_HALL_TOUGH"/>
+            <entry key="0x2519" value="CONTEST_HALL_COOL"/>
+            <entry key="0x2619" value="CONTEST_HALL_SMART"/>
+            <entry key="0x2719" value="CONTEST_HALL_CUTE"/>
+            <entry key="0x2819" value="INSIDE_OF_TRUCK"/>
+            <entry key="0x2919" value="SS_TIDAL - CORRIDOR"/>
+            <entry key="0x2a19" value="SS_TIDAL - LOWER_DECK"/>
+            <entry key="0x2b19" value="SS_TIDAL - ROOMS"/>
+            <entry key="0x2c19" value="BATTLE_PYRAMID - SQUARE01"/>
+            <entry key="0x2d19" value="BATTLE_PYRAMID - SQUARE02"/>
+            <entry key="0x2e19" value="BATTLE_PYRAMID - SQUARE03"/>
+            <entry key="0x2f19" value="BATTLE_PYRAMID - SQUARE04"/>
+            <entry key="0x3019" value="BATTLE_PYRAMID - SQUARE05"/>
+            <entry key="0x3119" value="BATTLE_PYRAMID - SQUARE06"/>
+            <entry key="0x3219" value="BATTLE_PYRAMID - SQUARE07"/>
+            <entry key="0x3319" value="BATTLE_PYRAMID - SQUARE08"/>
+            <entry key="0x3419" value="BATTLE_PYRAMID - SQUARE09"/>
+            <entry key="0x3519" value="BATTLE_PYRAMID - SQUARE10"/>
+            <entry key="0x3619" value="BATTLE_PYRAMID - SQUARE11"/>
+            <entry key="0x3719" value="BATTLE_PYRAMID - SQUARE12"/>
+            <entry key="0x3819" value="BATTLE_PYRAMID - SQUARE13"/>
+            <entry key="0x3919" value="BATTLE_PYRAMID - SQUARE14"/>
+            <entry key="0x3a19" value="BATTLE_PYRAMID - SQUARE15"/>
+            <entry key="0x3b19" value="BATTLE_PYRAMID - SQUARE16"/>
+            <entry key="0x3c19" value="UNION_ROOM"/>
+            <entry key="0x001a" value="SAFARI_ZONE - NORTHWEST"/>
+            <entry key="0x011a" value="SAFARI_ZONE - NORTH"/>
+            <entry key="0x021a" value="SAFARI_ZONE - SOUTHWEST"/>
+            <entry key="0x031a" value="SAFARI_ZONE - SOUTH"/>
+            <entry key="0x041a" value="BATTLE_FRONTIER - OUTSIDE_WEST"/>
+            <entry key="0x051a" value="BATTLE_FRONTIER - BATTLE_TOWER_LOBBY"/>
+            <entry key="0x061a" value="BATTLE_FRONTIER - BATTLE_TOWER_ELEVATOR"/>
+            <entry key="0x071a" value="BATTLE_FRONTIER - BATTLE_TOWER_CORRIDOR"/>
+            <entry key="0x081a" value="BATTLE_FRONTIER - BATTLE_TOWER_BATTLE_ROOM"/>
+            <entry key="0x091a" value="SOUTHERN_ISLAND - EXTERIOR"/>
+            <entry key="0x0a1a" value="SOUTHERN_ISLAND - INTERIOR"/>
+            <entry key="0x0b1a" value="SAFARI_ZONE - REST_HOUSE"/>
+            <entry key="0x0c1a" value="SAFARI_ZONE - NORTHEAST"/>
+            <entry key="0x0d1a" value="SAFARI_ZONE - SOUTHEAST"/>
+            <entry key="0x0e1a" value="BATTLE_FRONTIER - OUTSIDE_EAST"/>
+            <entry key="0x0f1a" value="BATTLE_FRONTIER - BATTLE_TOWER_MULTI_PARTNER_ROOM"/>
+            <entry key="0x101a" value="BATTLE_FRONTIER - BATTLE_TOWER_MULTI_CORRIDOR"/>
+            <entry key="0x111a" value="BATTLE_FRONTIER - BATTLE_TOWER_MULTI_BATTLE_ROOM"/>
+            <entry key="0x121a" value="BATTLE_FRONTIER - BATTLE_DOME_LOBBY"/>
+            <entry key="0x131a" value="BATTLE_FRONTIER - BATTLE_DOME_CORRIDOR"/>
+            <entry key="0x141a" value="BATTLE_FRONTIER - BATTLE_DOME_PRE_BATTLE_ROOM"/>
+            <entry key="0x151a" value="BATTLE_FRONTIER - BATTLE_DOME_BATTLE_ROOM"/>
+            <entry key="0x161a" value="BATTLE_FRONTIER - BATTLE_PALACE_LOBBY"/>
+            <entry key="0x171a" value="BATTLE_FRONTIER - BATTLE_PALACE_CORRIDOR"/>
+            <entry key="0x181a" value="BATTLE_FRONTIER - BATTLE_PALACE_BATTLE_ROOM"/>
+            <entry key="0x191a" value="BATTLE_FRONTIER - BATTLE_PYRAMID_LOBBY"/>
+            <entry key="0x1a1a" value="BATTLE_FRONTIER - BATTLE_PYRAMID_FLOOR"/>
+            <entry key="0x1b1a" value="BATTLE_FRONTIER - BATTLE_PYRAMID_TOP"/>
+            <entry key="0x1c1a" value="BATTLE_FRONTIER - BATTLE_ARENA_LOBBY"/>
+            <entry key="0x1d1a" value="BATTLE_FRONTIER - BATTLE_ARENA_CORRIDOR"/>
+            <entry key="0x1e1a" value="BATTLE_FRONTIER - BATTLE_ARENA_BATTLE_ROOM"/>
+            <entry key="0x1f1a" value="BATTLE_FRONTIER - BATTLE_FACTORY_LOBBY"/>
+            <entry key="0x201a" value="BATTLE_FRONTIER - BATTLE_FACTORY_PRE_BATTLE_ROOM"/>
+            <entry key="0x211a" value="BATTLE_FRONTIER - BATTLE_FACTORY_BATTLE_ROOM"/>
+            <entry key="0x221a" value="BATTLE_FRONTIER - BATTLE_PIKE_LOBBY"/>
+            <entry key="0x231a" value="BATTLE_FRONTIER - BATTLE_PIKE_CORRIDOR"/>
+            <entry key="0x241a" value="BATTLE_FRONTIER - BATTLE_PIKE_THREE_PATH_ROOM"/>
+            <entry key="0x251a" value="BATTLE_FRONTIER - BATTLE_PIKE_ROOM_NORMAL"/>
+            <entry key="0x261a" value="BATTLE_FRONTIER - BATTLE_PIKE_ROOM_FINAL"/>
+            <entry key="0x271a" value="BATTLE_FRONTIER - BATTLE_PIKE_ROOM_WILD_MONS"/>
+            <entry key="0x281a" value="BATTLE_FRONTIER - RANKING_HALL"/>
+            <entry key="0x291a" value="BATTLE_FRONTIER - LOUNGE1"/>
+            <entry key="0x2a1a" value="BATTLE_FRONTIER - EXCHANGE_SERVICE_CORNER"/>
+            <entry key="0x2b1a" value="BATTLE_FRONTIER - LOUNGE2"/>
+            <entry key="0x2c1a" value="BATTLE_FRONTIER - LOUNGE3"/>
+            <entry key="0x2d1a" value="BATTLE_FRONTIER - LOUNGE4"/>
+            <entry key="0x2e1a" value="BATTLE_FRONTIER - SCOTTS_HOUSE"/>
+            <entry key="0x2f1a" value="BATTLE_FRONTIER - LOUNGE5"/>
+            <entry key="0x301a" value="BATTLE_FRONTIER - LOUNGE6"/>
+            <entry key="0x311a" value="BATTLE_FRONTIER - LOUNGE7"/>
+            <entry key="0x321a" value="BATTLE_FRONTIER - RECEPTION_GATE"/>
+            <entry key="0x331a" value="BATTLE_FRONTIER - LOUNGE8"/>
+            <entry key="0x341a" value="BATTLE_FRONTIER - LOUNGE9"/>
+            <entry key="0x351a" value="BATTLE_FRONTIER - POKEMON_CENTER_1F"/>
+            <entry key="0x361a" value="BATTLE_FRONTIER - POKEMON_CENTER_2F"/>
+            <entry key="0x371a" value="BATTLE_FRONTIER - MART"/>
+            <entry key="0x381a" value="FARAWAY_ISLAND - ENTRANCE"/>
+            <entry key="0x391a" value="FARAWAY_ISLAND - INTERIOR"/>
+            <entry key="0x3a1a" value="BIRTH_ISLAND - EXTERIOR"/>
+            <entry key="0x3b1a" value="BIRTH_ISLAND - HARBOR"/>
+            <entry key="0x3c1a" value="TRAINER_HILL - ENTRANCE"/>
+            <entry key="0x3d1a" value="TRAINER_HILL - 1F"/>
+            <entry key="0x3e1a" value="TRAINER_HILL - 2F"/>
+            <entry key="0x3f1a" value="TRAINER_HILL - 3F"/>
+            <entry key="0x401a" value="TRAINER_HILL - 4F"/>
+            <entry key="0x411a" value="TRAINER_HILL - ROOF"/>
+            <entry key="0x421a" value="NAVEL_ROCK - EXTERIOR"/>
+            <entry key="0x431a" value="NAVEL_ROCK - HARBOR"/>
+            <entry key="0x441a" value="NAVEL_ROCK - ENTRANCE"/>
+            <entry key="0x451a" value="NAVEL_ROCK - B1F"/>
+            <entry key="0x461a" value="NAVEL_ROCK - FORK"/>
+            <entry key="0x471a" value="NAVEL_ROCK - UP1"/>
+            <entry key="0x481a" value="NAVEL_ROCK - UP2"/>
+            <entry key="0x491a" value="NAVEL_ROCK - UP3"/>
+            <entry key="0x4a1a" value="NAVEL_ROCK - UP4"/>
+            <entry key="0x4b1a" value="NAVEL_ROCK - TOP"/>
+            <entry key="0x4c1a" value="NAVEL_ROCK - DOWN01"/>
+            <entry key="0x4d1a" value="NAVEL_ROCK - DOWN02"/>
+            <entry key="0x4e1a" value="NAVEL_ROCK - DOWN03"/>
+            <entry key="0x4f1a" value="NAVEL_ROCK - DOWN04"/>
+            <entry key="0x501a" value="NAVEL_ROCK - DOWN05"/>
+            <entry key="0x511a" value="NAVEL_ROCK - DOWN06"/>
+            <entry key="0x521a" value="NAVEL_ROCK - DOWN07"/>
+            <entry key="0x531a" value="NAVEL_ROCK - DOWN08"/>
+            <entry key="0x541a" value="NAVEL_ROCK - DOWN09"/>
+            <entry key="0x551a" value="NAVEL_ROCK - DOWN10"/>
+            <entry key="0x561a" value="NAVEL_ROCK - DOWN11"/>
+            <entry key="0x571a" value="NAVEL_ROCK - BOTTOM"/>
+            <entry key="0x581a" value="TRAINER_HILL - ELEVATOR"/>
+            <entry key="0x001b" value="ROUTE 104 - PROTOTYPE"/>
+            <entry key="0x011b" value="ROUTE 104 - PROTOTYPE_PRETTY_PETAL_FLOWER_SHOP"/>
+            <entry key="0x001c" value="ROUTE 109 - SEASHORE_HOUSE"/>
+            <entry key="0x001d" value="ROUTE 110 - TRICK_HOUSE_ENTRANCE"/>
+            <entry key="0x011d" value="ROUTE 110 - TRICK_HOUSE_END"/>
+            <entry key="0x021d" value="ROUTE 110 - TRICK_HOUSE_CORRIDOR"/>
+            <entry key="0x031d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE1"/>
+            <entry key="0x041d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE2"/>
+            <entry key="0x051d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE3"/>
+            <entry key="0x061d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE4"/>
+            <entry key="0x071d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE5"/>
+            <entry key="0x081d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE6"/>
+            <entry key="0x091d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE7"/>
+            <entry key="0x0a1d" value="ROUTE 110 - TRICK_HOUSE_PUZZLE8"/>
+            <entry key="0x0b1d" value="ROUTE 110 - SEASIDE_CYCLING_ROAD_NORTH_ENTRANCE"/>
+            <entry key="0x0c1d" value="ROUTE 110 - SEASIDE_CYCLING_ROAD_SOUTH_ENTRANCE"/>
+            <entry key="0x001e" value="ROUTE 113 - GLASS_WORKSHOP"/>
+            <entry key="0x001f" value="ROUTE 123 - BERRY_MASTERS_HOUSE"/>
+            <entry key="0x0020" value="ROUTE 119 - WEATHER_INSTITUTE_1F"/>
+            <entry key="0x0120" value="ROUTE 119 - WEATHER_INSTITUTE_2F"/>
+            <entry key="0x0220" value="ROUTE 119 - HOUSE"/>
+            <entry key="0x0021" value="ROUTE 124 - DIVING_TREASURE_HUNTERS_HOUSE"/>
+        </mapName>
+
         <pokemon>
             <entry key="0x00" value="" />
             <entry key="0x01" value="Bulbasaur" />

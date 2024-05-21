@@ -2,6 +2,8 @@
 using GameHook.Domain.Interfaces;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using GameHook.Integrations.BizHawk;
+using SharedPlatformConstants = GameHook.Domain.SharedPlatformConstants;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace GameHook.Infrastructure.Drivers
@@ -83,8 +85,31 @@ namespace GameHook.Infrastructure.Drivers
         }
 
         public Task WriteBytes(uint startingMemoryAddress, byte[] values)
-        {
-            throw new NotImplementedException();
+        {           
+            var platform = SharedPlatformConstants
+                .Information
+                .SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? 
+                           throw new Exception($"System {SystemName} is not yet supported.");
+            //Get memory location
+            var memoryLocation = startingMemoryAddress & 0xF000000;
+            var bizhawkId = platform
+                .MemoryLayout
+                .Where(x => 
+                    x.PhysicalStartingAddress == memoryLocation)
+                .Select(x => x.BizhawkIdentifier)
+                .FirstOrDefault();
+            if (string.IsNullOrEmpty(bizhawkId))
+                throw new InvalidOperationException(
+                    $"Could not find the BizHawk identifier for memory address {startingMemoryAddress}");
+            var memoryContract = new MemoryContract<byte[]>
+            {
+                BizHawkIdentifier = bizhawkId,
+                Data = values,
+                DataLength = values.Length,
+                MemoryAddressStart = (long)startingMemoryAddress & 0xFFFFFF
+            };
+            BizhawkNamedPipesClient.WriteToBizhawk(memoryContract);
+            return Task.CompletedTask;
         }
     }
 }
