@@ -26,8 +26,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHook.Integrations.BizHa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHook.Infrastructure", "GameHook.Infrastructure\GameHook.Infrastructure.csproj", "{AE9B96B8-18AA-4D2A-8BB8-A096B59294D5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zAndrew-Testing", "zAndrew-Testing", "{120A47B8-AB9D-4D38-836E-15A674362E5C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

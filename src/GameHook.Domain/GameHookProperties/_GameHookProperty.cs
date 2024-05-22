@@ -85,7 +85,8 @@ namespace GameHook.Domain.GameHookProperties
 
                 return;
             }
-
+            
+            
             MemoryAddress? address = Address;
 
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
@@ -99,7 +100,16 @@ namespace GameHook.Domain.GameHookProperties
                     // TODO: Write a log entry here.
                 }
             }
-
+            //The mapper wants us to grab an address from a certain memory location
+            if (_pointerAddress is not null)
+            {
+                //Get the address the pointer is pointing to
+                var foundAddress = memoryManager.DefaultNamespace.get_uint32_le(_pointerAddress.Value);
+                if (foundAddress != 0x00)
+                    address = PointerAddressOffset is not null ? 
+                        foundAddress + (MemoryAddress)PointerAddressOffset :
+                        foundAddress;
+            }
             if (address == null)
             {
                 // There is nothing to do for this property, as it does not have an address or bytes.
