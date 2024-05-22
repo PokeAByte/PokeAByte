@@ -91,22 +91,23 @@ namespace GameHook.Infrastructure.Drivers
                 .SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? 
                            throw new Exception($"System {SystemName} is not yet supported.");
             //Get memory location
-            var memoryLocation = startingMemoryAddress & 0xF000000;
-            var bizhawkId = platform
+            //var memoryLocation = startingMemoryAddress & 0xF000000;
+            var bizhawkMemory = platform
                 .MemoryLayout
-                .Where(x => 
-                    x.PhysicalStartingAddress == memoryLocation)
-                .Select(x => x.BizhawkIdentifier)
-                .FirstOrDefault();
-            if (string.IsNullOrEmpty(bizhawkId))
+                .FirstOrDefault(x => 
+                    x.PhysicalStartingAddress <= startingMemoryAddress && 
+                    startingMemoryAddress <= x.PhysicalStartingAddress + (uint)x.Length);
+            if (bizhawkMemory is null || string.IsNullOrEmpty(bizhawkMemory.BizhawkIdentifier))
                 throw new InvalidOperationException(
                     $"Could not find the BizHawk identifier for memory address {startingMemoryAddress}");
+
+            
             var memoryContract = new MemoryContract<byte[]>
             {
-                BizHawkIdentifier = bizhawkId,
+                BizHawkIdentifier = bizhawkMemory.BizhawkIdentifier,
                 Data = values,
                 DataLength = values.Length,
-                MemoryAddressStart = (long)startingMemoryAddress & 0xFFFFFF
+                MemoryAddressStart = (long)startingMemoryAddress - bizhawkMemory.PhysicalStartingAddress
             };
             BizhawkNamedPipesClient.WriteToBizhawk(memoryContract);
             return Task.CompletedTask;
