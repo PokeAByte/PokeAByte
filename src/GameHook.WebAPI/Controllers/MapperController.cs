@@ -17,8 +17,6 @@ namespace GameHook.WebAPI.Controllers
                 Type = x.Type,
                 MemoryContainer = x.MemoryContainer,
                 Address = x.Address,
-                PointerAddress = x.PointerAddress,
-                PointerAddressOffset = x.PointerAddressOffset,
                 Length = x.Length,
                 Size = x.Size,
                 Reference = x.Reference,
@@ -82,9 +80,6 @@ namespace GameHook.WebAPI.Controllers
         public string? MemoryContainer { get; init; } = string.Empty;
 
         public uint? Address { get; init; }
-        public uint? PointerAddress { get; init; }
-        public int? PointerAddressOffset { get; init; }
-
         public int? Length { get; init; }
 
         public int? Size { get; init; }

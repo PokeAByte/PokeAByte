@@ -36,7 +36,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
     private SharedPlatformConstants.PlatformEntry? Platform = null;
     private int? FrameSkip = null;
-    
+    private NamedPipeServer? _namedPipeServer = null;
     public GameHookIntegrationForm()
     {
         ShowInTaskbar = false;
@@ -55,11 +55,15 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
         GameHookData_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("GAMEHOOK_BIZHAWK_DATA.bin", SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
         GameHookData_Accessor = GameHookData_MemoryMappedFile.CreateViewAccessor();
 
-        var namedPipeServer = new NamedPipeServer();
-        namedPipeServer.ClientDataHandler += ReadFromClient;
-        namedPipeServer.StartServer("BizHawk_Named_Pipe");
+        _namedPipeServer = new NamedPipeServer();
+        _namedPipeServer.ClientDataHandler += ReadFromClient;
+        _namedPipeServer.StartServer("BizHawk_Named_Pipe");
+        Closing += (sender, args) =>
+        {
+            _namedPipeServer.Dispose();
+            _namedPipeServer = null;
+        };
     }
-
     private void ReadFromClient(MemoryContract<byte[]>? clientData)
     {
         if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))

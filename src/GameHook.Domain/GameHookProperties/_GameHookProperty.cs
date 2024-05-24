@@ -13,8 +13,6 @@ namespace GameHook.Domain.GameHookProperties
 
             MemoryContainer = attributes.MemoryContainer;
             AddressString = attributes.Address;
-            PointerAddressString = attributes.PointerAddress;
-            PointerAddressOffset = attributes.PointerAddressOffset;
             Length = attributes.Length;
             Size = attributes.Size;
             Bits = attributes.Bits;
@@ -99,16 +97,6 @@ namespace GameHook.Domain.GameHookProperties
                 {
                     // TODO: Write a log entry here.
                 }
-            }
-            //The mapper wants us to grab an address from a certain memory location
-            if (_pointerAddress is not null)
-            {
-                //Get the address the pointer is pointing to
-                var foundAddress = memoryManager.DefaultNamespace.get_uint32_le(_pointerAddress.Value);
-                if (foundAddress != 0x00)
-                    address = PointerAddressOffset is not null ? 
-                        foundAddress + (MemoryAddress)PointerAddressOffset :
-                        foundAddress;
             }
             if (address == null)
             {

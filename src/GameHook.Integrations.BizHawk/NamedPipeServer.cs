@@ -7,38 +7,39 @@ namespace GameHook.Integrations.BizHawk;
 
 public delegate void ClientDataHandler(MemoryContract<byte[]>? memoryContract);
 
-public class NamedPipeServer
+public class NamedPipeServer : IDisposable
 {
     public event ClientDataHandler? ClientDataHandler;
     private string _pipeName = "";
+    private NamedPipeServerStream? _pipeServer = null;
     public void StartServer(string pipeName)
     {
         _pipeName = pipeName;
-        NamedPipeServerStream pipeServer = new(pipeName,
+        _pipeServer = new(pipeName,
             PipeDirection.In,
             1,
             PipeTransmissionMode.Byte,
             PipeOptions.Asynchronous);
         Console.WriteLine("Pipe server created, waiting for connections...");
-        pipeServer.BeginWaitForConnection(
+        _pipeServer.BeginWaitForConnection(
             WaitForConnectionCallback,
-            pipeServer);
+            _pipeServer);
     }
 
     private void WaitForConnectionCallback(IAsyncResult iar)
     {
         Console.WriteLine("Client connected");
-        if (iar.AsyncState is null)
+        if (iar.AsyncState is null || _pipeServer is null)
             throw new InvalidOperationException(
                 "The pipe server is null.");
         try
         {
-            var pipeServer = (NamedPipeServerStream)iar.AsyncState;
-            pipeServer.EndWaitForConnection(iar);
+            //var pipeServer = (NamedPipeServerStream)iar.AsyncState;
+            _pipeServer.EndWaitForConnection(iar);
             Console.WriteLine("Reading 255 bytes of client data...");
             var buffer = new byte[255];
             var dataList = new List<byte>();
-            var count = pipeServer
+            var count = _pipeServer
                 .Read(buffer, 
                     0, 
                     255);
@@ -46,7 +47,7 @@ public class NamedPipeServer
             while (count == 255)
             {
                 Console.WriteLine("Reading 255 more bytes of client data...");
-                count = pipeServer
+                count = _pipeServer
                     .Read(buffer, 
                         0, 
                         255);
@@ -58,21 +59,26 @@ public class NamedPipeServer
                 MemoryContract<byte[]>
                     .Deserialize(dataList.ToArray()));
             Console.WriteLine("Invoked delegate complete, closing server");
-            pipeServer.Close();
-            pipeServer = null;
-            pipeServer = new NamedPipeServerStream(_pipeName,
+            _pipeServer.Close();
+            _pipeServer = null;
+            _pipeServer = new NamedPipeServerStream(_pipeName,
                 PipeDirection.In,
                 1,
                 PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous);
             Console.WriteLine("Pipe server created, waiting for connections...");
-            pipeServer.BeginWaitForConnection(
+            _pipeServer.BeginWaitForConnection(
                 WaitForConnectionCallback,
-                pipeServer);
+                _pipeServer);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
+    }
+
+    public void Dispose()
+    {
+        _pipeServer?.Dispose();
     }
 }

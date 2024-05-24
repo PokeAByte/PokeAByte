@@ -6,9 +6,7 @@ namespace GameHook.Domain.GameHookProperties
     {
         private string? _memoryContainer { get; set; }
         private uint? _address { get; set; }
-        private uint? _pointerAddress { get; set; }
         private string? _addressString { get; set; }
-        private string? _pointerAddressString { get; set; }
         private int? _length { get; set; }
         private int? _size { get; set; }
         private string? _bits { get; set; }
@@ -50,21 +48,6 @@ namespace GameHook.Domain.GameHookProperties
                 FieldsChanged.Add("address");
             }
         }
-        public uint? PointerAddress
-        {
-            get { return _pointerAddress; }
-            set
-            {
-                if (value == _pointerAddress) { return; }
-
-                _pointerAddress = value;
-
-                FieldsChanged.Add("pointerAddress");
-            }
-        }
-
-        public int? PointerAddressOffset { get; set; }
-
         public string? AddressString
         {
             get { return _addressString; }
@@ -86,29 +69,6 @@ namespace GameHook.Domain.GameHookProperties
                 }
 
                 FieldsChanged.Add("address");
-            }
-        }
-        public string? PointerAddressString
-        {
-            get { return _pointerAddressString; }
-            set
-            {
-                if (value == _pointerAddressString) { return; }
-
-                _pointerAddressString = value;
-                
-                var convertedVal = Convert.ToUInt32(value, 16);
-
-                if (convertedVal == 0)
-                {
-                    _pointerAddress = null;
-                }
-                else
-                {
-                    _pointerAddress = convertedVal;
-                }
-
-                FieldsChanged.Add("pointerAddress");
             }
         }
         public int? Length

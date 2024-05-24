@@ -25,7 +25,6 @@ namespace GameHook.WebAPI.ClientNotifiers
                 path = x.Path,
                 memoryContainer = x.MemoryContainer,
                 address = x.Address,
-                pointerAddress = x.PointerAddress,
                 length = x.Length,
                 size = x.Size,
                 reference = x.Reference,
