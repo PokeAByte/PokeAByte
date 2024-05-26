@@ -80,6 +80,7 @@ namespace GameHook.WebAPI.Controllers
         public string? MemoryContainer { get; init; } = string.Empty;
 
         public uint? Address { get; init; }
+
         public int? Length { get; init; }
 
         public int? Size { get; init; }

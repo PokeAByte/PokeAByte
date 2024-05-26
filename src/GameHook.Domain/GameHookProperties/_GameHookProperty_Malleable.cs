@@ -48,6 +48,7 @@ namespace GameHook.Domain.GameHookProperties
                 FieldsChanged.Add("address");
             }
         }
+
         public string? AddressString
         {
             get { return _addressString; }
@@ -71,6 +72,7 @@ namespace GameHook.Domain.GameHookProperties
                 FieldsChanged.Add("address");
             }
         }
+
         public int? Length
         {
             get => _length;

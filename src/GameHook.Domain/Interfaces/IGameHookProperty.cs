@@ -36,6 +36,7 @@
         string? Reference { get; }
         string? Bits { get; }
         string? Description { get; }
+
         object? Value { get; set; }
         byte[]? Bytes { get; }
         byte[]? BytesFrozen { get; }

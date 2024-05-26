@@ -31,7 +31,7 @@ namespace GameHook.Domain.GameHookProperties
 
             BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
         }
-        
+
         protected IGameHookInstance Instance { get; }
         public string Path { get; }
         public string Type { get; }
@@ -83,8 +83,7 @@ namespace GameHook.Domain.GameHookProperties
 
                 return;
             }
-            
-            
+
             MemoryAddress? address = Address;
 
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
@@ -98,6 +97,7 @@ namespace GameHook.Domain.GameHookProperties
                     // TODO: Write a log entry here.
                 }
             }
+
             if (address == null)
             {
                 // There is nothing to do for this property, as it does not have an address or bytes.
