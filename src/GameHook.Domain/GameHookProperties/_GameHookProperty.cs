@@ -87,7 +87,14 @@ namespace GameHook.Domain.GameHookProperties
             }
 
             MemoryAddress? address = Address;
-            AddressString = _originalAddressString;
+
+            var reloadAddressKvp = Instance.Variables
+                .FirstOrDefault(x => x.Key == "reload_addresses");
+            if (reloadAddressKvp.Value is true)
+            {
+                AddressString = _originalAddressString;
+            }
+            
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
             {
                 if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
