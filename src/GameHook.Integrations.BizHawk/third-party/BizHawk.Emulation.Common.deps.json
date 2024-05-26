@@ -7,10 +7,10 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "BizHawk.Emulation.Common/2.9.1": {
+      "BizHawk.Emulation.Common/1.0.0": {
         "dependencies": {
-          "BizHawk.BizInvoke": "2.9.1",
-          "BizHawk.Common": "2.9.1",
+          "BizHawk.BizInvoke": "1.0.0",
+          "BizHawk.Common": "1.0.0",
           "DotNetAnalyzers.DocumentationAnalyzers": "1.0.0-beta.59",
           "Menees.Analyzers": "3.0.10",
           "Meziantou.Analyzer": "2.0.33",
@@ -18,7 +18,8 @@
           "Newtonsoft.Json": "13.0.3",
           "Nullable": "1.3.1",
           "StyleCop.Analyzers": "1.2.0-beta.435",
-          "System.Collections.Immutable": "7.0.0"
+          "System.Collections.Immutable": "8.0.0",
+          "ppy.SDL2-CS": "1.0.630-alpha"
         },
         "runtime": {
           "BizHawk.Emulation.Common.dll": {}
@@ -55,6 +56,15 @@
         }
       },
       "Nullable/1.3.1": {},
+      "PolySharp/1.14.1": {},
+      "ppy.SDL2-CS/1.0.630-alpha": {
+        "runtime": {
+          "lib/netstandard2.0/SDL2-CS.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "StyleCop.Analyzers/1.2.0-beta.435": {
         "dependencies": {
           "StyleCop.Analyzers.Unstable": "1.2.0.435"
@@ -69,15 +79,15 @@
           }
         }
       },
-      "System.Collections.Immutable/7.0.0": {
+      "System.Collections.Immutable/8.0.0": {
         "dependencies": {
           "System.Memory": "4.5.5",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         },
         "runtime": {
           "lib/netstandard2.0/System.Collections.Immutable.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
@@ -137,18 +147,19 @@
           }
         }
       },
-      "BizHawk.BizInvoke/2.9.1": {
+      "BizHawk.BizInvoke/1.0.0": {
         "dependencies": {
-          "BizHawk.Common": "2.9.1",
+          "BizHawk.Common": "1.0.0",
           "System.Reflection.Emit": "4.7.0"
         },
         "runtime": {
           "BizHawk.BizInvoke.dll": {}
         }
       },
-      "BizHawk.Common/2.9.1": {
+      "BizHawk.Common/1.0.0": {
         "dependencies": {
           "Microsoft.Bcl.HashCode": "1.1.1",
+          "PolySharp": "1.14.1",
           "System.ComponentModel.Annotations": "5.0.0",
           "System.Memory": "4.5.5",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
@@ -160,7 +171,7 @@
     }
   },
   "libraries": {
-    "BizHawk.Emulation.Common/2.9.1": {
+    "BizHawk.Emulation.Common/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -228,6 +239,20 @@
       "path": "nullable/1.3.1",
       "hashPath": "nullable.1.3.1.nupkg.sha512"
     },
+    "PolySharp/1.14.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mOOmFYwad3MIOL14VCjj02LljyF1GNw1wP0YVlxtcPvqdxjGGMNdNJJxHptlry3MOd8b40Flm8RPOM8JOlN2sQ==",
+      "path": "polysharp/1.14.1",
+      "hashPath": "polysharp.1.14.1.nupkg.sha512"
+    },
+    "ppy.SDL2-CS/1.0.630-alpha": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xsHxpqcQpOT0v+eu3iRnsisjF/IIyzL+0ZGuu30Wo/TqzOZZcNNLdUXr1kgR4L5/NCxBiN3Rp6vd9n7qAip9jw==",
+      "path": "ppy.sdl2-cs/1.0.630-alpha",
+      "hashPath": "ppy.sdl2-cs.1.0.630-alpha.nupkg.sha512"
+    },
     "StyleCop.Analyzers/1.2.0-beta.435": {
       "type": "package",
       "serviceable": true,
@@ -249,12 +274,12 @@
       "path": "system.buffers/4.5.1",
       "hashPath": "system.buffers.4.5.1.nupkg.sha512"
     },
-    "System.Collections.Immutable/7.0.0": {
+    "System.Collections.Immutable/8.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-dQPcs0U1IKnBdRDBkrCTi1FoajSTBzLcVTpjO4MBCMC7f4pDOIPzgBoX8JjG7X6uZRJ8EBxsi8+DR1JuwjnzOQ==",
-      "path": "system.collections.immutable/7.0.0",
-      "hashPath": "system.collections.immutable.7.0.0.nupkg.sha512"
+      "sha512": "sha512-AurL6Y5BA1WotzlEvVaIDpqzpIPvYnnldxru8oXJU2yFxFUy3+pNXjXd1ymO+RA0rq0+590Q8gaz2l3Sr7fmqg==",
+      "path": "system.collections.immutable/8.0.0",
+      "hashPath": "system.collections.immutable.8.0.0.nupkg.sha512"
     },
     "System.ComponentModel.Annotations/5.0.0": {
       "type": "package",
@@ -298,12 +323,12 @@
       "path": "system.runtime.compilerservices.unsafe/6.0.0",
       "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
     },
-    "BizHawk.BizInvoke/2.9.1": {
+    "BizHawk.BizInvoke/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "BizHawk.Common/2.9.1": {
+    "BizHawk.Common/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

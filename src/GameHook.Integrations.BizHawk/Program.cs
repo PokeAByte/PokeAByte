@@ -1,7 +1,3 @@
-using BizHawk.Client.Common;
-using BizHawk.Client.EmuHawk;
-using BizHawk.Common;
-using BizHawk.Emulation.Common;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,8 +5,12 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using BizHawk.Client.Common;
+using BizHawk.Client.EmuHawk;
+using BizHawk.Common;
+using BizHawk.Emulation.Common;
 
-namespace GameHookIntegration;
+namespace GameHook.Integrations.BizHawk;
 
 [ExternalTool("GameHook Integration")]
 public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, IDisposable
@@ -36,7 +36,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
     private SharedPlatformConstants.PlatformEntry? Platform = null;
     private int? FrameSkip = null;
-
+    private NamedPipeServer? _namedPipeServer = null;
     public GameHookIntegrationForm()
     {
         ShowInTaskbar = false;
@@ -54,8 +54,30 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
 
         GameHookData_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("GAMEHOOK_BIZHAWK_DATA.bin", SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
         GameHookData_Accessor = GameHookData_MemoryMappedFile.CreateViewAccessor();
-    }
 
+        _namedPipeServer = new NamedPipeServer();
+        _namedPipeServer.ClientDataHandler += ReadFromClient;
+        _namedPipeServer.StartServer("BizHawk_Named_Pipe");
+        Closing += (sender, args) =>
+        {
+            _namedPipeServer.Dispose();
+            _namedPipeServer = null;
+        };
+    }
+    private void ReadFromClient(MemoryContract<byte[]>? clientData)
+    {
+        if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))
+            return;
+        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier] ?? 
+                           throw new Exception($"Memory domain not found.");
+        memoryDomain.Enter();
+        for (int i = 0; i < clientData.Data.Length; i++)
+        {
+            //0x244EC
+            memoryDomain.PokeByte(clientData.MemoryAddressStart + i, clientData.Data[i]);
+        }
+        memoryDomain.Exit();
+    }
     public override void Restart()
     {
         var data = new byte[SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE];
@@ -85,7 +107,7 @@ public sealed class GameHookIntegrationForm : ToolFormBase, IExternalToolForm, I
             MainLabel.Text = $"Sending {System} data to GameHook...";
         }
     }
-
+    
     protected override void UpdateAfter()
     {
         try

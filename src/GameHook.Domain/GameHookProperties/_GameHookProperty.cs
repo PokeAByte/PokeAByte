@@ -5,6 +5,7 @@ namespace GameHook.Domain.GameHookProperties
 {
     public abstract partial class GameHookProperty : IGameHookProperty
     {
+        private readonly string _originalAddressString;
         public GameHookProperty(IGameHookInstance instance, PropertyAttributes attributes)
         {
             Instance = instance;
@@ -13,6 +14,7 @@ namespace GameHook.Domain.GameHookProperties
 
             MemoryContainer = attributes.MemoryContainer;
             AddressString = attributes.Address;
+            _originalAddressString = attributes.Address ?? "";
             Length = attributes.Length;
             Size = attributes.Size;
             Bits = attributes.Bits;
@@ -86,6 +88,13 @@ namespace GameHook.Domain.GameHookProperties
 
             MemoryAddress? address = Address;
 
+            var reloadAddressKvp = Instance.Variables
+                .FirstOrDefault(x => x.Key == "reload_addresses");
+            if (reloadAddressKvp.Value is true)
+            {
+                AddressString = _originalAddressString;
+            }
+            
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
             {
                 if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
