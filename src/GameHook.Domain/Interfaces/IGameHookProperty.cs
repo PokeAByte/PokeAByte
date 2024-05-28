@@ -14,7 +14,6 @@
         public string? Description { get; set; }
 
         public string? Value { get; set; }
-
         public string? ReadFunction { get; set; }
         public string? WriteFunction { get; set; }
 
@@ -38,6 +37,7 @@
         string? Description { get; }
 
         object? Value { get; set; }
+        object? FullValue { get; set; }
         byte[]? Bytes { get; }
         byte[]? BytesFrozen { get; }
 
@@ -50,8 +50,11 @@
 
         Task WriteValue(string value, bool? freeze);
         Task WriteBytes(byte[] bytes, bool? freeze);
-
         Task FreezeProperty(byte[] bytesFrozen);
         Task UnfreezeProperty();
+        //Exposing protected methods so we can maintian consistency
+        object? ObjectFromBytes(byte[] value);
+        byte[] BytesFromValue(string value);
+        byte[] BytesFromFullValue();
     }
 }

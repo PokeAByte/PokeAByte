@@ -226,6 +226,32 @@
                 }
             }
         },
+        "/mapper/set-properties-by-bits": {
+            "post": {
+                "tags": [
+                    "Mapper"
+                ],
+                "summary": "Updates a memory address from multiple properties.",
+                "operationId": "UpdatePropertyByBitsAsync",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/UpdatePropertyValueModel"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
         "/mapper/set-property-bytes": {
             "post": {
                 "tags": [

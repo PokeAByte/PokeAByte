@@ -13,6 +13,7 @@ namespace GameHook.Domain.GameHookProperties
         private string? _reference { get; set; }
         private string? _description { get; set; }
         private object? _value { get; set; }
+        private object? _fullValue { get; set; }
         private byte[]? _bytes { get; set; }
         private byte[]? _bytesFrozen { get; set; }
         private string? _readFunction { get; set; }
@@ -145,6 +146,18 @@ namespace GameHook.Domain.GameHookProperties
             }
         }
 
+
+        public object? FullValue
+        {
+            get => _fullValue;
+            set
+            {
+                if (_fullValue != null && _fullValue.Equals(value)) return;
+
+                //FieldsChanged.Add("value");
+                _fullValue = value;
+            }
+        }
         public byte[]? Bytes
         {
             get => _bytes;
