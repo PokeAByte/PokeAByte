@@ -26,8 +26,8 @@ namespace GameHook.Infrastructure
         }
 
         private static string MapperLocalDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
+        private static string MapperLocalArchiveDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
         private static string MapperLocalCommitHashFilePath => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers", "COMMIT_HASH.txt");
-
         private static string MapperTemporaryZipFilepath => Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp.zip");
         private static string MapperTemporaryExtractionDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp\\");
 
@@ -70,6 +70,10 @@ namespace GameHook.Infrastructure
 
                 if (Directory.Exists(MapperLocalDirectory))
                 {
+                    //make a zipped archived of the old mappers
+                    ZipFile.CreateFromDirectory(MapperLocalDirectory, 
+                        Path.Combine(MapperLocalArchiveDirectory, 
+                            $"Mapper_{DateTime.Now:yyyyMMddhhmm}"));
                     Directory.Delete(MapperLocalDirectory, true);
                 }
 
