@@ -63,7 +63,16 @@ namespace GameHook.Domain.GameHookProperties
 
         protected abstract object? ToValue(byte[] bytes);
         protected abstract byte[] FromValue(string value);
-
+        
+        //Not sure why FromValue and ToValue are protected? I would like to be able to convert
+        //values to bytes without having to handle or copy/paste for each different property type,
+        //so I am going to expose it
+        public byte[] BytesFromValue(string value) 
+            => FromValue(value);
+        public object? ObjectFromBytes(byte[] bytes)
+            => ToValue(bytes);
+        public byte[] BytesFromFullValue()
+            => FromValue(FullValue?.ToString() ?? "");
         public HashSet<string> FieldsChanged { get; } = [];
 
         public void ProcessLoop(IMemoryManager memoryManager)
@@ -152,7 +161,9 @@ namespace GameHook.Domain.GameHookProperties
                 throw new Exception(
                   $"Unable to retrieve bytes for property '{Path}' at address {Address?.ToHexdecimalString()}. A byte array length of zero was returned?");
             }
-
+            //Store the original, full value
+            FullValue = ToValue(bytes);
+            
             if (string.IsNullOrEmpty(Bits) == false)
             {
                 int[] indexes;
