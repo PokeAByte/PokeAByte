@@ -12,6 +12,8 @@ using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using GameHook.Infrastructure.Drivers.Bizhawk;
+using GameHook.Infrastructure.Mappers;
 
 namespace GameHook.WebAPI
 {
@@ -75,6 +77,7 @@ namespace GameHook.WebAPI
 
             // Register application classes.
             services.AddSingleton<AppSettings>();
+            services.AddSingleton<MapperSettingsManager>();
             services.AddSingleton<GameHookInstance>();
             services.AddSingleton<ScriptConsole>();
             services.AddSingleton<IMapperFilesystemProvider, MapperFilesystemProvider>();

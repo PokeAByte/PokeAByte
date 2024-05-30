@@ -38,6 +38,8 @@ namespace GameHook.Domain
 
         public static string ConfigurationDirectoryWpfConfigFilePath =>
             Path.Combine(ConfigurationDirectory, "gamehook.wpf.config");
+        public static string MapperUpdateSettingsFile =>
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, "mapper_updater_settings.json");
 
 #if DEBUG
         public static bool IsDebug => true;

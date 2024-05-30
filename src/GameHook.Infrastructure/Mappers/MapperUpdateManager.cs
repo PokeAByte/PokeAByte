@@ -1,21 +1,26 @@
-﻿using GameHook.Domain;
+﻿using System.IO.Compression;
+using GameHook.Domain;
 using GameHook.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.IO.Compression;
 
-namespace GameHook.Infrastructure
+namespace GameHook.Infrastructure.Mappers
 {
     public class MapperUpdateManager : IMapperUpdateManager
     {
         private readonly ILogger<MapperUpdateManager> _logger;
         private readonly AppSettings _appSettings;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly MapperSettingsManager _mapperSettingsManager;
 
-        public MapperUpdateManager(ILogger<MapperUpdateManager> logger, AppSettings appSettings, IHttpClientFactory httpClientFactory)
+        public MapperUpdateManager(ILogger<MapperUpdateManager> logger, 
+            AppSettings appSettings, 
+            IHttpClientFactory httpClientFactory,
+            MapperSettingsManager mapperSettingsManager)
         {
             _logger = logger;
             _appSettings = appSettings;
             _httpClientFactory = httpClientFactory;
+            _mapperSettingsManager = mapperSettingsManager;
 
             if (Directory.Exists(BuildEnvironment.ConfigurationDirectory) == false)
             {
@@ -24,13 +29,17 @@ namespace GameHook.Infrastructure
                 Directory.CreateDirectory(BuildEnvironment.ConfigurationDirectory);
             }
         }
-
-        private static string MapperLocalDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
-        private static string MapperLocalArchiveDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
-        private static string MapperLocalCommitHashFilePath => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers", "COMMIT_HASH.txt");
-        private static string MapperTemporaryZipFilepath => Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp.zip");
-        private static string MapperTemporaryExtractionDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp\\");
-
+        
+        private static string MapperLocalDirectory => 
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
+        private static string MapperLocalArchiveDirectory => 
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
+        private static string MapperLocalCommitHashFilePath => 
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers", "COMMIT_HASH.txt");
+        private static string MapperTemporaryZipFilepath => 
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp.zip");
+        private static string MapperTemporaryExtractionDirectory => 
+            Path.Combine(BuildEnvironment.ConfigurationDirectory, $"mappers_tmp\\");
         private static void CleanupTemporaryFiles()
         {
             // TODO: 2/8/2024 - Remove this at a future date.
@@ -59,7 +68,7 @@ namespace GameHook.Infrastructure
 
                 // Download the ZIP from Github.
                 var bytes = await httpClient.GetByteArrayAsync(distUrl);
-                File.WriteAllBytes(MapperTemporaryZipFilepath, bytes);
+                await File.WriteAllBytesAsync(MapperTemporaryZipFilepath, bytes);
 
                 // Extract to the temporary directory.
                 using var zout = ZipFile.OpenRead(MapperTemporaryZipFilepath);
@@ -86,7 +95,61 @@ namespace GameHook.Infrastructure
             }
         }
 
+        public async Task<List<Mapper>> GetMapperList()
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            if (string.IsNullOrWhiteSpace(_mapperSettingsManager.MapperSettings.MapperDownloadBaseUrl))
+            {
+                _logger.LogError("The mapper repo url was null or empty.");
+                return [];
+            }
+
+            try
+            {
+                //await httpClient.
+                return [];
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Failed to retrieve the list of mappers from " +
+                                    $"{_mapperSettingsManager.MapperSettings.MapperDownloadBaseUrl}");
+                return [];
+            }
+        }
         public async Task<bool> CheckForUpdates()
+        {
+            try
+            {
+                if (BuildEnvironment.IsDebug && _appSettings.MAPPER_DIRECTORY_OVERWRITTEN)
+                {
+                    _logger.LogWarning("Mapper directory is overwritten, will not perform any updates.");
+                    return false;
+                }
+
+                if (_mapperSettingsManager.MapperSettings.AlwaysIgnoreUpdates is true)
+                {
+                    _logger.LogInformation("User requested to ignore updates.");
+                    return false;
+                }
+
+                if (_mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil is not null &&
+                    _mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil > DateTime.Now)
+                {
+                    return false;
+                }
+                //`IgnoreUpdatesUntil` timeframe has passed, remove the value
+                _mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil = null;
+                //Get the list of mappers 
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not perform update check for mappers.");
+                return false;
+            }
+        }
+        public async Task<bool> CheckForUpdatesDeprecated()
         {
             try
             {

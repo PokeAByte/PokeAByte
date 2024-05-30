@@ -1,7 +1,7 @@
 ﻿using GameHook.Domain;
 using GameHook.Domain.Interfaces;
 
-namespace GameHook.Infrastructure
+namespace GameHook.Infrastructure.Mappers
 {
     public class MapperFilesystemProvider : IMapperFilesystemProvider
     {
@@ -23,6 +23,7 @@ namespace GameHook.Infrastructure
 
         private string GetId(MapperFilesystemTypes type, string filePath)
         {
+            //Not sure why we should throw an exception instead of just returning string.Empty? 
             if (filePath.Contains(".."))
             {
                 throw new Exception("Invalid characters in file path.");
@@ -42,6 +43,7 @@ namespace GameHook.Infrastructure
 
         private string GetDisplayName(string filePath)
         {
+            //Not sure why we should throw an exception instead of just returning string.Empty? 
             if (filePath.Contains(".."))
             {
                 throw new Exception("Invalid characters in file path.");
@@ -70,7 +72,12 @@ namespace GameHook.Infrastructure
             {
                 throw new Exception("Invalid characters in mapper folder path.");
             }
-
+            //It is possible that the mapper dir is missing, if so this will cause a lot of issues.
+            if (!Directory.Exists(_appSettings.MAPPER_DIRECTORY))
+            {
+                //Just create the directory again
+                Directory.CreateDirectory(_appSettings.MAPPER_DIRECTORY);
+            }
             var mappers = new DirectoryInfo(_appSettings.MAPPER_DIRECTORY)
                 .GetFiles("*.xml", SearchOption.AllDirectories)
                 .Select(x => new MapperFilesystemDTO()
@@ -84,7 +91,12 @@ namespace GameHook.Infrastructure
 
             if (_appSettings.MAPPER_LOCAL_DIRECTORY != null)
             {
-                if (_appSettings.MAPPER_LOCAL_DIRECTORY.Contains('.') || _appSettings.MAPPER_LOCAL_DIRECTORY.Contains(".."))
+                //I am not sure why this is required? I will comment this out for now since this causes
+                //issues with the debugging process if we have mappers within the application build folder.
+                //Maybe it would be a better idea to just return what we have instead of throwing an exception and
+                //breaking everything?
+                if (/*_appSettings.MAPPER_LOCAL_DIRECTORY.Contains('.') ||*/ 
+                    _appSettings.MAPPER_LOCAL_DIRECTORY.Contains(".."))
                 {
                     throw new Exception("Invalid characters in mapper folder path.");
                 }
