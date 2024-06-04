@@ -121,7 +121,7 @@ namespace GameHook.WebAPI.Controllers
         public string Path { get; init; } = string.Empty;
         public bool Freeze { get; init; }
     }
-
+    
     [ApiController]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -299,6 +299,61 @@ namespace GameHook.WebAPI.Controllers
             return Ok();
         }
 
+        [HttpPost("set-properties-by-bits")]
+        [SwaggerOperation("Updates a memory address from multiple properties.")]
+        public async Task<ActionResult> UpdatePropertyByBitsAsync(List<UpdatePropertyValueModel> model)
+        {
+            if (Instance.Initalized == false || Instance.Mapper == null)
+                return ApiHelper.MapperNotLoaded();
+
+            if (model.Count == 0)
+                return ApiHelper.BadRequestResult("Properties count is zero.");
+            //Make sure all values exist
+            if (model.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
+                return ApiHelper.BadRequestResult("Values cannot be null.");
+            //Convert BitProperty to GameHookBitProperty
+            var gameHookProperties = model
+                .Select(x =>
+                {
+                    var path = x.Path.StripEndingRoute().FromRouteToPath();
+                    //Since we are already checking if the value is null, we shouldn't need to worry
+                    //about it being string.Empty. I just want to stop the compiler from complaining 
+                    return new KeyValuePair<IGameHookProperty, string>
+                        (Instance.Mapper.Properties[path], x.Value?.ToString() ?? string.Empty);
+                })
+                .ToDictionary();
+            //Make sure the addresses are the same
+            var baseAddress = gameHookProperties.First().Key.Address;
+            var baseType = gameHookProperties.First().Key.Type;
+            var baseLength = gameHookProperties.First().Key.Length;
+            if (baseAddress is null || baseLength is null)
+                return ApiHelper.BadRequestResult("Address or length for property is null.");
+            if (gameHookProperties.Any(x => 
+                        x.Key.Address != baseAddress.Value || 
+                        x.Key.Type != baseType ||
+                        x.Key.Length != baseLength))
+                return ApiHelper.BadRequestResult("Addresses or types for the properties are not the same.");
+
+            try
+            {
+                //Construct the updated byte array from value
+                var outputByteArray = MultiplePropertiesUpdater
+                    .ConstructUpdatedBytes(gameHookProperties);
+                //Update only the first property since WriteBytes will overwrite the entire address space 
+                //of this property. We are maintaining the original set of bytes before overwriting only
+                //the values 
+                await gameHookProperties
+                    .First()
+                    .Key
+                    .WriteBytes(outputByteArray, false);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ApiHelper.BadRequestResult(e.ToString());
+            }
+            return Ok();
+        }
         [HttpPost("set-property-bytes")]
         [SwaggerOperation("Updates a property's bytes.")]
         public async Task<ActionResult> UpdatePropertyBytesAsync(UpdatePropertyBytesModel model)
