@@ -80,8 +80,16 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">Update Manager</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getAvailableUpdates">View Available Mapper Updates</a>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="dropdown is-hoverable">
                     <div class="dropdown-trigger header-menu-item">Help</div>
                     <div class="dropdown-menu" role="menu">
                         <div class="dropdown-content">
@@ -98,14 +106,15 @@
                                target="_blank">Credits</a>
                         </div>
                     </div>
-                </div>
+                </div>-->
+            
             </div>
-
+                        
             <div class="columns mt-3" v-if="loadingMapperWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
                         <p class="my-3">Please select the mapper file you would like to load.</p>
-
+                        
                         <select class="input my-3" v-model="loadingMapperSelectedId">
                             <option :value="null"></option>
                             <option v-for="file in loadingMapperFiles" :value="file.id">
@@ -127,6 +136,71 @@
                 </div>
             </div>
 
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select the mapper file you would like to update/download.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="updateSearch" />
+                        </label>
+                        <ul>
+                            <li>
+                                <label>
+                                    <input type="checkbox" v-on:click="checkAllMappers" v-model="allMapperUpdatesSelected" />
+                                    <span> Check All</span>
+                                </label>
+                                <hr />
+                            </li>
+                            <li v-for="(mapper, index) in filteredUpdates" style="padding:4px">
+                                <label>
+                                    <input :id="mapper.path" :value="mapper" name="mapper"
+                                        type="checkbox" v-model="selectedMapperUpdates" />
+                                    <span>&nbsp;{{getPath(mapper)}} - Revision #{{getRevision(mapper)}}</span>
+                                    <br />
+                                        <span v-if="selectedMapperUpdates.includes(mapper)">
+                                            <span v-if="mapper.currentVersion !== undefined" style="padding-left:16px">
+                                                Local Revision #{{mapper.currentVersion.revision}}: Created: {{formatDate(mapper.currentVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.currentVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Local: Missing
+                                            </span>
+                                            <br />
+                                            <span v-if="mapper.latestVersion !== undefined" style="padding-left:16px">
+                                                Remote Revision #{{mapper.latestVersion.revision}}: Created: {{formatDate(mapper.latestVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.latestVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Remote: Missing
+                                            </span>
+                                        </span>
+                                </label>
+                            </li>
+                        </ul>
+                        <hr />
+                        <button type="button" class="button" v-on:click="downloadUpdatedMappers">
+                            Downloaded {{selectedMapperUpdates.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="checkForMapperUpdates">
+                            Check for Updates
+                        </button>
+                        <button type="button" class="button" v-on:click="mapperUpdaterWindowOpen = false">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowLoaderOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <img src="loading.gif" alt="loading" style="height: 100px; width: 100px"/>
+                    </div>
+                </div>
+            </div>
+            
             <div class="center-wrapper" v-else-if="!mapper.meta">
                 <div>You do not have a mapper loaded.</div>
             </div>
@@ -599,7 +673,13 @@
                 apiDocumentationUrl: `${originUrl}/swagger/`,
                 loadingMapper: false,
                 loadingMapperWindowOpen: false,
+                mapperUpdaterWindowOpen: false,
+                mapperUpdaterWindowLoaderOpen: false,
                 loadingMapperFiles: null,
+                updateSearch: "",
+                availableUpdates: [],
+                selectedMapperUpdates: [],
+                allMapperUpdatesSelected: false,
                 loadingMapperSelectedId: null,
                 loadingMapperError: null,
                 mapper: null,
@@ -661,9 +741,46 @@
             // Load existing user configuration.
             this.loadData()
         },
+        computed: {
+            filteredUpdates() {
+                return this.availableUpdates.filter(item => {
+                    let found = false;
+                    if(item.latestVersion !== undefined) {
+                        found = item.latestVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());
+                    } 
+                    if(item.currentVersion !== undefined) {
+                        found = found || item.currentVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());         
+                    }
+                    return found;
+                });
+            }
+        },
         methods: {
             decimalToHexdecimal: GameHookMapperClient.decimalToHexdecimal,
-
+            getPath: function(mapperDto) {
+                return mapperDto.currentVersion === undefined ?
+                    mapperDto.latestVersion.path : mapperDto.currentVersion.path;
+            },
+            getRevision: function(mapperDto) {
+                return mapperDto.latestVersion === undefined ?
+                    mapperDto.currentVersion.revision : mapperDto.latestVersion.revision;                
+            },
+            formatDate: function(date) {
+                let formattedDate = new Date(date);
+                if(formattedDate.toString() === "Invalid Date") {
+                    return "N/A";
+                } else {
+                    let dt = formattedDate.toISOString().split("T");
+                    return `${dt[0]} ${dt[1].substring(0, dt[1].indexOf("."))}`
+                    //return `${formattedDate.getFullYear()}-${formattedDate.getMonth()+1}-${formattedDate.getDate()} ${formattedDate.getHours()}:${formattedDate.getMinutes()}`;
+                }
+            },
             displayBytes: function (bytes, forceMode) {
                 const mode = forceMode ?? this.userSettings.displayBytesMode
 
@@ -759,6 +876,53 @@
 
                 return []
             },
+            getAvailableUpdates: async function() {
+                this.selectedMapperUpdates = []
+                this.availableUpdates = []
+                this.updateSearch = "";
+                this.availableUpdates = await fetch(`${this.mapper._connectionString}/files/mapper/get_updates`)
+                    .then(async (x) => {
+                      return await x.json()  
+                    })
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = true
+                this.mapperUpdaterWindowLoaderOpen = false;
+            },
+            checkForMapperUpdates: async function() {
+                this.availableUpdates = []
+                this.updateSearch = "";
+                await fetch(`${this.mapper._connectionString}/files/mapper/check_for_updates`, {
+                    method: 'GET'
+                }).then(async() => {
+                    await this.getAvailableUpdates();
+                });
+            },            
+            checkAllMappers: function() {
+                this.selectedMapperUpdates = []
+                if(!this.allMapperUpdatesSelected) {
+                    for(mapperUpdate in this.availableUpdates) {
+                        this.selectedMapperUpdates.push(this.availableUpdates[mapperUpdate])
+                    }
+                }
+            },
+            downloadUpdatedMappers: async function() {
+                try {
+                    if(this.selectedMapperUpdates.length === 0)
+                        return;
+                    this.availableUpdates = []
+                    this.updateSearch = ""
+                    this.mapperUpdaterWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/download_updates`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedMapperUpdates)                        
+                    })
+                } finally {
+                    this.selectedMapperUpdates = []
+                    await this.getAvailableUpdates();
+                }
+            },
             openLoadingMapper: async function () {
                 this.loadingMapperFiles = await fetch(`${this.mapper._connectionString}/files/mappers`)
                     .then(async (x) => {
@@ -766,6 +930,7 @@
                     })
 
                 this.loadingMapperWindowOpen = true
+                this.mapperUpdaterWindowOpen = false
             },
             replaceMapper: async function (id = null) {
                 this.loadingMapper = true

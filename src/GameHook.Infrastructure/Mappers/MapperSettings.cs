@@ -15,34 +15,17 @@ public record MapperSettings
     public string? MapperDownloadBaseUrl { get; set; }
     [JsonPropertyName("archive_limit")]
     public int ArchiveLimit { get; set; } = 10;
-    [JsonPropertyName("mappers")] 
-    public List<Mapper> Mappers { get; set; } = [];
-}
+    [JsonPropertyName("requires_update")] 
+    public bool RequiresUpdate { get; set; } = false;
 
-public record Mapper
-{
-    [JsonPropertyName("mapper_display_name")]
-    public string DisplayName { get; set; } = "";
-    [JsonPropertyName("mapper_filename")]
-    public string Filename { get; set; } = "";
-    [JsonPropertyName("mapper_current_version")]
-    public string CurrentVersion { get; set; } = "";
-    [JsonPropertyName("mapper_latest_version")]
-    public string LatestVersion { get; set; } = "";
-}
-public class MapperSettingsManager
-{
-    public MapperSettings MapperSettings = new();
-    private readonly ILogger<MapperSettings> _logger;
-    public MapperSettingsManager(ILogger<MapperSettings> logger)
+    public static MapperSettings Load(ILogger logger)
     {
-        _logger = logger;
         //Setting file does not exist, just continue like normal
         if (!File.Exists(BuildEnvironment.MapperUpdateSettingsFile))
         {
             logger.LogWarning($"{BuildEnvironment.MapperUpdateSettingsFile} does not exist. " +
                               $"Mapper update settings failed to load.");
-            return;
+            return new MapperSettings();
         }
 
         //Load the json
@@ -52,28 +35,28 @@ public class MapperSettingsManager
         {
             logger.LogWarning($"Failed to read data from {BuildEnvironment.MapperUpdateSettingsFile}. " +
                               $"Mapper update settings failed to load.");
-           return; 
+            return new MapperSettings();
         }
 
         try
         {
             //Deserialize the data 
-            MapperSettings = JsonSerializer
+            return JsonSerializer
                 .Deserialize<MapperSettings>(jsonData) ?? new MapperSettings();
         }
         catch (Exception ex)
         {
             logger.LogWarning($"Failed to parse {BuildEnvironment.MapperUpdateSettingsFile}. " +
                               $"Mapper update settings failed to load.");
-        }
+            return new MapperSettings();
+        }        
     }
-
-    public void SaveChanges()
+    public void SaveChanges(ILogger logger)
     {
-        var jsonData = JsonSerializer.Serialize(MapperSettings);
+        var jsonData = JsonSerializer.Serialize(this);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
-            _logger.LogError("Failed to save changes to the mapper settings file.");
+            logger.LogError("Failed to save changes to the mapper settings file.");
             return;
         }
 
@@ -83,7 +66,7 @@ public class MapperSettingsManager
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to save changes to the mapper settings file.");
+            logger.LogError(e, "Failed to save changes to the mapper settings file.");
         }
     }
 }

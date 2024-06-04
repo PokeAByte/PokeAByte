@@ -1,6 +1,9 @@
 ﻿using System.IO.Compression;
+using System.Net.Http.Json;
+using System.Text.Json;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Infrastructure.Github;
 using Microsoft.Extensions.Logging;
 
 namespace GameHook.Infrastructure.Mappers
@@ -10,17 +13,23 @@ namespace GameHook.Infrastructure.Mappers
         private readonly ILogger<MapperUpdateManager> _logger;
         private readonly AppSettings _appSettings;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly MapperSettingsManager _mapperSettingsManager;
+        private readonly MapperSettings _mapperSettings;
+        private readonly GithubApiSettings _githubApiSettings;
+        private readonly GithubRestApi _githubRestApi;
 
         public MapperUpdateManager(ILogger<MapperUpdateManager> logger, 
             AppSettings appSettings, 
             IHttpClientFactory httpClientFactory,
-            MapperSettingsManager mapperSettingsManager)
+            MapperSettings mapperSettingsManager, 
+            GithubApiSettings githubApiSettings, 
+            GithubRestApi githubRestApi)
         {
             _logger = logger;
             _appSettings = appSettings;
             _httpClientFactory = httpClientFactory;
-            _mapperSettingsManager = mapperSettingsManager;
+            _mapperSettings = mapperSettingsManager;
+            _githubApiSettings = githubApiSettings;
+            _githubRestApi = githubRestApi;
 
             if (Directory.Exists(BuildEnvironment.ConfigurationDirectory) == false)
             {
@@ -83,6 +92,7 @@ namespace GameHook.Infrastructure.Mappers
                     ZipFile.CreateFromDirectory(MapperLocalDirectory, 
                         Path.Combine(MapperLocalArchiveDirectory, 
                             $"Mapper_{DateTime.Now:yyyyMMddhhmm}"));
+                    
                     Directory.Delete(MapperLocalDirectory, true);
                 }
 
@@ -95,26 +105,29 @@ namespace GameHook.Infrastructure.Mappers
             }
         }
 
-        public async Task<List<Mapper>> GetMapperList()
+        //Returns a list of outdated mappers 
+        private async Task<List<MapperComparisonDto>> GetOutdatedMapperList()
         {
-            var httpClient = _httpClientFactory.CreateClient();
-            if (string.IsNullOrWhiteSpace(_mapperSettingsManager.MapperSettings.MapperDownloadBaseUrl))
+            //Get the latest version of the mapper tree from github
+            var mapperListResponse = await _githubRestApi.GetMapperTreeFile();
+            if (mapperListResponse is null || !mapperListResponse.IsSuccessStatusCode)
             {
-                _logger.LogError("The mapper repo url was null or empty.");
+                _logger.LogError("Failed to download the latest version of the mapper tree json from Github.");
                 return [];
             }
+            //Convert the remote data to a MapperDto
+            var remote = await mapperListResponse.Content.ReadFromJsonAsync<List<MapperDto>>();
+            if (remote is null || remote.Count == 0)
+            {
+                _logger.LogError("Could not read the remote json file.");
+                return [];
+            }
+            //Get the current version the user has on their filesystem
+            var mapperTreeUtil = new MapperTreeUtility(MapperLocalDirectory);
+            mapperTreeUtil.Load();
+            //Compare the mapper trees and return a list of outdated mappers
+            return mapperTreeUtil.CompareMapperTrees(remote);
 
-            try
-            {
-                //await httpClient.
-                return [];
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Failed to retrieve the list of mappers from " +
-                                    $"{_mapperSettingsManager.MapperSettings.MapperDownloadBaseUrl}");
-                return [];
-            }
         }
         public async Task<bool> CheckForUpdates()
         {
@@ -123,24 +136,35 @@ namespace GameHook.Infrastructure.Mappers
                 if (BuildEnvironment.IsDebug && _appSettings.MAPPER_DIRECTORY_OVERWRITTEN)
                 {
                     _logger.LogWarning("Mapper directory is overwritten, will not perform any updates.");
+                    _mapperSettings.RequiresUpdate = false;
+                    _mapperSettings.SaveChanges(_logger);
                     return false;
                 }
 
-                if (_mapperSettingsManager.MapperSettings.AlwaysIgnoreUpdates is true)
+                if (_mapperSettings.AlwaysIgnoreUpdates)
                 {
                     _logger.LogInformation("User requested to ignore updates.");
+                    _mapperSettings.RequiresUpdate = false;
+                    _mapperSettings.SaveChanges(_logger);
                     return false;
                 }
 
-                if (_mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil is not null &&
-                    _mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil > DateTime.Now)
+                if (_mapperSettings.IgnoreUpdatesUntil is not null &&
+                    _mapperSettings.IgnoreUpdatesUntil > DateTime.Now)
                 {
+                    _mapperSettings.RequiresUpdate = false;
+                    _mapperSettings.SaveChanges(_logger);
                     return false;
                 }
                 //`IgnoreUpdatesUntil` timeframe has passed, remove the value
-                _mapperSettingsManager.MapperSettings.IgnoreUpdatesUntil = null;
-                //Get the list of mappers 
-                
+                _mapperSettings.IgnoreUpdatesUntil = null;
+                //Get the list of outdated mappers 
+                var outdatedMappers = await GetOutdatedMapperList();
+                //Save the outdated mapper list
+                var jsonData = JsonSerializer.Serialize(outdatedMappers);
+                await File.WriteAllTextAsync(BuildEnvironment.OutdatedMapperTreeJson,jsonData);
+                _mapperSettings.RequiresUpdate = true;
+                _mapperSettings.SaveChanges(_logger);
                 return true;
             }
             catch (Exception ex)
@@ -190,6 +214,135 @@ namespace GameHook.Infrastructure.Mappers
 
                 return false;
             }
+        }
+
+        private void ArchiveFile(string relativeFilename, string filepath, string? archivePath)
+        {
+            //var filename = relativeFilename[relativeFilename.LastIndexOf('/')..];
+            if (!File.Exists(filepath))
+            {
+                _logger.LogWarning($"Failed to archive {relativeFilename} because it does not exist.\n" +
+                                   $"\tPath: {filepath}");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(archivePath) || !Directory.Exists(archivePath))
+            {
+                _logger.LogWarning($"Failed to archive {relativeFilename} because " +
+                                   $"the archive directory not exist.");
+                return;
+            }
+            try
+            {
+                var archiveFile = new FileInfo($"{archivePath}/{relativeFilename}");
+                archiveFile.Directory?.Create();
+                File.Move(filepath, 
+                    archiveFile.FullName);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Failed to archive {relativeFilename} because of an exception.");
+            }
+        }
+
+        private void WriteTextToFile(string filepath, string text)
+        {
+            if (!string.IsNullOrWhiteSpace(text))  
+            {
+                try
+                {
+                    var file = new FileInfo(filepath);
+                    file.Directory?.Create();
+                    File.WriteAllText(file.FullName, text);
+                    return;
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"Failed to write {filepath} because of an exception.");
+                    return;
+                }
+            }
+            _logger.LogWarning($"Failed to write {filepath} because the input data was blank.");
+        }
+        
+        public async Task SaveUpdatedMappersAsync(List<UpdateMapperDto> updatedMappers)
+        {
+            DirectoryInfo? archiveDirectory = null;
+            //Create a tmp dir to store old mappers
+            archiveDirectory = !Directory.Exists(Path.Combine(MapperLocalDirectory, "Archive")) ?
+                Directory.CreateDirectory(Path.Combine(MapperLocalDirectory, "Archive")) : 
+                new DirectoryInfo(Path.Combine(MapperLocalDirectory, "Archive"));
+            foreach (var mapper in updatedMappers)
+            {
+                var mapperPath = $"{MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
+                var jsPath = $"{MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
+                ArchiveFile(mapper.RelativeXmlPath, mapperPath, archiveDirectory?.FullName);
+                ArchiveFile(mapper.RelativeJsPath, jsPath, archiveDirectory?.FullName);
+                WriteTextToFile(mapperPath, mapper.XmlData);
+                WriteTextToFile(jsPath, mapper.JsData);
+                /*if(File.Exists(Path.Combine(MapperLocalDirectory.Replace("\\", "/"), mapper.XmlPath)))
+                    File.Move(
+                        Path.Combine(MapperLocalDirectory.Replace("\\", "/"), mapper.XmlPath),
+                        Path.Combine(MapperLocalDirectory.Replace("\\", "/"), "Archive", mapper.XmlPath));
+                if(File.Exists(Path.Combine(MapperLocalDirectory.Replace("\\", "/"), mapper.JsPath)))
+                    File.Move(
+                        Path.Combine(MapperLocalDirectory.Replace("\\", "/"), mapper.JsPath),
+                        Path.Combine(MapperLocalDirectory.Replace("\\", "/"), "Archive", mapper.JsPath));*/
+                //Write the files to their respective directories
+                /*if (!string.IsNullOrEmpty(mapper.XmlData))
+                {
+                    var file = new
+                        FileInfo(MapperLocalDirectory.Replace("\\", "/") + mapper.RelativeXmlPath);
+                    file.Directory?.Create();
+                    await File.WriteAllTextAsync(file.FullName, mapper.XmlData);
+                }
+
+                if (!string.IsNullOrEmpty(mapper.JsData))
+                {
+                    var file = new
+                        FileInfo(MapperLocalDirectory.Replace("\\", "/") + mapper.RelativeJsPath);
+                    file.Directory?.Create();
+                    await File.WriteAllTextAsync(file.FullName, mapper.JsData);
+                }*/
+            }
+
+            var archiveFolder = Path.Combine(MapperLocalDirectory, "Archive");
+            var archiveFiles = Directory.GetDirectories(archiveFolder).Length != 0 || 
+                               Directory.GetFiles(archiveFolder).Length != 0;
+            
+            //Zip the archived files
+            if (archiveFiles)
+            {
+                var archiveDir = Directory.CreateDirectory(MapperLocalArchiveDirectory);
+                /*var archiveMapperDirectory = new DirectoryInfo(Path.Combine(archiveDir.FullName, 
+                    $"Mapper_{DateTime.Now:yyyyMMddhhmm}"));
+                archiveMapperDirectory.Create();*/
+                Directory.Move(Path.Combine(MapperLocalDirectory, "Archive"), 
+                    Path.Combine(archiveDir.FullName, $"Mapper_{DateTime.Now:yyyyMMddhhmm}"));
+                /*ZipFile.CreateFromDirectory(Path.Combine(MapperLocalDirectory, "Archive"), 
+                Path.Combine(MapperLocalArchiveDirectory, 
+                    $"Mappers_{DateTime.Now:yyyyMMddhhmm}.zip"));*/
+            }
+
+            try
+            {
+                //Clean out tmp dir
+                if (Directory.Exists(Path.Combine(MapperLocalDirectory, "Archive")))
+                {
+                    Directory.Delete(Path.Combine(MapperLocalDirectory, "Archive"), true);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to remove the archive folder because of an exception.");
+            }
+
+            //Update the mapper list
+            var mapperTreeUtil = new MapperTreeUtility(MapperLocalDirectory);
+            mapperTreeUtil.MapperTree = mapperTreeUtil.GenerateMapperDtoTree();
+            mapperTreeUtil.SaveChanges();
+            //Finish off by checking for any changes
+            await CheckForUpdates();
         }
     }
 }

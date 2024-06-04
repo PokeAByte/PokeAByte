@@ -1,0 +1,128 @@
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using GameHook.Domain;
+using Microsoft.Extensions.Logging;
+
+namespace GameHook.Infrastructure.Github;
+
+public record GithubApiSettings 
+{
+    //Accept
+    [JsonPropertyName("accept")] public string Accept { get; set; } = "application/vnd.github.v3.raw";//"application/vnd.github+json";
+    
+    //X-GitHub-Api-Version
+    [JsonPropertyName("api_version")]
+    public string ApiVersion { get; set; } = "2022-11-28";
+    
+    //Authorization
+    [JsonIgnore]
+    public string Token { get; set; } = "";
+    [JsonPropertyName("owner")]
+    public string Owner { get; set; } = "amnipp";
+    
+    [JsonPropertyName("repo")]
+    public string Repo { get; set; } = "mappers";
+    
+    [JsonPropertyName("dir")] 
+    public string Directory { get; set; } = "";
+
+    [JsonIgnore] public static string GithubApiUrl = "https://api.github.com/repos/";
+    //[JsonIgnore] public static string GithubApiUrl = "https://raw.githubusercontent.com/";
+    [JsonIgnore] private ILogger? _logger;
+    public string GetAcceptValue() => Accept;
+
+    public string GetApiVersionValue() => ApiVersion;
+
+    public string GetTokenValue() => Token;
+
+    public string GetFormattedToken() =>
+        !string.IsNullOrWhiteSpace(Token) ? $"Bearer {Token}" : "";
+
+    public string GetDirectory() => Directory;
+    protected void SetLogger(ILogger<GithubApiSettings> logger)
+    {
+        _logger = logger;
+    }
+
+    protected GithubApiSettings(ILogger<GithubApiSettings> logger, string? token = null)
+    {
+        Token = token ?? "";
+        _logger = logger;
+    }
+
+    protected GithubApiSettings()
+    {
+    }
+
+    public string GetBaseRequestString()
+    {
+        if (string.IsNullOrWhiteSpace(Owner) ||
+            string.IsNullOrWhiteSpace(Repo))
+        {
+            _logger?.LogError(
+                "Cannot generate a request string because either Owner or Repo are null. \n" +
+                $"Owner: {Owner}, Repo: {Repo}");
+            return "";
+        }
+
+        return $"{GithubApiUrl}{Owner}/{Repo}";
+    }
+
+    public static GithubApiSettings Load(ILogger<GithubApiSettings> logger, string? token = null)
+    {
+        //Setting file does not exist, just continue like normal
+        if (!File.Exists(BuildEnvironment.GithubApiSettings))
+        {
+            logger.LogWarning($"{BuildEnvironment.GithubApiSettings} does not exist. " +
+                              $"Mapper update settings failed to load.");
+            return new GithubApiSettings(logger, token);
+        }
+        
+        //Load the json
+        var jsonData = File.ReadAllText(BuildEnvironment.GithubApiSettings);        
+        //Blank json data, just return 
+        if (string.IsNullOrWhiteSpace(jsonData))
+        {
+            logger.LogWarning($"Failed to read data from {BuildEnvironment.GithubApiSettings}. " +
+                              $"Github Api settings failed to load.");
+            return new GithubApiSettings(logger);
+        }
+        try
+        {
+            //Deserialize the data 
+            var deserialized = JsonSerializer
+                .Deserialize<GithubApiSettings>(jsonData);
+            if (deserialized is null)
+                return new GithubApiSettings(logger);
+            deserialized.SetLogger(logger);
+            deserialized.Token = token ?? "";
+            return deserialized;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning($"Failed to parse {BuildEnvironment.GithubApiSettings}. " +
+                              $"Github Api settings failed to load.");
+            return new GithubApiSettings(logger);
+        }
+    }
+
+    public void SaveChanges(ILogger logger)
+    {
+        var jsonData = JsonSerializer.Serialize(this);
+        if (string.IsNullOrWhiteSpace(jsonData))
+        {
+            logger.LogError("Failed to save changes to the Github Api settings file.");
+            return;
+        }
+
+        try
+        {
+            File.WriteAllText(BuildEnvironment.MapperUpdateSettingsFile,jsonData);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to save changes to the Github Api settings file.");
+        }
+    }
+}
