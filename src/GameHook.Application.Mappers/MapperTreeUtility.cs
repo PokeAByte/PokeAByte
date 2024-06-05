@@ -2,30 +2,30 @@
 using System.Xml;
 using GameHook.Domain;
 
-namespace GameHook.Infrastructure.Mappers;
+namespace GameHook.Mappers;
 
-public class MapperTreeUtility(string baseDirectory)
+public static class MapperTreeUtility
 {
-    public readonly string BaseDirectory = baseDirectory;
+    //public readonly string BaseDirectory = baseDirectory;
     //public List<string> FileTree = [];
-    public List<MapperDto> MapperTree = [];
-    private List<string> GenerateFileTree()
+    //public List<MapperDto> MapperTree = [];
+    private static List<string> GenerateFileTree(string baseDirectory)
     {
-        if (string.IsNullOrWhiteSpace(BaseDirectory))
+        if (string.IsNullOrWhiteSpace(baseDirectory))
             throw new Exception("Base directory is null.");
-        if (!Directory.Exists(BaseDirectory))
+        if (!Directory.Exists(baseDirectory))
         {
-            Directory.CreateDirectory(BaseDirectory);
+            Directory.CreateDirectory(baseDirectory);
         }
         return Directory
-            .GetFiles(BaseDirectory, 
+            .GetFiles(baseDirectory, 
             "*.*", 
             SearchOption.AllDirectories)
             .Where(x => x.EndsWith(".xml"))
             .ToList();
     }
 
-    private int GetRevision(string xmlPath)
+    public static int GetRevision(string xmlPath)
     {
         if (!File.Exists(xmlPath))
             return 0;
@@ -37,55 +37,50 @@ public class MapperTreeUtility(string baseDirectory)
         int.TryParse(rev, out var revision);
         return revision;
     }
-    public List<MapperDto> GenerateMapperDtoTree()
+    public static List<MapperDto> GenerateMapperDtoTree(string baseDirectory)
     {
-        var fileTree = GenerateFileTree();
+        var fileTree = GenerateFileTree(baseDirectory);
         if (fileTree.Count == 0)
             return [];
         return fileTree
-            .Select(x => MapperDto.Create(BaseDirectory, x, GetRevision(x)))
+            .Select(x => MapperDto.Create(baseDirectory, x, GetRevision(x)))
             .ToList();
     }
-    public void Load()
+    public static List<MapperDto> Load(string baseDirectory)
     {
-        var path = Path.Combine(BaseDirectory, "mapper_tree.json");
+        var path = Path.Combine(baseDirectory, "mapper_tree.json");
         if (!File.Exists(path))
         {
             Console.WriteLine($"{path} does not exist.");
-            MapperTree = GenerateMapperDtoTree();
-            SaveChanges();
-            return;
+            var mapperTree = GenerateMapperDtoTree(baseDirectory);
+            SaveChanges(baseDirectory, mapperTree);
+            return mapperTree;
         }
 
         try
         {
             var jsonData = File.ReadAllText(path);
             var mapperDtoList = JsonSerializer.Deserialize<List<MapperDto>>(jsonData);
-            if (mapperDtoList is null)
-            {
-                MapperTree = GenerateMapperDtoTree();
-                SaveChanges();
-            }
-            else
-            {
-                MapperTree = mapperDtoList;
-            }
+            if (mapperDtoList is not null) return mapperDtoList;
+            var mapperTree = GenerateMapperDtoTree(baseDirectory);
+            SaveChanges(baseDirectory, mapperTree);
+            return mapperTree;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            MapperTree = GenerateMapperDtoTree();
+            return GenerateMapperDtoTree(baseDirectory);
         }
     }
-    public bool SaveChanges()
+    public static bool SaveChanges(string baseDirectory, List<MapperDto> mapperTree)
     {
-        if (MapperTree.Count == 0)
+        if (mapperTree.Count == 0)
         {
             Console.WriteLine("Mapper tree is empty. Failed to save.");
             return false;
         }
-        var path = Path.Combine(BaseDirectory, "mapper_tree.json");
-        var jsonData = JsonSerializer.Serialize(MapperTree);
+        var path = Path.Combine(baseDirectory, "mapper_tree.json");
+        var jsonData = JsonSerializer.Serialize(mapperTree);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
             Console.WriteLine("Serialized json data is null. Failed to save.");
@@ -99,11 +94,11 @@ public class MapperTreeUtility(string baseDirectory)
 
 public static class MapperTreeUtilityExtensions
 {
-    public static List<MapperComparisonDto> CompareMapperTrees(this MapperTreeUtility local, List<MapperDto> remoteTree)
+    public static List<MapperComparisonDto> CompareMapperTrees(this List<MapperDto> local, List<MapperDto> remoteTree)
     {
         //Get a list of mappers missing from local
         var missing = remoteTree
-            .Where(x => local.MapperTree.All(y => y.Path != x.Path))
+            .Where(x => local.All(y => y.Path != x.Path))
             .Select(remote => new MapperComparisonDto()
             {
                 LatestVersion = remote,
@@ -116,7 +111,7 @@ public static class MapperTreeUtilityExtensions
         //Then we run the `Outdated` to compare local and remote's DateUpdatedUtc
         //True means the local mapper is outdated, otherwise it means they aren't outdated
         //or `DateUpdatedUtc` is null
-        var outdated = local.MapperTree.Where(x =>
+        var outdated = local.Where(x =>
                 x.Outdated(remoteTree
                     .FirstOrDefault(y =>
                         y.Path == x.Path)))

@@ -13,6 +13,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
 		<ProjectReference Include="..\GameHook.Integrations.BizHawk\GameHook.Integrations.BizHawk.csproj" />
+		<ProjectReference Include="..\GameHook.Application.Mappers\GameHook.Application.Mappers.csproj" />
 	</ItemGroup>
 
 </Project>

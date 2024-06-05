@@ -1,7 +1,7 @@
 ﻿using GameHook.Domain;
 using GameHook.Domain.Interfaces;
 
-namespace GameHook.Infrastructure.Mappers
+namespace GameHook.Mappers
 {
     public class MapperFilesystemProvider : IMapperFilesystemProvider
     {

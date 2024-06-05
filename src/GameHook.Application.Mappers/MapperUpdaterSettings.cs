@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 using GameHook.Domain;
 using Microsoft.Extensions.Logging;
 
-namespace GameHook.Infrastructure.Mappers;
+namespace GameHook.Mappers;
 
-public record MapperSettings
+public record MapperUpdaterSettings
 {
     [JsonPropertyName("always_ignore_updates")]
     public bool AlwaysIgnoreUpdates { get; set; }
@@ -18,37 +18,37 @@ public record MapperSettings
     [JsonPropertyName("requires_update")] 
     public bool RequiresUpdate { get; set; } = false;
 
-    public static MapperSettings Load(ILogger logger)
+    public static MapperUpdaterSettings Load(ILogger logger)
     {
         //Setting file does not exist, just continue like normal
-        if (!File.Exists(BuildEnvironment.MapperUpdateSettingsFile))
+        if (!File.Exists(MapperEnvironment.MapperUpdateSettingsFile))
         {
-            logger.LogWarning($"{BuildEnvironment.MapperUpdateSettingsFile} does not exist. " +
+            logger.LogWarning($"{MapperEnvironment.MapperUpdateSettingsFile} does not exist. " +
                               $"Mapper update settings failed to load.");
-            return new MapperSettings();
+            return new MapperUpdaterSettings();
         }
 
         //Load the json
-        var jsonData = File.ReadAllText(BuildEnvironment.MapperUpdateSettingsFile);
+        var jsonData = File.ReadAllText(MapperEnvironment.MapperUpdateSettingsFile);
         //Blank json data, just return 
         if (string.IsNullOrWhiteSpace(jsonData))
         {
-            logger.LogWarning($"Failed to read data from {BuildEnvironment.MapperUpdateSettingsFile}. " +
+            logger.LogWarning($"Failed to read data from {MapperEnvironment.MapperUpdateSettingsFile}. " +
                               $"Mapper update settings failed to load.");
-            return new MapperSettings();
+            return new MapperUpdaterSettings();
         }
 
         try
         {
             //Deserialize the data 
             return JsonSerializer
-                .Deserialize<MapperSettings>(jsonData) ?? new MapperSettings();
+                .Deserialize<MapperUpdaterSettings>(jsonData) ?? new MapperUpdaterSettings();
         }
         catch (Exception ex)
         {
-            logger.LogWarning($"Failed to parse {BuildEnvironment.MapperUpdateSettingsFile}. " +
+            logger.LogWarning($"Failed to parse {MapperEnvironment.MapperUpdateSettingsFile}. " +
                               $"Mapper update settings failed to load.");
-            return new MapperSettings();
+            return new MapperUpdaterSettings();
         }        
     }
     public void SaveChanges(ILogger logger)
@@ -62,7 +62,7 @@ public record MapperSettings
 
         try
         {
-            File.WriteAllText(BuildEnvironment.MapperUpdateSettingsFile,jsonData);
+            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile,jsonData);
         }
         catch (Exception e)
         {

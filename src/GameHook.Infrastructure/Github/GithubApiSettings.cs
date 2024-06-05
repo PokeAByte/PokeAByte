@@ -2,11 +2,13 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using GameHook.Domain;
+using GameHook.Domain.Interfaces;
+using GameHook.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace GameHook.Infrastructure.Github;
 
-public record GithubApiSettings 
+public record GithubApiSettings : IGithubApiSettings
 {
     //Accept
     [JsonPropertyName("accept")] public string Accept { get; set; } = "application/vnd.github.v3.raw";//"application/vnd.github+json";
@@ -72,19 +74,19 @@ public record GithubApiSettings
     public static GithubApiSettings Load(ILogger<GithubApiSettings> logger, string? token = null)
     {
         //Setting file does not exist, just continue like normal
-        if (!File.Exists(BuildEnvironment.GithubApiSettings))
+        if (!File.Exists(MapperEnvironment.GithubApiSettings))
         {
-            logger.LogWarning($"{BuildEnvironment.GithubApiSettings} does not exist. " +
+            logger.LogWarning($"{MapperEnvironment.GithubApiSettings} does not exist. " +
                               $"Mapper update settings failed to load.");
             return new GithubApiSettings(logger, token);
         }
         
         //Load the json
-        var jsonData = File.ReadAllText(BuildEnvironment.GithubApiSettings);        
+        var jsonData = File.ReadAllText(MapperEnvironment.GithubApiSettings);        
         //Blank json data, just return 
         if (string.IsNullOrWhiteSpace(jsonData))
         {
-            logger.LogWarning($"Failed to read data from {BuildEnvironment.GithubApiSettings}. " +
+            logger.LogWarning($"Failed to read data from {MapperEnvironment.GithubApiSettings}. " +
                               $"Github Api settings failed to load.");
             return new GithubApiSettings(logger);
         }
@@ -101,7 +103,7 @@ public record GithubApiSettings
         }
         catch (Exception ex)
         {
-            logger.LogWarning($"Failed to parse {BuildEnvironment.GithubApiSettings}. " +
+            logger.LogWarning($"Failed to parse {MapperEnvironment.GithubApiSettings}. " +
                               $"Github Api settings failed to load.");
             return new GithubApiSettings(logger);
         }
@@ -118,7 +120,7 @@ public record GithubApiSettings
 
         try
         {
-            File.WriteAllText(BuildEnvironment.MapperUpdateSettingsFile,jsonData);
+            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile,jsonData);
         }
         catch (Exception e)
         {

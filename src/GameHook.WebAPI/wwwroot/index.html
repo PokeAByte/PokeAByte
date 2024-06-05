@@ -82,10 +82,13 @@
                 </div>
                 
                 <div class="dropdown is-hoverable">
-                    <div class="dropdown-trigger header-menu-item">Update Manager</div>
+                    <div class="dropdown-trigger header-menu-item">Mapper Manager</div>
                     <div class="dropdown-menu" role="menu">
                         <div class="dropdown-content">
                             <a href="#" class="dropdown-item" v-on:click="getAvailableUpdates">View Available Mapper Updates</a>
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getArchivedMappers">View Archived Mappers</a>
                         </div>
                     </div>
                 </div>
@@ -197,6 +200,34 @@
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
                         <img src="loading.gif" alt="loading" style="height: 100px; width: 100px"/>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperArchiveWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select an archived mapper file to manage.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="archivedSearch" />
+                        </label>
+                        <div v-for="(archive) in filteredArchives" style="padding:4px">
+                            <span>{{archive.key}}</span>
+                            <br />
+                            <ul style="padding-left:16px">
+                                <li v-for="(mapper) in archive.value" style="padding:4px;">
+                                    <label>
+                                        <input :value="mapper" name="archivedMapper"
+                                               type="checkbox" v-model="selectedArchivedMappers" />
+                                        <span style="padding-left:2px;">
+                                            {{mapper.pathDisplayName}}/{{mapper.mapper.display_name}} - 
+                                            Revision #{{mapper.mapper.revision}}
+                                        </span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -674,11 +705,15 @@
                 loadingMapper: false,
                 loadingMapperWindowOpen: false,
                 mapperUpdaterWindowOpen: false,
+                mapperArchiveWindowOpen: false,
                 mapperUpdaterWindowLoaderOpen: false,
                 loadingMapperFiles: null,
                 updateSearch: "",
                 availableUpdates: [],
                 selectedMapperUpdates: [],
+                archivedSearch: "",
+                archivedMappers: [],
+                selectedArchivedMappers: [],
                 allMapperUpdatesSelected: false,
                 loadingMapperSelectedId: null,
                 loadingMapperError: null,
@@ -759,6 +794,28 @@
                     }
                     return found;
                 });
+            },
+            filteredArchives() {
+                /*let filtered = Array.from(Object
+                        .entries(this.archivedMappers)
+                        .filter(([k,v]) => {
+                            let foundList = v.filter(item => item.mapper.path
+                                .toLowerCase()
+                                .includes(this.archivedSearch.toLowerCase()));
+                            return foundList.length > 0
+                        }));*/
+                let foundObjs = [];
+                Object.entries(this.archivedMappers)
+                    .forEach(item => {
+                        let filtered = item[1].filter(innerItem => innerItem
+                            .mapper.path
+                            .toLowerCase()
+                            .includes(this.archivedSearch.toLowerCase()));
+                        if(filtered.length > 0) {
+                            foundObjs.push({key:item[0], value:filtered});
+                        }
+                    });
+                return foundObjs;
             }
         },
         methods: {
@@ -876,6 +933,20 @@
 
                 return []
             },
+            getArchivedMappers: async function()
+            {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/get_archived`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = false
+                this.mapperUpdaterWindowLoaderOpen = false;
+                this.mapperArchiveWindowOpen = true;
+            },
             getAvailableUpdates: async function() {
                 this.selectedMapperUpdates = []
                 this.availableUpdates = []
@@ -887,6 +958,7 @@
                 this.loadingMapperWindowOpen = false
                 this.mapperUpdaterWindowOpen = true
                 this.mapperUpdaterWindowLoaderOpen = false;
+                this.mapperArchiveWindowOpen = false;
             },
             checkForMapperUpdates: async function() {
                 this.availableUpdates = []
@@ -931,6 +1003,7 @@
 
                 this.loadingMapperWindowOpen = true
                 this.mapperUpdaterWindowOpen = false
+                this.mapperArchiveWindowOpen = false;
             },
             replaceMapper: async function (id = null) {
                 this.loadingMapper = true

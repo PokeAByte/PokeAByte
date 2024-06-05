@@ -1,22 +1,23 @@
 ﻿using System.Net.Http.Headers;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace GameHook.Infrastructure.Github;
 
-public class GithubRestApi
+public class GithubRestApi : IGithubRestApi
 {
-    private readonly GithubApiSettings _apiSettings;
+    private readonly IGithubApiSettings _apiSettings;
     private readonly ILogger<GithubRestApi> _logger;
     
     public GithubRestApi(ILogger<GithubRestApi> logger,  
-        GithubApiSettings apiSettings)
+        IGithubApiSettings apiSettings)
     {
         _logger = logger;
         _apiSettings = apiSettings;
     }
-    private void UpdateRequestHeaders(HttpRequestHeaders headers)
+    /*private void UpdateRequestHeaders(HttpRequestHeaders headers)
     {
         if (string.IsNullOrWhiteSpace(_apiSettings.GetAcceptValue()) ||
             string.IsNullOrWhiteSpace(_apiSettings.GetApiVersionValue()))
@@ -30,9 +31,9 @@ public class GithubRestApi
         headers.Add("X-GitHub-Api-Version", _apiSettings.GetApiVersionValue());
         if(!string.IsNullOrWhiteSpace(_apiSettings.GetTokenValue()))
             headers.Add("Authorization", _apiSettings.GetFormattedToken());
-    }
-    public async Task DownloadMapperFiles(List<MapperDto> mapperDtos, Func<List<UpdateMapperDto>, Task> 
-        postDownloadAction)
+    }*/
+    public async Task DownloadMapperFiles(List<MapperDto> mapperDtos, 
+        Func<List<UpdateMapperDto>, Task> postDownloadAction)
     {
         List<UpdateMapperDto> updatedMapperList = new();
         foreach (var mapper in mapperDtos)
@@ -47,9 +48,12 @@ public class GithubRestApi
             var jsResponse = await GetContentRequest(jsPath, true);
             var jsData = await ResponseMessageToJson(jsResponse);
             //Add them to the list
-            updatedMapperList.Add(new UpdateMapperDto(xmlPath, xmlData ?? "", jsPath, jsData ?? ""));
+            updatedMapperList.Add(new UpdateMapperDto(
+                xmlPath, xmlData ?? "", 
+                jsPath, jsData ?? "",
+                mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
             //Try to not process too fast, Github has a rate-limit 
-            Thread.Sleep(10);
+            Thread.Sleep(1);
         }
         await postDownloadAction(updatedMapperList);
     }
@@ -67,9 +71,14 @@ public class GithubRestApi
             return null;
         }
     }
-    
+
+    public Task DownloadMapperFiles(List<MapperDto> mapperDtos, Func<Dictionary<MapperDto, UpdateMapperDto>> postDownloadAction)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
-        await GetContentRequest(BuildEnvironment.MapperTreeJson, true);
+        await GetContentRequest(MapperEnvironment.MapperTreeJson, true);
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
     {
         var url = _apiSettings.GetBaseRequestString();
