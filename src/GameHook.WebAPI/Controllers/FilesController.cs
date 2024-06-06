@@ -97,7 +97,7 @@ namespace GameHook.WebAPI.Controllers
         }
         [SwaggerOperation("Returns a list of available mapper updates.")]
         [HttpGet("mapper/get_archived")]
-        public ActionResult<IEnumerable<MapperDto>> GetArchivedMappersAsync()
+        public ActionResult GetArchivedMappersAsync()
         {
             try
             {
@@ -107,6 +107,29 @@ namespace GameHook.WebAPI.Controllers
             {
                 return ApiHelper.BadRequestResult(e.ToString());
             }
+        }
+
+        [SwaggerOperation("Restores a list of mappers.")]
+        [HttpPost("mapper/restore_mappers")]
+        public ActionResult RestoreMapper(IEnumerable<ArchivedMapperDto> archivedMappers)
+        {
+            try
+            {
+                archiveManager.RestoreMappersFromArchive(archivedMappers.ToList());
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return ApiHelper.BadRequestResult($"Exception: {e}");
+            }
+        }
+
+        [SwaggerOperation("Refreshes the list of archived files.")]
+        [HttpGet("mapper/refresh_archived_list")]
+        public ActionResult RefreshArchivedList()
+        {
+            archiveManager.GenerateArchivedList();
+            return Ok(archiveManager.GetArchivedMappers());
         }
     }
 }

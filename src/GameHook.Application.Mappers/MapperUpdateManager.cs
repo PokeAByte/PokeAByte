@@ -227,21 +227,14 @@ public class MapperUpdateManager : IMapperUpdateManager
     }
     public async Task SaveUpdatedMappersAsync(List<UpdateMapperDto> updatedMappers)
     {
-        DirectoryInfo? archiveDirectory = null;
-        //Create a tmp dir to store old mappers
-        archiveDirectory = !Directory.Exists(MapperEnvironment.MapperArchiveDirectory) ?
-            Directory.CreateDirectory(MapperEnvironment.MapperArchiveDirectory) : 
-            new DirectoryInfo(MapperEnvironment.MapperArchiveDirectory);
         foreach (var mapper in updatedMappers)
         {
             var mapperPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
             var jsPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
             _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath, 
-                mapperPath, 
-                archiveDirectory?.FullName);
+                mapperPath);
             _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath, 
-                jsPath, 
-                archiveDirectory?.FullName);
+                jsPath);
             WriteTextToFile(mapperPath, mapper.XmlData, mapper.Created, mapper.Updated);
             WriteTextToFile(jsPath, mapper.JsData, mapper.Created, mapper.Updated);
         }

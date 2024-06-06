@@ -228,6 +228,17 @@
                                 </li>
                             </ul>
                         </div>
+                        <hr />
+                        <button type="button" class="button" v-on:click="restoreMappers">
+                            Restore {{selectedArchivedMappers.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="refreshArchivedList">
+                            Refresh List
+                        </button>
+                        <button type="button" class="button" v-on:click="mapperArchiveWindowOpen = false">
+                            Close
+                        </button>
                     </div>
                 </div>
             </div>
@@ -851,7 +862,6 @@
                     throw new Error(`Invalid user setting found for displayBytesMode: ${mode}.`)
                 }
             },
-
             getTabClasses: function (tab, isFirstEntry = false) {
                 const classes = ['gh-panel-header']
 
@@ -933,12 +943,46 @@
 
                 return []
             },
-            getArchivedMappers: async function()
-            {
+            getArchivedMappers: async function() {
                 this.archivedSearch = ""
                 this.archivedMappers = []
                 this.selectedArchivedMappers = []
                 this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/get_archived`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = false
+                this.mapperUpdaterWindowLoaderOpen = false;
+                this.mapperArchiveWindowOpen = true;
+            },
+            restoreMappers: async function() {
+                try {
+                    console.log(this.selectedArchivedMappers)
+                    if(this.selectedArchivedMappers.length === 0)
+                        return;
+                    this.archivedMappers = []
+                    this.archivedSearch = ""
+                    this.mapperArchiveWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/restore_mappers`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedArchivedMappers)
+                    })
+                } catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    this.selectedArchivedMappers = []
+                    await this.refreshArchivedList()
+                }
+            },
+            refreshArchivedList: async function() {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/refresh_archived_list`)
                     .then(async (x) => {
                         return await x.json()
                     });

@@ -112,6 +112,7 @@ public static class MapperTreeUtilityExtensions
         //True means the local mapper is outdated, otherwise it means they aren't outdated
         //or `DateUpdatedUtc` is null
         var outdated = local.Where(x =>
+                x.Revision < remoteTree.FirstOrDefault(y => y.Path == x.Path)?.Revision ||
                 x.Outdated(remoteTree
                     .FirstOrDefault(y =>
                         y.Path == x.Path)))
