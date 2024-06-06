@@ -165,7 +165,6 @@ public class MapperArchiveManager : IMapperArchiveManager
         }
 
     }
-
     public void RestoreMappersFromArchive(List<ArchivedMapperDto> archivedMappers)
     {
         if (archivedMappers.Count == 0)
@@ -208,7 +207,6 @@ public class MapperArchiveManager : IMapperArchiveManager
         if(File.Exists(archivedJsPath))
             File.Move(archivedJsPath, mapperJsPath);*/
     }
-
     private void RestoreFile(string sourceFile, string destinationFile, string sourcePath)
     {
         if (!File.Exists(sourceFile)) return;
@@ -223,4 +221,35 @@ public class MapperArchiveManager : IMapperArchiveManager
             Directory.Delete(sourcePath, true);
         }
     }
+
+    public void DeleteMappersFromArchive(List<ArchivedMapperDto> archivedMappers)
+    {
+        if(archivedMappers.Count == 0)
+            return;
+        foreach (var mapper in archivedMappers)
+        {
+            DeleteMapperFromArchive(mapper);
+        }
+        GenerateArchivedList();
+    }
+
+    private void DeleteMapperFromArchive(ArchivedMapperDto archivedMapper)
+    {
+        var absolutePath = Path.Combine(archivedMapper.FullPath, archivedMapper.Mapper.DisplayName);
+        if (File.Exists(absolutePath))
+        {
+            File.Delete(absolutePath);
+        }
+        if (File.Exists(absolutePath.Replace(".xml", ".js")))
+        {
+            File.Delete(absolutePath.Replace(".xml", ".js"));
+        }
+
+        var archiveDir = archivedMapper.FullPath[..^archivedMapper.PathDisplayName.Length];
+        if (Directory.GetFiles(archiveDir, "*.*", SearchOption.AllDirectories).Length == 0)
+        {
+            Directory.Delete(archiveDir, true);
+        }
+    }
+    
 }

@@ -9,4 +9,5 @@ public interface IMapperArchiveManager
     public void ArchiveDirectory(string directoryPath,
         string? archivePath = null);
     public void RestoreMappersFromArchive(List<ArchivedMapperDto> archivedMappers);
+    public void DeleteMappersFromArchive(List<ArchivedMapperDto> archivedMappers);
 }

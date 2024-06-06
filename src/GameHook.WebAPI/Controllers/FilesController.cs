@@ -123,7 +123,20 @@ namespace GameHook.WebAPI.Controllers
                 return ApiHelper.BadRequestResult($"Exception: {e}");
             }
         }
-
+        [SwaggerOperation("Restores a list of mappers.")]
+        [HttpPost("mapper/delete_mappers")]
+        public ActionResult DeleteMappers(IEnumerable<ArchivedMapperDto> archivedMappers)
+        {
+            try
+            {
+                archiveManager.DeleteMappersFromArchive(archivedMappers.ToList());
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return ApiHelper.BadRequestResult($"Exception: {e}");
+            }
+        }
         [SwaggerOperation("Refreshes the list of archived files.")]
         [HttpGet("mapper/refresh_archived_list")]
         public ActionResult RefreshArchivedList()
