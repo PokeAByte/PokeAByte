@@ -25,17 +25,16 @@ public static class MapperTreeUtility
             .ToList();
     }
 
-    public static int GetRevision(string xmlPath)
+    public static string GetVersion(string xmlPath)
     {
         if (!File.Exists(xmlPath))
-            return 0;
+            return "";
         using var xmlReader = XmlReader.Create(xmlPath);
         xmlReader.MoveToContent();
-        var moved = xmlReader.MoveToAttribute("revision");
-        if (!moved) return 0;
-        var rev = xmlReader.ReadContentAsString();
-        int.TryParse(rev, out var revision);
-        return revision;
+        var moved = xmlReader.MoveToAttribute("version");
+        if (!moved) return "";
+        var ver = xmlReader.ReadContentAsString();
+        return ver;
     }
     public static List<MapperDto> GenerateMapperDtoTree(string baseDirectory)
     {
@@ -43,7 +42,7 @@ public static class MapperTreeUtility
         if (fileTree.Count == 0)
             return [];
         return fileTree
-            .Select(x => MapperDto.Create(baseDirectory, x, GetRevision(x)))
+            .Select(x => MapperDto.Create(baseDirectory, x, GetVersion(x)))
             .ToList();
     }
     public static List<MapperDto> Load(string baseDirectory)
@@ -112,7 +111,6 @@ public static class MapperTreeUtilityExtensions
         //True means the local mapper is outdated, otherwise it means they aren't outdated
         //or `DateUpdatedUtc` is null
         var outdated = local.Where(x =>
-                x.Revision < remoteTree.FirstOrDefault(y => y.Path == x.Path)?.Revision ||
                 x.Outdated(remoteTree
                     .FirstOrDefault(y =>
                         y.Path == x.Path)))

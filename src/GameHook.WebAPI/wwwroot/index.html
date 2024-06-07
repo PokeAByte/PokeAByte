@@ -90,6 +90,9 @@
                         <div class="dropdown-content">
                             <a href="#" class="dropdown-item" v-on:click="getArchivedMappers">View Archived Mappers</a>
                         </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="openGithubSettings">GitHub API Settings</a>
+                        </div>
                     </div>
                 </div>
                 <!--<div class="dropdown is-hoverable">
@@ -138,7 +141,66 @@
                     </div>
                 </div>
             </div>
-
+            
+            <div class="columns mt-3" v-else-if="githubSettingsMenuOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p style="color:red">Changing these settings is generally not recommended unless you know 
+                            what you are doing. These settings allow you to set a custom mapper repository, incorrect 
+                            settings can cause issues retrieving new and updated mappers. Please only do so with caution.
+                        </p>
+                        <hr />
+                        <h3 v-if="githubSettingsSaveSuccess">Settings saved successfully!</h3>
+                        <h3 v-else-if="githubSettingsSaveFailed">Failed to save settings! Error: {{githubSaveErrorMessage}}</h3>
+                        <hr />
+                        <label>
+                            <span>GitHub Owner Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.owner" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>Repository Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.repo" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Alternative Directory Name - 
+                                Note: This is only required if the <b>mapper_tree.json</b> 
+                                is not in the root directory of the repository
+                            </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.dir" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Personal Access Token - 
+                                Note: This is required if the repository is private or if you want to bypass the
+                                GitHub REST Api rate limit. Once you have a token generated <b>do not</b> share it 
+                                with anyone; for more information please refer to this page: 
+                                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
+                                    Managing your personal access tokens
+                                </a>
+                            </span>
+                            <br />
+                            <input type="password" v-model="githubSettings.token" style="width:50vw"/>
+                        </label>
+                        <br />
+                        <h3 v-if="showGithubTestResults">{{githubTestResult}}</h3>
+                        <button type="button" class="button" v-on:click="testGithubSettings">
+                            Test Settings
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="saveGithubSettings">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="columns mt-3" v-else-if="mapperUpdaterWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
@@ -159,11 +221,15 @@
                                 <label>
                                     <input :id="mapper.path" :value="mapper" name="mapper"
                                         type="checkbox" v-model="selectedMapperUpdates" />
-                                    <span>&nbsp;{{getPath(mapper)}} - Revision #{{getRevision(mapper)}}</span>
+                                    <span>&nbsp;{{getPath(mapper)}}</span>
+                                    <span v-if="getVersion(mapper).length > 0"> - Version {{getVersion(mapper)}}</span>
                                     <br />
                                         <span v-if="selectedMapperUpdates.includes(mapper)">
                                             <span v-if="mapper.currentVersion !== undefined" style="padding-left:16px">
-                                                Local Revision #{{mapper.currentVersion.revision}}: Created: {{formatDate(mapper.currentVersion.date_created)}} - 
+                                                <span v-if="mapper.currentVersion.version.length > 0">
+                                                    Local Version {{mapper.currentVersion.version}}:
+                                                </span>
+                                                Created: {{formatDate(mapper.currentVersion.date_created)}} - 
                                                 Updated: {{formatDate(mapper.currentVersion.date_updated)}} 
                                             </span>
                                             <span v-else style="padding-left:16px">
@@ -171,7 +237,10 @@
                                             </span>
                                             <br />
                                             <span v-if="mapper.latestVersion !== undefined" style="padding-left:16px">
-                                                Remote Revision #{{mapper.latestVersion.revision}}: Created: {{formatDate(mapper.latestVersion.date_created)}} - 
+                                                <span v-if="mapper.latestVersion.version.length > 0">
+                                                    Remote Version {{mapper.latestVersion.version}}: 
+                                                </span>
+                                                Created: {{formatDate(mapper.latestVersion.date_created)}} - 
                                                 Updated: {{formatDate(mapper.latestVersion.date_updated)}} 
                                             </span>
                                             <span v-else style="padding-left:16px">
@@ -728,6 +797,12 @@
                 mapperUpdaterWindowOpen: false,
                 mapperArchiveWindowOpen: false,
                 mapperUpdaterWindowLoaderOpen: false,
+                githubSettingsMenuOpen: false,
+                githubSaveErrorMessage: "",
+                githubSettingsSaveFailed: false,
+                githubSettingsSaveSuccess: false,
+                showGithubTestResults: false,
+                githubTestResult: "",
                 loadingMapperFiles: null,
                 updateSearch: "",
                 availableUpdates: [],
@@ -743,6 +818,14 @@
                 pinnedPropertyPaths: [],
                 editingProperty: null,
                 editingPropertyError: null,
+                githubSettings: {
+                    accept: "",
+                    api_version: "",
+                    token: "",
+                    owner: "",
+                    repo: "",
+                    dir: ""
+                },
                 userSettings: {
                     driver: 'retroarch',
                     displayBytesMode: 'hexdecimalUpper'
@@ -841,13 +924,20 @@
         },
         methods: {
             decimalToHexdecimal: GameHookMapperClient.decimalToHexdecimal,
+            closeAllWindows: function() {
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = false
+                this.mapperArchiveWindowOpen = false
+                this.mapperUpdaterWindowLoaderOpen = false
+                this.githubSettingsMenuOpen = false
+            },
             getPath: function(mapperDto) {
                 return mapperDto.currentVersion === undefined ?
                     mapperDto.latestVersion.path : mapperDto.currentVersion.path;
             },
-            getRevision: function(mapperDto) {
+            getVersion: function(mapperDto) {
                 return mapperDto.latestVersion === undefined ?
-                    mapperDto.currentVersion.revision : mapperDto.latestVersion.revision;                
+                    mapperDto.currentVersion.version : mapperDto.latestVersion.version;                
             },
             formatDate: function(date) {
                 let formattedDate = new Date(date);
@@ -953,6 +1043,55 @@
 
                 return []
             },
+            openGithubSettings: async function() {
+                this.showGithubTestResults = false;
+                this.closeAllWindows();
+                this.githubSettings = await fetch(`${this.mapper._connectionString}/files/get_github_settings`)
+                    .then(async (x) => {
+                        return JSON.parse(await x.json());
+                    });
+                this.githubSettingsMenuOpen = true;
+            },
+            saveGithubSettings: async function() {
+                this.githubSettingsSaveSuccess = false;
+                this.githubSettingsSaveFailed = false;
+                this.githubSaveErrorMessage = "";
+                this.showGithubTestResults = false;
+                try {
+                    this.closeAllWindows();
+                    await fetch(`${this.mapper._connectionString}/files/save_github_settings`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.githubSettings)
+                    }).then(x => {
+                        if(x.ok) {
+                            this.githubSettingsSaveSuccess = true;
+                            this.githubSettingsSaveFailed = false;
+                            this.githubSaveErrorMessage = "";                            
+                        } else {
+                            this.githubSettingsSaveSuccess = false;
+                            this.githubSettingsSaveFailed = true;
+                            this.githubSaveErrorMessage = x.text();
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                    this.githubSettingsSaveSuccess = false;
+                    this.githubSettingsSaveFailed = true;
+                    this.githubSaveErrorMessage = e;
+                }
+                finally {
+                    await this.openGithubSettings();
+                }                
+            },
+            testGithubSettings: async function() {
+                this.showGithubTestResults = false;
+                this.githubTestResult = await fetch(`${this.mapper._connectionString}/files/test_github_settings`)
+                    .then(async(x) => {
+                        return await x.text();
+                    })
+                this.showGithubTestResults = true;
+            },
             getArchivedMappers: async function() {
                 this.archivedSearch = ""
                 this.archivedMappers = []
@@ -961,9 +1100,7 @@
                     .then(async (x) => {
                         return await x.json()
                     });
-                this.loadingMapperWindowOpen = false
-                this.mapperUpdaterWindowOpen = false
-                this.mapperUpdaterWindowLoaderOpen = false;
+                this.closeAllWindows();
                 this.mapperArchiveWindowOpen = true;
             },
             restoreMappers: async function() {
@@ -995,9 +1132,7 @@
                     .then(async (x) => {
                         return await x.json()
                     });
-                this.loadingMapperWindowOpen = false
-                this.mapperUpdaterWindowOpen = false
-                this.mapperUpdaterWindowLoaderOpen = false;
+                this.closeAllWindows();
                 this.mapperArchiveWindowOpen = true;
             },
             deleteArchivedMappers: async function() {
@@ -1014,9 +1149,7 @@
                 } catch (e) {
                     console.log(e);
                 } finally {
-                    this.loadingMapperWindowOpen = false
-                    this.mapperUpdaterWindowOpen = false
-                    this.mapperUpdaterWindowLoaderOpen = false;
+                    this.closeAllWindows();
                     this.mapperArchiveWindowOpen = true;
                     await this.refreshArchivedList()
                 }   
@@ -1029,10 +1162,8 @@
                     .then(async (x) => {
                       return await x.json()  
                     })
-                this.loadingMapperWindowOpen = false
+                this.closeAllWindows();
                 this.mapperUpdaterWindowOpen = true
-                this.mapperUpdaterWindowLoaderOpen = false;
-                this.mapperArchiveWindowOpen = false;
             },
             checkForMapperUpdates: async function() {
                 this.availableUpdates = []
@@ -1074,10 +1205,8 @@
                     .then(async (x) => {
                         return await x.json()
                     })
-
+                this.closeAllWindows();
                 this.loadingMapperWindowOpen = true
-                this.mapperUpdaterWindowOpen = false
-                this.mapperArchiveWindowOpen = false;
             },
             replaceMapper: async function (id = null) {
                 this.loadingMapper = true
@@ -1100,8 +1229,7 @@
 
                     await this.mapper.loadMapper()
                     this.mapperLoadId = id
-
-                    this.loadingMapperWindowOpen = false
+                    this.closeAllWindows()
                 } finally {
                     this.loadingMapper = false
                 }

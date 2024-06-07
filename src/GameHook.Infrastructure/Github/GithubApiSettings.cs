@@ -11,20 +11,21 @@ namespace GameHook.Infrastructure.Github;
 public record GithubApiSettings : IGithubApiSettings
 {
     //Accept
-    [JsonPropertyName("accept")] public string Accept { get; set; } = "application/vnd.github.v3.raw";//"application/vnd.github+json";
+    [JsonPropertyName("accept")] 
+    public string Accept { get; set; } = "application/vnd.github.v3.raw";//"application/vnd.github+json";
     
     //X-GitHub-Api-Version
     [JsonPropertyName("api_version")]
     public string ApiVersion { get; set; } = "2022-11-28";
     
     //Authorization
-    [JsonIgnore]
+    [JsonPropertyName("token")]
     public string Token { get; set; } = "";
     [JsonPropertyName("owner")]
-    public string Owner { get; set; } = "amnipp";
+    public string Owner { get; set; } = "";
     
     [JsonPropertyName("repo")]
-    public string Repo { get; set; } = "mappers";
+    public string Repo { get; set; } = "";
     
     [JsonPropertyName("dir")] 
     public string Directory { get; set; } = "";
@@ -53,7 +54,7 @@ public record GithubApiSettings : IGithubApiSettings
         _logger = logger;
     }
 
-    protected GithubApiSettings()
+    public GithubApiSettings()
     {
     }
 
@@ -71,6 +72,16 @@ public record GithubApiSettings : IGithubApiSettings
         return $"{GithubApiUrl}{Owner}/{Repo}";
     }
 
+    public void CopySettings(IGithubApiSettings settings)
+    {
+        if (settings is not GithubApiSettings apiSettings)
+            throw new InvalidCastException($"Failed to cast {settings.GetType()} to " +
+                                           $"{typeof(GithubApiSettings)}");
+        Token = apiSettings.Token;
+        Owner = apiSettings.Owner;
+        Repo = apiSettings.Repo;
+        Directory = apiSettings.Directory;
+    }
     public static GithubApiSettings Load(ILogger<GithubApiSettings> logger, string? token = null)
     {
         //Setting file does not exist, just continue like normal
@@ -98,7 +109,9 @@ public record GithubApiSettings : IGithubApiSettings
             if (deserialized is null)
                 return new GithubApiSettings(logger);
             deserialized.SetLogger(logger);
-            deserialized.Token = token ?? "";
+            deserialized.Token = string.IsNullOrWhiteSpace(deserialized.Token) ? 
+                token ?? "" : 
+                deserialized.Token;
             return deserialized;
         }
         catch (Exception ex)
@@ -109,22 +122,22 @@ public record GithubApiSettings : IGithubApiSettings
         }
     }
 
-    public void SaveChanges(ILogger logger)
+    public void SaveChanges()
     {
         var jsonData = JsonSerializer.Serialize(this);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
-            logger.LogError("Failed to save changes to the Github Api settings file.");
+            _logger?.LogError("Failed to save changes to the Github Api settings file.");
             return;
         }
 
         try
         {
-            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile,jsonData);
+            File.WriteAllText(MapperEnvironment.GithubApiSettings,jsonData);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to save changes to the Github Api settings file.");
+            _logger?.LogError(e, "Failed to save changes to the Github Api settings file.");
         }
     }
 }

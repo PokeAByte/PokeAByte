@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
 using GameHook.Mappers;
@@ -71,12 +72,7 @@ public class GithubRestApi : IGithubRestApi
             return null;
         }
     }
-
-    public Task DownloadMapperFiles(List<MapperDto> mapperDtos, Func<Dictionary<MapperDto, UpdateMapperDto>> postDownloadAction)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
         await GetContentRequest(MapperEnvironment.MapperTreeJson, true);
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
@@ -122,5 +118,16 @@ public class GithubRestApi : IGithubRestApi
         //UpdateRequestHeaders(clientRequest.Headers);
         using var client = new HttpClient();
         return await client.SendAsync(clientRequest);
+    }
+
+    public async Task<string> TestSettings()
+    {
+        var result = await GetMapperTreeFile();
+        if (result is null)
+            return "Response from server was null.";
+        return result.IsSuccessStatusCode ? "" : 
+            result.StatusCode == HttpStatusCode.NotFound ? 
+                "The mapper tree json was not found." : 
+                $"Reason: {result.ReasonPhrase}";
     }
 }

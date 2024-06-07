@@ -8,4 +8,6 @@ public interface IGithubApiSettings
     public string GetApiVersionValue();
     public string GetTokenValue();
     public string GetFormattedToken();
+    public void CopySettings(IGithubApiSettings settings);
+    public void SaveChanges();
 }

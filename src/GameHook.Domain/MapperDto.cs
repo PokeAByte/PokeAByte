@@ -8,9 +8,9 @@ public record MapperDto
     [JsonPropertyName("path")] public required string Path { get; init; }
     [JsonPropertyName("date_created")] public DateTime DateCreatedUtc { get; init; }
     [JsonPropertyName("date_updated")] public DateTime? DateUpdatedUtc { get; init; }
-    [JsonPropertyName("revision")] public int Revision { get; init; } = 0;
+    [JsonPropertyName("version")] public string Version { get; init; } = "";
 
-    public static MapperDto Create(string baseDirectory, string filepath, int revision = 0)
+    public static MapperDto Create(string baseDirectory, string filepath, string version = "")
     {
         if (!File.Exists(filepath))
             throw new Exception($"Failed to open file {filepath}.");
@@ -20,7 +20,7 @@ public record MapperDto
         {
             Path = path,
             DisplayName = file.Name,
-            Revision = revision,
+            Version = version,
             DateCreatedUtc = file.CreationTimeUtc,
             DateUpdatedUtc = file.LastWriteTimeUtc <= file.CreationTimeUtc ? 
                 null : 

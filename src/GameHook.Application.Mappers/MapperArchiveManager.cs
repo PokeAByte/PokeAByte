@@ -63,7 +63,7 @@ public class MapperArchiveManager : IMapperArchiveManager
             //create the mapper dto
             var archivedMapper = MapperDto.Create(MapperEnvironment.MapperLocalArchiveDirectory, 
                 xmlFile.Value,
-                MapperTreeUtility.GetRevision(xmlFile.Value));
+                MapperTreeUtility.GetVersion(xmlFile.Value));
             //get the path's display name
             var pathDisplayName = xmlFile
                 .Value[xmlFile.Key.Length..xmlFile.Value.LastIndexOf('\\')]

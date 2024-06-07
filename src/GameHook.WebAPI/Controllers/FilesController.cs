@@ -19,8 +19,11 @@ namespace GameHook.WebAPI.Controllers
     [Consumes("application/json")]
     [Route("files")]
     public class FilesController(IMapperFilesystemProvider mapperFilesystemProvider,
-        ILogger<FilesController> logger, IMapperUpdateManager updateManager, 
-        IGithubRestApi githubRest, IMapperArchiveManager archiveManager) : ControllerBase
+        ILogger<FilesController> logger, 
+        IMapperUpdateManager updateManager, 
+        IGithubRestApi githubRest,
+        IMapperArchiveManager archiveManager,
+        IGithubApiSettings githubApiSettings) : ControllerBase
     {        
         private static string MapperLocalDirectory => 
             Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
@@ -143,6 +146,56 @@ namespace GameHook.WebAPI.Controllers
         {
             archiveManager.GenerateArchivedList();
             return Ok(archiveManager.GetArchivedMappers());
+        }
+
+        [SwaggerOperation("Gets the saved GitHub settings.")]
+        [HttpGet("get_github_settings")]
+        public ActionResult GetGithubSettings()
+        {
+            try
+            {
+                return Ok(JsonSerializer.Serialize((GithubApiSettings)githubApiSettings));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        [SwaggerOperation("Saves the updated Github settings.")]
+        [HttpPost("save_github_settings")]
+        public ActionResult SaveGithubSettings(GithubApiSettings settings)
+        {
+            try
+            {
+                githubApiSettings.CopySettings(settings);
+                githubApiSettings.SaveChanges();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to save github settings because of an exception.");
+                return ApiHelper.BadRequestResult("Failed to save github settings changes because of an exception. " +
+                                                  $"{e}");
+            }
+        }
+
+        [SwaggerOperation("Tests the saved settings in Github Settings class.")]
+        [HttpGet("test_github_settings")]
+        public async Task<ActionResult> TestGithubSettings()
+        {
+            try
+            {
+                var result = await githubRest.TestSettings();
+                return string.IsNullOrWhiteSpace(result)
+                    ? Ok("Successfully connected to Github Api!")
+                    : Ok($"Failed to connect to Github Api - Reason: {result}");
+            }
+            catch (Exception e)
+            {
+                return Ok($"Failed to connect to Github Api - Reason: {e}");
+            }
         }
     }
 }
