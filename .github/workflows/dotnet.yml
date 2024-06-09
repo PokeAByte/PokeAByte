@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/GameHook.sln
     - name: Build
       run: dotnet build src/GameHook.sln --no-restore
     - name: Test
