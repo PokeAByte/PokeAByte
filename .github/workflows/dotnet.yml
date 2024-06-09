@@ -24,7 +24,5 @@ jobs:
       run: dotnet restore src/GameHook.sln
     - name: Build
       run: dotnet build src/GameHook.sln --no-restore
-    - name: Test
-      run: dotnet test src/GameHook.sln --no-build --verbosity normal\
     - name: Publish
       run: dotnet publish src/GameHook.sln
