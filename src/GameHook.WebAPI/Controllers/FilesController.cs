@@ -171,6 +171,7 @@ namespace GameHook.WebAPI.Controllers
             {
                 githubApiSettings.CopySettings(settings);
                 githubApiSettings.SaveChanges();
+                
                 return Ok();
             }
             catch (Exception e)
