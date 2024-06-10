@@ -54,7 +54,7 @@ public class GithubRestApi : IGithubRestApi
                 jsPath, jsData ?? "",
                 mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
             //Try to not process too fast, Github has a rate-limit 
-            Thread.Sleep(1);
+            //Thread.Sleep(1);
         }
         await postDownloadAction(updatedMapperList);
     }

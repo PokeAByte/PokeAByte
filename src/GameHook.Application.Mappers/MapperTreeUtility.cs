@@ -79,7 +79,7 @@ public static class MapperTreeUtility
             return false;
         }
         var path = Path.Combine(baseDirectory, "mapper_tree.json");
-        var jsonData = JsonSerializer.Serialize(mapperTree);
+        var jsonData = JsonSerializer.Serialize(mapperTree, MapperDtoContext.Default.ListMapperDto);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
             Console.WriteLine("Serialized json data is null. Failed to save.");

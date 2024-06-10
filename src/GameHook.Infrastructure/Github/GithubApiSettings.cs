@@ -22,10 +22,10 @@ public record GithubApiSettings : IGithubApiSettings
     [JsonPropertyName("token")]
     public string Token { get; set; } = "";
     [JsonPropertyName("owner")]
-    public string Owner { get; set; } = "";
+    public string Owner { get; set; } = "Scotts-Thoughts";
     
     [JsonPropertyName("repo")]
-    public string Repo { get; set; } = "";
+    public string Repo { get; set; } = "mappers";
     
     [JsonPropertyName("dir")] 
     public string Directory { get; set; } = "";

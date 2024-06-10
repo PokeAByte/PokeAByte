@@ -43,6 +43,11 @@ public record MapperDto
     }
 }
 
+[JsonSerializable(typeof(List<MapperDto>))]
+public partial class MapperDtoContext : JsonSerializerContext
+{
+    
+}
 public record MapperComparisonDto
 {
     public MapperDto? CurrentVersion { get; set; } = null;

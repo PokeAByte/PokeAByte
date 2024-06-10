@@ -226,8 +226,9 @@
                                     <br />
                                         <span v-if="selectedMapperUpdates.includes(mapper)">
                                             <span v-if="mapper.currentVersion !== undefined" style="padding-left:16px">
+                                                <span>Local Version </span>
                                                 <span v-if="mapper.currentVersion.version.length > 0">
-                                                    Local Version {{mapper.currentVersion.version}}:
+                                                    {{mapper.currentVersion.version}}:
                                                 </span>
                                                 Created: {{formatDate(mapper.currentVersion.date_created)}} - 
                                                 Updated: {{formatDate(mapper.currentVersion.date_updated)}} 
@@ -237,8 +238,9 @@
                                             </span>
                                             <br />
                                             <span v-if="mapper.latestVersion !== undefined" style="padding-left:16px">
+                                                <span>Remote Version </span>
                                                 <span v-if="mapper.latestVersion.version.length > 0">
-                                                    Remote Version {{mapper.latestVersion.version}}: 
+                                                    {{mapper.latestVersion.version}}: 
                                                 </span>
                                                 Created: {{formatDate(mapper.latestVersion.date_created)}} - 
                                                 Updated: {{formatDate(mapper.latestVersion.date_updated)}} 
@@ -1085,6 +1087,7 @@
                 }                
             },
             testGithubSettings: async function() {
+                await this.saveGithubSettings();
                 this.showGithubTestResults = false;
                 this.githubTestResult = await fetch(`${this.mapper._connectionString}/files/test_github_settings`)
                     .then(async(x) => {

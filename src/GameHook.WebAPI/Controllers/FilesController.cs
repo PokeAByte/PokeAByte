@@ -165,10 +165,11 @@ namespace GameHook.WebAPI.Controllers
 
         [SwaggerOperation("Saves the updated Github settings.")]
         [HttpPost("save_github_settings")]
-        public ActionResult SaveGithubSettings(GithubApiSettings settings)
+        public async Task<ActionResult> SaveGithubSettingsAsync(GithubApiSettings settings)
         {
             try
             {
+                await CheckForUpdates();
                 githubApiSettings.CopySettings(settings);
                 githubApiSettings.SaveChanges();
                 
@@ -184,7 +185,7 @@ namespace GameHook.WebAPI.Controllers
 
         [SwaggerOperation("Tests the saved settings in Github Settings class.")]
         [HttpGet("test_github_settings")]
-        public async Task<ActionResult> TestGithubSettings()
+        public async Task<ActionResult> TestGithubSettingsAsync()
         {
             try
             {

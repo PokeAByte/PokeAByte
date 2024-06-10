@@ -21,7 +21,7 @@ public class MapperArchiveManager : IMapperArchiveManager
         _logger = logger;
     }
 
-    private List<KeyValuePair<string, string>> FindAllXmlFiles(string path)
+    private List<MapperXmlFileDto> FindAllXmlFiles(string path, string basePath = "")
     {
         if (!Directory.Exists(MapperEnvironment.MapperLocalArchiveDirectory))
         {
@@ -30,17 +30,19 @@ public class MapperArchiveManager : IMapperArchiveManager
             return [];
         }
 
-        List<KeyValuePair<string,string>> fileList = [];
+        List<MapperXmlFileDto> fileList = [];
         foreach (var dir in Directory.EnumerateDirectories(path))
         {
+            if (string.IsNullOrWhiteSpace(basePath))
+                basePath = dir;
             try
             {
                 if (Directory.GetDirectories(dir).Length > 0)
-                    fileList.AddRange(FindAllXmlFiles(dir));
+                    fileList.AddRange(FindAllXmlFiles(dir, basePath));
                 fileList.AddRange(Directory
                     .EnumerateFiles(dir)
                     .Where(x => x.ToLower().EndsWith(".xml"))
-                    .Select(file => new KeyValuePair<string, string>(path, file)));
+                    .Select(file => MapperXmlFileDto.Create(file, basePath)));
             }
             catch (Exception e)
             {
@@ -62,26 +64,23 @@ public class MapperArchiveManager : IMapperArchiveManager
         {
             //create the mapper dto
             var archivedMapper = MapperDto.Create(MapperEnvironment.MapperLocalArchiveDirectory, 
-                xmlFile.Value,
-                MapperTreeUtility.GetVersion(xmlFile.Value));
+                xmlFile.FilePath,
+                MapperTreeUtility.GetVersion(xmlFile.FilePath));
             //get the path's display name
-            var pathDisplayName = xmlFile
-                .Value[xmlFile.Key.Length..xmlFile.Value.LastIndexOf('\\')]
-                .Replace("\\", "/");
             var archivedMapperDto = new ArchivedMapperDto()
             {
-                PathDisplayName = pathDisplayName,
-                FullPath = xmlFile.Value[..xmlFile.Value.LastIndexOf('\\')],
+                PathDisplayName = xmlFile.RelativePath,
+                FullPath = xmlFile.FullPath,
                 Mapper = archivedMapper
             };
-            if (_archivedMappers.ContainsKey(xmlFile.Key))
+            if (_archivedMappers.ContainsKey(xmlFile.FullPath))
             {
-                _archivedMappers.TryGetValue(xmlFile.Key, out var val);
+                _archivedMappers.TryGetValue(xmlFile.FullPath, out var val);
                 val?.Add(archivedMapperDto);
             }
             else
             {
-                _archivedMappers.TryAdd(xmlFile.Key, [archivedMapperDto]);
+                _archivedMappers.TryAdd(xmlFile.FullPath, [archivedMapperDto]);
             }
         }
     }

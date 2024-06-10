@@ -105,14 +105,22 @@ public class MapperUpdateManager : IMapperUpdateManager
             return [];
         }
         //Convert the remote data to a MapperDto
-        var remote = await HttpContentJsonExtensions.ReadFromJsonAsync<List<MapperDto>>(mapperListResponse.Content);
-        if (remote is null || remote.Count == 0)
+        var remoteDeserialized = await mapperListResponse
+            .Content
+            .ReadFromJsonAsync<List<MapperDto>>();
+        if (remoteDeserialized is null || remoteDeserialized.Count == 0)
         {
             _logger.LogError("Could not read the remote json file.");
             return [];
         }
+        var remote = remoteDeserialized            
+            .Select(m => m with { Path = m.Path.Trim('/').Trim('\\') })
+            .ToList();
         //Get the current version the user has on their filesystem
-        var mapperTree = MapperTreeUtility.Load(MapperEnvironment.MapperLocalDirectory);
+        var mapperTree = MapperTreeUtility
+            .Load(MapperEnvironment.MapperLocalDirectory)            
+            .Select(m => m with { Path = m.Path.Trim('/').Trim('\\') })
+            .ToList();
         //Compare the mapper trees and return a list of outdated mappers
         return mapperTree.CompareMapperTrees(remote);
 
