@@ -1,7 +1,7 @@
 ﻿using System.IO.Pipes;
 using GameHook.Integrations.BizHawk;
 
-namespace GameHook.Infrastructure;
+namespace GameHook.Infrastructure.Drivers.Bizhawk;
 
 public static class BizhawkNamedPipesClient
 {

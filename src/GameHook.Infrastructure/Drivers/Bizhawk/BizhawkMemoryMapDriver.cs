@@ -1,12 +1,12 @@
-﻿using GameHook.Domain;
-using GameHook.Domain.Interfaces;
-using System.IO.MemoryMappedFiles;
+﻿using System.IO.MemoryMappedFiles;
 using System.Text;
+using GameHook.Domain;
+using GameHook.Domain.Interfaces;
 using GameHook.Integrations.BizHawk;
 using SharedPlatformConstants = GameHook.Domain.SharedPlatformConstants;
 
 #pragma warning disable CA1416 // Validate platform compatibility
-namespace GameHook.Infrastructure.Drivers
+namespace GameHook.Infrastructure.Drivers.Bizhawk
 {
     public class BizhawkMemoryMapDriver : IGameHookDriver, IBizhawkMemoryMapDriver
     {

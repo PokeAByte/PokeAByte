@@ -80,8 +80,22 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">Mapper Manager</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getAvailableUpdates">View Available Mapper Updates</a>
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getArchivedMappers">View Archived Mappers</a>
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="openGithubSettings">GitHub API Settings</a>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="dropdown is-hoverable">
                     <div class="dropdown-trigger header-menu-item">Help</div>
                     <div class="dropdown-menu" role="menu">
                         <div class="dropdown-content">
@@ -98,14 +112,15 @@
                                target="_blank">Credits</a>
                         </div>
                     </div>
-                </div>
+                </div>-->
+            
             </div>
-
+                        
             <div class="columns mt-3" v-if="loadingMapperWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
                         <p class="my-3">Please select the mapper file you would like to load.</p>
-
+                        
                         <select class="input my-3" v-model="loadingMapperSelectedId">
                             <option :value="null"></option>
                             <option v-for="file in loadingMapperFiles" :value="file.id">
@@ -126,80 +141,199 @@
                     </div>
                 </div>
             </div>
-
+            
+            <div class="columns mt-3" v-else-if="githubSettingsMenuOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p style="color:red">Changing these settings is generally not recommended unless you know 
+                            what you are doing. These settings allow you to set a custom mapper repository, incorrect 
+                            settings can cause issues retrieving new and updated mappers. Please only do so with caution.
+                        </p>
+                        <hr />
+                        <h3 v-if="githubSettingsSaveSuccess">Settings saved successfully!</h3>
+                        <h3 v-else-if="githubSettingsSaveFailed">Failed to save settings! Error: {{githubSaveErrorMessage}}</h3>
+                        <hr />
+                        <label>
+                            <span>GitHub Owner Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.owner" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>Repository Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.repo" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Alternative Directory Name - 
+                                Note: This is only required if the <b>mapper_tree.json</b> 
+                                is not in the root directory of the repository
+                            </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.dir" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Personal Access Token - 
+                                Note: This is required if the repository is private or if you want to bypass the
+                                GitHub REST Api rate limit. Once you have a token generated <b>do not</b> share it 
+                                with anyone; for more information please refer to this page: 
+                                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
+                                    Managing your personal access tokens
+                                </a>
+                            </span>
+                            <br />
+                            <input type="password" v-model="githubSettings.token" style="width:50vw"/>
+                        </label>
+                        <br />
+                        <h3 v-if="showGithubTestResults">{{githubTestResult}}</h3>
+                        <button type="button" class="button" v-on:click="testGithubSettings">
+                            Test Settings
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="saveGithubSettings">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select the mapper file you would like to update/download.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="updateSearch" />
+                        </label>
+                        <ul>
+                            <li>
+                                <label>
+                                    <input type="checkbox" v-on:click="checkAllMappers" v-model="allMapperUpdatesSelected" />
+                                    <span> Check All</span>
+                                </label>
+                                <hr />
+                            </li>
+                            <li v-for="(mapper, index) in filteredUpdates" style="padding:4px">
+                                <label>
+                                    <input :id="mapper.path" :value="mapper" name="mapper"
+                                        type="checkbox" v-model="selectedMapperUpdates" />
+                                    <span>&nbsp;{{getPath(mapper)}}</span>
+                                    <span v-if="getVersion(mapper).length > 0"> - Version {{getVersion(mapper)}}</span>
+                                    <br />
+                                        <span v-if="selectedMapperUpdates.includes(mapper)">
+                                            <span v-if="mapper.currentVersion !== undefined" style="padding-left:16px">
+                                                <span>Local Version </span>
+                                                <span v-if="mapper.currentVersion.version.length > 0">
+                                                    {{mapper.currentVersion.version}}:
+                                                </span>
+                                                Created: {{formatDate(mapper.currentVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.currentVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Local: Missing
+                                            </span>
+                                            <br />
+                                            <span v-if="mapper.latestVersion !== undefined" style="padding-left:16px">
+                                                <span>Remote Version </span>
+                                                <span v-if="mapper.latestVersion.version.length > 0">
+                                                    {{mapper.latestVersion.version}}: 
+                                                </span>
+                                                Created: {{formatDate(mapper.latestVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.latestVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Remote: Missing
+                                            </span>
+                                        </span>
+                                </label>
+                            </li>
+                        </ul>
+                        <hr />
+                        <button type="button" class="button" v-on:click="downloadUpdatedMappers">
+                            Downloaded {{selectedMapperUpdates.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="checkForMapperUpdates">
+                            Check for Updates
+                        </button>
+                        <button type="button" class="button" v-on:click="mapperUpdaterWindowOpen = false">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowLoaderOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <img src="loading.gif" alt="loading" style="height: 100px; width: 100px"/>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperArchiveWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select an archived mapper file to manage.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="archivedSearch" />
+                        </label>
+                        <div v-for="(archive) in filteredArchives" style="padding:4px">
+                            <span>{{archive.key}}</span>
+                            <br />
+                            <ul style="padding-left:16px">
+                                <li v-for="(mapper) in archive.value" style="padding:4px;">
+                                    <label>
+                                        <input :value="mapper" name="archivedMapper"
+                                               type="checkbox" v-model="selectedArchivedMappers" />
+                                        <span style="padding-left:2px;">
+                                            {{mapper.pathDisplayName}}/{{mapper.mapper.display_name}} - 
+                                            Version {{mapper.mapper.version}}
+                                        </span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                        <hr />
+                        <button type="button" class="button" v-on:click="restoreMappers">
+                            Restore {{selectedArchivedMappers.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="refreshArchivedList">
+                            Refresh List
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="mapperArchiveWindowOpen = false">
+                            Close
+                        </button>
+                        <hr />
+                        <span style="color:red;">
+                            Warning: This will permanently delete ALL selected archived mappers. 
+                            Please only select mappers you want to remove. 
+                        </span>
+                        <div style="padding-bottom: 12px;"></div>
+                        <button type="button" class="button" v-on:click="deleteArchivedMappers">
+                            Delete Archived Mappers
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="center-wrapper" v-else-if="!mapper.meta">
                 <div>You do not have a mapper loaded.</div>
             </div>
 
             <div class="columns" v-else>
-                <div class="column is-3">
+                <div class="column is-5">
                     <div class="gh-panel gh-properties-panel">
                         <div class="gh-panel-header">All Properties</div>
                         <div class="gh-panel-content">
                             <tree-view-item :obj="this.mapper.properties" depth="0" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column is-6">
-                    <div class="gh-panel gh-center-panel">
-                        <div v-bind:class="getTabClasses('pinnedProperties', true)"
-                             v-on:click="centerPanelTab = 'pinnedProperties'">
-                            Pinned Properties
-                        </div>
-                        <div v-bind:class="getTabClasses('frozenProperties')"
-                             v-on:click="centerPanelTab = 'frozenProperties'">
-                            Frozen Properties
-                        </div>
-
-                        <div class="gh-panel-content" v-if="centerPanelTab == 'pinnedProperties'">
-                            <table v-if="pinnedPropertyPaths.length > 0" class="gh-table">
-                                <tr class="has-text-white">
-                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
-                                    <th class="has-text-white pt-1 bytes-th" style="width: 30%">Value (Bytes)</th>
-                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
-                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
-                                </tr>
-                                <tr v-for="property in getPinnedProperties()">
-                                    <td class="pt-1">{{ property.path }}</td>
-                                    <td class="pt-1 bytes-td displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
-                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
-                                    <td class="pt-1 has-text-centered commands-td">
-                                        <description-btn :property="property"></description-btn>
-                                        <freeze-property-btn :property="property"></freeze-property-btn>
-                                        <pin-property-btn :property="property"></pin-property-btn>
-                                        <edit-property-btn :property="property"></edit-property-btn>
-                                    </td>
-                                </tr>
-                            </table>
-                            <p v-else>
-                                Properties you pin will appear here.
-                            </p>
-                        </div>
-
-                        <div class="gh-panel-content" v-if="centerPanelTab == 'frozenProperties'">
-                            <table v-if="getFrozenProperties().length > 0" class="gh-table">
-                                <tr class="has-text-white">
-                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
-                                    <th class="has-text-white pt-1" style="width: 30%">Value (Bytes)</th>
-                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
-                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
-                                </tr>
-                                <tr v-for="property in getFrozenProperties()">
-                                    <td class="pt-1">{{ property.path }}</td>
-                                    <td class="pt-1 displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
-                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
-                                    <td class="pt-1 has-text-centered commands-td">
-                                        <description-btn :property="property"></description-btn>
-                                        <freeze-property-btn :property="property"></freeze-property-btn>
-                                        <pin-property-btn :property="property"></pin-property-btn>
-                                        <edit-property-btn :property="property"></edit-property-btn>
-                                    </td>
-                                </tr>
-                            </table>
-                            <p v-else>
-                                Properties you have frozen will appear here.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -333,6 +467,69 @@
                                     Updating the property failed.
                                 </error-hint>
                             </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-4">
+                    <div class="gh-panel gh-center-panel">
+                        <div v-bind:class="getTabClasses('pinnedProperties', true)"
+                             v-on:click="centerPanelTab = 'pinnedProperties'">
+                            Pinned Properties
+                        </div>
+                        <div v-bind:class="getTabClasses('frozenProperties')"
+                             v-on:click="centerPanelTab = 'frozenProperties'">
+                            Frozen Properties
+                        </div>
+
+                        <div class="gh-panel-content" v-if="centerPanelTab == 'pinnedProperties'">
+                            <table v-if="pinnedPropertyPaths.length > 0" class="gh-table">
+                                <tr class="has-text-white">
+                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
+                                    <th class="has-text-white pt-1 bytes-th" style="width: 30%">Value (Bytes)</th>
+                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
+                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
+                                </tr>
+                                <tr v-for="property in getPinnedProperties()">
+                                    <td class="pt-1">{{ property.path }}</td>
+                                    <td class="pt-1 bytes-td displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
+                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
+                                    <td class="pt-1 has-text-centered commands-td">
+                                        <description-btn :property="property"></description-btn>
+                                        <freeze-property-btn :property="property"></freeze-property-btn>
+                                        <pin-property-btn :property="property"></pin-property-btn>
+                                        <edit-property-btn :property="property"></edit-property-btn>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p v-else>
+                                Properties you pin will appear here.
+                            </p>
+                        </div>
+
+                        <div class="gh-panel-content" v-if="centerPanelTab == 'frozenProperties'">
+                            <table v-if="getFrozenProperties().length > 0" class="gh-table">
+                                <tr class="has-text-white">
+                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
+                                    <th class="has-text-white pt-1" style="width: 30%">Value (Bytes)</th>
+                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
+                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
+                                </tr>
+                                <tr v-for="property in getFrozenProperties()">
+                                    <td class="pt-1">{{ property.path }}</td>
+                                    <td class="pt-1 displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
+                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
+                                    <td class="pt-1 has-text-centered commands-td">
+                                        <description-btn :property="property"></description-btn>
+                                        <freeze-property-btn :property="property"></freeze-property-btn>
+                                        <pin-property-btn :property="property"></pin-property-btn>
+                                        <edit-property-btn :property="property"></edit-property-btn>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p v-else>
+                                Properties you have frozen will appear here.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -599,7 +796,23 @@
                 apiDocumentationUrl: `${originUrl}/swagger/`,
                 loadingMapper: false,
                 loadingMapperWindowOpen: false,
+                mapperUpdaterWindowOpen: false,
+                mapperArchiveWindowOpen: false,
+                mapperUpdaterWindowLoaderOpen: false,
+                githubSettingsMenuOpen: false,
+                githubSaveErrorMessage: "",
+                githubSettingsSaveFailed: false,
+                githubSettingsSaveSuccess: false,
+                showGithubTestResults: false,
+                githubTestResult: "",
                 loadingMapperFiles: null,
+                updateSearch: "",
+                availableUpdates: [],
+                selectedMapperUpdates: [],
+                archivedSearch: "",
+                archivedMappers: [],
+                selectedArchivedMappers: [],
+                allMapperUpdatesSelected: false,
                 loadingMapperSelectedId: null,
                 loadingMapperError: null,
                 mapper: null,
@@ -607,6 +820,14 @@
                 pinnedPropertyPaths: [],
                 editingProperty: null,
                 editingPropertyError: null,
+                githubSettings: {
+                    accept: "",
+                    api_version: "",
+                    token: "",
+                    owner: "",
+                    repo: "",
+                    dir: ""
+                },
                 userSettings: {
                     driver: 'retroarch',
                     displayBytesMode: 'hexdecimalUpper'
@@ -661,9 +882,75 @@
             // Load existing user configuration.
             this.loadData()
         },
+        computed: {
+            filteredUpdates() {
+                return this.availableUpdates.filter(item => {
+                    let found = false;
+                    if(item.latestVersion !== undefined) {
+                        found = item.latestVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());
+                    } 
+                    if(item.currentVersion !== undefined) {
+                        found = found || item.currentVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());         
+                    }
+                    return found;
+                });
+            },
+            filteredArchives() {
+                /*let filtered = Array.from(Object
+                        .entries(this.archivedMappers)
+                        .filter(([k,v]) => {
+                            let foundList = v.filter(item => item.mapper.path
+                                .toLowerCase()
+                                .includes(this.archivedSearch.toLowerCase()));
+                            return foundList.length > 0
+                        }));*/
+                let foundObjs = [];
+                Object.entries(this.archivedMappers)
+                    .forEach(item => {
+                        let filtered = item[1].filter(innerItem => innerItem
+                            .mapper.path
+                            .toLowerCase()
+                            .includes(this.archivedSearch.toLowerCase()));
+                        if(filtered.length > 0) {
+                            foundObjs.push({key:item[0], value:filtered});
+                        }
+                    });
+                return foundObjs;
+            }
+        },
         methods: {
             decimalToHexdecimal: GameHookMapperClient.decimalToHexdecimal,
-
+            closeAllWindows: function() {
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = false
+                this.mapperArchiveWindowOpen = false
+                this.mapperUpdaterWindowLoaderOpen = false
+                this.githubSettingsMenuOpen = false
+            },
+            getPath: function(mapperDto) {
+                return mapperDto.currentVersion === undefined ?
+                    mapperDto.latestVersion.path : mapperDto.currentVersion.path;
+            },
+            getVersion: function(mapperDto) {
+                return mapperDto.latestVersion === undefined ?
+                    mapperDto.currentVersion.version : mapperDto.latestVersion.version;                
+            },
+            formatDate: function(date) {
+                let formattedDate = new Date(date);
+                if(formattedDate.toString() === "Invalid Date") {
+                    return "N/A";
+                } else {
+                    let dt = formattedDate.toISOString().split("T");
+                    return `${dt[0]} ${dt[1].substring(0, dt[1].indexOf("."))}`
+                    //return `${formattedDate.getFullYear()}-${formattedDate.getMonth()+1}-${formattedDate.getDate()} ${formattedDate.getHours()}:${formattedDate.getMinutes()}`;
+                }
+            },
             displayBytes: function (bytes, forceMode) {
                 const mode = forceMode ?? this.userSettings.displayBytesMode
 
@@ -677,7 +964,6 @@
                     throw new Error(`Invalid user setting found for displayBytesMode: ${mode}.`)
                 }
             },
-
             getTabClasses: function (tab, isFirstEntry = false) {
                 const classes = ['gh-panel-header']
 
@@ -759,12 +1045,170 @@
 
                 return []
             },
+            openGithubSettings: async function() {
+                this.showGithubTestResults = false;
+                this.closeAllWindows();
+                this.githubSettings = await fetch(`${this.mapper._connectionString}/files/get_github_settings`)
+                    .then(async (x) => {
+                        return JSON.parse(await x.json());
+                    });
+                this.githubSettingsMenuOpen = true;
+            },
+            saveGithubSettings: async function() {
+                this.githubSettingsSaveSuccess = false;
+                this.githubSettingsSaveFailed = false;
+                this.githubSaveErrorMessage = "";
+                this.showGithubTestResults = false;
+                try {
+                    this.closeAllWindows();
+                    await fetch(`${this.mapper._connectionString}/files/save_github_settings`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.githubSettings)
+                    }).then(x => {
+                        if(x.ok) {
+                            this.githubSettingsSaveSuccess = true;
+                            this.githubSettingsSaveFailed = false;
+                            this.githubSaveErrorMessage = "";                            
+                        } else {
+                            this.githubSettingsSaveSuccess = false;
+                            this.githubSettingsSaveFailed = true;
+                            this.githubSaveErrorMessage = x.text();
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                    this.githubSettingsSaveSuccess = false;
+                    this.githubSettingsSaveFailed = true;
+                    this.githubSaveErrorMessage = e;
+                }
+                finally {
+                    await this.openGithubSettings();
+                }                
+            },
+            testGithubSettings: async function() {
+                await this.saveGithubSettings();
+                this.showGithubTestResults = false;
+                this.githubTestResult = await fetch(`${this.mapper._connectionString}/files/test_github_settings`)
+                    .then(async(x) => {
+                        return await x.text();
+                    })
+                this.showGithubTestResults = true;
+            },
+            getArchivedMappers: async function() {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/get_archived`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.closeAllWindows();
+                this.mapperArchiveWindowOpen = true;
+            },
+            restoreMappers: async function() {
+                try {
+                    if(this.selectedArchivedMappers.length === 0)
+                        return;
+                    this.archivedMappers = []
+                    this.archivedSearch = ""
+                    this.mapperArchiveWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/restore_mappers`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedArchivedMappers)
+                    })
+                } catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    this.selectedArchivedMappers = []
+                    await this.refreshArchivedList()
+                }
+            },
+            refreshArchivedList: async function() {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/refresh_archived_list`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.closeAllWindows();
+                this.mapperArchiveWindowOpen = true;
+            },
+            deleteArchivedMappers: async function() {
+                if(this.selectedArchivedMappers.length === 0)
+                    return;
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                try {
+                    await fetch(`${this.mapper._connectionString}/files/mapper/delete_mappers`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedArchivedMappers)
+                    })
+                } catch (e) {
+                    console.log(e);
+                } finally {
+                    this.closeAllWindows();
+                    this.mapperArchiveWindowOpen = true;
+                    await this.refreshArchivedList()
+                }   
+            },
+            getAvailableUpdates: async function() {
+                this.selectedMapperUpdates = []
+                this.availableUpdates = []
+                this.updateSearch = "";
+                this.availableUpdates = await fetch(`${this.mapper._connectionString}/files/mapper/get_updates`)
+                    .then(async (x) => {
+                      return await x.json()  
+                    })
+                this.closeAllWindows();
+                this.mapperUpdaterWindowOpen = true
+            },
+            checkForMapperUpdates: async function() {
+                this.availableUpdates = []
+                this.updateSearch = "";
+                await fetch(`${this.mapper._connectionString}/files/mapper/check_for_updates`, {
+                    method: 'GET'
+                }).then(async() => {
+                    await this.getAvailableUpdates();
+                });
+            },            
+            checkAllMappers: function() {
+                this.selectedMapperUpdates = []
+                if(!this.allMapperUpdatesSelected) {
+                    for(mapperUpdate in this.availableUpdates) {
+                        this.selectedMapperUpdates.push(this.availableUpdates[mapperUpdate])
+                    }
+                }
+            },
+            downloadUpdatedMappers: async function() {
+                try {
+                    if(this.selectedMapperUpdates.length === 0)
+                        return;
+                    this.availableUpdates = []
+                    this.updateSearch = ""
+                    this.mapperUpdaterWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/download_updates`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedMapperUpdates)                        
+                    })
+                } finally {
+                    this.selectedMapperUpdates = []
+                    await this.getAvailableUpdates();
+                }
+            },
             openLoadingMapper: async function () {
                 this.loadingMapperFiles = await fetch(`${this.mapper._connectionString}/files/mappers`)
                     .then(async (x) => {
                         return await x.json()
                     })
-
+                this.closeAllWindows();
                 this.loadingMapperWindowOpen = true
             },
             replaceMapper: async function (id = null) {
@@ -788,8 +1232,7 @@
 
                     await this.mapper.loadMapper()
                     this.mapperLoadId = id
-
-                    this.loadingMapperWindowOpen = false
+                    this.closeAllWindows()
                 } finally {
                     this.loadingMapper = false
                 }

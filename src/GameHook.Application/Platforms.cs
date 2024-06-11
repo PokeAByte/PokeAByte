@@ -47,6 +47,7 @@ namespace GameHook.Application
 
         public MemoryAddressBlock[] Ranges { get; } = new List<MemoryAddressBlock>()
         {
+            new MemoryAddressBlock("Header", 0x0000, 0x00FF),
             new MemoryAddressBlock("VRAM", 0x8000, 0x9FFF),
             new MemoryAddressBlock("External RAM (Part 1)", 0xA000, 0xAFFF),
             new MemoryAddressBlock("External RAM (Part 2)", 0xB000, 0xBFFF),
@@ -63,6 +64,7 @@ namespace GameHook.Application
 
         public MemoryAddressBlock[] Ranges { get; } = new List<MemoryAddressBlock>()
         {
+            new MemoryAddressBlock("Header", 0x0000, 0x00FF),
             new MemoryAddressBlock("VRAM", 0x8000, 0x9FFF),
             new MemoryAddressBlock("External RAM (Part 1)", 0xA000, 0xAFFF),
             new MemoryAddressBlock("External RAM (Part 2)", 0xB000, 0xBFFF),

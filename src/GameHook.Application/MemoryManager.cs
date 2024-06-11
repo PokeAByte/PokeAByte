@@ -1,6 +1,7 @@
-﻿using GameHook.Domain.Interfaces;
+﻿using GameHook.Domain;
+using GameHook.Domain.Interfaces;
 
-namespace GameHook.Domain.Implementations
+namespace GameHook.Application
 {
     public class MemoryManager : IMemoryManager
     {

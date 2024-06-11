@@ -1,5 +1,4 @@
 ﻿using GameHook.Domain;
-using GameHook.Domain.Implementations;
 using GameHook.Domain.Interfaces;
 using Jint;
 using Jint.Native;

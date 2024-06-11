@@ -12,6 +12,9 @@ using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using GameHook.Infrastructure.Drivers.Bizhawk;
+using GameHook.Infrastructure.Github;
+using GameHook.Mappers;
 
 namespace GameHook.WebAPI
 {
@@ -75,10 +78,30 @@ namespace GameHook.WebAPI
 
             // Register application classes.
             services.AddSingleton<AppSettings>();
-            services.AddSingleton<GameHookInstance>();
-            services.AddSingleton<ScriptConsole>();
+            services.AddSingleton<IGithubApiSettings>(x =>
+            {
+                var logger = x.GetRequiredService<ILogger<GithubApiSettings>>();
+                var config = x.GetRequiredService<IConfiguration>();
+                var token = config["GITHUB_TOKEN"];
+                return GithubApiSettings.Load(logger, token);
+            });
             services.AddSingleton<IMapperFilesystemProvider, MapperFilesystemProvider>();
             services.AddSingleton<IMapperUpdateManager, MapperUpdateManager>();
+            services.AddSingleton(x =>
+            {
+                var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
+                return MapperUpdaterSettings.Load(logger);
+            });
+            services.AddSingleton<IMapperArchiveManager, MapperArchiveManager>(x =>
+            {
+                var logger = x.GetRequiredService<ILogger<MapperArchiveManager>>();
+                var mapperArchiveManager = new MapperArchiveManager(logger);
+                mapperArchiveManager.GenerateArchivedList();
+                return mapperArchiveManager;
+            });
+            services.AddSingleton<IGithubRestApi, GithubRestApi>();
+            services.AddSingleton<GameHookInstance>();
+            services.AddSingleton<ScriptConsole>();
             services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
             services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
             services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
@@ -143,7 +166,6 @@ namespace GameHook.WebAPI
 
                 x.MapHub<UpdateHub>("/updates");
             });
-
             logger.LogInformation("GameHook startup completed.");
             logger.LogInformation($"UI is accessible at {string.Join(", ", appSettings.Urls)}");
         }

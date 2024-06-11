@@ -32,16 +32,15 @@ namespace GameHook.Domain
 
         public static string LogFilePath =>
             Path.Combine(ConfigurationDirectory, "GameHook.log");
-
         public static string ConfigurationDirectoryAppsettingsFilePath =>
             Path.Combine(ConfigurationDirectory, "appsettings.json");
-
         public static string ConfigurationDirectoryWpfConfigFilePath =>
             Path.Combine(ConfigurationDirectory, "gamehook.wpf.config");
 
 #if DEBUG
         public static bool IsDebug => true;
         public static bool IsTestingBuild => true;
+
 #else
     public static bool IsDebug = false;
     public static bool IsTestingBuild => AssemblyVersion == "0.0.0.0";
