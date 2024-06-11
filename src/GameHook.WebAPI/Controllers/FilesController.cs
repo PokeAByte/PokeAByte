@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
@@ -198,6 +199,44 @@ namespace GameHook.WebAPI.Controllers
             {
                 return Ok($"Failed to connect to Github Api - Reason: {e}");
             }
+        }
+
+        [SwaggerOperation("Opens mapper folder.")]
+        [HttpGet("open_mapper_folder")]
+        public ActionResult OpenMapperFolder()
+        {
+            try
+            {
+                Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to open directory.");
+                return ApiHelper.BadRequestResult(e.ToString());
+            }
+        }
+        [SwaggerOperation("Opens mapper archived folder.")]
+        [HttpGet("open_mapper_archive_folder")]
+        public ActionResult OpenMapperArchiveFolder()
+        {
+            try
+            {
+                Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to open directory.");
+                return ApiHelper.BadRequestResult(e.ToString());
+            }
+        }
+
+        [SwaggerOperation("Get the Github link.")]
+        [HttpGet("get_github_link")]
+        public ActionResult GetGithubLink()
+        {
+            return Ok(githubApiSettings.GetGithubUrl());
         }
     }
 }

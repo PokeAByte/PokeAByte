@@ -132,7 +132,9 @@
                                 v-on:click="replaceMapper(loadingMapperSelectedId)">
                             Load Mapper
                         </button>
-
+                        <button type="button" class="button" v-on:click="openMapperFolder">
+                            Open Mapper Folder
+                        </button>
                         <div class="my-3">
                             <error-hint :err="loadingMapperError">
                                 Applying the mapper failed.
@@ -192,6 +194,10 @@
                         <h3 v-if="showGithubTestResults">{{githubTestResult}}</h3>
                         <button type="button" class="button" v-on:click="testGithubSettings">
                             Test Settings
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="openGithubUrl">
+                            Open Github Link
                         </button>
                         <br />
                         <button type="button" class="button" v-on:click="saveGithubSettings">
@@ -306,6 +312,10 @@
                         <br />
                         <button type="button" class="button" v-on:click="refreshArchivedList">
                             Refresh List
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="openArchiveFolder">
+                            Open Archive Folder
                         </button>
                         <br />
                         <button type="button" class="button" v-on:click="mapperArchiveWindowOpen = false">
@@ -1210,6 +1220,22 @@
                     })
                 this.closeAllWindows();
                 this.loadingMapperWindowOpen = true
+            },
+            openMapperFolder: function() {
+                fetch(`${this.mapper._connectionString}/files/open_mapper_folder`);  
+            },
+            openArchiveFolder: function() {
+                fetch(`${this.mapper._connectionString}/files/open_mapper_archive_folder`);
+            },
+            openGithubUrl: async function() {
+                await fetch(`${this.mapper._connectionString}/files/get_github_link`)
+                    .then(async x => {
+                        if(x.ok) {
+                            let url = await x.text();
+                            url = url.replaceAll("\"", "");
+                            window.open(url, '_blank').focus();
+                        }
+                    });
             },
             replaceMapper: async function (id = null) {
                 this.loadingMapper = true
