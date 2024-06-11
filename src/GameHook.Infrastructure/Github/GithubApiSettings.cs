@@ -31,6 +31,8 @@ public record GithubApiSettings : IGithubApiSettings
     public string Directory { get; set; } = "";
 
     [JsonIgnore] public static string GithubApiUrl = "https://api.github.com/repos/";
+
+    [JsonIgnore] public static string GithubUrl = "https://github.com";
     //[JsonIgnore] public static string GithubApiUrl = "https://raw.githubusercontent.com/";
     [JsonIgnore] private ILogger? _logger;
     public string GetAcceptValue() => Accept;
@@ -43,6 +45,7 @@ public record GithubApiSettings : IGithubApiSettings
         !string.IsNullOrWhiteSpace(Token) ? $"Bearer {Token}" : "";
 
     public string GetDirectory() => Directory;
+    public string GetGithubUrl() => $"{GithubUrl}/{Owner}/{Repo}/{Directory}";
     protected void SetLogger(ILogger<GithubApiSettings> logger)
     {
         _logger = logger;
