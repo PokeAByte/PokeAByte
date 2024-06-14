@@ -4,6 +4,7 @@ using GameHook.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json.Serialization;
+using GameHook.Domain.Models;
 
 namespace GameHook.WebAPI.Controllers
 {

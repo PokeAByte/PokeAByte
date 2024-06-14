@@ -1,6 +1,9 @@
 ﻿using System.Text.Json;
 using System.Xml;
 using GameHook.Domain;
+using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
+using MapperDtoContext = GameHook.Domain.Models.Mappers.MapperDtoContext;
 
 namespace GameHook.Mappers;
 

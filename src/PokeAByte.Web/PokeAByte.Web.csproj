@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MudBlazor" Version="6.20.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\MapperManager\LoadMapper.razor" />
+      <AdditionalFiles Include="Components\MapperManager\MapperArchives.razor" />
+      <AdditionalFiles Include="Components\MapperManager\UpdateMappers.razor" />
+      <AdditionalFiles Include="Layout\MainLayout.razor" />
+      <AdditionalFiles Include="Layout\NavigationMenu.razor" />
+      <AdditionalFiles Include="Pages\AppSettings.razor" />
+      <AdditionalFiles Include="Pages\DataProperties.razor" />
+      <AdditionalFiles Include="Pages\Error.razor" />
+      <AdditionalFiles Include="Pages\Home.razor" />
+      <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />
+      <AdditionalFiles Include="Pages\MapperManager.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Pages\AppSettings.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\DataProperties.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\MapperConnectionStatus.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\MapperManager.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Components\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GameHook.Application.Mappers\GameHook.Application.Mappers.csproj" />
+      <ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

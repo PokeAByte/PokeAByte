@@ -1,5 +1,7 @@
 ﻿using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace GameHook.Mappers;

@@ -1,0 +1,31 @@
+﻿<MudGrid>
+    <MudItem xs="12">
+        <MudText Typo="Typo.body1">
+            Please select a mapper file you would like to load: 
+        </MudText>
+    </MudItem>
+    <MudItem xs="12">
+        <MudSelect T="string"
+                   Label="Mapper"
+                   AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem Value="string.Empty"/>
+            @foreach (var mapper in _mapperNames)
+            {
+                <MudSelectItem Value="@mapper"/>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="6">
+        <MudButton Variant="Variant.Filled" FullWidth="true" Disabled="true">Load Mapper</MudButton>
+    </MudItem>
+    <MudItem xs="6">
+        <MudButton Variant="Variant.Filled" FullWidth="true">Open Mapper Folder</MudButton>
+    </MudItem>
+
+</MudGrid>
+
+@code {
+
+    private List<string> _mapperNames = [];
+
+}

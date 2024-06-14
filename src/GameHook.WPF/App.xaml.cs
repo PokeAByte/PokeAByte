@@ -1,6 +1,7 @@
 ﻿using GameHook.Domain;
 using RestoreWindowPlace;
 using System.Windows;
+using GameHook.Domain.Models;
 
 namespace GameHook.WPF
 {

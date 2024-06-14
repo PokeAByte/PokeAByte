@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using GameHook.Domain.Models;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace GameHook.WPF

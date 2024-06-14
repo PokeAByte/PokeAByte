@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Text.Json;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
 using GameHook.Infrastructure.Github;
 using GameHook.Mappers;
 using Microsoft.AspNetCore.Mvc;

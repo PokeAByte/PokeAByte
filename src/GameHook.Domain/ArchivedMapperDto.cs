@@ -1,4 +1,7 @@
-﻿namespace GameHook.Domain;
+﻿using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
+
+namespace GameHook.Domain;
 
 public record ArchivedMapperDto
 {

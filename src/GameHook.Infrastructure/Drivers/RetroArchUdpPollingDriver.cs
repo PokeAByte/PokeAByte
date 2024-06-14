@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using GameHook.Domain.Models;
 
 namespace GameHook.Infrastructure.Drivers
 {

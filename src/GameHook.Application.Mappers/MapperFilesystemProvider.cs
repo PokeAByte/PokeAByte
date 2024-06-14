@@ -1,5 +1,6 @@
 ﻿using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models;
 
 namespace GameHook.Mappers
 {

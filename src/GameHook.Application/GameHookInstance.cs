@@ -6,6 +6,7 @@ using Jint.Native.Object;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text.Json;
+using GameHook.Domain.Models;
 
 namespace GameHook.Application
 {

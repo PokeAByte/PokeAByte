@@ -2,6 +2,8 @@
 using System.Net.Http.Headers;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
 using GameHook.Mappers;
 using Microsoft.Extensions.Logging;
 

@@ -2,8 +2,9 @@
 using System.Text;
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models;
 using GameHook.Integrations.BizHawk;
-using SharedPlatformConstants = GameHook.Domain.SharedPlatformConstants;
+using SharedPlatformConstants = GameHook.Domain.Models.SharedPlatformConstants;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace GameHook.Infrastructure.Drivers.Bizhawk

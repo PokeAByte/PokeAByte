@@ -1,4 +1,7 @@
-﻿namespace GameHook.Domain.Interfaces;
+﻿using GameHook.Domain.Models;
+using GameHook.Domain.Models.Mappers;
+
+namespace GameHook.Domain.Interfaces;
 
 public interface IGithubRestApi
 {

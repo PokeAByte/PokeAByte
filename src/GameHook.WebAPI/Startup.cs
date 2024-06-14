@@ -12,6 +12,7 @@ using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using GameHook.Domain.Models;
 using GameHook.Infrastructure.Drivers.Bizhawk;
 using GameHook.Infrastructure.Github;
 using GameHook.Mappers;

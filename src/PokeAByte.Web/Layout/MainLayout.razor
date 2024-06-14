@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<MudDialogProvider />
+<MudThemeProvider />
+<MudSnackbarProvider />
+
+<MudThemingProvider IsDarkMode="true" />
+<MudLayout>
+    <MudMainContent>
+        <MudAppBar Elevation="0">
+            <MudText Typo="Typo.h5" Class="ml-3 mr-9">Poke-A-Byte</MudText>
+            <NavigationMenu />
+        </MudAppBar>
+        <MudContainer Fixed="true">
+            <MudPaper Height="100%" Square="true" Elevation="2" Class="pa-8 overflow-y-scroll">
+                <CascadingValue Value="PageTitle">
+                    @Body
+                </CascadingValue>
+            </MudPaper>
+        </MudContainer>
+        <MudAppBar Bottom="true" Fixed="true">Hello Footer</MudAppBar>
+    </MudMainContent>
+</MudLayout>
+

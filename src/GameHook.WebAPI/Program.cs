@@ -1,4 +1,5 @@
 using GameHook.Domain;
+using GameHook.Domain.Models;
 using Serilog;
 
 namespace GameHook.WebAPI

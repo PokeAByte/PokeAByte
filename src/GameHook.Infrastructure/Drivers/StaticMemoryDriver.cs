@@ -2,6 +2,7 @@
 using GameHook.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using GameHook.Domain.Models;
 
 namespace GameHook.Infrastructure.Drivers
 {

@@ -1,0 +1,15 @@
+﻿@page "/"
+@page "/Home"
+@using PokeAByte.Web.Services
+<PageTitle>@PageTitle - Home</PageTitle>
+@code
+{
+    [CascadingParameter] public string? PageTitle { get; set; }
+    [Inject] public NavigationManager? NavMan { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        NavMan?.NavigateTo(AppRoutes.MapperManager);
+    }
+}
