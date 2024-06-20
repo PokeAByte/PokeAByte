@@ -1,4 +1,6 @@
-﻿namespace GameHook.Domain.Models.Mappers;
+﻿using GameHook.Domain.Models.Properties;
+
+namespace GameHook.Domain.Models.Mappers;
 
 public record MapperModel
 {

@@ -1,4 +1,4 @@
-﻿namespace GameHook.Domain.Models.Mappers;
+﻿namespace GameHook.Domain.Models.Properties;
 
 public class GlossaryItemModel
 {

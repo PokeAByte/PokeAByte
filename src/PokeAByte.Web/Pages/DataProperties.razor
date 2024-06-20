@@ -1,6 +1,8 @@
 ﻿@page "/DataProperties"
+@using PokeAByte.Web.Components.Properties
 <PageTitle>@PageTitle - Properties</PageTitle>
-<h3>Data Properties</h3>
+
+<PropertyTreeView />
 
 @code {
     [CascadingParameter] public string? PageTitle { get; set; }

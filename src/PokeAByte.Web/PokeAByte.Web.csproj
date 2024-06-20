@@ -34,12 +34,18 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components\" />
+      <ProjectReference Include="..\GameHook.Application.Mappers\GameHook.Application.Mappers.csproj" />
+      <ProjectReference Include="..\GameHook.Application\GameHook.Application.csproj" />
+      <ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
+      <ProjectReference Include="..\GameHook.Infrastructure\GameHook.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GameHook.Application.Mappers\GameHook.Application.Mappers.csproj" />
-      <ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
+      <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="wwwroot\dist\gameHookMapperClient.js" />
     </ItemGroup>
 
 </Project>

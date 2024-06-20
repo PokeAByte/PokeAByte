@@ -1,45 +1,53 @@
 ﻿@using PokeAByte.Web.Services
 <MudButtonGroup OverrideStyles="false">
-    <MudButton @ref="_mapperManager"
-               StartIcon="@Icons.Material.Filled.CatchingPokemon"
+    <MudButton StartIcon="@Icons.Material.Filled.CatchingPokemon"
                Variant="Variant.Filled"
                IconColor="Color.Secondary"
                Size="Size.Large"
                DisableElevation="true"
+               Disabled="NavService!
+                    .IsButtonDisabled(NavigationService.Pages.MapperManager) ?? 
+                    false"
                OnClick="() => 
-                    NavButtonClickHandler(NavigationService.Pages.Home, _mapperManager)"
+                    NavButtonClickHandler(NavigationService.Pages.MapperManager)"
                Class="@_buttonBorder">
         Mappers
     </MudButton>
-    <MudButton @ref="_dataProperties"
-               StartIcon="@Icons.Material.Filled.Api"
+    <MudButton StartIcon="@Icons.Material.Filled.Api"
                Variant="Variant.Filled"
                IconColor="Color.Secondary"
                Size="Size.Large"
                DisableElevation="true"
+               Disabled="NavService!
+                    .IsButtonDisabled(NavigationService.Pages.DataProperties) ?? 
+                    false"
                OnClick="() => 
-                    NavButtonClickHandler(NavigationService.Pages.DataProperties, _dataProperties)"
+                    NavButtonClickHandler(NavigationService.Pages.DataProperties)"
                Class="@_buttonBorder">
         Properties
     </MudButton>
-    <MudButton @ref="_appSettings"
-               StartIcon="@Icons.Material.Filled.Build"
+    <MudButton StartIcon="@Icons.Material.Filled.Build"
                Variant="Variant.Filled"
                IconColor="Color.Secondary"
                Size="Size.Large"
                DisableElevation="true"
+               Disabled="NavService!
+                    .IsButtonDisabled(NavigationService.Pages.AppSettings) ?? 
+                    false"
                OnClick="() => 
-                    NavButtonClickHandler(NavigationService.Pages.AppSettings, _appSettings)"
+                    NavButtonClickHandler(NavigationService.Pages.AppSettings)"
                Class="@_buttonBorder">
         Settings
     </MudButton>
 </MudButtonGroup>
 <MudSpacer/>
 <MudText>Connection Status: </MudText>
-<MudIconButton @ref="_connectionStatus"
-               Icon="@Icons.Material.Filled.PowerSettingsNew"
+<MudIconButton Icon="@Icons.Material.Filled.PowerSettingsNew"
                Size="Size.Large"
                Color="ConnectionService!.GetCurrentConnectionColor()"
+               Disabled="NavService!
+                    .IsButtonDisabled(NavigationService.Pages.MapperConnectionStatus) ?? 
+                    false"
                OnClick="() => 
-                    NavButtonClickHandler(NavigationService.Pages.MapperConnectionStatus, _connectionStatus)"
+                    NavButtonClickHandler(NavigationService.Pages.MapperConnectionStatus)"
                aria-label="connection status"/>

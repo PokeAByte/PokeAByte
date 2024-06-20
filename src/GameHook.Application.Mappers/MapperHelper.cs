@@ -2,6 +2,7 @@
 using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models;
 using GameHook.Domain.Models.Mappers;
+using GameHook.Domain.Models.Properties;
 
 namespace GameHook.Mappers;
 

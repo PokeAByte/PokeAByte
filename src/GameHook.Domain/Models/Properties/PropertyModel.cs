@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GameHook.Domain.Models.Mappers;
+namespace GameHook.Domain.Models.Properties;
 
 public class PropertyModel
 {

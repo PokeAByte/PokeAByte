@@ -114,12 +114,13 @@ class GameHookMapperClient {
     get(path) {
         return this._properties.find(x => x.path === path)
     }
-    first = true;
+
     async loadMapper() {
         console.debug('[GameHook Client] Loading mapper.')
 
         function assign(final, path, value) {
             let lastKeyIndex = path.length - 1
+
             for (var i = 0; i < lastKeyIndex; ++i) {
                 let key = path[i]
                 if (!(key in final)) {
@@ -131,7 +132,7 @@ class GameHookMapperClient {
 
             final[path[lastKeyIndex]] = value
         }
-    
+
         let mapper = await fetch(`${this._connectionString}/mapper`)
             .then(async (x) => {
                 return { response: x, body: await x.json() }
@@ -157,7 +158,7 @@ class GameHookMapperClient {
         this.properties = {}
         this._properties = mapper.properties.map(x => new GameHookProperty(this, x))
         this._properties.forEach(x => assign(this.properties, x.path.split('.'), x))
-        
+
         setTimeout(() => this.loadMapper(), this._options.automaticRefreshMapperTimeMinutes * 60000)
 
         return this

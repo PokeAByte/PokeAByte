@@ -10,6 +10,13 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        NavMan?.NavigateTo(AppRoutes.MapperManager);
+        try
+        {
+            NavMan?.NavigateTo(AppRoutes.MapperManager);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }

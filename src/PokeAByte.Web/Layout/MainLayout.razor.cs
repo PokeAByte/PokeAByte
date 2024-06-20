@@ -16,5 +16,11 @@ public partial class MainLayout
         _mapperConnectedColor = MapperConnectionService?.GetCurrentConnectionColor() ?? 
                                 Color.Info;
     }
-    
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        _mapperConnectedColor = MapperConnectionService?.GetCurrentConnectionColor() ?? 
+                                Color.Info;
+    }
 }
