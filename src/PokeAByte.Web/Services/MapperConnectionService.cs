@@ -57,6 +57,15 @@ public class MapperConnectionService(
         return Result.Success(propertyModels);
     }
 
+    public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
+    {
+        var glossaryItems = client.GetGlossaryByKey(key);
+        var glossaryList = glossaryItems?.ToList();
+        if(glossaryList is null || glossaryList.Count == 0)
+            return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
+        return Result.Success(glossaryList);
+    }
+
     public Result<HashSet<MapperPropertyTreeModel>> GetPropertiesHashSet()
     {
         var propTree = client.GetHashSetTree();
@@ -75,5 +84,18 @@ public class MapperConnectionService(
         return meta is null ? 
             Result.Failure<MapperMetaModel>(Error.FailedToLoadMetaData) :
             Result.Success(meta);
+    }
+
+    public async Task<Result> UpdatePropertyData(string propertyPath, string value, bool isFrozen)
+    {
+        if (string.IsNullOrEmpty(propertyPath) ||
+            string.IsNullOrEmpty(value))
+            return Result.Failure(Error.StringIsNullOrEmpty);
+        if (!client.IsMapperLoaded)
+            return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
+        var path = propertyPath.StripEndingRoute().FromRouteToPath();
+        if (await client.UpdateProperty(path, value, isFrozen))
+            return Result.Success();
+        return Result.Failure(Error.FailedToUpdateProperty);
     }
 }

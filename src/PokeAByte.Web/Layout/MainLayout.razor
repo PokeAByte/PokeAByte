@@ -8,10 +8,9 @@
 <MudLayout>
     <MudMainContent>
         <MudAppBar Elevation="0">
-            <MudText Typo="Typo.h5" Class="ml-3 mr-9">Poke-A-Byte</MudText>
             <NavigationMenu />
         </MudAppBar>
-        <MudContainer Fixed="true">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
             <MudPaper Height="100%" Square="true" Elevation="2" Class="pa-8 overflow-y-scroll">
                 <CascadingValue Value="PageTitle">
                     @Body
@@ -21,4 +20,3 @@
         <MudAppBar Bottom="true" Fixed="true">Hello Footer</MudAppBar>
     </MudMainContent>
 </MudLayout>
-

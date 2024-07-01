@@ -31,4 +31,15 @@ public sealed record Error(string Code, string? Description)
     public static readonly Error FailedToLoadMetaData = new(nameof(FailedToLoadMetaData),
         "Failed to load mapper meta data.");
 
+    public static readonly Error StringIsNullOrEmpty = new(nameof(StringIsNullOrEmpty),
+        "The input string was null or empty.");
+
+    public static readonly Error FailedToParseValue = new(nameof(FailedToParseValue),
+        "Failed to parse value.");
+
+    public static readonly Error NoGlossaryItemsFound = new(nameof(NoGlossaryItemsFound),
+        "No glossary items were found.");
+
+    public static readonly Error FailedToUpdateProperty = new(nameof(FailedToUpdateProperty),
+        "Failed to update property.");
 }

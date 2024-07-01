@@ -1,0 +1,76 @@
+﻿@using GameHook.Domain.Models
+<MudContainer Fixed="true">
+    <MudSimpleTable Style="overflow-x: auto;"
+                    Bordered="true"
+                    Dense="true">
+        <tbody>
+        <tr>
+            <td style="width: 10%">Value</td>
+            <td>
+                <PropertyValueEditor EditContext="Context"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Path</td>
+            <td>@Context.Path</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Type</td>
+            <td>@Context.Type</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Address</td>
+            <td>@Context.Address</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Length</td>
+            <td>@Context.Length</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Size</td>
+            <td>@Context.Size</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Reference</td>
+            <td>@Context.Reference</td>
+        </tr>
+        <tr>
+            <td style="width: 10%">Bytes</td>
+            <td>
+                <MudGrid Spacing="1" Justify="Justify.FlexStart">
+                    <MudItem md="@_byteArray1Break">
+                        <div class="d-flex flex-grow-1 gap-2">
+                            @foreach (var ba in _byteArray1)
+                            {
+                                <div class="flex-shrink-1">
+                                    <MudTextField Value="@ba"
+                                                  MaxLength="2"
+                                                  Class="align-center justify-center mt-n4"
+                                                  Style="height: 25px"
+                                                  Margin="Margin.Dense"
+                                                  ShrinkLabel="true" />
+                                </div>
+                            }
+                        </div>
+                    </MudItem>
+                    <MudItem md="@_byteArray2Break">
+                        <div class="d-flex flex-grow-1 gap-2">
+                            @foreach (var ba in _byteArray2)
+                            {
+                                <div class="flex-shrink-1">
+                                    <MudTextField Value="@ba"
+                                                  MaxLength="2"
+                                                  Class="align-center justify-center mt-n4"
+                                                  Style="height: 25px"
+                                                  Margin="Margin.Dense"
+                                                  ShrinkLabel="true" />
+                                </div>
+                            }
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </td>
+        </tr>
+        </tbody>
+    </MudSimpleTable>
+</MudContainer>

@@ -28,10 +28,11 @@ public class MapperPropertyTreeModel
     public static void UpdateDisplayedChildren(MapperPropertyTreeModel model)
     {
         model.DisplayedChildren = model.Children;
-        //Lazy load the next set of children
+        //Lie to the tree view and make it think we have a list of children, we will load them
+        //in later when we need them
         foreach (var dc in model.DisplayedChildren.Where(x => x.HasChildren))
         {
-            dc.DisplayedChildren = dc.Children;
+            dc.DisplayedChildren = [new MapperPropertyTreeModel()];
         }
     }
     public static MapperPropertyTreeModel CreateFrom(MapperPropertyTreeModel model)

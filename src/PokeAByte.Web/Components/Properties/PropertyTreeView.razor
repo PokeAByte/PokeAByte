@@ -16,6 +16,7 @@ else
 {
     <MudTreeView Items="PropertyItems"
                  Color="Color.Secondary"
+                 Dense="true"
                  Hover="true"
                  ExpandOnClick="true">
         <ItemTemplate>
@@ -27,28 +28,8 @@ else
                 <BodyContent Context="bodyContext">
                     @if (context.Property is not null)
                     {
-                        <div class="d-flex flex-grow-1 gap-4 py-1 pr-10">
-                            <MudExpansionPanels Square="true" Class="flex-auto d-flex" Elevation="2">
-                                <MudExpansionPanel @bind-IsExpanded="@context.IsPropertyExpanded" 
-                                                   Text="@context.Name"
-                                                   HideIcon="true" Class="py-1">
-                                    <TitleContent>
-                                        <MudGrid Spacing="2" Justify="Justify.FlexStart">
-                                            <MudItem>
-                                                <MudIcon Icon="@Icons.Material.Filled.CatchingPokemon"
-                                                         Color="@SetIconColor(context)"
-                                                         class="ml-auto"/>
-                                            </MudItem>
-                                            <MudItem>
-                                                <MudText>@context.Name - @context.Property.Value</MudText>
-                                            </MudItem>
-                                        </MudGrid>
-                                    </TitleContent>
-                                    <ChildContent>
-                                        <PropertyView Context="context.Property"/>
-                                    </ChildContent>
-                                </MudExpansionPanel>
-                            </MudExpansionPanels>
+                        <div class="d-flex flex-grow-1 gap-4 pr-10">
+                            <PropertyExpansionPanel Context="@context"/>
                         </div>
                     }
                     else

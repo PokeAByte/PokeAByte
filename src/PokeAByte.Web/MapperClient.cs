@@ -79,7 +79,18 @@ public class MapperClient(
 
     public MapperMetaModel? GetMetaData() => 
         _mapperModel?.Meta;
-    
+
+    public Dictionary<string, IEnumerable<GlossaryItemModel>>? GetAllGlossaryItems() => 
+        _mapperModel?.Glossary;
+
+    public IEnumerable<GlossaryItemModel>? GetGlossaryByKey(string key)
+    {
+        if (_mapperModel is null)
+            return null;
+        var gotVal = _mapperModel.Glossary.TryGetValue(key, out var val);
+        return gotVal ? val : null;
+    }
+
     public PropertyModel? GetPropertyByPath(string path)
     {
         return _mapperModel?
@@ -116,5 +127,23 @@ public class MapperClient(
     {
         _cachedMapperPropertyTree.Dispose();
         _cachedMapperPropertyTree = new MapperPropertyTree();
+    }
+
+    public async Task<bool> UpdateProperty(string path, string value, bool isFrozen)
+    {
+        if (!IsMapperLoaded || instance.Mapper is null) return false;
+        try
+        {
+            var prop = instance.Mapper.Properties[path];
+            if (prop.IsReadOnly)
+                return false;
+            await prop.WriteValue(value, isFrozen);
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to update property.");
+            return false;
+        }
     }
 }
