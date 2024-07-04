@@ -6,32 +6,40 @@ public class Result
     public Error Error { get; }
     public Exception? ExceptionValue { get; }
     public bool IsException => ExceptionValue is not null;
+    public string AdditionalErrorMessage { get; }
 
-    protected Result(bool isSuccess, Error error, Exception? exception = null)
+    protected Result(bool isSuccess, Error error, Exception? exception = null, string additionalErrorMessage = "")
     {
         IsSuccess = isSuccess;
         Error = error;
         ExceptionValue = exception;
+        AdditionalErrorMessage = additionalErrorMessage;
     }
     public static Result Success() => new Result(true, Error.None);
-    public static Result Failure(Error error) => new Result(false, error);
-    public static Result Exception(Exception exception) => 
-        new Result(false, Error.Exception, exception);
     public static Result<TValue> Success<TValue>(TValue value) =>
         new(true, Error.None, value);
-
-    public static Result<TValue> Failure<TValue>(Error error) =>
-        new(false, error);
-
+    
+    public static Result Failure(Error error, string additionalErrorMessage = "") =>
+        new Result(false, error, additionalErrorMessage: additionalErrorMessage);
+    public static Result Failure(string additionalErrorMessage) => 
+        new Result(false, Error.GeneralError, additionalErrorMessage: additionalErrorMessage);
+    public static Result<TValue> Failure<TValue>(Error error, string additionalErrorMessage = "") =>
+        new(false, error, additionalErrorMessage: additionalErrorMessage);
+    
+    public static Result Exception(Exception exception) => 
+        new Result(false, Error.Exception, exception);
     public static Result<TValue> Exception<TValue>(Exception exception) =>
         new(false, Error.Exception, exception: exception);
+    
     public override string ToString()
     {
         if (IsSuccess)
             return "";
         var errorMessage = $"{Error}\n";
         if (IsException)
-            errorMessage += $"Exception Found:\n{ExceptionValue}";
+            errorMessage += $"Exception Found:\n{ExceptionValue}\n";
+        if (!string.IsNullOrEmpty(AdditionalErrorMessage))
+            errorMessage += $"Additional Message: {AdditionalErrorMessage}";
         return errorMessage;
     }
 }
@@ -41,15 +49,15 @@ public class Result<TValue> : Result
     private TValue? _value;
     protected internal Result(bool isSuccess,
         Error error, TValue? resultValue = default,
-        Exception? exception = null) :
-        base(isSuccess, error, exception)
+        Exception? exception = null,
+        string additionalErrorMessage = "") :
+        base(isSuccess, error, exception, additionalErrorMessage)
     {
         _value = resultValue;
     }
-    public TValue ResultValue => IsSuccess
+    public TValue? ResultValue => IsSuccess
         ? _value!
-        : throw new InvalidOperationException("The value of a failure result" +
-                                              " cannot be accessed.");
+        : default;
     public override string ToString()
     {
         if (!IsSuccess) return base.ToString();

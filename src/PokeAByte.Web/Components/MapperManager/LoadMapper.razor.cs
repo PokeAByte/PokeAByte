@@ -7,7 +7,7 @@ namespace PokeAByte.Web.Components.MapperManager;
 
 public partial class LoadMapper : ComponentBase
 {
-    [Inject] public MapperConnectionService? MapperConnectionService { get; set; }
+    [Inject] public MapperClientService? MapperConnectionService { get; set; }
     [Inject] public NavigationService? NavigationService { get; set; }
     private IEnumerable<MapperFileModel>? _mapperFiles;
     private string _selectedMapperId = "";

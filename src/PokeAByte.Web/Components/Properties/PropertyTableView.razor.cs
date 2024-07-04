@@ -1,7 +1,4 @@
-﻿using GameHook.Domain.Models;
-using GameHook.Domain.Models.Properties;
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
+﻿using Microsoft.AspNetCore.Components;
 using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web.Components.Properties;
@@ -15,6 +12,18 @@ public partial class PropertyTableView : ComponentBase
     private int _byteArray2Break = 1;
     
     protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        UpdateByteArray();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        UpdateByteArray();
+    }
+
+    private void UpdateByteArray()
     {
         if (Context.ByteArray.EditableArray.Count > 0)
         {

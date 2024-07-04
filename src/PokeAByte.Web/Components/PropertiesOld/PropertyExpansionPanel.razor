@@ -10,16 +10,18 @@
                                OnClick="() => Context.IsPropertyExpanded = !Context.IsPropertyExpanded"/>
             </MudItem>
             <MudItem Class="align-content-center">
-                <MudText Typo="Typo.body2" Style="width: 125px; overflow-x: scroll" Class="d-flex justify-start">
+                <MudText Typo="Typo.body2" Style="width: 125px;" Class="d-flex justify-start">
                     @Context.Name:
                 </MudText>
             </MudItem>
             <MudItem Class="align-center">
-                <PropertyValueEditor EditContext="_editContext"/>
+                <MudText>@EditContext.ValueString</MudText>
+                <MudText>@Context.Property?.Value</MudText>
+                <PropertyValueEditor EditContext="EditContext"/>
             </MudItem>
         </MudGrid>
         <MudContainer Fixed="true" Style="@DisplayContent">
-            <PropertyTableView Context="_editContext"/>
+            <PropertyTableView Context="EditContext"/>
         </MudContainer>
     </MudStack>
 </MudPaper>

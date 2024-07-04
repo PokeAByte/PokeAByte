@@ -20,7 +20,8 @@ namespace GameHook.Domain.GameHookProperties
             var uints = value
                 .Select(x => ComputedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
                 .ToList();
-
+            
+            Console.WriteLine();
             if (uints.Count + 1 > Length)
             {
                 uints = uints.Take(Length ?? 0 - 1).ToList();
@@ -28,7 +29,9 @@ namespace GameHook.Domain.GameHookProperties
 
             var nullTerminationKey = ComputedReference.Values.First(x => x.Value == null);
             uints.Add(nullTerminationKey);
-
+            /*var returnBytes = ulongArray
+                .Select(x => (byte)x)
+                .ToArray();*/
             return uints
                 .Select(x =>
                 {
@@ -38,8 +41,9 @@ namespace GameHook.Domain.GameHookProperties
                     }
 
                     return x.Key;
-                })
-                .Select(x => (byte)x)
+                }).SelectMany(x => BitConverter
+                    .GetBytes(x)
+                    .Take(Size ?? 0 - 1))
                 .ToArray();
         }
 

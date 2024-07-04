@@ -15,7 +15,7 @@
 
 @code {
     [CascadingParameter] public string? PageTitle { get; set; }
-    [Inject] private MapperConnectionService? MapperConnectionService { get; set; }
+    [Inject] private MapperClientService? MapperConnectionService { get; set; }
     private Color _currentStatusColor = Color.Info;
     private string _currentStatusName = "Not Found";
     protected override void OnInitialized()

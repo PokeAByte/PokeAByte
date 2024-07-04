@@ -31,6 +31,10 @@
       <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\MapperConnectionStatus.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\MapperManager.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyExpansionPanel.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
     </ItemGroup>
 
     <ItemGroup>
@@ -42,10 +46,23 @@
 
     <ItemGroup>
       <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
+      <EmbeddedResource Remove="Components\PropertiesOld\**" />
     </ItemGroup>
 
     <ItemGroup>
       <Resource Include="wwwroot\dist\gameHookMapperClient.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Components\PropertiesOld\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Components\PropertiesOld\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Components\PropertiesOld\**" />
     </ItemGroup>
 
 </Project>

@@ -20,8 +20,9 @@ public class EditPropertyModel : PropertyModel
             if (ValidateValueString(value))
             {
                 _valueString = value;
+                
                 if (_isInitValueSet) IsValueEdited = true;
-            }
+            }                
             _isInitValueSet = true;
         }
     }
@@ -31,15 +32,16 @@ public class EditPropertyModel : PropertyModel
         return Type switch
         {
             "bool" or "bit" => bool.TryParse(value, out _),
-            "string" => Length >= value.Length,
+            "string" => Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length),
             "int" or "nibble" => int.TryParse(value, out _),
             "uint" => uint.TryParse(value, out _),
             _ => false
         };
     }
     public ByteArrayProperty ByteArray { get; set; }
+
     public static EditPropertyModel FromPropertyModel(PropertyModel model)
-    {
+    {            
         return new EditPropertyModel
         {
             ValueString = model.Value?.ToString() ?? "",
@@ -59,10 +61,19 @@ public class EditPropertyModel : PropertyModel
             ByteArray = new ByteArrayProperty(model.Bytes)
         };
     }
-
-    public void Clear()
+    public void Reset()
     {
-        _valueString = Value?.ToString() ?? "";
+        _isInitValueSet = false;
         IsValueEdited = false;
+        ValueString = Value?.ToString() ?? "";
+    }
+    public void UpdateFromPropertyModel(PropertyModel? model)
+    {
+        ValueString = model?.Value?.ToString() ?? "";
+        Value = model?.Value;
+        Bytes = model?.Bytes;
+        IsFrozen = model?.IsFrozen;
+        IsReadOnly = model?.IsReadOnly ?? false;
+        ByteArray = new ByteArrayProperty(model?.Bytes);
     }
 }

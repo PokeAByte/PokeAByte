@@ -6,6 +6,7 @@ using GameHook.Infrastructure.Drivers.Bizhawk;
 using GameHook.Infrastructure.Github;
 using GameHook.Mappers;
 using MudBlazor.Services;
+using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web;
@@ -51,15 +52,18 @@ public class Program
         builder.Services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
         builder.Services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
         builder.Services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
-        //builder.Services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
+        builder.Services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         
+        builder.Services.AddSingleton<PropertyUpdateService>();
         //PokeAByte Services
-        builder.Services.AddSingleton<MapperConnectionService>(x =>
+        builder.Services.AddSingleton<MapperClientService>(x =>
         {
             var mapperFs = x.GetRequiredService<IMapperFilesystemProvider>();
-            var logger = x.GetRequiredService<ILogger<MapperConnectionService>>();
+            var logger = x.GetRequiredService<ILogger<MapperClientService>>();
+            var clientNotif = x.GetRequiredService<IClientNotifier>();
+            var propUpdate = x.GetRequiredService<PropertyUpdateService>();
             
-            return new MapperConnectionService(mapperFs, logger, CreateClient(x));
+            return new MapperClientService(mapperFs, logger, CreateClient(x), clientNotif, propUpdate);
         });
         builder.Services.AddScoped<NavigationService>();
         //builder.Services.AddSingleton<MapperClientService>();

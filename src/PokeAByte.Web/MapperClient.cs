@@ -1,110 +1,144 @@
-﻿using GameHook.Domain.Interfaces;
+﻿using Antlr4.Runtime.Misc;
+using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models;
 using GameHook.Domain.Models.Mappers;
 using GameHook.Domain.Models.Properties;
 using GameHook.Mappers;
+using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web;
 
-public class MapperClient(
-    ILogger<MapperClient> logger,
-    IGameHookInstance instance,
-    AppSettings appSettings,
-    IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
-    IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
-    IStaticMemoryDriver staticMemoryDriver)
-{
+public class MapperClient
+{    
+    //Property Tree 
+    private MapperPropertyTree _cachedMapperPropertyTree = new();
+    private readonly ILogger<MapperClient> _logger;
+    private readonly IGameHookInstance _instance;
+    private readonly AppSettings _appSettings;
+    private readonly IBizhawkMemoryMapDriver _bizhawkMemoryMapDriver;
+    private readonly IRetroArchUdpPollingDriver _retroArchUdpPollingDriver;
+    private readonly IStaticMemoryDriver _staticMemoryDriver;
+
+    public MapperClient(ILogger<MapperClient> logger,
+        IGameHookInstance instance,
+        AppSettings appSettings,
+        IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
+        IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
+        IStaticMemoryDriver staticMemoryDriver)
+    {
+        _logger = logger;
+        _instance = instance;
+        _appSettings = appSettings;
+        _bizhawkMemoryMapDriver = bizhawkMemoryMapDriver;
+        _retroArchUdpPollingDriver = retroArchUdpPollingDriver;
+        _staticMemoryDriver = staticMemoryDriver;
+    }
     public string ConnectionString { get; set; } = "";
     public bool IsMapperLoaded => _mapperModel is not null;
     private MapperModel? _mapperModel;
-    public async Task<Result> LoadMapper(MapperReplaceModel mapper)
+    public async Task<bool> LoadMapper(MapperReplaceModel mapper)
     {
-        logger.LogDebug("Replacing mapper.");
+        if (!_instance.Initalized)
+        {
+            _logger.LogDebug("Poke-A-Byte instance has not been initialized!");
+        }
+        _logger.LogDebug("Replacing mapper.");
         switch (mapper.Driver)
         {
             case DriverModels.Bizhawk:
-                await instance.Load(bizhawkMemoryMapDriver, mapper.Id);
-                logger.LogDebug("Bizhawk driver loaded."); 
+                await _instance.Load(_bizhawkMemoryMapDriver, mapper.Id);
+                _logger.LogDebug("Bizhawk driver loaded."); 
                 break;
             case DriverModels.Retroarch:
-                await instance.Load(retroArchUdpPollingDriver, mapper.Id);
-                logger.LogDebug("Retroarch driver loaded.");
+                await _instance.Load(_retroArchUdpPollingDriver, mapper.Id);
+                _logger.LogDebug("Retroarch driver loaded.");
                 break;
             case DriverModels.StaticMemory:
-                await instance.Load(staticMemoryDriver, mapper.Id);
-                logger.LogDebug("Static memory driver loaded.");
+                await _instance.Load(_staticMemoryDriver, mapper.Id);
+                _logger.LogDebug("Static memory driver loaded.");
                 break;
             default:
-                logger.LogError("A valid driver was not supplied.");
+                _logger.LogError("A valid driver was not supplied.");
                 break;
         }
-        var getMapperResult = GetMapper();
-        if (getMapperResult.IsSuccess)
-            _mapperModel = getMapperResult.ResultValue;
-        else
-            return getMapperResult;
-        return Result.Success();
+        _mapperModel = GetMapper();
+        return _mapperModel is not null;
     }
 
-    private Result<MapperModel> GetMapper()
+    private MapperModel? GetMapper()
     {
-        if (instance.Initalized == false || instance.Mapper == null)
-            return Result.Failure<MapperModel>(Error.ClientInstanceNotInitialized);
-        return Result.Success(new MapperModel
+        if (_instance.Initalized == false || _instance.Mapper == null)
+        {
+            _logger.LogError(Error.ClientInstanceNotInitialized.ToString());
+            return null;
+        }
+
+        return new MapperModel
         {
             Meta = new MapperMetaModel()
             {
-                Id = instance.Mapper.Metadata.Id,
-                GameName = instance.Mapper.Metadata.GameName,
-                GamePlatform = instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION
+                Id = _instance.Mapper.Metadata.Id,
+                GameName = _instance.Mapper.Metadata.GameName,
+                GamePlatform = _instance.Mapper.Metadata.GamePlatform,
+                MapperReleaseVersion = _appSettings.MAPPER_VERSION
             },
-            Properties = instance.Mapper
+            Properties = _instance.Mapper
                 .Properties
                 .Values
                 .Select(x => x.MapToPropertyModel())
                 .ToArray(),
-            Glossary = instance.Mapper
+            Glossary = _instance.Mapper
                 .References
                 .Values
                 .MapToDictionaryGlossaryItemModel()
-        });
+        };
     }
-    
     public void UnloadMapper()
     {
         _mapperModel = null;
     }
 
-    public MapperMetaModel? GetMetaData() => 
-        _mapperModel?.Meta;
+    public MapperMetaModel? GetMetaData()
+    {
+        if (!IsMapperLoaded || !_instance.Initalized)
+            return null;
+        return _mapperModel!.Meta;
+    }
 
-    public Dictionary<string, IEnumerable<GlossaryItemModel>>? GetAllGlossaryItems() => 
-        _mapperModel?.Glossary;
+    public Dictionary<string, IEnumerable<GlossaryItemModel>>? GetAllGlossaryItems()
+    {
+        if (!IsMapperLoaded || !_instance.Initalized)
+            return null;
+        return _mapperModel!.Glossary;
+    }
 
     public IEnumerable<GlossaryItemModel>? GetGlossaryByKey(string key)
     {
-        if (_mapperModel is null)
+        if (!IsMapperLoaded || !_instance.Initalized)
             return null;
-        var gotVal = _mapperModel.Glossary.TryGetValue(key, out var val);
+        var gotVal = _mapperModel!.Glossary.TryGetValue(key, out var val);
         return gotVal ? val : null;
     }
 
     public PropertyModel? GetPropertyByPath(string path)
     {
-        return _mapperModel?
+        if (!IsMapperLoaded || !_instance.Initalized)
+            return null;
+        return _mapperModel!
             .Properties
             .FirstOrDefault(x => x.Path == path);
     }
 
-    public IEnumerable<PropertyModel>? GetProperties() => _mapperModel?
-        .Properties?
-        .AsEnumerable();
+    public IEnumerable<PropertyModel>? GetProperties()
+    {
+        if (!IsMapperLoaded || !_instance.Initalized)
+            return null;
+        return _mapperModel!
+            .Properties
+            .AsEnumerable();
+    }
     
-    //Property Tree 
-    private MapperPropertyTree _cachedMapperPropertyTree = new();
-
     public HashSet<MapperPropertyTreeModel>? GetHashSetTree()
     {
         if (_cachedMapperPropertyTree.Tree.Count > 0)
@@ -129,12 +163,20 @@ public class MapperClient(
         _cachedMapperPropertyTree = new MapperPropertyTree();
     }
 
-    public async Task<bool> UpdateProperty(string path, string value, bool isFrozen)
+    public void UpdateProperty(IGameHookProperty property)
     {
-        if (!IsMapperLoaded || instance.Mapper is null) return false;
+        if (!IsMapperLoaded || !_instance.Initalized) return;
+        _mapperModel!.Properties
+            .FirstOrDefault(x => x.Path == property.Path)?
+            .UpdatePropertyModel(property);
+    }
+
+    public async Task<bool> WriteProperty(string path, string value, bool isFrozen)
+    {
+        if (!IsMapperLoaded || !_instance.Initalized || _instance.Mapper is null) return false;
         try
         {
-            var prop = instance.Mapper.Properties[path];
+            var prop = _instance.Mapper.Properties[path];
             if (prop.IsReadOnly)
                 return false;
             await prop.WriteValue(value, isFrozen);
@@ -142,7 +184,7 @@ public class MapperClient(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to update property.");
+            _logger.LogError(e, "Failed to update property.");
             return false;
         }
     }

@@ -1,10 +1,12 @@
-﻿using GameHook.Domain.Models.Mappers;
+﻿using GameHook.Domain.Interfaces;
+using GameHook.Domain.Models.Mappers;
 using GameHook.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
 
 public class MapperPropertyTreeModel
 {
+    public event EventHandler? PropertyChangedEvent;
     public string Name { get; set; }
     public int Depth { get; set; }
     private bool isExpanded = false;
@@ -46,6 +48,12 @@ public class MapperPropertyTreeModel
             DisplayedChildren = [],
             Children = []
         };
+
+    public void UpdateProperty(IGameHookProperty prop)
+    {
+        Property?.UpdatePropertyModel(prop);
+        PropertyChangedEvent?.Invoke(this, EventArgs.Empty);
+    }
 }
 
 public class MapperPropertyTree : IDisposable
@@ -120,6 +128,28 @@ public class MapperPropertyTree : IDisposable
     public void Dispose()
     {
         Tree.Clear();
+    }
+
+    public void UpdateProperty(IGameHookProperty prop, EventHandler? propertyUpdatedEvent)
+    {
+        var paths = prop.Path.Split('.');
+        if (paths.Length == 0) return;
+        var currentTree = Tree
+            .FirstOrDefault(x => x.Name == paths[0]);
+        if(currentTree is null)
+            return;
+        for (var i = 1; i < paths.Length; ++i)
+        {
+            currentTree = currentTree?
+                .Children
+                .FirstOrDefault(x => x.Name == paths[i]);
+        }
+
+        if (currentTree is not null)
+        {
+            currentTree.PropertyChangedEvent += propertyUpdatedEvent;
+            currentTree.UpdateProperty(prop);
+        }
     }
 }
 

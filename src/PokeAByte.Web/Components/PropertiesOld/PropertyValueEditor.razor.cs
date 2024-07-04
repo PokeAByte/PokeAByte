@@ -4,7 +4,7 @@ using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
-namespace PokeAByte.Web.Components.Properties;
+namespace PokeAByte.Web.Components.PropertiesOld;
 
 public partial class PropertyValueEditor
 {
@@ -26,7 +26,6 @@ public partial class PropertyValueEditor
         if (string.IsNullOrEmpty(EditContext.Reference)) return;
         _cachedGlossary = GetGlossaryByReferenceKey(EditContext.Reference);
     }
-
     private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
     {
         var glossaryResult = MapperClientService.GetGlossaryByReferenceKey(reference);
@@ -34,9 +33,9 @@ public partial class PropertyValueEditor
             //todo log
             return [];
         var glossaryItems = glossaryResult.ResultValue;
-        return glossaryItems?
+        return glossaryItems
             .Select(g => new KeyValuePair<ulong, string>(g.Key, g.Value?.ToString() ?? ""))
-            .ToDictionary() ?? [];
+            .ToDictionary();
     }
     
     private Task<IEnumerable<string>> SearchForReference(string arg)

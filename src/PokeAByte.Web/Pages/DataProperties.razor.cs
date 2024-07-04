@@ -4,30 +4,29 @@ using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
-namespace PokeAByte.Web.Components.Properties;
+namespace PokeAByte.Web.Pages;
 
-public partial class PropertyTreeView : ComponentBase
+public partial class DataProperties
 {
-    private MudTreeView<MapperPropertyTreeModel> _treeView;
-    [Inject] public MapperConnectionService MapperConnectionService { get; set; }
+    [CascadingParameter] public string? PageTitle { get; set; }
+    [Inject] public MapperClientService ClientService { get; set; }
     private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
-    private MapperPropertyTreeModel? SelectedItem { get; set; }
     private string MapperName { get; set; } = "";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        var metaResult = MapperConnectionService.GetMetaData();
+        var metaResult = ClientService.GetMetaData();
         if (metaResult.IsSuccess)
-            MapperName = $"{metaResult.ResultValue.GameName}";
+            MapperName = $"{metaResult.ResultValue?.GameName}";
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
         if (!firstRender) return;
-        var propsResult = MapperConnectionService.GetPropertiesHashSet();
-        if (!propsResult.IsSuccess) return;
+        var propsResult = ClientService.GetPropertiesHashSet();
+        if (!propsResult.IsSuccess || propsResult.ResultValue is null) return;
         PropertyItems = propsResult.ResultValue;
         foreach (var prop in PropertyItems)
         {
@@ -35,6 +34,7 @@ public partial class PropertyTreeView : ComponentBase
         }
         StateHasChanged();
     }
+    
     private string SetIcon(MapperPropertyTreeModel model)
     {
         return model.HasChildren

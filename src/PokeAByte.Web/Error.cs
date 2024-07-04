@@ -42,4 +42,6 @@ public sealed record Error(string Code, string? Description)
 
     public static readonly Error FailedToUpdateProperty = new(nameof(FailedToUpdateProperty),
         "Failed to update property.");
+
+    public static readonly Error GeneralError = new(nameof(GeneralError), "Error!");
 }

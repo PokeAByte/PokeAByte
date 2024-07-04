@@ -1,34 +1,78 @@
 ﻿using System.Text.Json.Serialization;
+using GameHook.Domain.Interfaces;
 
 namespace GameHook.Domain.Models.Properties;
 
 public class PropertyModel
 {
-    public string Path { get; init; } = string.Empty;
+    public string Path { get; set; } = string.Empty;
 
-    public string Type { get; init; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
 
-    public string? MemoryContainer { get; init; } = string.Empty;
+    public string? MemoryContainer { get; set; } = string.Empty;
 
-    public uint? Address { get; init; }
+    public uint? Address { get; set; }
 
-    public int? Length { get; init; }
+    public int? Length { get; set; }
 
-    public int? Size { get; init; }
+    public int? Size { get; set; }
 
-    public string? Reference { get; init; }
+    public string? Reference { get; set; }
 
-    public string? Bits { get; init; }
+    public string? Bits { get; set; }
 
-    public string? Description { get; init; }
+    public string? Description { get; set; }
 
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public object? Value { get; init; }
+    public object? Value { get; set; }
 
-    public IEnumerable<int>? Bytes { get; init; } = Enumerable.Empty<int>();
+    public IEnumerable<int>? Bytes { get; set; } = Enumerable.Empty<int>();
 
-    public bool? IsFrozen { get; init; }
+    public bool? IsFrozen { get; set; }
 
-    public bool IsReadOnly { get; init; }
+    public bool IsReadOnly { get; set; }
+}
+public static class PropertyModelExtensions
+{
+    public static void UpdateValues(this PropertyModel? current, PropertyModel? updated)
+    {
+        if (current is null || updated is null) return;
+        current.Path = updated.Path;
+        current.Type = updated.Type;
+        current.MemoryContainer = updated.MemoryContainer;
+        current.Address = updated.Address;
+        current.Length = updated.Length;
+        current.Size = updated.Size;
+        current.Reference = updated.Reference;
+        current.Bits = updated.Bits;
+        current.Description = updated.Description;
+        current.Value = updated.Value;
+        current.Bytes = updated.Bytes;
+        current.IsFrozen = updated.IsFrozen;
+        current.IsReadOnly = updated.IsReadOnly;
+    }
+    public static void UpdatePropertyModel(this PropertyModel original, IGameHookProperty updated)
+    {
+        if(updated.Path != original.Path)
+            return;
+        if (updated.Value != original.Value)
+        {
+            original.Value = updated.Value;
+        }
+
+        if (updated.Bytes != null && 
+            (original.Bytes is null || 
+             !updated.Bytes
+                 .ToIntegerArray()
+                 .SequenceEqual(original.Bytes)))
+        {
+            original.Bytes = updated.Bytes.ToIntegerArray();
+        }
+
+        if (updated.IsFrozen != original.IsFrozen)
+            original.IsFrozen = updated.IsFrozen;
+        if (updated.IsReadOnly != original.IsReadOnly)
+            original.IsFrozen = updated.IsReadOnly;
+    }
 }

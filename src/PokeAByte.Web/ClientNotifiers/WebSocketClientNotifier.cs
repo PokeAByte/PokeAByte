@@ -1,9 +1,9 @@
 using GameHook.Domain;
 using GameHook.Domain.Interfaces;
-using GameHook.WebAPI.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using PokeAByte.Web.Hubs;
 
-namespace GameHook.WebAPI.ClientNotifiers
+namespace PokeAByte.Web.ClientNotifiers
 {
     public class WebSocketClientNotifier(ILogger<WebSocketClientNotifier> logger, IHubContext<UpdateHub> hubContext) : IClientNotifier
     {
@@ -19,9 +19,11 @@ namespace GameHook.WebAPI.ClientNotifiers
         public Task SendError(IProblemDetails problemDetails) =>
             _hubContext.Clients.All.SendAsync("Error", problemDetails);
 
+        public event PropertyChangedEventHandler? PropertyChangedEvent;
         public async Task SendPropertiesChanged(IEnumerable<IGameHookProperty> properties)
         {
-            await _hubContext.Clients.All.SendAsync("PropertiesChanged", properties.Select(x => new
+            var props = properties.ToList();
+            await _hubContext.Clients.All.SendAsync("PropertiesChanged", props.Select(x => new
             {
                 path = x.Path,
                 memoryContainer = x.MemoryContainer,
@@ -39,7 +41,13 @@ namespace GameHook.WebAPI.ClientNotifiers
 
                 fieldsChanged = x.FieldsChanged
             }).ToArray());
+            OnPropertyChangedEvent(new PropertyChangedEventArgs(props));
         }
-        public event PropertyChangedEventHandler? PropertyChangedEvent;
+
+        protected virtual void OnPropertyChangedEvent(PropertyChangedEventArgs args)
+        {
+            PropertyChangedEventHandler? handler = PropertyChangedEvent;
+            handler?.Invoke(this, args);
+        }
     }
 }

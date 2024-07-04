@@ -6,5 +6,7 @@ namespace GameHook.Domain.Interfaces
         Task SendMapperLoaded(IGameHookMapper mapper);
         Task SendError(IProblemDetails problemDetails);
         Task SendPropertiesChanged(IEnumerable<IGameHookProperty> properties);
+        
+        public event PropertyChangedEventHandler? PropertyChangedEvent;
     }
 }

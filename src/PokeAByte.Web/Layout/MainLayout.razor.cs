@@ -6,7 +6,7 @@ namespace PokeAByte.Web.Layout;
 
 public partial class MainLayout
 {
-    [Inject] private MapperConnectionService? MapperConnectionService { get; set; }
+    [Inject] private MapperClientService? MapperConnectionService { get; set; }
     
     private Color _mapperConnectedColor;
     public const string PageTitle = "Poke-A-Byte";
