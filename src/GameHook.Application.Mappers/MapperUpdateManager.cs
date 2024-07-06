@@ -30,10 +30,9 @@ public class MapperUpdateManager : IMapperUpdateManager
         _mapperUpdaterSettings = mapperUpdaterSettingsManager;
         _githubRestApi = githubRestApi;
         _mapperArchiveManager = mapperArchiveManager;
-
         if (Directory.Exists(BuildEnvironment.ConfigurationDirectory) == false)
         {
-            _logger.LogInformation("Creating configuration directory for GameHook.");
+            _logger.LogInformation("Creating configuration directory for Poke-A-Byte.");
 
             Directory.CreateDirectory(BuildEnvironment.ConfigurationDirectory);
         }

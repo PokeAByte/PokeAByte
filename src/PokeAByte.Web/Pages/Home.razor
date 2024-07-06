@@ -6,6 +6,7 @@
 {
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] public NavigationManager? NavMan { get; set; }
+    [Inject] public ILogger<Home> Logger { get; set; }
 
     protected override void OnInitialized()
     {
@@ -16,7 +17,7 @@
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Logger.LogError(e, "Exception!");
         }
     }
 }

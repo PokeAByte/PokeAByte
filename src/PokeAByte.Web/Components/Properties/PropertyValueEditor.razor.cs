@@ -55,14 +55,21 @@ public partial class PropertyValueEditor
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
     //handler it will update when it loses focus. I am not a fan of leaving in empty methods but if it works, it works
     private void InputFocusLostHandler(FocusEventArgs obj){}
-
+    private string _errorMessage = "";
+    private string _successMessage = "";
     private async Task SaveBtnOnClickHandler(MouseEventArgs obj)
     {
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
             EditContext.ValueString,
             EditContext.IsFrozen ?? false);
         if (!result.IsSuccess)
-            return; //Todo: log 
+        {
+            _errorMessage = result.ToString();
+        }
+        else
+        {
+            _successMessage = "Saved successful!";
+        }
     }
 
     private void ClearBtnOnClickHandler(MouseEventArgs obj)

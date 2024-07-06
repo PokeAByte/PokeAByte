@@ -9,7 +9,9 @@
                       Class="mt-n3"
                       Margin="Margin.Dense"
                       OnBlur="InputFocusLostHandler"
-                      ShrinkLabel="true"/>
+                      ShrinkLabel="true"
+                      ReadOnly="EditContext.IsReadOnly"
+                      Disabled="EditContext.IsReadOnly"/>
     }
     else if (!string.IsNullOrEmpty(EditContext.Reference))
     {
@@ -51,16 +53,31 @@
                    Title="Save"
                    Disabled="!EditContext.IsValueEdited"
                    OnClick="SaveBtnOnClickHandler"/>
-    <MudIconButton Icon="@Icons.Material.Filled.Clear"
+    @*<MudIconButton Icon="@Icons.Material.Filled.Clear"
                    Title="Clear"
                    Disabled="!EditContext.IsValueEdited"
-                   OnClick="ClearBtnOnClickHandler"/>
+                   OnClick="ClearBtnOnClickHandler"/>*@
     <MudIconButton Icon="@PokeAByteIcons.SnowflakeIconDisabled"
                    Title="Freeze"/>
-    <MudIconButton Icon="@Icons.Material.Filled.PushPin"
-                   Title="Pin"/>
+    @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
+                   Title="Pin"/>*@
 </MudStack>
-
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <MudAlert Severity="Severity.Error"
+              ShowCloseIcon="true"
+              CloseIconClicked="@(() => _errorMessage = "")">
+        @_errorMessage
+    </MudAlert>
+}
+else if (!string.IsNullOrEmpty(_successMessage))
+{
+    <MudAlert Severity="Severity.Success"
+              ShowCloseIcon="true"
+              CloseIconClicked="@(() => _successMessage = "")">
+        @_successMessage
+    </MudAlert>
+}
 <style>
     span.mud-switch-base {
         padding: 5px !important;
