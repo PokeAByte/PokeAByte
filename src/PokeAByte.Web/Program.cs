@@ -17,7 +17,6 @@ public class Program
 {
     public static void Main(string[] args)
     {          
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Production");
         Environment.SetEnvironmentVariable("SERILOG_LOG_FILE_PATH", BuildEnvironment.LogFilePath);      
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
