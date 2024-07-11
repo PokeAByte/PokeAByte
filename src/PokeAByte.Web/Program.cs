@@ -38,7 +38,7 @@ public class Program
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}")
                     .Enrich.FromLogContext());
             builder.Services.ConfigureServices();
-            //builder.Services.AddSingleton<MapperClientService>();
+            
             var app = builder.Build();
 
             app.ConfigureApp();

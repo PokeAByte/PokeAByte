@@ -1,0 +1,1350 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>GameHook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+          integrity="sha256-UDtbUHqpVVfXmdJcQVU/bfDEr9xldf3Dbd0ShD0Uf/Y=" crossorigin="anonymous">
+    <link href="site.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="center-wrapper" v-if="connected == false">
+            <loading-spinner>Establishing a connection to GameHook...</loading-spinner>
+        </div>
+        <div class="center-wrapper" v-else-if="loadingMapper">
+            <loading-spinner>Loading mapper...</loading-spinner>
+        </div>
+        <template v-else>
+            <div id="header">
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">File</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="openLoadingMapper">Load Mapper</a>
+                            <a href="#" class="dropdown-item" v-on:click="replaceMapper()">Reload Mapper</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">Emulator Driver</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item pl-4" v-on:click="changeUserSettingDriver('retroarch')">
+                                <svg class="sprite">
+                                    <use xlink:href="#check" v-if="userSettings.driver === 'retroarch'"></use>
+                                </svg>
+                                RetroArch
+                            </a>
+                            <a href="#" class="dropdown-item pl-4" v-on:click="changeUserSettingDriver('bizhawk')">
+                                <svg class="sprite">
+                                    <use xlink:href="#check" v-if="userSettings.driver === 'bizhawk'"></use>
+                                </svg>
+                                BizHawk
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">View</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <p class="pl-2 has-text-black">View bytes as...</p>
+                            <a href="#" class="dropdown-item pl-4"
+                               v-on:click="changeUserSettingDisplayBytesMode('hexdecimalUpper')">
+                                <svg class="sprite">
+                                    <use xlink:href="#check"
+                                         v-if="userSettings.displayBytesMode === 'hexdecimalUpper'"></use>
+                                </svg>
+                                Hexdecimal (upper-case)
+                            </a>
+                            <a href="#" class="dropdown-item pl-4"
+                               v-on:click="changeUserSettingDisplayBytesMode('hexdecimalLower')">
+                                <svg class="sprite">
+                                    <use xlink:href="#check"
+                                         v-if="userSettings.displayBytesMode === 'hexdecimalLower'"></use>
+                                </svg>
+                                Hexdecimal (lower-case)
+                            </a>
+                            <a href="#" class="dropdown-item pl-4"
+                               v-on:click="changeUserSettingDisplayBytesMode('decimal')">
+                                <svg class="sprite">
+                                    <use xlink:href="#check" v-if="userSettings.displayBytesMode === 'decimal'"></use>
+                                </svg>
+                                Decimal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">Mapper Manager</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getAvailableUpdates">View Available Mapper Updates</a>
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="getArchivedMappers">View Archived Mappers</a>
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" v-on:click="openGithubSettings">GitHub API Settings</a>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger header-menu-item">Help</div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a class="dropdown-item" href="https://gamehook.io/" target="_blank">Website</a>
+                            <a class="dropdown-item" href="https://gamehook.io/discord" target="_blank">Discord Channel</a>
+                            <a class="dropdown-item" href="http://github.com/gamehook-io/gamehook"
+                               target="_blank">Github</a>
+                            <a class="dropdown-item" href="http://github.com/gamehook-io/mappers" target="_blank">
+                                Mappers
+                                Repository
+                            </a>
+                            <a class="dropdown-item" :href="apiDocumentationUrl" target="_blank">API Documentation</a>
+                            <a class="dropdown-item" href="https://github.com/gamehook-io/gamehook/blob/main/CREDITS.md"
+                               target="_blank">Credits</a>
+                        </div>
+                    </div>
+                </div>-->
+            
+            </div>
+                        
+            <div class="columns mt-3" v-if="loadingMapperWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select the mapper file you would like to load.</p>
+                        
+                        <select class="input my-3" v-model="loadingMapperSelectedId">
+                            <option :value="null"></option>
+                            <option v-for="file in loadingMapperFiles" :value="file.id">
+                                {{ file.displayName }}
+                            </option>
+                        </select>
+
+                        <button type="button" class="button" :disabled="!loadingMapperSelectedId || loadingMapper"
+                                v-on:click="replaceMapper(loadingMapperSelectedId)">
+                            Load Mapper
+                        </button>
+                        <button type="button" class="button" v-on:click="openMapperFolder">
+                            Open Mapper Folder
+                        </button>
+                        <div class="my-3">
+                            <error-hint :err="loadingMapperError">
+                                Applying the mapper failed.
+                            </error-hint>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="githubSettingsMenuOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p style="color:red">Changing these settings is generally not recommended unless you know 
+                            what you are doing. These settings allow you to set a custom mapper repository, incorrect 
+                            settings can cause issues retrieving new and updated mappers. Please only do so with caution.
+                        </p>
+                        <hr />
+                        <h3 v-if="githubSettingsSaveSuccess">Settings saved successfully!</h3>
+                        <h3 v-else-if="githubSettingsSaveFailed">Failed to save settings! Error: {{githubSaveErrorMessage}}</h3>
+                        <hr />
+                        <label>
+                            <span>GitHub Owner Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.owner" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>Repository Name: </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.repo" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Alternative Directory Name - 
+                                Note: This is only required if the <b>mapper_tree.json</b> 
+                                is not in the root directory of the repository
+                            </span>
+                            <br />
+                            <input type="text" v-model="githubSettings.dir" />
+                        </label>
+                        <br />
+                        <label>
+                            <span>
+                                Personal Access Token - 
+                                Note: This is required if the repository is private or if you want to bypass the
+                                GitHub REST Api rate limit. Once you have a token generated <b>do not</b> share it 
+                                with anyone; for more information please refer to this page: 
+                                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
+                                    Managing your personal access tokens
+                                </a>
+                            </span>
+                            <br />
+                            <input type="password" v-model="githubSettings.token" style="width:50vw"/>
+                        </label>
+                        <br />
+                        <h3 v-if="showGithubTestResults">{{githubTestResult}}</h3>
+                        <button type="button" class="button" v-on:click="testGithubSettings">
+                            Test Settings
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="openGithubUrl">
+                            Open Github Link
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="saveGithubSettings">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select the mapper file you would like to update/download.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="updateSearch" />
+                        </label>
+                        <ul>
+                            <li>
+                                <label>
+                                    <input type="checkbox" v-on:click="checkAllMappers" v-model="allMapperUpdatesSelected" />
+                                    <span> Check All</span>
+                                </label>
+                                <hr />
+                            </li>
+                            <li v-for="(mapper, index) in filteredUpdates" style="padding:4px">
+                                <label>
+                                    <input :id="mapper.path" :value="mapper" name="mapper"
+                                        type="checkbox" v-model="selectedMapperUpdates" />
+                                    <span>&nbsp;{{getPath(mapper)}}</span>
+                                    <span v-if="getVersion(mapper).length > 0"> - Version {{getVersion(mapper)}}</span>
+                                    <br />
+                                        <span v-if="selectedMapperUpdates.includes(mapper)">
+                                            <span v-if="mapper.currentVersion !== undefined" style="padding-left:16px">
+                                                <span>Local Version </span>
+                                                <span v-if="mapper.currentVersion.version.length > 0">
+                                                    {{mapper.currentVersion.version}}:
+                                                </span>
+                                                Created: {{formatDate(mapper.currentVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.currentVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Local: Missing
+                                            </span>
+                                            <br />
+                                            <span v-if="mapper.latestVersion !== undefined" style="padding-left:16px">
+                                                <span>Remote Version </span>
+                                                <span v-if="mapper.latestVersion.version.length > 0">
+                                                    {{mapper.latestVersion.version}}: 
+                                                </span>
+                                                Created: {{formatDate(mapper.latestVersion.date_created)}} - 
+                                                Updated: {{formatDate(mapper.latestVersion.date_updated)}} 
+                                            </span>
+                                            <span v-else style="padding-left:16px">
+                                                Remote: Missing
+                                            </span>
+                                        </span>
+                                </label>
+                            </li>
+                        </ul>
+                        <hr />
+                        <button type="button" class="button" v-on:click="downloadUpdatedMappers">
+                            Downloaded {{selectedMapperUpdates.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="checkForMapperUpdates">
+                            Check for Updates
+                        </button>
+                        <button type="button" class="button" v-on:click="mapperUpdaterWindowOpen = false">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperUpdaterWindowLoaderOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <img src="loading.gif" alt="loading" style="height: 100px; width: 100px"/>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-3" v-else-if="mapperArchiveWindowOpen">
+                <div class="column is-6 is-offset-3">
+                    <div class="m-3">
+                        <p class="my-3">Please select an archived mapper file to manage.</p>
+                        <label>
+                            <span>Filter: </span>
+                            <input type="text" v-model="archivedSearch" />
+                        </label>
+                        <div v-for="(archive) in filteredArchives" style="padding:4px">
+                            <span>{{archive.key}}</span>
+                            <br />
+                            <ul style="padding-left:16px">
+                                <li v-for="(mapper) in archive.value" style="padding:4px;">
+                                    <label>
+                                        <input :value="mapper" name="archivedMapper"
+                                               type="checkbox" v-model="selectedArchivedMappers" />
+                                        <span style="padding-left:2px;">
+                                            {{mapper.pathDisplayName}}/{{mapper.mapper.display_name}} - 
+                                            Version {{mapper.mapper.version}}
+                                        </span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                        <hr />
+                        <button type="button" class="button" v-on:click="restoreMappers">
+                            Restore {{selectedArchivedMappers.length}} Mappers
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="refreshArchivedList">
+                            Refresh List
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="openArchiveFolder">
+                            Open Archive Folder
+                        </button>
+                        <br />
+                        <button type="button" class="button" v-on:click="mapperArchiveWindowOpen = false">
+                            Close
+                        </button>
+                        <hr />
+                        <span style="color:red;">
+                            Warning: This will permanently delete ALL selected archived mappers. 
+                            Please only select mappers you want to remove. 
+                        </span>
+                        <div style="padding-bottom: 12px;"></div>
+                        <button type="button" class="button" v-on:click="deleteArchivedMappers">
+                            Delete Archived Mappers
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="center-wrapper" v-else-if="!mapper.meta">
+                <div>You do not have a mapper loaded.</div>
+            </div>
+
+            <div class="columns" v-else>
+                <div class="column is-5">
+                    <div class="gh-panel gh-properties-panel">
+                        <div class="gh-panel-header">All Properties</div>
+                        <div class="gh-panel-content">
+                            <tree-view-item :obj="this.mapper.properties" depth="0" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-3">
+                    <div class="gh-panel gh-edit-panel" v-if="editingProperty">
+                        <div class="gh-panel-header">Editor</div>
+                        <div class="gh-panel-content">
+                            <table class="gh-table mb-4">
+                                <tr>
+                                    <td style="width: 150px;">Path</td>
+                                    <td>{{ editingProperty.property.path }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Type</td>
+                                    <td>{{ editingProperty.property.type }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.memoryContainer">
+                                    <td>Memory Container</td>
+                                    <td>{{ decimalToHexdecimal(editingProperty.property.memoryContainer) }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.address">
+                                    <td>Address</td>
+                                    <td>0x{{ decimalToHexdecimal(editingProperty.property.address) }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.length">
+                                    <td>Length</td>
+                                    <td>{{ editingProperty.property.length }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.size">
+                                    <td>Size</td>
+                                    <td>{{ editingProperty.property.size }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.bits">
+                                    <td>Bits</td>
+                                    <td>{{ editingProperty.property.bits }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.reference">
+                                    <td>Reference</td>
+                                    <td>{{ editingProperty.property.reference }}</td>
+                                </tr>
+                                <tr v-if="editingProperty.property.description">
+                                    <td>Description</td>
+                                    <td>{{ editingProperty.property.description }}</td>
+                                </tr>
+                            </table>
+
+                            <template v-if="editingProperty.property.isReadOnly">
+                                <div>Property is considered read-only and cannot be modified.</div>
+                            </template>
+                            <template v-else>
+                                <div class="my-4">
+                                    <div v-if="editingProperty.property.type === 'string'">
+                                        <div for="value">Value</div>
+
+                                        <input class="input is-dark" type="text" v-model="editingProperty.value" />
+                                    </div>
+                                    <div v-else-if="editingProperty.property.reference">
+                                        <div for="value">Value</div>
+
+                                        <select class="input is-dark" v-model="editingProperty.value">
+                                            <option v-for="option in getGlossaryByReferenceKey(editingProperty.property.reference)"
+                                                    v-bind:value="option.value.value">
+                                                {{ option.value.value }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div v-else-if="editingProperty.property.type === 'int' || editingProperty.property.type === 'uint' || editingProperty.property.type === 'nibble'">
+                                        <div for="value">Value</div>
+
+                                        <input class="input is-dark" type="number" v-model="editingProperty.value" />
+                                    </div>
+                                    <div v-else-if="editingProperty.property.type === 'bit' || editingProperty.property.type === 'bool'">
+                                        <div for="value">Value:</div>
+
+                                        <select class="input is-dark" v-model="editingProperty.value">
+                                            <option value="true">
+                                                True
+                                            </option>
+                                            <option value="false">
+                                                False
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div v-else>
+                                        <div for="value">Value:</div>
+
+                                        {{ editingProperty.value }}
+                                    </div>
+
+                                    <div class="my-4">
+                                        <div for="bytes">Bytes:</div>
+
+                                        <bytes-editor v-bind.sync="{ editingProperty: editingProperty }">
+                                        </bytes-editor>
+                                    </div>
+                                </div>
+
+                                <div class="my-4">
+                                    <label class="checkbox">
+                                        <input type="checkbox" v-model="editingProperty.isFrozen">
+                                        Freeze this property
+                                    </label>
+                                </div>
+
+                                <template v-if="editingProperty.didValueChange()">
+                                    <div class="button is-primary is-fullwidth my-2" v-on:click="saveEditingProperty">
+                                        Save
+                                        Value Changes
+                                    </div>
+                                </template>
+                                <template v-else-if="editingProperty.didBytesChange()">
+                                    <div class="button is-primary is-fullwidth my-2" v-on:click="saveEditingProperty">
+                                        Save
+                                        Bytes Changes
+                                    </div>
+                                </template>
+                                <template v-else-if="editingProperty.didFrozenChange()">
+                                    <div class="button is-primary is-fullwidth my-2" v-on:click="saveEditingProperty">
+                                        Save
+                                        Changes
+                                    </div>
+                                </template>
+
+                                <div class="button is-secondary is-fullwidth my-2" v-on:click="cancelEditingProperty">
+                                    Cancel
+                                    Changes
+                                </div>
+
+                                <error-hint :err="editingPropertyError">
+                                    Updating the property failed.
+                                </error-hint>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-4">
+                    <div class="gh-panel gh-center-panel">
+                        <div v-bind:class="getTabClasses('pinnedProperties', true)"
+                             v-on:click="centerPanelTab = 'pinnedProperties'">
+                            Pinned Properties
+                        </div>
+                        <div v-bind:class="getTabClasses('frozenProperties')"
+                             v-on:click="centerPanelTab = 'frozenProperties'">
+                            Frozen Properties
+                        </div>
+
+                        <div class="gh-panel-content" v-if="centerPanelTab == 'pinnedProperties'">
+                            <table v-if="pinnedPropertyPaths.length > 0" class="gh-table">
+                                <tr class="has-text-white">
+                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
+                                    <th class="has-text-white pt-1 bytes-th" style="width: 30%">Value (Bytes)</th>
+                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
+                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
+                                </tr>
+                                <tr v-for="property in getPinnedProperties()">
+                                    <td class="pt-1">{{ property.path }}</td>
+                                    <td class="pt-1 bytes-td displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
+                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
+                                    <td class="pt-1 has-text-centered commands-td">
+                                        <description-btn :property="property"></description-btn>
+                                        <freeze-property-btn :property="property"></freeze-property-btn>
+                                        <pin-property-btn :property="property"></pin-property-btn>
+                                        <edit-property-btn :property="property"></edit-property-btn>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p v-else>
+                                Properties you pin will appear here.
+                            </p>
+                        </div>
+
+                        <div class="gh-panel-content" v-if="centerPanelTab == 'frozenProperties'">
+                            <table v-if="getFrozenProperties().length > 0" class="gh-table">
+                                <tr class="has-text-white">
+                                    <th class="has-text-white pt-1" style="width: 35%">Property Name</th>
+                                    <th class="has-text-white pt-1" style="width: 30%">Value (Bytes)</th>
+                                    <th class="has-text-white pt-1" style="width: 25%">Value</th>
+                                    <th class="has-text-white pt-1 commands-th" style="min-width: 148px;"></th>
+                                </tr>
+                                <tr v-for="property in getFrozenProperties()">
+                                    <td class="pt-1">{{ property.path }}</td>
+                                    <td class="pt-1 displayPropertyBytes">{{ displayBytes(property.bytes) }}</td>
+                                    <td class="pt-1">{{ displayPropertyValue(property) }}</td>
+                                    <td class="pt-1 has-text-centered commands-td">
+                                        <description-btn :property="property"></description-btn>
+                                        <freeze-property-btn :property="property"></freeze-property-btn>
+                                        <pin-property-btn :property="property"></pin-property-btn>
+                                        <edit-property-btn :property="property"></edit-property-btn>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p v-else>
+                                Properties you have frozen will appear here.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <svg width="0" height="0" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-snowflake" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#e0e0e0" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="snowflake-disabled">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(60 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(120 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(180 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(240 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(300 12 12)" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-snowflake" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#00bfd8" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="snowflake">
+            <path stroke="none" d="M0 0h24v24H0z" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(60 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(120 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(180 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(240 12 12)" />
+            <path d="M10 4l2 1l2 -1m-2 -2v6.5l3 1.72" transform="rotate(300 12 12)" />
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pin" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#e0e0e0" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="pin-disabled">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" />
+            <line x1="9" y1="15" x2="4.5" y2="19.5" />
+            <line x1="14.5" y1="4" x2="20" y2="9.5" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pin" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#ff2825" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="pin">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" />
+            <line x1="9" y1="15" x2="4.5" y2="19.5" />
+            <line x1="14.5" y1="4" x2="20" y2="9.5" />
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-edit" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffbf00" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="edit">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M9 7h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />
+            <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />
+            <line x1="16" y1="5" x2="19" y2="8" />
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-folder-x" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#9e9e9e" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="folder">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-folder-x" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#9e9e9e" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="folder-open">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" fill="#9e9e9e" />
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="check">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M5 12l5 5l10 -10"></path>
+        </svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-help" width="16" height="16"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="#e0e0e0" fill="none" stroke-linecap="round"
+             stroke-linejoin="round" id="description">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="17" x2="12" y2="17.01" />
+            <path d="M12 13.5a1.5 1.5 0 0 1 1 -1.5a2.6 2.6 0 1 0 -3 -4" />
+        </svg>
+    </svg>
+
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@6.0.3/dist/browser/signalr.min.js"
+            integrity="sha256-8qu19eSyi7D86TUqTH7/pKaxrxITuHJYjGsxnNJWtMw=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.js"
+            integrity="sha256-T3nUjmQxnOjzHxjuh3cHG9MpgOURumsZOuLHDQTef9I=" crossorigin="anonymous"></script>
+    <script src="dist/gameHookMapperClient.js"></script>
+
+    <script type="text/javascript">
+    const originUrl = 'http://localhost:8085'
+
+    const arraysEqual = function (a, b) {
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+
+        for (var i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false;
+        }
+
+        return true;
+    }
+
+    const loadingComponent = {
+        template: '<span class="loader mr-2"></span> <slot></slot>'
+    }
+
+    const errorHintComponent = {
+        props: ['err'],
+        template: `
+          <template v-if="err">
+            <slot></slot>
+            <div v-if="err && err.title">{{ err.title }}</div>
+            <div v-if="err && err.detail">{{ err.detail }}</div>
+            <div>Please refer to the server logs if you need more information.</div>
+          </template>`
+    }
+
+    const descriptionBtnComponent = {
+        props: ['property'],
+        template: `
+          <div class="cmd-button" v-if="property.description">
+          <svg class="sprite">
+            <use xlink:href="#description"></use>
+          </svg>
+          </div>
+          <div class="cmd-button" v-else>
+          </div>`
+    }
+
+    const freezePropertyBtnComponent = {
+        props: ['property'],
+        template: `
+          <div class="cmd-button" v-on:click="$root.freezeProperty(property)" v-if="property.isFrozen">
+          <svg class="sprite active">
+            <use xlink:href="#snowflake"></use>
+          </svg>
+          </div>
+          <div class="cmd-button" v-on:click="$root.freezeProperty(property)" v-else>
+          <svg class="sprite">
+            <use xlink:href="#snowflake-disabled"></use>
+          </svg>
+          </div>`
+    }
+
+    const pinPropertyBtnComponent = {
+        props: ['property'],
+        template: `
+          <div class="cmd-button" v-on:click="$root.pinProperty(property)"
+               v-if="$root.pinnedPropertyPaths.includes(property.path)">
+          <svg class="sprite active">
+            <use xlink:href="#pin"></use>
+          </svg>
+          </div>
+
+          <div class="cmd-button" v-on:click="$root.pinProperty(property)" v-else>
+          <svg class="sprite">
+            <use xlink:href="#pin-disabled"></use>
+          </svg>
+          </div>`
+    }
+
+    const editPropertyBtnComponent = {
+        props: ['property'],
+        template: `
+          <div class="cmd-button" v-on:click="$root.beginEditProperty(property)">
+          <svg class="sprite">
+            <use xlink:href="#edit"></use>
+          </svg>
+          </div>`
+    }
+
+    const bytesEditorComponent = {
+        props: ['editingProperty'],
+        computed: {
+            bytesHexdecimal() {
+                return this.$parent.displayBytes(this.editingProperty.bytes).split(' ')
+            }
+        },
+        methods: {
+            onKeypress(event) {
+                const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'];
+                const keyPressed = event.key;
+
+                // Do not allow an invalid key to be pressed.
+                if (keysAllowed.includes(keyPressed) == false) {
+                    event.preventDefault()
+                }
+            },
+            onBlur(event, index) {
+                const valueInteger = GameHookMapperClient.hexdecimalToDecimal(event.target.value)
+
+                this.editingProperty.bytes[index] = valueInteger
+            }
+        },
+        template: `
+          <div class="hex-editor"><input class="hex-editor-item" type="text" v-for="(x, index) in bytesHexdecimal"
+                                         v-model="bytesHexdecimal[index]" @focus="$event.target.select()"
+                                         @keypress="onKeypress($event)" @blur="onBlur($event, index)"/></div>`
+    }
+
+    const treeViewItemComponent = {
+        props: ['depth', 'key', 'obj'],
+        data() {
+            return {
+                open: (this.depth == 0) ? true : false,
+                cssPropsChildren: {
+                    marginLeft: this.depth == 0 ? '' : 16 + 'px'
+                }
+            }
+        },
+        methods: {
+            isObjectTypeOfProperty: function (obj) {
+                return Object.keys(obj).includes('path')
+            },
+            displayPropertyValue: function (prop) {
+                return this.$root.displayPropertyValue(prop, true)
+            }
+        },
+        template: `
+          <div v-show="depth != 0" class="treeitem-node" v-on:click="open = !open">
+          <svg class="sprite" v-if="open == false">
+            <use xlink:href="#folder"></use>
+          </svg>
+          <svg class="sprite" v-if="open == true">
+            <use xlink:href="#folder-open"></use>
+          </svg>
+
+          <span class="has-text-weight-semibold pl-2"><slot></slot></span>
+          </div>
+
+          <div v-show="open == true" v-for="key in Object.keys(obj)" :style="cssPropsChildren">
+          <template v-if="isObjectTypeOfProperty(obj[key])">
+            <div class="treeitem-node">
+              <span class="has-text-weight-normal">{{ key }}:</span> <span
+                class="has-text-weight-light">{{ displayPropertyValue(obj[key]) }}</span>
+
+              <div class="commands">
+                <description-btn :property="obj[key]"></description-btn>
+                <freeze-property-btn :property="obj[key]"/>
+                <pin-property-btn :property="obj[key]"/>
+                <edit-property-btn :property="obj[key]"/>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <tree-view-item key="key" :obj="obj[key]" :depth="parseInt(this.depth) + 1">{{ key }}</tree-view-item>
+          </template>
+          </div>`
+    }
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                connected: false,
+                centerPanelTab: 'pinnedProperties',
+                driverError: null,
+                apiDocumentationUrl: `${originUrl}/swagger/`,
+                loadingMapper: false,
+                loadingMapperWindowOpen: false,
+                mapperUpdaterWindowOpen: false,
+                mapperArchiveWindowOpen: false,
+                mapperUpdaterWindowLoaderOpen: false,
+                githubSettingsMenuOpen: false,
+                githubSaveErrorMessage: "",
+                githubSettingsSaveFailed: false,
+                githubSettingsSaveSuccess: false,
+                showGithubTestResults: false,
+                githubTestResult: "",
+                loadingMapperFiles: null,
+                updateSearch: "",
+                availableUpdates: [],
+                selectedMapperUpdates: [],
+                archivedSearch: "",
+                archivedMappers: [],
+                selectedArchivedMappers: [],
+                allMapperUpdatesSelected: false,
+                loadingMapperSelectedId: null,
+                loadingMapperError: null,
+                mapper: null,
+                mapperLoadId: null,
+                pinnedPropertyPaths: [],
+                editingProperty: null,
+                editingPropertyError: null,
+                githubSettings: {
+                    accept: "",
+                    api_version: "",
+                    token: "",
+                    owner: "",
+                    repo: "",
+                    dir: ""
+                },
+                userSettings: {
+                    driver: 'retroarch',
+                    displayBytesMode: 'hexdecimalUpper'
+                }
+            }
+        },
+        watch: {
+            userSettings: function () {
+                this.saveData()
+            }
+        },
+        mounted: async function () {
+            // Setup the GameHook client, and configure it to
+            // show and hide the UI based off of the filename.
+            this.mapper = new GameHookMapperClient()
+
+            this.mapper.onConnected = () => {
+                this.connected = true
+            }
+
+            this.mapper.onDisconnected = () => {
+                this.connected = false
+
+                document.title = 'GameHook'
+            }
+
+            this.mapper.onMapperLoaded = () => {
+                this.loadData()
+
+                this.editingProperty = null
+                this.editingPropertyError = null
+
+                document.title = `GameHook - ${this.mapper.meta.gameName}`
+            }
+
+            this.mapper.onDriverError = (err) => this.driverError = err
+            this.mapper.onDriverRecovered = () => this.driverError = null
+
+            this.mapper.onMapperLoadError = (err) => {
+                if (err.title === 'MAPPER_NOT_LOADED') {
+                    this.connected = true
+
+                    document.title = 'GameHook'
+                }
+            }
+
+            // Establish the connection to GameHook.
+            if (await this.mapper.connect()) {
+                document.title = `GameHook - ${this.mapper.meta.gameName}`
+            }
+
+            // Load existing user configuration.
+            this.loadData()
+        },
+        computed: {
+            filteredUpdates() {
+                return this.availableUpdates.filter(item => {
+                    let found = false;
+                    if(item.latestVersion !== undefined) {
+                        found = item.latestVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());
+                    } 
+                    if(item.currentVersion !== undefined) {
+                        found = found || item.currentVersion
+                            .path
+                            .toLowerCase()
+                            .includes(this.updateSearch.toLowerCase());         
+                    }
+                    return found;
+                });
+            },
+            filteredArchives() {
+                /*let filtered = Array.from(Object
+                        .entries(this.archivedMappers)
+                        .filter(([k,v]) => {
+                            let foundList = v.filter(item => item.mapper.path
+                                .toLowerCase()
+                                .includes(this.archivedSearch.toLowerCase()));
+                            return foundList.length > 0
+                        }));*/
+                let foundObjs = [];
+                Object.entries(this.archivedMappers)
+                    .forEach(item => {
+                        let filtered = item[1].filter(innerItem => innerItem
+                            .mapper.path
+                            .toLowerCase()
+                            .includes(this.archivedSearch.toLowerCase()));
+                        if(filtered.length > 0) {
+                            foundObjs.push({key:item[0], value:filtered});
+                        }
+                    });
+                return foundObjs;
+            }
+        },
+        methods: {
+            decimalToHexdecimal: GameHookMapperClient.decimalToHexdecimal,
+            closeAllWindows: function() {
+                this.loadingMapperWindowOpen = false
+                this.mapperUpdaterWindowOpen = false
+                this.mapperArchiveWindowOpen = false
+                this.mapperUpdaterWindowLoaderOpen = false
+                this.githubSettingsMenuOpen = false
+            },
+            getPath: function(mapperDto) {
+                return mapperDto.currentVersion === undefined ?
+                    mapperDto.latestVersion.path : mapperDto.currentVersion.path;
+            },
+            getVersion: function(mapperDto) {
+                return mapperDto.latestVersion === undefined ?
+                    mapperDto.currentVersion.version : mapperDto.latestVersion.version;                
+            },
+            formatDate: function(date) {
+                let formattedDate = new Date(date);
+                if(formattedDate.toString() === "Invalid Date") {
+                    return "N/A";
+                } else {
+                    let dt = formattedDate.toISOString().split("T");
+                    return `${dt[0]} ${dt[1].substring(0, dt[1].indexOf("."))}`
+                    //return `${formattedDate.getFullYear()}-${formattedDate.getMonth()+1}-${formattedDate.getDate()} ${formattedDate.getHours()}:${formattedDate.getMinutes()}`;
+                }
+            },
+            displayBytes: function (bytes, forceMode) {
+                const mode = forceMode ?? this.userSettings.displayBytesMode
+
+                if (mode === 'decimal') {
+                    return bytes.join(' ')
+                } else if (mode === 'hexdecimalLower') {
+                    return bytes.map(x => GameHookMapperClient.decimalToHexdecimal(x, false)).join(' ')
+                } else if (mode === 'hexdecimalUpper') {
+                    return bytes.map(x => GameHookMapperClient.decimalToHexdecimal(x, true)).join(' ')
+                } else {
+                    throw new Error(`Invalid user setting found for displayBytesMode: ${mode}.`)
+                }
+            },
+            getTabClasses: function (tab, isFirstEntry = false) {
+                const classes = ['gh-panel-header']
+
+                if (isFirstEntry == false) {
+                    classes.push('ml-1')
+                }
+
+                if (this.centerPanelTab === tab) {
+                    classes.push('active')
+                } else {
+                    classes.push('inactive')
+                }
+
+                return classes
+            },
+            displayPropertyValue: function (prop, minimal) {
+                if (prop.value == null) return ''
+                else if (prop.reference) {
+                    if (typeof prop.value === 'object') return prop.value.name
+                    else return prop.value
+                } else if (prop.type === 'bitArray') {
+                    if (minimal) {
+                        return '[bitArray]'
+                    }
+
+                    return prop.value.map(x => x == true ? '1' : '0').join(' ')
+                } else return prop.value
+            },
+            saveData: function () {
+                localStorage.setItem("user_settings", JSON.stringify(this.userSettings))
+
+                if (this.mapper.meta) {
+                    if (this.mapper.meta.id == null) {
+                        throw new Error('Mapper meta is missing an identifier.')
+                    }
+
+                    const id = this.mapper.meta.id.toLowerCase().replace('-', '_')
+                    localStorage.setItem(`pinned_property_paths_${id}`, JSON.stringify(this.pinnedPropertyPaths))
+                }
+            },
+            loadData: function () {
+                const userSettingsLocalStorage = localStorage.getItem('user_settings')
+                if (userSettingsLocalStorage) {
+                    Object.assign(this.userSettings, JSON.parse(userSettingsLocalStorage))
+                }
+
+                if (this.mapper.meta) {
+                    if (this.mapper.meta.id == null) {
+                        throw new Error('Mapper meta is missing an identifier.')
+                    }
+
+                    const id = this.mapper.meta.id.toLowerCase().replace('-', '_')
+                    const pinnedPropertyPathsLocalStorage = localStorage.getItem(`pinned_property_paths_${id}`)
+
+                    if (pinnedPropertyPathsLocalStorage) {
+                        this.pinnedPropertyPaths = JSON.parse(pinnedPropertyPathsLocalStorage)
+                    }
+                }
+            },
+            changeUserSettingDisplayBytesMode: function (newValue) {
+                this.userSettings.displayBytesMode = newValue
+                this.saveData()
+            },
+            changeUserSettingDriver: function (newValue) {
+                this.userSettings.driver = newValue
+                this.saveData()
+            },
+            getPinnedProperties: function () {
+                if (this.mapper._properties) {
+                    return this.mapper._properties.filter(x => this.pinnedPropertyPaths.includes(x.path))
+                }
+
+                return []
+            },
+            getFrozenProperties: function () {
+                if (this.mapper._properties) {
+                    return this.mapper._properties.filter(x => x.isFrozen)
+                }
+
+                return []
+            },
+            openGithubSettings: async function() {
+                this.showGithubTestResults = false;
+                this.closeAllWindows();
+                this.githubSettings = await fetch(`${this.mapper._connectionString}/files/get_github_settings`)
+                    .then(async (x) => {
+                        return JSON.parse(await x.json());
+                    });
+                this.githubSettingsMenuOpen = true;
+            },
+            saveGithubSettings: async function() {
+                this.githubSettingsSaveSuccess = false;
+                this.githubSettingsSaveFailed = false;
+                this.githubSaveErrorMessage = "";
+                this.showGithubTestResults = false;
+                try {
+                    this.closeAllWindows();
+                    await fetch(`${this.mapper._connectionString}/files/save_github_settings`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.githubSettings)
+                    }).then(x => {
+                        if(x.ok) {
+                            this.githubSettingsSaveSuccess = true;
+                            this.githubSettingsSaveFailed = false;
+                            this.githubSaveErrorMessage = "";                            
+                        } else {
+                            this.githubSettingsSaveSuccess = false;
+                            this.githubSettingsSaveFailed = true;
+                            this.githubSaveErrorMessage = x.text();
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                    this.githubSettingsSaveSuccess = false;
+                    this.githubSettingsSaveFailed = true;
+                    this.githubSaveErrorMessage = e;
+                }
+                finally {
+                    await this.openGithubSettings();
+                }                
+            },
+            testGithubSettings: async function() {
+                await this.saveGithubSettings();
+                this.showGithubTestResults = false;
+                this.githubTestResult = await fetch(`${this.mapper._connectionString}/files/test_github_settings`)
+                    .then(async(x) => {
+                        return await x.text();
+                    })
+                this.showGithubTestResults = true;
+            },
+            getArchivedMappers: async function() {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/get_archived`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.closeAllWindows();
+                this.mapperArchiveWindowOpen = true;
+            },
+            restoreMappers: async function() {
+                try {
+                    if(this.selectedArchivedMappers.length === 0)
+                        return;
+                    this.archivedMappers = []
+                    this.archivedSearch = ""
+                    this.mapperArchiveWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/restore_mappers`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedArchivedMappers)
+                    })
+                } catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    this.selectedArchivedMappers = []
+                    await this.refreshArchivedList()
+                }
+            },
+            refreshArchivedList: async function() {
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                this.selectedArchivedMappers = []
+                this.archivedMappers = await fetch(`${this.mapper._connectionString}/files/mapper/refresh_archived_list`)
+                    .then(async (x) => {
+                        return await x.json()
+                    });
+                this.closeAllWindows();
+                this.mapperArchiveWindowOpen = true;
+            },
+            deleteArchivedMappers: async function() {
+                if(this.selectedArchivedMappers.length === 0)
+                    return;
+                this.archivedSearch = ""
+                this.archivedMappers = []
+                try {
+                    await fetch(`${this.mapper._connectionString}/files/mapper/delete_mappers`,{
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedArchivedMappers)
+                    })
+                } catch (e) {
+                    console.log(e);
+                } finally {
+                    this.closeAllWindows();
+                    this.mapperArchiveWindowOpen = true;
+                    await this.refreshArchivedList()
+                }   
+            },
+            getAvailableUpdates: async function() {
+                this.selectedMapperUpdates = []
+                this.availableUpdates = []
+                this.updateSearch = "";
+                this.availableUpdates = await fetch(`${this.mapper._connectionString}/files/mapper/get_updates`)
+                    .then(async (x) => {
+                      return await x.json()  
+                    })
+                this.closeAllWindows();
+                this.mapperUpdaterWindowOpen = true
+            },
+            checkForMapperUpdates: async function() {
+                this.availableUpdates = []
+                this.updateSearch = "";
+                await fetch(`${this.mapper._connectionString}/files/mapper/check_for_updates`, {
+                    method: 'GET'
+                }).then(async() => {
+                    await this.getAvailableUpdates();
+                });
+            },            
+            checkAllMappers: function() {
+                this.selectedMapperUpdates = []
+                if(!this.allMapperUpdatesSelected) {
+                    for(mapperUpdate in this.availableUpdates) {
+                        this.selectedMapperUpdates.push(this.availableUpdates[mapperUpdate])
+                    }
+                }
+            },
+            downloadUpdatedMappers: async function() {
+                try {
+                    if(this.selectedMapperUpdates.length === 0)
+                        return;
+                    this.availableUpdates = []
+                    this.updateSearch = ""
+                    this.mapperUpdaterWindowOpen = false
+                    this.mapperUpdaterWindowLoaderOpen = true;
+                    await fetch(`${this.mapper._connectionString}/files/mapper/download_updates`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.selectedMapperUpdates)                        
+                    })
+                } finally {
+                    this.selectedMapperUpdates = []
+                    await this.getAvailableUpdates();
+                }
+            },
+            openLoadingMapper: async function () {
+                this.loadingMapperFiles = await fetch(`${this.mapper._connectionString}/files/mappers`)
+                    .then(async (x) => {
+                        return await x.json()
+                    })
+                this.closeAllWindows();
+                this.loadingMapperWindowOpen = true
+            },
+            openMapperFolder: function() {
+                fetch(`${this.mapper._connectionString}/files/open_mapper_folder`);  
+            },
+            openArchiveFolder: function() {
+                fetch(`${this.mapper._connectionString}/files/open_mapper_archive_folder`);
+            },
+            openGithubUrl: async function() {
+                await fetch(`${this.mapper._connectionString}/files/get_github_link`)
+                    .then(async x => {
+                        if(x.ok) {
+                            let url = await x.text();
+                            url = url.replaceAll("\"", "");
+                            window.open(url, '_blank').focus();
+                        }
+                    });
+            },
+            replaceMapper: async function (id = null) {
+                this.loadingMapper = true
+
+                if (id == null) {
+                    id = this.mapperLoadId
+                }
+
+                try {
+                    const result = await fetch(`${this.mapper._connectionString}/mapper`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({id: id, driver: this.userSettings.driver})
+                    })
+
+                    if (result.ok == false) {
+                        this.loadingMapperError = result.json()
+                        return
+                    }
+
+                    await this.mapper.loadMapper()
+                    this.mapperLoadId = id
+                    this.closeAllWindows()
+                } finally {
+                    this.loadingMapper = false
+                }
+            },
+            pinProperty: function (property) {
+                if (this.pinnedPropertyPaths.includes(property.path)) {
+                    this.pinnedPropertyPaths = this.pinnedPropertyPaths.filter(x => x !== property.path)
+                } else {
+                    this.pinnedPropertyPaths = this.pinnedPropertyPaths.concat(property.path)
+                }
+
+                this.saveData()
+            },
+            freezeProperty: function (property) {
+                property.freeze(!property.isFrozen)
+            },
+            getGlossaryByReferenceKey: function (reference) {
+                return Object.keys(this.mapper.glossary[reference]).map(key => ({
+                    key: parseInt(key),
+                    value: this.mapper.glossary[reference][key]
+                }))
+            },
+            beginEditProperty: function (property) {
+                function ignoreKeys(key, value) {
+                    if (key == '_client') return undefined;
+                    else return value;
+                }
+
+                const copy1 = JSON.parse(JSON.stringify(property, ignoreKeys))
+                const copy2 = JSON.parse(JSON.stringify(property, ignoreKeys))
+
+                this.editingProperty = {
+                    property: copy1,
+                    bytes: copy2.bytes ? [...copy2.bytes] : [],
+                    value: copy2.value,
+                    isFrozen: copy2.isFrozen,
+                    didBytesChange: function () {
+                        return arraysEqual(this.bytes, this.property.bytes) == false
+                    },
+                    didValueChange: function () {
+                        return this.value != this.property.value
+                    },
+                    didFrozenChange: function () {
+                        return this.isFrozen != this.property.isFrozen
+                    }
+                }
+
+                this.editingPropertyError = null
+            },
+            cancelEditingProperty: function () {
+                this.editingProperty = null
+            },
+            saveEditingProperty: async function () {
+                try {
+                    this.editingPropertyError = null
+
+                    if (this.editingProperty.didBytesChange()) {
+                        await this.mapper._editPropertyBytes(this.editingProperty.property.path, this.editingProperty.bytes, this.editingProperty.isFrozen)
+                    } else if (this.editingProperty.didValueChange()) {
+                        await this.mapper._editPropertyValue(this.editingProperty.property.path, this.editingProperty.value, this.editingProperty.isFrozen)
+                    } else if (this.editingProperty.didFrozenChange()) {
+                        await this.mapper._editPropertyBytes(this.editingProperty.property.path, null, this.editingProperty.isFrozen)
+                    } else {
+                        throw new Error('Nothing changed?')
+                    }
+
+                    this.editingProperty = null
+                } catch (ex) {
+                    console.error(ex)
+                    this.editingPropertyError = ex
+                }
+            }
+        }
+    })
+
+    app.component('tree-view-item', treeViewItemComponent)
+    app.component('description-btn', descriptionBtnComponent)
+    app.component('freeze-property-btn', freezePropertyBtnComponent)
+    app.component('pin-property-btn', pinPropertyBtnComponent)
+    app.component('edit-property-btn', editPropertyBtnComponent)
+    app.component('bytes-editor', bytesEditorComponent)
+    app.component('error-hint', errorHintComponent)
+    app.component('loading-spinner', loadingComponent)
+
+    app.mount('#app')
+    </script>
+</body>
+
+</html>
