@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime.Misc;
+using GameHook.Application;
 using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models;
 using GameHook.Domain.Models.Mappers;
@@ -14,14 +15,14 @@ public class MapperClient
     //Property Tree 
     private MapperPropertyTree _cachedMapperPropertyTree = new();
     private readonly ILogger<MapperClient> _logger;
-    private readonly IGameHookInstance _instance;
+    private readonly GameHookInstance _instance;
     private readonly AppSettings _appSettings;
     private readonly IBizhawkMemoryMapDriver _bizhawkMemoryMapDriver;
     private readonly IRetroArchUdpPollingDriver _retroArchUdpPollingDriver;
     private readonly IStaticMemoryDriver _staticMemoryDriver;
 
     public MapperClient(ILogger<MapperClient> logger,
-        IGameHookInstance instance,
+        GameHookInstance instance,
         AppSettings appSettings,
         IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
         IRetroArchUdpPollingDriver retroArchUdpPollingDriver,

@@ -103,7 +103,7 @@ public static class Startup
                 IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
                 IStaticMemoryDriver staticMemoryDriver*/
         var logger = services.GetRequiredService<ILogger<MapperClient>>();
-        var instance = services.GetRequiredService<IGameHookInstance>();
+        var instance = services.GetRequiredService<GameHookInstance>();
         var appSettings = services.GetRequiredService<AppSettings>();
         var bizhawk = services.GetRequiredService<IBizhawkMemoryMapDriver>();
         var retro = services.GetRequiredService<IRetroArchUdpPollingDriver>();
