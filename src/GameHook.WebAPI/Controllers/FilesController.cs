@@ -60,7 +60,7 @@ namespace GameHook.WebAPI.Controllers
         
         [SwaggerOperation("Returns a list of available mapper updates.")]
         [HttpGet("mapper/get_updates")]
-        public ActionResult<IEnumerable<MapperDto>> GetMapperUpdatesAsync()
+        public ActionResult<IEnumerable<MapperDto>> GetMapperUpdates()
         {
             if (!System.IO.File.Exists(MapperEnvironment.OutdatedMapperTreeJson))
             {

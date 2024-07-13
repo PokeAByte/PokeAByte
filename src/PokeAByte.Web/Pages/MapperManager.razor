@@ -4,23 +4,13 @@
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
-    <MudText Typo="Typo.body1">Mapper Connection Status:</MudText>
-    <MudText Typo="Typo.body1" Color="@_currentStatusColor">
-        @_currentStatusName
-    </MudText>
-    <MudIcon Icon="@Icons.Material.Filled.PowerSettingsNew" 
-             Color="@_currentStatusColor" />
-    @if (!string.IsNullOrEmpty(_mapperName))
-    {
-        <MudText Typo="Typo.body1">
-            -
-        </MudText>
-    }
-    <MudText Typo="Typo.body1">
-        @_mapperName
-    </MudText>
+    <MudText Typo="Typo.body1">Mapper Status:</MudText>
+
     @if (MapperConnectionService!.IsCurrentlyConnected())
     {
+        <MudText Typo="Typo.body1">
+            @_mapperName
+        </MudText>
         <MudIconButton Icon="@Icons.Material.Filled.Clear"
                        Title="Clear"
                        DisableElevation="true"

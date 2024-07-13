@@ -87,6 +87,7 @@ public static class Startup
                 
                 return new MapperClientService(mapperFs, logger, CreateClient(x), clientNotif, propUpdate);
             });
+            services.AddScoped<MapperManagerService>();
             services.AddScoped<NavigationService>();
             
             //For some reason, the Driver controller requires special DI despite not needing it 
