@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace GameHook.Domain.Models.Mappers;
 
@@ -41,6 +42,17 @@ public record MapperDto
             return true;
         return false;
     }
+
+    public bool Search(string searchTerm)
+    {
+        return DisplayName.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase) ||
+               Path.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase) ||
+               Version.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase) ||
+               DateCreatedUtc.ToString(CultureInfo.InvariantCulture)
+                   .Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase) ||
+               (DateUpdatedUtc is not null && DateUpdatedUtc.Value.ToString(CultureInfo.InvariantCulture)
+                   .Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase));
+    }
 }
 
 [JsonSerializable(typeof(List<MapperDto>))]
@@ -52,5 +64,32 @@ public record MapperComparisonDto
 {
     public MapperDto? CurrentVersion { get; set; } = null;
     public MapperDto? LatestVersion { get; set; } = null;
+    public string GetVersion() => 
+        (string.IsNullOrEmpty(LatestVersion?.Version) ?
+            string.IsNullOrEmpty(CurrentVersion?.Version) ? 
+                string.Empty : 
+                CurrentVersion?.Version :
+        LatestVersion.Version) ?? 
+        string.Empty;
+    public string GetPath() => 
+        (string.IsNullOrEmpty(CurrentVersion?.Path) ?
+            string.IsNullOrEmpty(LatestVersion?.Path) ? 
+                string.Empty : 
+                CurrentVersion?.Path :
+            LatestVersion?.Path) ?? 
+        string.Empty;
+
+    public bool Search(string searchFilter)
+    {
+        if (LatestVersion is null && CurrentVersion is null)
+            return false;
+        if (string.IsNullOrEmpty(searchFilter))
+            return true;
+        if (LatestVersion is not null && LatestVersion.Search(searchFilter))
+            return true;
+        if (CurrentVersion is not null && CurrentVersion.Search(searchFilter))
+            return true;
+        return false;
+    }
 }
 

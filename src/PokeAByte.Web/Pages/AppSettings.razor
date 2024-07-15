@@ -1,6 +1,9 @@
-﻿@page "/AppSettings"
+﻿@using PokeAByte.Web.Components.Settings
+@page "/AppSettings"
 <PageTitle>@PageTitle - Settings</PageTitle>
 <h3>App Settings</h3>
+
+<GitHubSettings />
 
 @code {
     [CascadingParameter] public string? PageTitle { get; set; }

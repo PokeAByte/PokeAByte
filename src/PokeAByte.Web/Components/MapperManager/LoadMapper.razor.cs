@@ -1,4 +1,6 @@
-﻿using GameHook.Domain.Models.Mappers;
+﻿using System.Diagnostics;
+using GameHook.Domain.Models.Mappers;
+using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using PokeAByte.Web.Services;
@@ -45,5 +47,9 @@ public partial class LoadMapper : ComponentBase
             _isMapperLoading = false;
             //log
         }
+    }
+    private void OpenMapperFolder()
+    {
+        Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
     }
 }

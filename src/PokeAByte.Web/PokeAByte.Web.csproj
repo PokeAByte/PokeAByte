@@ -73,6 +73,7 @@
 
     <ItemGroup>
       <None Remove="Components\PropertiesOld\**" />
+      <None Remove="wwwroot.zip" />
     </ItemGroup>
 
 </Project>
