@@ -1,13 +1,19 @@
-﻿<MudPaper Class="pa-8" Elevation="4">
-    <MudText Typo="Typo.h4">GitHub Api Settings</MudText>
-    <MudGrid>
+﻿<MudPaper Class="px-8 pb-8 pt-3" Elevation="4">
+    <MudStack Row="true" @onclick="ToggleVisibility" Class="cursor-pointer">
+        <MudText Typo="Typo.h6">GitHub Api Settings</MudText>
+        <MudIconButton Icon="@IconStyle" 
+                       OnClick="ToggleVisibility"
+                       Size="Size.Small"/>  
+    </MudStack>
+    <MudGrid Class="@BodyClass">
         <MudItem xs="12" Class="mt-2">
+            <MudDivider DividerType="DividerType.FullWidth" Class="my-4"/>
             <MudText Typo="Typo.body1" Color="Color.Error">
                 Changing these settings is generally not recommended unless you know
                 what you are doing. These settings allow you to set a custom mapper repository,
                 incorrect settings can cause issues retrieving new and updated mappers. Please only do so with caution.
             </MudText>
-            <MudDivider DividerType="DividerType.Middle" Class="my-2"/>
+            <MudDivider DividerType="DividerType.FullWidth" Class="my-4"/>
         </MudItem>
         <MudItem xs="12">
             <MudText>GitHub Owner Name: </MudText>
@@ -35,7 +41,7 @@
                     Managing your personal access tokens
                 </MudLink>
             </MudText>
-            <MudTextField InputType="InputType.Password" 
+            <MudTextField InputType="InputType.Password"
                           @bind-Value="@_apiSettings.Token"/>
         </MudItem>
         <MudItem xs="12">
@@ -55,3 +61,18 @@
         </MudItem>
     </MudGrid>
 </MudPaper>
+<style>
+    .content-anim {
+        height: 0;
+        overflow: hidden;
+        transition: height 0.5s;
+    }
+    
+    .content-anim.show {
+        height: 700px;  /* Adjust to the required height */
+    }
+    
+    .content-anim.hide {
+        height: 0;
+    }
+</style>

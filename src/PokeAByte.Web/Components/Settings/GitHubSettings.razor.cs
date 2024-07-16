@@ -12,10 +12,21 @@ public partial class GitHubSettings : ComponentBase
     [Inject] public IGithubRestApi RestApi { get; set; }
     [Inject] public ILogger<GitHubSettings> Logger { get; set; }
     [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Parameter] public bool? IsInitiallyVisible { get; set; } = true;
+    private bool _isVisible = true;
+
+    private string BodyClass =>
+        "content-anim " + (_isVisible ? "show" : "hide");
+
+    private string IconStyle => _isVisible ? 
+            Icons.Material.Filled.ArrowDropUp : 
+            Icons.Material.Filled.ArrowDropDown;
+
     private GithubApiSettings _apiSettings = new();
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        _isVisible = IsInitiallyVisible is null || IsInitiallyVisible.Value;
         try
         {
             _apiSettings.CopySettings(ApiSettings);
@@ -74,5 +85,10 @@ public partial class GitHubSettings : ComponentBase
     {
         _saveChangesResult = (false, "");
         _settingsTestResult = (false, "");
+    }
+
+    private void ToggleVisibility()
+    {
+        _isVisible = !_isVisible;
     }
 }
