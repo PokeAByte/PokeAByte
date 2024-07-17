@@ -41,6 +41,11 @@ else
                    OnClick="OnClickCheckForUpdates">
             Check for Updates
         </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickOpenMapperDirectory">
+            Open Mapper Directory
+        </MudButton>
     </MudStack>
 
     <MudTextField @bind-Value="_filterString"
@@ -53,7 +58,12 @@ else
     {
         <MudText Typo="Typo.h6">No Mappers Found!</MudText>
     }
-
+    else if(UpdatedMapperListFiltered.Count > 0 && !string.IsNullOrEmpty(_filterString))
+    {
+        <MudText Typo="Typo.h6" Class="pb-2">
+            @UpdatedMapperListFiltered.Count / @_updatedMapperList.Count Filtered
+        </MudText>
+    }
     <MudTable Items="UpdatedMapperListFiltered"
               SelectedItemsChanged="OnSelectedItemsChanged"
               Hover="true"

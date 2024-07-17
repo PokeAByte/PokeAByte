@@ -34,7 +34,7 @@ public class MapperManagerService(
             return [];
         }
         //load the mapper list
-        var jsonStr = System.IO.File.ReadAllText(MapperEnvironment.OutdatedMapperTreeJson);
+        var jsonStr = File.ReadAllText(MapperEnvironment.OutdatedMapperTreeJson);
         if (string.IsNullOrWhiteSpace(jsonStr))
             logger.LogError($"{MapperEnvironment.OutdatedMapperTreeJson} was empty.");
         try
@@ -70,6 +70,13 @@ public class MapperManagerService(
         {
             logger.LogError(e, "Failed to download mappers.");
         }
+    }
+
+    public List<MapperDto> GetMapperList()
+    {
+        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperLocalDirectory);
+        MapperTreeUtility.SaveChanges(MapperLocalDirectory, mapperTree);
+        return mapperTree;
     }
 
     public IReadOnlyDictionary<string, IReadOnlyList<ArchivedMapperDto>>? GetArchivedMappers()

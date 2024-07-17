@@ -1,6 +1,8 @@
-﻿using GameHook.Domain;
+﻿using System.Diagnostics;
+using GameHook.Domain;
 using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models.Mappers;
+using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
@@ -116,5 +118,10 @@ public partial class UpdateMappers : ComponentBase
     {
         _updatedMapperList.Clear();
         await GetUpdatedMappers();
+    }
+
+    private void OnClickOpenMapperDirectory()
+    {
+        Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
     }
 }

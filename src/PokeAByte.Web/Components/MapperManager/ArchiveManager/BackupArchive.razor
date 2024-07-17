@@ -1,0 +1,77 @@
+﻿@if (_isDataLoading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="500px"/>
+    <MudOverlay Visible="_isDataLoading" DarkBackground="true" Absolute="true">
+        <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
+    </MudOverlay>
+}
+else
+{
+    <MudText Typo="Typo.h6" Class="py-6">
+        @_selectedMapperListFromTable.Count / @_mapperList.Count Mappers Selected!
+    </MudText>
+    <MudStack Row="true" Class="pb-2">
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_selectedMapperListFromTable.Count == 0)"
+                   OnClick="OnClickArchiveSelected">
+            Archive Selected
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_mapperList.Count == 0)"
+                   OnClick="OnClickArchiveAll">
+            Archive All
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickReloadMapperList">
+            Reload Mapper List
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickOpenMapperDirectory">
+            Open Mapper Directory
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickOpenArchiveDirectory">
+            Open Archive Directory
+        </MudButton>
+    </MudStack>
+
+    <MudTextField @bind-Value="_mapperListFilter"
+                  Class="py-4"
+                  Label="Filter Updates"
+                  Immediate="true"
+                  Variant="Variant.Filled"/>
+
+    @if (_mapperListFiltered.Count == 0)
+    {
+        <MudText Typo="Typo.h6" Class="pb-3">No Mappers Found!</MudText>
+    }
+    else if(_mapperListFiltered.Count > 0 && !string.IsNullOrEmpty(_mapperListFilter))
+    {
+        <MudText Typo="Typo.h6" Class="pb-3">
+            @_mapperListFiltered.Count / @_mapperList.Count Filtered
+        </MudText>
+    }
+    <MudTable Items="_mapperListFiltered"
+              SelectedItemsChanged="OnSelectedItemsChanged"
+              Hover="true"
+              MultiSelection="true"
+              Dense="true">
+        <ColGroup>
+            <col style="width:45px;"/>
+            <col/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Path</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Path">
+                @context.MapperDto.Path
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}

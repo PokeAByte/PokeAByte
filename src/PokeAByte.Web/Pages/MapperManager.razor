@@ -1,5 +1,6 @@
 ﻿@page "/MapperManager"
 @using PokeAByte.Web.Components.MapperManager
+@using PokeAByte.Web.Components.MapperManager.ArchiveManager
 @using PokeAByte.Web.Services
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
@@ -38,12 +39,12 @@
     </MudTabPanel>
     <MudTabPanel Text="Backup">
         <MudText Style="@PanelStyle">
-            <MapperArchives />
+            <BackupArchive />
         </MudText>
     </MudTabPanel>
     <MudTabPanel Text="Restore">
         <MudText Style="@PanelStyle">
-            <MapperArchives />
+            <RestoreArchive />
         </MudText>
     </MudTabPanel>
 </MudTabs>
