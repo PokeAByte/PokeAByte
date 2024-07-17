@@ -4,6 +4,7 @@ using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models.Mappers;
 using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
@@ -20,12 +21,15 @@ public partial class UpdateMappers : ComponentBase
             .Where(x => x.MapperComparison.Search(_filterString))
             .ToList();
     public Action<HashSet<VisualMapperComparisonModel>>? OnSelectedItemsChanged { get; set; }
+    public Action<TableRowClickEventArgs<VisualMapperComparisonModel>>? OnRowClick { get; set; }
+
     private HashSet<VisualMapperComparisonModel> _selectedMappersFromTable = [];
     private List<MapperComparisonDto> _selectedMappersToDownload = [];
     private bool _isDataLoading = true;
     protected override async Task OnInitializedAsync()
     {
         OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
+        OnRowClick += OnRowClickHandler;
         await base.OnInitializedAsync();
         await GetUpdatedMappers();
     }
@@ -86,14 +90,18 @@ public partial class UpdateMappers : ComponentBase
     }
     private void OnSelectedItemsChangedHandler(HashSet<VisualMapperComparisonModel> items)
     {
-        ResetSelection();
         _selectedMappersFromTable = items;
-        foreach (var item in items)
-        {
-            item.IsSelected = true;
-        }
+
     }
 
+    private VisualMapperComparisonModel? _prevSelected;
+    private void OnRowClickHandler(TableRowClickEventArgs<VisualMapperComparisonModel> eventArgs)
+    {
+        if(_prevSelected is not null && _prevSelected != eventArgs.Item)
+            _prevSelected.IsSelected = false;
+        eventArgs.Item.IsSelected = !eventArgs.Item.IsSelected;
+        _prevSelected = eventArgs.Item;
+    }
     private async Task OnClickUpdateSelected()
     {
         if(_selectedMappersFromTable.Count == 0)
@@ -103,7 +111,6 @@ public partial class UpdateMappers : ComponentBase
             .ToList();
         await DownloadUpdatedMapper();
     }
-
     private async Task OnClickUpdateAll()
     {
         if(_updatedMapperList.Count == 0)
@@ -123,5 +130,12 @@ public partial class UpdateMappers : ComponentBase
     private void OnClickOpenMapperDirectory()
     {
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+    }
+
+    private string GetSelectedIcon(VisualMapperComparisonModel context)
+    {
+        return context.IsSelected ? 
+            Icons.Material.Filled.ArrowDropUp : 
+            Icons.Material.Filled.ArrowDropDown;
     }
 }

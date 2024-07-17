@@ -68,6 +68,8 @@ else
               SelectedItemsChanged="OnSelectedItemsChanged"
               Hover="true"
               MultiSelection="true"
+              SelectOnRowClick="false"
+              OnRowClick="OnRowClick"
               Dense="true">
         <ColGroup>
             <col style="width:45px;"/>
@@ -77,8 +79,8 @@ else
             <MudTh>Path</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Path">
-                <MapperDetails Context="context"/>
+            <MudTd DataLabel="Path" Class="cursor-pointer">
+                <MapperDetails Context="context" />
             </MudTd>
         </RowTemplate>
     </MudTable>
