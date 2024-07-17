@@ -48,17 +48,23 @@ public class MapperManagerService(
         }
     }
 
-    public async Task DownloadMapperUpdatesAsync(IEnumerable<MapperComparisonDto> mappers)
+    private Action<int>? _updateProcessedCountAction;
+    public async Task DownloadMapperUpdatesAsync(IEnumerable<MapperComparisonDto> mappers,
+        Action<int>? updateProcessedCountAction = null)
     {
         try
         {
+            if (updateProcessedCountAction is not null)
+                _updateProcessedCountAction = updateProcessedCountAction;
             var mapperDownloads = mappers
                 .Select(m => 
                     m.LatestVersion ?? 
                     (m.CurrentVersion ?? 
                      throw new InvalidOperationException("Current Version and Latest version are both null.")))
                 .ToList();
-            await githubRestApi.DownloadMapperFiles(mapperDownloads, mapperUpdateManager.SaveUpdatedMappersAsync);
+            await githubRestApi.DownloadMapperFiles(mapperDownloads, 
+                mapperUpdateManager.SaveUpdatedMappersAsync,
+                _updateProcessedCountAction);
         }
         catch (Exception e)
         {

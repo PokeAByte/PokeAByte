@@ -75,8 +75,8 @@ public record MapperComparisonDto
         (string.IsNullOrEmpty(CurrentVersion?.Path) ?
             string.IsNullOrEmpty(LatestVersion?.Path) ? 
                 string.Empty : 
-                CurrentVersion?.Path :
-            LatestVersion?.Path) ?? 
+                LatestVersion?.Path :
+            CurrentVersion?.Path) ?? 
         string.Empty;
 
     public bool Search(string searchFilter)

@@ -36,8 +36,10 @@ public class GithubRestApi : IGithubRestApi
             headers.Add("Authorization", _apiSettings.GetFormattedToken());
     }*/
     public async Task DownloadMapperFiles(List<MapperDto> mapperDtos, 
-        Func<List<UpdateMapperDto>, Task> postDownloadAction)
+        Func<List<UpdateMapperDto>, Task> postDownloadAction,
+        Action<int>? currentProcessCountUpdate = null)
     {
+        var count = 0;
         List<UpdateMapperDto> updatedMapperList = new();
         foreach (var mapper in mapperDtos)
         {
@@ -55,8 +57,8 @@ public class GithubRestApi : IGithubRestApi
                 xmlPath, xmlData ?? "", 
                 jsPath, jsData ?? "",
                 mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
-            //Try to not process too fast, Github has a rate-limit 
-            //Thread.Sleep(1);
+            count++;
+            currentProcessCountUpdate?.Invoke(count);
         }
         await postDownloadAction(updatedMapperList);
     }

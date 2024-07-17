@@ -1,51 +1,75 @@
 ﻿@using PokeAByte.Web.Components.Settings
-<GitHubSettings IsInitiallyVisible="false"/>
-
-<MudText Typo="Typo.h6" Class="py-6">
-    @_selectedMappers.Count / @_updatedMapperList.Count Mappers Selected!
-</MudText>
-<MudStack Row="true" Class="pb-2">
-    <MudButton Color="Color.Secondary" 
-               Variant="Variant.Filled"
-               Disabled="@(_selectedMappers.Count == 0)">
-        Update Selected
-    </MudButton>
-    <MudButton Color="Color.Secondary"
-               Variant="Variant.Filled"
-               Disabled="@(_updatedMapperList.Count == 0)">
-        Update All
-    </MudButton>
-    <MudButton Color="Color.Secondary"
-               Variant="Variant.Filled">
-        Check for Updates
-    </MudButton>
-</MudStack>
-
-<MudTextField @bind-Value="_filterString"
-              Class="py-4"
-              Label="Filter Updates" 
-              Immediate="true"
-              Variant="Variant.Filled" />
-
-@if (UpdatedMapperListFiltered.Count == 0)
+@if (_isDataLoading)
 {
-    <MudText Typo="Typo.h6">No Mappers Found!</MudText>
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="500px"/>
+    <MudOverlay Visible="_isDataLoading" DarkBackground="true" Absolute="true">
+        @if (_currentProcessedCount != -1)
+        {
+            <MudText Typo="Typo.body2">Processed @_currentProcessedCount Mappers</MudText>
+            <MudProgressLinear Color="Color.Secondary"
+                               Indeterminate="false"
+                               Value="@_currentProcessedCountLinear"/>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+    </MudOverlay>
 }
-<MudTable Items="UpdatedMapperListFiltered"
-          SelectedItemsChanged="OnSelectedItemsChanged"
-          Hover="true"
-          MultiSelection="true"
-          Dense="true">
-    <ColGroup>
-        <col style="width:45px;" />
-        <col />
-    </ColGroup>
-    <HeaderContent>
-        <MudTh>Path</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Path">
-            <MapperDetails Context="context"/>
-        </MudTd>
-    </RowTemplate>
-</MudTable>
+else
+{
+    <GitHubSettings IsInitiallyVisible="false"/>
+
+    <MudText Typo="Typo.h6" Class="py-6">
+        @_selectedMappersFromTable.Count / @_updatedMapperList.Count Mappers Selected!
+    </MudText>
+    <MudStack Row="true" Class="pb-2">
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_selectedMappersFromTable.Count == 0)"
+                   OnClick="OnClickUpdateSelected">
+            Update Selected
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_updatedMapperList.Count == 0)"
+                   OnClick="OnClickUpdateAll">
+            Update All
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickCheckForUpdates">
+            Check for Updates
+        </MudButton>
+    </MudStack>
+
+    <MudTextField @bind-Value="_filterString"
+                  Class="py-4"
+                  Label="Filter Updates"
+                  Immediate="true"
+                  Variant="Variant.Filled"/>
+
+    @if (UpdatedMapperListFiltered.Count == 0)
+    {
+        <MudText Typo="Typo.h6">No Mappers Found!</MudText>
+    }
+
+    <MudTable Items="UpdatedMapperListFiltered"
+              SelectedItemsChanged="OnSelectedItemsChanged"
+              Hover="true"
+              MultiSelection="true"
+              Dense="true">
+        <ColGroup>
+            <col style="width:45px;"/>
+            <col/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Path</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Path">
+                <MapperDetails Context="context"/>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
