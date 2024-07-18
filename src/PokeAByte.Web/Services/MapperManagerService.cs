@@ -121,5 +121,24 @@ public class MapperManagerService(
         mapperArchiveManager.GenerateArchivedList();
         return GetArchivedMappers();
     }
-    
+
+    public void ArchiveMappers(List<MapperDto> mappers)
+    {
+        foreach (var mapper in mappers)
+        {
+            var relativeJsPath = mapper.Path
+                [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
+            var mapperPath = $"{MapperEnvironment.MapperLocalDirectory
+                .Replace("\\", "/")}/{mapper.Path}";
+            var jsPath = $"{MapperEnvironment.MapperLocalDirectory
+                .Replace("\\", "/")}/{relativeJsPath}";
+            mapperArchiveManager.ArchiveFile(mapper.Path, mapperPath);
+            mapperArchiveManager.ArchiveFile(relativeJsPath, jsPath);
+        }
+        var archiveFolder = MapperEnvironment.MapperArchiveDirectory;
+        mapperArchiveManager.ArchiveDirectory(archiveFolder);
+        //Update the mapper list
+        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
+        MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
+    }
 }

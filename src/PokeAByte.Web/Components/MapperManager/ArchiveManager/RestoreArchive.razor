@@ -1,1 +1,59 @@
-﻿<MudText>Restore</MudText>
+﻿@if (_isDataLoading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="500px"/>
+    <MudOverlay Visible="_isDataLoading" DarkBackground="true" Absolute="true">
+        <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
+    </MudOverlay>
+}
+else
+{
+    <MudText Typo="Typo.h6" Class="py-6">
+         / @_archivedMappers.Count Mappers Selected!
+    </MudText>
+    <MudStack Row="true" Class="pb-2">
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="true"
+                   OnClick="OnClickRestoreSelected">
+            Archive Selected
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_archivedMappers.Count == 0)"
+                   OnClick="OnClickRestoreAll">
+            Archive All
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickReloadMapperList">
+            Reload Mapper List
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickOpenMapperDirectory">
+            Open Mapper Directory
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   OnClick="OnClickOpenArchiveDirectory">
+            Open Archive Directory
+        </MudButton>
+    </MudStack>
+
+    <MudTextField @bind-Value="_mapperListFilter"
+                  Class="py-4"
+                  Label="Filter Updates"
+                  Immediate="true"
+                  Variant="Variant.Filled"/>
+
+    @if (ArchivedMapperListFiltered.Count == 0)
+    {
+        <MudText Typo="Typo.h6" Class="pb-3">No Mappers Found!</MudText>
+    }
+    else if(ArchivedMapperListFiltered.Count > 0 && !string.IsNullOrEmpty(_mapperListFilter))
+    {
+        <MudText Typo="Typo.h6" Class="pb-3">
+            @ArchivedMapperListFiltered.Count / @_archivedMappers.Count Filtered
+        </MudText>
+    }
+}

@@ -76,12 +76,12 @@ public static class MapperTreeUtility
     }
     public static bool SaveChanges(string baseDirectory, List<MapperDto> mapperTree)
     {
+        var path = Path.Combine(baseDirectory, "mapper_tree.json");
         if (mapperTree.Count == 0)
         {
-            Console.WriteLine("Mapper tree is empty. Failed to save.");
+            File.WriteAllText(path, "");
             return false;
         }
-        var path = Path.Combine(baseDirectory, "mapper_tree.json");
         var jsonData = JsonSerializer.Serialize(mapperTree, MapperDtoContext.Default.ListMapperDto);
         if (string.IsNullOrWhiteSpace(jsonData))
         {

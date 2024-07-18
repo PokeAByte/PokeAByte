@@ -10,9 +10,11 @@ namespace PokeAByte.Web.Components.MapperManager.ArchiveManager;
 public partial class BackupArchive : ComponentBase
 {
     [Inject] public MapperManagerService ManagerService { get; set; }
+    [Inject] public ILogger<BackupArchive> Logger { get; set; }
+    
     private List<VisualMapperDto> _mapperList = [];
     private string _mapperListFilter = "";
-    private List<VisualMapperDto> _mapperListFiltered =>
+    private List<VisualMapperDto> MapperListFiltered =>
         _mapperList.Where(x => x.MapperDto.Search(_mapperListFilter)).ToList();
     public Action<HashSet<VisualMapperDto>>? OnSelectedItemsChanged { get; set; }
     private HashSet<VisualMapperDto> _selectedMapperListFromTable = [];
@@ -59,6 +61,24 @@ public partial class BackupArchive : ComponentBase
         StateHasChanged();
     }
 
+    private void ArchiveMappers()
+    {
+        if (_selectedMappersToBackup.Count == 0) return;
+        _isDataLoading = true;
+        try
+        {
+            ManagerService.ArchiveMappers(_selectedMappersToBackup);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Exception!");
+        }
+        _selectedMappersToBackup = [];
+        _isDataLoading = false;
+        StateHasChanged();
+        GetMapperList();
+    }
+
     private void OnClickReloadMapperList()
     {
         GetMapperList();
@@ -66,12 +86,19 @@ public partial class BackupArchive : ComponentBase
 
     private void OnClickArchiveAll()
     {
-        throw new NotImplementedException();
+        if(_mapperList.Count == 0) return;
+        _selectedMappersToBackup = _mapperList.Select(x => x.MapperDto).ToList();
+        ArchiveMappers();
     }
 
     private void OnClickArchiveSelected()
     {
-        throw new NotImplementedException();
+        if(_selectedMapperListFromTable.Count == 0) return;
+        _selectedMappersToBackup = _selectedMapperListFromTable
+            .Select(x => x.MapperDto)
+            .ToList();
+        _selectedMapperListFromTable = [];
+        ArchiveMappers();
     }
 
     private void OnClickOpenMapperDirectory()
