@@ -19,8 +19,6 @@
 
     <ItemGroup>
       <AdditionalFiles Include="Components\MapperManager\LoadMapper.razor" />
-      <AdditionalFiles Include="Components\MapperManager\MapperArchives.razor" />
-      <AdditionalFiles Include="Components\MapperManager\UpdateMappers.razor" />
       <AdditionalFiles Include="Layout\MainLayout.razor" />
       <AdditionalFiles Include="Layout\NavigationMenu.razor" />
       <AdditionalFiles Include="Pages\AppSettings.razor" />

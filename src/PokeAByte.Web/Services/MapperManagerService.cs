@@ -4,6 +4,7 @@ using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models;
 using GameHook.Domain.Models.Mappers;
 using GameHook.Mappers;
+using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web.Services;
 
@@ -116,12 +117,38 @@ public class MapperManagerService(
         }
     }
 
-    public IReadOnlyDictionary<string, IReadOnlyList<ArchivedMapperDto>>? RefreshArchivedMappersList()
+    public List<MapperArchiveModel> RefreshArchivedMappersList()
     {
         mapperArchiveManager.GenerateArchivedList();
-        return GetArchivedMappers();
+        var mappers = GetArchivedMappers();
+        var mapperModels = mappers?.Select(m => new MapperArchiveModel()
+            {
+                BasePath = GetBasePathFromArchive(m.Key),
+                MapperList = new[]
+                {
+                    new KeyValuePair<string, List<ArchivedMapperDto>>(m.Key, m.Value.ToList())
+                }.ToDictionary()
+            })
+            .ToList();
+        if (mapperModels is null)
+            return [];
+        return mapperModels
+            .GroupBy(x => x.BasePath)
+            .Select(x => 
+                new MapperArchiveModel
+                {
+                    BasePath = x.Key,
+                    MapperList = x.Select(y => y.MapperList.First()).ToDictionary()
+                })
+            .ToList();
     }
 
+    private static string GetBasePathFromArchive(string fullPath)
+    {
+        var barePath = fullPath[(MapperEnvironment.MapperLocalArchiveDirectory.Length+1)..];
+        return "/" + barePath[..barePath.IndexOf('/')];
+    }
+    
     public void ArchiveMappers(List<MapperDto> mappers)
     {
         foreach (var mapper in mappers)

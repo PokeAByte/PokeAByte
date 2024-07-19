@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using GameHook.Domain;
-using GameHook.Domain.Interfaces;
 using GameHook.Domain.Models.Mappers;
 using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
@@ -8,7 +6,7 @@ using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
-namespace PokeAByte.Web.Components.MapperManager;
+namespace PokeAByte.Web.Components.MapperManager.UpdateManager;
 
 public partial class UpdateMappers : ComponentBase
 {

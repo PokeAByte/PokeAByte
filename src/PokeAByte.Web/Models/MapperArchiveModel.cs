@@ -1,0 +1,10 @@
+﻿using GameHook.Domain;
+
+namespace PokeAByte.Web.Models;
+
+public record MapperArchiveModel
+{
+    public required string BasePath { get; init; }
+    public required Dictionary<string, List<ArchivedMapperDto>> MapperList { get; init; }
+    public bool IsSelected { get; set; }
+}

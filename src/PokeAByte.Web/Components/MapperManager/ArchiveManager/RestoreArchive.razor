@@ -8,7 +8,7 @@
 else
 {
     <MudText Typo="Typo.h6" Class="py-6">
-         / @_archivedMappers.Count Mappers Selected!
+         @_selectedArchivedMappers.Count / @_archivedMappers.Count Mappers Selected!
     </MudText>
     <MudStack Row="true" Class="pb-2">
         <MudButton Color="Color.Secondary"
@@ -56,4 +56,24 @@ else
             @ArchivedMapperListFiltered.Count / @_archivedMappers.Count Filtered
         </MudText>
     }
+    <MudTable Items="ArchivedMapperListFiltered"
+              SelectedItemsChanged="OnSelectedItemsChanged"
+              Hover="true"
+              MultiSelection="true"
+              SelectOnRowClick="false"
+              OnRowClick="OnRowClick"
+              Dense="true">
+        <ColGroup>
+            <col style="width:45px;"/>
+            <col/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Path</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Path" Class="cursor-pointer">
+                <MapperArchiveTable BasePath="@context.BasePath" Context="@context"/>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
 }

@@ -1,0 +1,40 @@
+﻿@using GameHook.Domain
+@using PokeAByte.Web.Models
+<MudStack>
+    <MudText Typo="Typo.body2">@BasePath</MudText>
+    <MudTable Items="Context.MapperList"
+              Style="@DataStyle"
+              SelectedItemsChanged="OnSelectedItemsChanged"
+              Hover="true"
+              MultiSelection="true"
+              SelectOnRowClick="false"
+              Dense="true">
+        <ColGroup>
+            <col style="width:45px;"/>
+            <col/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Path</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Path" Class="cursor-pointer">
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudStack>
+@code {
+    [Parameter] public required string BasePath { get; set; }
+    [Parameter] public MapperArchiveModel Context { get; set; }
+    [Parameter]
+    public Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? OnSelectedChildItemChanged { get; set; }
+    
+    private string DataStyle => Context.IsSelected ? "display: block" : "display: none";
+    
+    public Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? OnSelectedItemsChanged { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        OnSelectedItemsChanged += OnSelectedChildItemChanged;
+        base.OnInitialized();
+    }
+}
