@@ -18,25 +18,34 @@ public partial class RestoreArchive : ComponentBase
 
     private List<MapperArchiveModel> ArchivedMapperListFiltered =>
         _archivedMappers.Where(x =>
-            x.BasePath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase) ||
-            x.MapperList
-                .Any(k => 
-                    k.Key.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase)) ||
-            x.MapperList
-                .Any(v => 
-                    v.Value.Any(y => y.Mapper.Search(_mapperListFilter))))
+                x.BasePath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase) ||
+                x.MapperModel.Mapper.Search(_mapperListFilter) ||
+                x.MapperModel.FullPath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase))
             .ToList();
+            
+        
 
-    public Action<HashSet<MapperArchiveModel>> OnSelectedItemsChanged { get; set; }
+    public Action<MapperArchiveModel> OnSelectedItemChanged { get; set; }
     public Action<TableRowClickEventArgs<MapperArchiveModel>> OnRowClick { get; set; }
     private Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? _onSelectedChildItemChanged;
     private List<MapperArchiveModel> _selectedArchivedMappers = [];
-    private HashSet<MapperArchiveModel> _selectedValuesFromTable = [];
+    private MapperArchiveModel? _selectedValueFromTable;
+    private TableGroupDefinition<MapperArchiveModel> _groupDefinition = new()
+    {
+        GroupName = "Archive Path Name",
+        Indentation = true,
+        IsInitiallyExpanded = false,
+        Expandable = true,
+        Selector = (e) => e.BasePath
+    };
+
+    private MudTable<MapperArchiveModel> _tableRef;
+
     protected override void OnInitialized()
     {
-        OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
+        OnSelectedItemChanged += OnSelectedItemsChangedHandler;
         OnRowClick += OnRowClickHandler;
-        OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
+        //OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
         base.OnInitialized();
         GetArchivedMappers();
     }
@@ -44,8 +53,7 @@ public partial class RestoreArchive : ComponentBase
     private void GetArchivedMappers()
     {
         _selectedArchivedMappers = [];
-        ResetSelection();
-        _selectedValuesFromTable = [];
+        _selectedValueFromTable = null;
         _archivedMappers = MapperManagerService
             .RefreshArchivedMappersList();
         /*_archivedMappers = MapperManagerService.RefreshArchivedMappersList() ?? 
@@ -77,25 +85,14 @@ public partial class RestoreArchive : ComponentBase
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
     }
 
-    private void OnRowClickHandler(TableRowClickEventArgs<MapperArchiveModel> args)
+    private void OnRowClickHandler(TableRowClickEventArgs<MapperArchiveModel> eventArgs)
     {
-        ResetSelection();
-        foreach (var item in _selectedValuesFromTable)
-        {
-            item.IsSelected = true;
-        }
-    }
+        eventArgs.Item.IsExpanded = !eventArgs.Item.IsExpanded;
 
-    private void ResetSelection()
-    {
-        foreach (var item in _selectedValuesFromTable.Where(x => x.IsSelected))
-        {
-            item.IsSelected = false;
-        }
     }
-    private void OnSelectedItemsChangedHandler(HashSet<MapperArchiveModel> selectedValues)
+    private void OnSelectedItemsChangedHandler(MapperArchiveModel selectedValue)
     {
-        _selectedValuesFromTable = selectedValues;
+        _selectedValueFromTable = selectedValue;
     }
     private void OnSelectedChildItemsChangedHandler(
         HashSet<KeyValuePair<string, List<ArchivedMapperDto>>> selectedValues)

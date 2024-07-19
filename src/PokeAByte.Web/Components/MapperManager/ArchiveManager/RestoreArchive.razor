@@ -57,22 +57,28 @@ else
         </MudText>
     }
     <MudTable Items="ArchivedMapperListFiltered"
-              SelectedItemsChanged="OnSelectedItemsChanged"
               Hover="true"
               MultiSelection="true"
+              GroupBy="@_groupDefinition"
               SelectOnRowClick="false"
-              OnRowClick="OnRowClick"
-              Dense="true">
+              Dense="true"
+              @ref="_tableRef">
         <ColGroup>
-            <col style="width:45px;"/>
-            <col/>
+            <col style="width:60px;" />
+            <col />
+            <col />
         </ColGroup>
         <HeaderContent>
             <MudTh>Path</MudTh>
         </HeaderContent>
+        <GroupHeaderTemplate>
+            <MudTh colspan="2">
+                @($"{context.Key}")
+            </MudTh>
+        </GroupHeaderTemplate>
         <RowTemplate>
-            <MudTd DataLabel="Path" Class="cursor-pointer">
-                <MapperArchiveTable BasePath="@context.BasePath" Context="@context"/>
+            <MudTd DataLabel="Path">
+                @($"{context.MapperModel.FullPath}/{context.MapperModel.Mapper.DisplayName}")
             </MudTd>
         </RowTemplate>
     </MudTable>

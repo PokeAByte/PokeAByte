@@ -121,7 +121,16 @@ public class MapperManagerService(
     {
         mapperArchiveManager.GenerateArchivedList();
         var mappers = GetArchivedMappers();
-        var mapperModels = mappers?.Select(m => new MapperArchiveModel()
+        var mapperModels = mappers?
+            .SelectMany(x =>
+                x.Value.Select(y => new MapperArchiveModel
+                {
+                    BasePath = GetBasePathFromArchive(x.Key),
+                    MapperModel = y
+                }))
+            .ToList();
+        return mapperModels ?? [];
+        /*var mapperModels = mappers?.Select(m => new MapperArchiveModel()
             {
                 BasePath = GetBasePathFromArchive(m.Key),
                 MapperList = new[]
@@ -134,13 +143,13 @@ public class MapperManagerService(
             return [];
         return mapperModels
             .GroupBy(x => x.BasePath)
-            .Select(x => 
+            .Select(x =>
                 new MapperArchiveModel
                 {
                     BasePath = x.Key,
                     MapperList = x.Select(y => y.MapperList.First()).ToDictionary()
                 })
-            .ToList();
+            .ToList();*/
     }
 
     private static string GetBasePathFromArchive(string fullPath)

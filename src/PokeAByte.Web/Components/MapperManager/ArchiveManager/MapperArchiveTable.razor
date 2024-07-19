@@ -1,8 +1,8 @@
-﻿@using GameHook.Domain
+﻿@*@using GameHook.Domain
 @using PokeAByte.Web.Models
 <MudStack>
     <MudText Typo="Typo.body2">@BasePath</MudText>
-    <MudTable Items="Context.MapperList"
+    <MudTable Items="Context.MapperModel"
               Style="@DataStyle"
               SelectedItemsChanged="OnSelectedItemsChanged"
               Hover="true"
@@ -23,12 +23,14 @@
     </MudTable>
 </MudStack>
 @code {
-    [Parameter] public required string BasePath { get; set; }
-    [Parameter] public MapperArchiveModel Context { get; set; }
+    [Parameter] 
+    public required string BasePath { get; set; }
+    [Parameter]
+    public MapperArchiveModel Context { get; set; }
     [Parameter]
     public Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? OnSelectedChildItemChanged { get; set; }
     
-    private string DataStyle => Context.IsSelected ? "display: block" : "display: none";
+    private string DataStyle => Context.IsChildrenVisible ? "display: block" : "display: none";
     
     public Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? OnSelectedItemsChanged { get; set; }
     
@@ -37,4 +39,4 @@
         OnSelectedItemsChanged += OnSelectedChildItemChanged;
         base.OnInitialized();
     }
-}
+}*@
