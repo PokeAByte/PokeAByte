@@ -117,39 +117,19 @@ public class MapperManagerService(
         }
     }
 
-    public List<MapperArchiveModel> RefreshArchivedMappersList()
+    public List<MapperArchiveModel> CreateArchiveList()
     {
         mapperArchiveManager.GenerateArchivedList();
         var mappers = GetArchivedMappers();
         var mapperModels = mappers?
-            .SelectMany(x =>
-                x.Value.Select(y => new MapperArchiveModel
-                {
-                    BasePath = GetBasePathFromArchive(x.Key),
-                    MapperModel = y
-                }))
-            .ToList();
-        return mapperModels ?? [];
-        /*var mapperModels = mappers?.Select(m => new MapperArchiveModel()
+            .GroupBy(g => GetBasePathFromArchive(g.Key))
+            .Select(m => new MapperArchiveModel
             {
-                BasePath = GetBasePathFromArchive(m.Key),
-                MapperList = new[]
-                {
-                    new KeyValuePair<string, List<ArchivedMapperDto>>(m.Key, m.Value.ToList())
-                }.ToDictionary()
+                BasePath = m.Key,
+                MapperModels = m.SelectMany(c => c.Value.ToList()).ToList()
             })
             .ToList();
-        if (mapperModels is null)
-            return [];
-        return mapperModels
-            .GroupBy(x => x.BasePath)
-            .Select(x =>
-                new MapperArchiveModel
-                {
-                    BasePath = x.Key,
-                    MapperList = x.Select(y => y.MapperList.First()).ToDictionary()
-                })
-            .ToList();*/
+        return mapperModels ?? [];   
     }
 
     private static string GetBasePathFromArchive(string fullPath)

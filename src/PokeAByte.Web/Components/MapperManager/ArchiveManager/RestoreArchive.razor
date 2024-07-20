@@ -8,21 +8,10 @@
 else
 {
     <MudText Typo="Typo.h6" Class="py-6">
-         @_selectedArchivedMappers.Count / @_archivedMappers.Count Mappers Selected!
+        @_archivedMappers.Count folders and
+        @_archivedMappers.SelectMany(y => y.MapperModels).Count() files found!
     </MudText>
     <MudStack Row="true" Class="pb-2">
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   Disabled="true"
-                   OnClick="OnClickRestoreSelected">
-            Archive Selected
-        </MudButton>
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   Disabled="@(_archivedMappers.Count == 0)"
-                   OnClick="OnClickRestoreAll">
-            Archive All
-        </MudButton>
         <MudButton Color="Color.Secondary"
                    Variant="Variant.Filled"
                    OnClick="OnClickReloadMapperList">
@@ -56,30 +45,46 @@ else
             @ArchivedMapperListFiltered.Count / @_archivedMappers.Count Filtered
         </MudText>
     }
-    <MudTable Items="ArchivedMapperListFiltered"
-              Hover="true"
-              MultiSelection="true"
-              GroupBy="@_groupDefinition"
-              SelectOnRowClick="false"
-              Dense="true"
-              @ref="_tableRef">
-        <ColGroup>
-            <col style="width:60px;" />
-            <col />
-            <col />
-        </ColGroup>
-        <HeaderContent>
-            <MudTh>Path</MudTh>
-        </HeaderContent>
-        <GroupHeaderTemplate>
-            <MudTh colspan="2">
-                @($"{context.Key}")
-            </MudTh>
-        </GroupHeaderTemplate>
-        <RowTemplate>
-            <MudTd DataLabel="Path">
-                @($"{context.MapperModel.FullPath}/{context.MapperModel.Mapper.DisplayName}")
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    @foreach (var item in ArchivedMapperListFiltered)
+    {
+        <MudPaper Class="pa-1 mb-2" Elevation="4">
+            <MudGrid Spacing="1" Justify="Justify.FlexStart">
+                <MudItem Class="align-start">
+                    <MudIconButton Icon="@Icons.Material.Filled.CatchingPokemon"
+                                   Color="@SetIconColor(item.IsExpanded)"
+                                   aria-label="expand-panel"
+                                   Class="ml-auto mud-width-full d-flex"
+                                   OnClick="() => item.IsExpanded = !item.IsExpanded"/>
+                </MudItem>
+                <MudItem Class="align-content-center"  Style="width:325px;">
+                    <MudText Typo="Typo.body1" Class="d-flex justify-start">
+                        @item.BasePath (@item.MapperModels.Count files)
+                    </MudText>
+                </MudItem>
+                <MudItem Class="align-content-center align-center">
+                    <MudButton Color="Color.Success"
+                               OnClick="() => OnClickRestoreButton(item)"
+                               Class="ml-auto mud-width-full d-flex"
+                               Variant="Variant.Filled">
+                        Restore
+                    </MudButton>
+                </MudItem>
+                <MudItem Class="align-content-center align-center">
+                    <MudButton Color="Color.Error"
+                               OnClick="() => OnClickDeleteButton(item)"
+                               Class="ml-auto mud-width-full d-flex"
+                               Variant="Variant.Filled">
+                        Delete
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+            <div style="@(item.IsExpanded ? "display:block;" : "display:none;")">
+                <MudDivider Vertical="false"
+                            Light="false"
+                            DividerType="DividerType.FullWidth"
+                            Class="mb-3"/>
+                <MapperArchiveData Context="@item.MapperModels"/>
+            </div>
+        </MudPaper>
+    }
 }

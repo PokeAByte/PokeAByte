@@ -7,72 +7,41 @@ using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web.Components.MapperManager.ArchiveManager;
-
 public partial class RestoreArchive : ComponentBase
 {
     [Inject] public MapperManagerService MapperManagerService { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
     private bool _isDataLoading;
     private string _mapperListFilter = "";
 
-    private List<MapperArchiveModel> _archivedMappers = [];
-
-    private List<MapperArchiveModel> ArchivedMapperListFiltered =>
+    private HashSet<MapperArchiveModel> _archivedMappers = [];
+    private HashSet<MapperArchiveModel> ArchivedMapperListFiltered =>
         _archivedMappers.Where(x =>
-                x.BasePath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase) ||
-                x.MapperModel.Mapper.Search(_mapperListFilter) ||
-                x.MapperModel.FullPath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase))
-            .ToList();
-            
-        
-
-    public Action<MapperArchiveModel> OnSelectedItemChanged { get; set; }
-    public Action<TableRowClickEventArgs<MapperArchiveModel>> OnRowClick { get; set; }
-    private Action<HashSet<KeyValuePair<string, List<ArchivedMapperDto>>>>? _onSelectedChildItemChanged;
-    private List<MapperArchiveModel> _selectedArchivedMappers = [];
-    private MapperArchiveModel? _selectedValueFromTable;
-    private TableGroupDefinition<MapperArchiveModel> _groupDefinition = new()
-    {
-        GroupName = "Archive Path Name",
-        Indentation = true,
-        IsInitiallyExpanded = false,
-        Expandable = true,
-        Selector = (e) => e.BasePath
-    };
-
-    private MudTable<MapperArchiveModel> _tableRef;
+                x.BasePath.Contains(_mapperListFilter, StringComparison.InvariantCultureIgnoreCase))
+            .ToHashSet();
+    
+    private Color SetIconColor(bool isExpanded) =>
+        isExpanded ? Color.Secondary : Color.Info;
 
     protected override void OnInitialized()
     {
-        OnSelectedItemChanged += OnSelectedItemsChangedHandler;
-        OnRowClick += OnRowClickHandler;
-        //OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
         base.OnInitialized();
         GetArchivedMappers();
     }
 
     private void GetArchivedMappers()
     {
-        _selectedArchivedMappers = [];
-        _selectedValueFromTable = null;
         _archivedMappers = MapperManagerService
-            .RefreshArchivedMappersList();
+            .CreateArchiveList()
+            .ToHashSet();
         /*_archivedMappers = MapperManagerService.RefreshArchivedMappersList() ?? 
             new Dictionary<string, IReadOnlyList<ArchivedMapperDto>>().AsReadOnly();*/
         StateHasChanged();
     }
-    private void OnClickRestoreSelected()
-    {
-        throw new NotImplementedException();
-    }
-
-    private void OnClickRestoreAll()
-    {
-        throw new NotImplementedException();
-    }
 
     private void OnClickReloadMapperList()
     {
-        throw new NotImplementedException();
+        GetArchivedMappers();
     }
 
     private void OnClickOpenMapperDirectory()
@@ -85,21 +54,29 @@ public partial class RestoreArchive : ComponentBase
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
     }
 
-    private void OnRowClickHandler(TableRowClickEventArgs<MapperArchiveModel> eventArgs)
+    private async Task OnClickRestoreButton(MapperArchiveModel? item)
     {
-        eventArgs.Item.IsExpanded = !eventArgs.Item.IsExpanded;
+        if (item is null)
+            return;
+        var result = await DialogService.ShowMessageBox(
+            "Warning", "Restoring a set of mappers will archive any current mappers you have downloaded.",
+            "Restore!", cancelText:"Cancel");
+        if (result is null or false)
+            return;
+        MapperManagerService.RestoreArchivedMappers(item.MapperModels);
+        GetArchivedMappers();
+    }
 
-    }
-    private void OnSelectedItemsChangedHandler(MapperArchiveModel selectedValue)
+    private async Task OnClickDeleteButton(MapperArchiveModel? item)
     {
-        _selectedValueFromTable = selectedValue;
-    }
-    private void OnSelectedChildItemsChangedHandler(
-        HashSet<KeyValuePair<string, List<ArchivedMapperDto>>> selectedValues)
-    {
-        foreach (var item in selectedValues)
-        {
-            var t = item.Key;
-        }
+        if (item is null)
+            return;
+        var result = await DialogService.ShowMessageBox(
+            "Warning", "Deleting a set of archived mappers cannot be undone. Proceed with caution.",
+            "Delete!", cancelText:"Cancel");
+        if (result is null or false)
+            return;
+        MapperManagerService.DeleteArchivedMappers(item.MapperModels);
+        GetArchivedMappers();
     }
 }
