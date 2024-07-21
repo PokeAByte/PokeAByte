@@ -24,6 +24,8 @@ public class Program
             .CreateBootstrapLogger();
         try
         {
+            if (!File.Exists(BuildEnvironment.UserSettingsJson))
+                File.Create(BuildEnvironment.UserSettingsJson);
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseSerilog((bc, sp, lc) => 
                 lc.MinimumLevel.Information()

@@ -13,6 +13,7 @@ namespace GameHook.Domain.Interfaces
         int DelayMsBetweenReads { get; }
 
         Task EstablishConnection();
+        Task<bool> TestConnection();
 
         Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks);
 

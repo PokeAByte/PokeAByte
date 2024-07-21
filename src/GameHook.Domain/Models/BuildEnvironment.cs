@@ -34,6 +34,8 @@ namespace GameHook.Domain.Models
             Path.Combine(ConfigurationDirectory, "GameHook.log");
         public static string ConfigurationDirectoryAppsettingsFilePath =>
             Path.Combine(ConfigurationDirectory, "appsettings.json");
+        public static string UserSettingsJson =>
+            Path.Combine(ConfigurationDirectory, "user_settings.json");
         public static string ConfigurationDirectoryWpfConfigFilePath =>
             Path.Combine(ConfigurationDirectory, "gamehook.wpf.config");
 

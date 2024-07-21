@@ -51,7 +51,7 @@ public class MapperClient
                 await _instance.Load(_bizhawkMemoryMapDriver, mapper.Id);
                 _logger.LogDebug("Bizhawk driver loaded."); 
                 break;
-            case DriverModels.Retroarch:
+            case DriverModels.RetroArch:
                 await _instance.Load(_retroArchUdpPollingDriver, mapper.Id);
                 _logger.LogDebug("Retroarch driver loaded.");
                 break;

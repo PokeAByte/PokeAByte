@@ -74,6 +74,7 @@ public static class Startup
             services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
             services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
             services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
+            services.AddSingleton<DriverService>();
             services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
             
             services.AddSingleton<PropertyUpdateService>();
@@ -148,5 +149,6 @@ public static class Startup
 
         app.MapControllers();
         app.MapHub<UpdateHub>("/updates");
+        app.Services.GetRequiredService<DriverService>();
     }
 }

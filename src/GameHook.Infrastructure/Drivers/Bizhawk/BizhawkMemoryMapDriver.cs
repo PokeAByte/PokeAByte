@@ -73,6 +73,23 @@ namespace GameHook.Infrastructure.Drivers.Bizhawk
             return Task.CompletedTask;
         }
 
+        public Task<bool> TestConnection()
+        {
+            try
+            {
+                EstablishConnection();
+                var platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");
+
+                var data = GetFromMemoryMappedFile("GAMEHOOK_BIZHAWK_DATA.bin", DATA_Length);
+
+                return Task.FromResult(data.Length > 0);
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
         public Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
         {
             var platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");

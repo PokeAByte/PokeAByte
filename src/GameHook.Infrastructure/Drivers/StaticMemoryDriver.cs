@@ -13,7 +13,7 @@ namespace GameHook.Infrastructure.Drivers
 
         private readonly ILogger<StaticMemoryDriver> _logger;
         private Dictionary<uint, byte[]> MemoryFragmentLayout { get; set; } = [];
-
+        private bool _isConnected = false;
         public StaticMemoryDriver(ILogger<StaticMemoryDriver> logger)
         {
             _logger = logger;
@@ -25,8 +25,13 @@ namespace GameHook.Infrastructure.Drivers
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
-
+            _isConnected = true;
             return Task.CompletedTask;
+        }
+
+        public Task<bool> TestConnection()
+        {
+            return Task.FromResult(_isConnected);
         }
 
         public async Task SetMemoryFragment(string filename)

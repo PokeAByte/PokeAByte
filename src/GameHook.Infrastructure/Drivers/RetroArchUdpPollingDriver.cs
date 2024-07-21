@@ -31,6 +31,7 @@ namespace GameHook.Infrastructure.Drivers
         private readonly AppSettings _appSettings;
         private UdpClient UdpClient { get; set; }
         private Dictionary<string, ReceivedPacket> Responses { get; set; } = [];
+        private bool _isConnected = false;
 
         void CreateUdpClient()
         {
@@ -63,7 +64,7 @@ namespace GameHook.Infrastructure.Drivers
                         if (UdpClient == null || UdpClient.Client.Connected == false)
                         {
                             Logger.LogDebug("UdpClient is not connected -- reestablishing connection.");
-
+                            _isConnected = false;
                             CreateUdpClient();
                         }
 
@@ -73,10 +74,12 @@ namespace GameHook.Infrastructure.Drivers
                         }
 
                         var buffer = await UdpClient.ReceiveAsync();
+                        _isConnected = true;
                         ReceivePacket(buffer.Buffer);
                     }
                     catch
                     {
+                        _isConnected = false;
                         // Automatically swallow exceptions here because
                         // they're not useful even if there's an error.
 
@@ -174,6 +177,11 @@ namespace GameHook.Infrastructure.Drivers
 
             Responses[receiveKey] = new ReceivedPacket(command, memoryAddress, value);
             Logger.LogDebug($"[Incoming Packet] Set response {receiveKey}");
+        }
+
+        public Task<bool> TestConnection()
+        {
+            return Task.FromResult(_isConnected);
         }
 
         public async Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
