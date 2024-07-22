@@ -57,7 +57,7 @@ namespace GameHook.Application
             Variables = [];
         }
 
-        private async Task ResetState()
+        public async Task ResetState()
         {
             if (ReadLoopToken != null && ReadLoopToken.Token.CanBeCanceled)
             {
@@ -74,9 +74,10 @@ namespace GameHook.Application
 
             JavascriptModuleInstance = null;
 
+            MemoryContainerManager = new MemoryManager();
             State = [];
             Variables = [];
-
+            
             await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
         }
 

@@ -16,15 +16,19 @@ public class MapperClientService
     private readonly ILogger<MapperClientService> _logger;
     private readonly MapperClient _client;
     private readonly PropertyUpdateService _propertyUpdateService;
+    private readonly DriverService _driverService;
     public MapperClientService(IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
         MapperClient client,
-        IClientNotifier clientNotifier, PropertyUpdateService propertyUpdateService)
+        IClientNotifier clientNotifier, 
+        PropertyUpdateService propertyUpdateService, 
+        DriverService driverService)
     {
         _mapperFs = mapperFs;
         _logger = logger;
         _client = client;
         _propertyUpdateService = propertyUpdateService;
+        _driverService = driverService;
         clientNotifier.PropertyChangedEvent += HandlePropertyChangedEvent;
     }
 
@@ -43,6 +47,10 @@ public class MapperClientService
 
     public async Task<Result> ChangeMapper(string mapperId)
     {
+        var driverResult = await _driverService.TestDrivers();
+        if (string.IsNullOrWhiteSpace(driverResult))
+            return Result.Failure(Error.FailedToLoadMapper);
+        LoadedDriver = driverResult;
         var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
         try
         {
@@ -136,5 +144,12 @@ public class MapperClientService
             return;
         var prop = _client.GetPropertyByPath(model.Path);
         model.UpdateFromPropertyModel(prop);
+    }
+
+    public void UnloadMapper()
+    {
+        if(!_client.IsMapperLoaded)
+            return;
+        _client.UnloadMapper();
     }
 }

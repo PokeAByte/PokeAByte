@@ -10,7 +10,7 @@
         IGameHookDriver? Driver { get; }
         IGameHookMapper? Mapper { get; }
         IPlatformOptions? PlatformOptions { get; }
-
+        Task ResetState();
         Task Load(IGameHookDriver driver, string mapperId);
 
         object? ExecuteExpression(string? expression, object x);

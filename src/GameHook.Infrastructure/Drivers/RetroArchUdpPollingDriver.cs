@@ -74,7 +74,6 @@ namespace GameHook.Infrastructure.Drivers
                         }
 
                         var buffer = await UdpClient.ReceiveAsync();
-                        _isConnected = true;
                         ReceivePacket(buffer.Buffer);
                     }
                     catch
@@ -179,9 +178,19 @@ namespace GameHook.Infrastructure.Drivers
             Logger.LogDebug($"[Incoming Packet] Set response {receiveKey}");
         }
 
-        public Task<bool> TestConnection()
+        public async Task<bool> TestConnection()
         {
-            return Task.FromResult(_isConnected);
+            try
+            {
+                MemoryAddressBlock block = new("test", 0, 1);
+                List<MemoryAddressBlock> blocks = [block];
+                var result = await ReadBytes(blocks);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
 
         public async Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)

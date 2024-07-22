@@ -95,9 +95,10 @@ public class MapperClient
                 .MapToDictionaryGlossaryItemModel()
         };
     }
-    public void UnloadMapper()
+    public async Task UnloadMapper()
     {
         _mapperModel = null;
+        await _instance.ResetState();
     }
 
     public MapperMetaModel? GetMetaData()

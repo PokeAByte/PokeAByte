@@ -52,11 +52,11 @@ public class DriverService
             _logger.LogError(e, "Failed to load settings data.");
         }            
         DriverModel = userSettings?.DefaultDriver ?? DriverModels.Bizhawk;
-        _driverConnectionTestTimer =
+        /*_driverConnectionTestTimer =
             new System.Timers.Timer(userSettings?.DriverTestTimeoutMs ?? 100);
         _driverConnectionTestTimer.Elapsed += OnTimerEvent;
         _driverConnectionTestTimer.AutoReset = true;
-        _driverConnectionTestTimer.Enabled = true;
+        _driverConnectionTestTimer.Enabled = false;*/
     }
     private async void OnTimerEvent(object? source, ElapsedEventArgs e)
     {
@@ -65,7 +65,7 @@ public class DriverService
         _logger.LogError($"Current Connected Driver: {result}");
         _driverConnectionTestTimer.Start();
     }
-    private async Task<string> TestDrivers()
+    public async Task<string> TestDrivers()
     {
         //set the list of drivers
         var driverList = DriverModels.DriverList;
@@ -74,7 +74,7 @@ public class DriverService
             DriverModels.Bizhawk : _driverModel;
         //Test the drivers
         var connects = false;
-        while (!connects || driverList.Count > 0)
+        while (!connects && driverList.Count > 0)
         {
             switch (currentDriver)
             {

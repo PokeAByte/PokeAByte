@@ -19,6 +19,11 @@ namespace GameHook.Utility.BuildMapperBindings
 
         public Dictionary<string, object?> Variables => throw new NotImplementedException();
 
+        public Task ResetState()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task Load(IGameHookDriver driver, string mapperId)
         {
             throw new NotImplementedException();

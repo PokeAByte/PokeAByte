@@ -85,8 +85,8 @@ public static class Startup
                 var logger = x.GetRequiredService<ILogger<MapperClientService>>();
                 var clientNotif = x.GetRequiredService<IClientNotifier>();
                 var propUpdate = x.GetRequiredService<PropertyUpdateService>();
-                
-                return new MapperClientService(mapperFs, logger, CreateClient(x), clientNotif, propUpdate);
+                var driverService = x.GetRequiredService<DriverService>();
+                return new MapperClientService(mapperFs, logger, CreateClient(x), clientNotif, propUpdate, driverService);
             });
             services.AddScoped<MapperManagerService>();
             services.AddScoped<NavigationService>();
