@@ -11,6 +11,9 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
     [Parameter] public MapperPropertyTreeModel Context { get; set; }
     private EditPropertyModel? _editContext;
     [Inject] public PropertyUpdateService PropertyUpdateService { get; set; }
+    [Parameter] public int TextWidth { get; set; }
+    private string Width => $"width:{TextWidth}px;";
+
     protected override void OnInitialized()
     {
         if (Context.Property is not null)

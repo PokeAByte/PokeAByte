@@ -14,6 +14,9 @@ public partial class LoadMapper : ComponentBase
     private IEnumerable<MapperFileModel>? _mapperFiles;
     private string _selectedMapperId = "";
     private bool _isMapperLoading = false;
+    private string? _errorMessage = "";
+    private string? _successMessage = "";
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -45,7 +48,7 @@ public partial class LoadMapper : ComponentBase
         else
         {
             _isMapperLoading = false;
-            //log
+            _errorMessage = result.ToString();
         }
     }
     private void OpenMapperFolder()

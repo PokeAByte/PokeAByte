@@ -48,4 +48,11 @@ public partial class NavigationMenu : ComponentBase, IDisposable
             Console.WriteLine(e);
         }
     }
+
+    private void OnClickHomeButton()
+    {
+        NavService?.Navigate(ConnectionService!.IsCurrentlyConnected()
+            ? NavigationService.Pages.DataProperties
+            : NavigationService.Pages.MapperManager);
+    }
 }

@@ -26,27 +26,28 @@
          Rounded="false" 
          ApplyEffectsToContainer="true"
          PanelClass="pa-6"
-         MinimumTabWidth="240px"
-         Color="Color.Dark">
+         MinimumTabWidth="128px"
+         Color="Color.Dark"
+         Class="d-flex justify-center align-content-center">
     <MudTabPanel Text="Load">
-        <MudText Style="@PanelStyle">
+        <MudContainer Fixed="true" Style="@PanelStyle">
             <LoadMapper />
-        </MudText>
+        </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Update">
-        <MudText Style="height: auto">
+        <MudContainer Style="height: auto">
             <UpdateMappers />
-        </MudText>
+        </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Backup">
-        <MudText Style="@PanelStyle">
+        <MudContainer Fixed="true" Style="@PanelStyle">
             <BackupArchive />
-        </MudText>
+        </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Restore">
-        <MudText Style="@PanelStyle">
+        <MudContainer Fixed="true" Style="@PanelStyle">
             <RestoreArchive />
-        </MudText>
+        </MudContainer>
     </MudTabPanel>
 </MudTabs>
 

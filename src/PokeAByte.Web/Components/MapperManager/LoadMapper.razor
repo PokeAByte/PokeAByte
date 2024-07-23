@@ -23,6 +23,24 @@
                 }
             </MudSelect>
         </MudItem>
+        <MudItem xs="12">
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error"
+                          ShowCloseIcon="true"
+                          CloseIconClicked="@(() => _errorMessage = "")">
+                    @_errorMessage
+                </MudAlert>
+            }
+            else if (!string.IsNullOrEmpty(_successMessage))
+            {
+                <MudAlert Severity="Severity.Success"
+                          ShowCloseIcon="true"
+                          CloseIconClicked="@(() => _successMessage = "")">
+                    @_successMessage
+                </MudAlert>
+            }
+        </MudItem>
         <MudItem xs="6">
             <MudButton Variant="Variant.Filled"
                        FullWidth="true"

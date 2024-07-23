@@ -41,4 +41,5 @@ public partial class DataProperties
             ? (model.IsExpanded ? Icons.Material.Filled.FolderOpen : Icons.Material.Filled.Folder)
             : "";
     }
+    private static int TextSize(int len) => len * 8;
 }

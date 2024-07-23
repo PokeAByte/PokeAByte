@@ -6,6 +6,7 @@ namespace PokeAByte.Web.Models;
 public class EditPropertyModel : PropertyModel
 {
     public bool IsValueEdited { get; set; } = false;
+    public Dictionary<ulong, string>? GlossaryReference { get; set; }
     private string _valueString = "";
     private bool _isInitValueSet = false;
     public string ValueString 
@@ -13,17 +14,18 @@ public class EditPropertyModel : PropertyModel
         get => _valueString;
         set
         {
+            _isInitValueSet = true;
             if (_valueString == value)
                 return;
             if (string.IsNullOrEmpty(_valueString))
                 _valueString = value;
+
             if (ValidateValueString(value))
             {
                 _valueString = value;
                 
                 if (_isInitValueSet) IsValueEdited = true;
             }                
-            _isInitValueSet = true;
         }
     }
 
@@ -33,10 +35,24 @@ public class EditPropertyModel : PropertyModel
         {
             "bool" or "bit" => bool.TryParse(value, out _),
             "string" => Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length),
-            "int" or "nibble" => int.TryParse(value, out _),
+            "int" or "nibble" => CanParseInt(value),
             "uint" => uint.TryParse(value, out _),
             _ => false
         };
+    }
+
+    private bool CanParseInt(string value)
+    {
+        //get the reference
+        if (!string.IsNullOrEmpty(Reference) && GlossaryReference is not null)
+        {
+            return GlossaryReference.Where(g =>
+                    g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Select(g => g.Key)
+                .ToList()
+                .Count != 0;
+        }
+        return int.TryParse(value, out _);
     }
     public ByteArrayProperty ByteArray { get; set; }
 

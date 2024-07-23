@@ -19,17 +19,48 @@ public class MapperPropertyTreeModel
             {
                 UpdateDisplayedChildren(this);
             }
+            else
+            {
+                MinimizeChildren();
+            }
+        }
+    }
+
+    private void MinimizeChildren()
+    {
+        foreach (var child in 
+                 Children.Where(child => child.IsExpanded))
+        {
+            child.IsExpanded = false;
         }
     }
     public bool IsPropertyExpanded { get; set; }
     public PropertyModel? Property { get; init; }
     public HashSet<MapperPropertyTreeModel> Children { get; set; } = [];
     public HashSet<MapperPropertyTreeModel> DisplayedChildren { get; set; } = [];
+    public int Width { get; set; } = 125;
     public bool HasChildren { get; set; }
 
+    private int GetMaxLength()
+    {
+        if (HasChildren)
+        {
+            return Children
+                .Aggregate(0, (max, current) =>
+                    Math.Max(max, current.Name.Length));
+        }
+        return Name.Length;
+    }
     public static void UpdateDisplayedChildren(MapperPropertyTreeModel model)
     {
         model.DisplayedChildren = model.Children;
+        if (model.HasChildren)
+        {
+            foreach (var dc in model.DisplayedChildren)
+            {
+                dc.Width = model.GetMaxLength();
+            }
+        }
         //Lie to the tree view and make it think we have a list of children, we will load them
         //in later when we need them
         foreach (var dc in model.DisplayedChildren.Where(x => x.HasChildren))
@@ -37,18 +68,6 @@ public class MapperPropertyTreeModel
             dc.DisplayedChildren = [new MapperPropertyTreeModel()];
         }
     }
-    public static MapperPropertyTreeModel CreateFrom(MapperPropertyTreeModel model)
-        => new()
-        {
-            Name = model.Name,
-            Depth = model.Depth,
-            IsExpanded = model.IsExpanded,
-            Property = model.Property,
-            HasChildren = model.Children.Count > 0,
-            DisplayedChildren = [],
-            Children = []
-        };
-
     public void UpdateProperty(IGameHookProperty prop)
     {
         Property?.UpdatePropertyModel(prop);

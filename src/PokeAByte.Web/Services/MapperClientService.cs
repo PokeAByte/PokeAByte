@@ -49,7 +49,8 @@ public class MapperClientService
     {
         var driverResult = await _driverService.TestDrivers();
         if (string.IsNullOrWhiteSpace(driverResult))
-            return Result.Failure(Error.FailedToLoadMapper);
+            return Result.Failure(Error.FailedToLoadMapper, 
+                "Driver was not found.");
         LoadedDriver = driverResult;
         var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
         try
@@ -59,7 +60,9 @@ public class MapperClientService
             {
                 Properties = _client.GetProperties()?.ToList() ?? [];
             }
-            return result ? Result.Success() : Result.Failure(Error.FailedToLoadMapper);
+            return result ? Result.Success() : 
+                Result.Failure(Error.FailedToLoadMapper,
+                    "Please see logs for more info.");
         }
         catch (Exception e)
         {

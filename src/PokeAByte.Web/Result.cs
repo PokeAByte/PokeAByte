@@ -39,7 +39,7 @@ public class Result
         if (IsException)
             errorMessage += $"Exception Found:\n{ExceptionValue}\n";
         if (!string.IsNullOrEmpty(AdditionalErrorMessage))
-            errorMessage += $"Additional Message: {AdditionalErrorMessage}";
+            errorMessage += $"Message: {AdditionalErrorMessage}";
         return errorMessage;
     }
 }

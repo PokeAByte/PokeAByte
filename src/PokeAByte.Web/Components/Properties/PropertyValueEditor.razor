@@ -11,7 +11,9 @@
                       OnBlur="InputFocusLostHandler"
                       ShrinkLabel="true"
                       ReadOnly="EditContext.IsReadOnly"
-                      Disabled="EditContext.IsReadOnly"/>
+                      Disabled="EditContext.IsReadOnly"
+                      Immediate="true" 
+                      OnKeyDown="OnKeyDownHandler"/>
     }
     else if (!string.IsNullOrEmpty(EditContext.Reference))
     {
@@ -24,7 +26,14 @@
                          Style="height: 25px;"
                          Adornment="Adornment.None"
                          OnBlur="InputFocusLostHandler"
-                         ShrinkLabel="true"/>
+                         ShrinkLabel="true"
+                         Immediate="true"
+                         MaxItems="50"
+                         OnKeyDown="OnKeyDownHandler">
+            <MoreItemsTemplate>
+                <MudText Typo="Typo.body1" Class="ml-2">Too many entries, type the name to search</MudText>
+            </MoreItemsTemplate>
+        </MudAutocomplete>
     }
     else if (EditContext.Type is "int" or "uint" or "nibble")
     {
@@ -35,7 +44,9 @@
                       Class="mt-n3"
                       Margin="Margin.Dense"
                       OnBlur="InputFocusLostHandler"
-                      ShrinkLabel="true"/>
+                      ShrinkLabel="true"
+                      Immediate="true"
+                      OnKeyDown="OnKeyDownHandler"/>
     }
     else if (EditContext.Type is "bit" or "bool")
     {

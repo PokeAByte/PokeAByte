@@ -25,6 +25,7 @@ public partial class PropertyValueEditor
         base.OnInitialized();
         if (string.IsNullOrEmpty(EditContext.Reference)) return;
         _cachedGlossary = GetGlossaryByReferenceKey(EditContext.Reference);
+        EditContext.GlossaryReference = _cachedGlossary;
     }
 
     private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
@@ -57,7 +58,8 @@ public partial class PropertyValueEditor
     private void InputFocusLostHandler(FocusEventArgs obj){}
     private string _errorMessage = "";
     private string _successMessage = "";
-    private async Task SaveBtnOnClickHandler(MouseEventArgs obj)
+
+    private async Task Save()
     {
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
             EditContext.ValueString,
@@ -70,11 +72,24 @@ public partial class PropertyValueEditor
         {
             _successMessage = "Saved successful!";
         }
+        StateHasChanged();
+    }
+    private async Task SaveBtnOnClickHandler(MouseEventArgs obj)
+    {
+        await Save();
     }
 
     private void ClearBtnOnClickHandler(MouseEventArgs obj)
     {
         EditContext.Reset();
         StateHasChanged();
+    }
+
+    private async Task OnKeyDownHandler(KeyboardEventArgs args)
+    {
+        if (args.Code is "Enter" or "NumpadEnter")
+        {
+            await Save();
+        }
     }
 }
