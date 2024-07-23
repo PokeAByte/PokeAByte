@@ -32,6 +32,8 @@ public sealed record Error(string Code, string? Description)
 
     public static readonly Error StringIsNullOrEmpty = new(nameof(StringIsNullOrEmpty),
         "The input string was null or empty.");
+    public static readonly Error ListIsEmpty = new(nameof(ListIsEmpty),
+        "The list that was being accessed is empty.");
 
     public static readonly Error FailedToParseValue = new(nameof(FailedToParseValue),
         "Failed to parse value.");
@@ -42,5 +44,12 @@ public sealed record Error(string Code, string? Description)
     public static readonly Error FailedToUpdateProperty = new(nameof(FailedToUpdateProperty),
         "Failed to update property.");
 
+    public static readonly Error FailedToLoadSavedMapperSettings = new(nameof(FailedToLoadSavedMapperSettings),
+        "Unable to load saved mapper settings.");
+    public static readonly Error FailedToFindMapper = new(nameof(FailedToFindMapper),
+        "Unable to find the requested mapper.");
+
+    public static readonly Error FailedToSaveData = new(nameof(FailedToSaveData),
+        "Failed to save data.");
     public static readonly Error GeneralError = new(nameof(GeneralError), "Error!");
 }

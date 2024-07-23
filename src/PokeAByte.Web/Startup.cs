@@ -78,6 +78,7 @@ public static class Startup
             services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
             
             services.AddSingleton<PropertyUpdateService>();
+            services.AddSingleton<MapperSettingsService>();
             //PokeAByte Services
             services.AddSingleton<MapperClientService>(x =>
             {
@@ -86,7 +87,13 @@ public static class Startup
                 var clientNotif = x.GetRequiredService<IClientNotifier>();
                 var propUpdate = x.GetRequiredService<PropertyUpdateService>();
                 var driverService = x.GetRequiredService<DriverService>();
-                return new MapperClientService(mapperFs, logger, CreateClient(x), clientNotif, propUpdate, driverService);
+                var mapperSettings = x.GetRequiredService<MapperSettingsService>();
+                return new MapperClientService(mapperFs, 
+                    logger, 
+                    CreateClient(x),
+                    clientNotif, 
+                    propUpdate, 
+                    driverService);
             });
             services.AddScoped<MapperManagerService>();
             services.AddScoped<NavigationService>();
@@ -110,7 +117,8 @@ public static class Startup
         var bizhawk = services.GetRequiredService<IBizhawkMemoryMapDriver>();
         var retro = services.GetRequiredService<IRetroArchUdpPollingDriver>();
         var staticMem = services.GetRequiredService<IStaticMemoryDriver>();
-        return new MapperClient(logger, instance, appSettings, bizhawk, retro, staticMem);
+        var mapperSettings = services.GetRequiredService<MapperSettingsService>();
+        return new MapperClient(logger, instance, appSettings, bizhawk, retro, staticMem, mapperSettings);
     }
 
     public static void ConfigureApp(this WebApplication app)

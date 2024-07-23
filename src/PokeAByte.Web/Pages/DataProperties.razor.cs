@@ -28,9 +28,9 @@ public partial class DataProperties
         var propsResult = ClientService.GetPropertiesHashSet();
         if (!propsResult.IsSuccess || propsResult.ResultValue is null) return;
         PropertyItems = propsResult.ResultValue;
-        foreach (var prop in PropertyItems)
+        foreach (var item in PropertyItems)
         {
-            MapperPropertyTreeModel.UpdateDisplayedChildren(prop);
+            MapperPropertyTreeModel.UpdateOpenedDisplayedChildren(item);
         }
         StateHasChanged();
     }

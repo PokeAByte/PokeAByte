@@ -149,10 +149,10 @@ public class MapperClientService
         model.UpdateFromPropertyModel(prop);
     }
 
-    public void UnloadMapper()
+    public async Task UnloadMapper()
     {
         if(!_client.IsMapperLoaded)
             return;
-        _client.UnloadMapper();
+        await _client.UnloadMapper();
     }
 }
