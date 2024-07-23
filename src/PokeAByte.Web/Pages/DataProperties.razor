@@ -2,7 +2,7 @@
 @using PokeAByte.Web.Components.Properties
 <PageTitle>@PageTitle - Properties</PageTitle>
 
-@if (!ClientService.IsCurrentlyConnected())
+@if (!ClientService.IsCurrentlyConnected)
 {
     <MudText Typo="Typo.h4" Color="Color.Error">No Mapper Loaded!</MudText>
 }
@@ -45,7 +45,7 @@ else
         </ItemTemplate>
     </MudTreeView>
 }
-else if (ClientService.IsCurrentlyConnected())
+else if (ClientService.IsCurrentlyConnected)
 {
     <MudText Typo="Typo.body1">Loading Properties: </MudText>
     <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />

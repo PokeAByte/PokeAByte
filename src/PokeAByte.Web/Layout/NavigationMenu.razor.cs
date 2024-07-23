@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web.Layout;
@@ -7,7 +8,7 @@ public partial class NavigationMenu : ComponentBase, IDisposable
 {
     [Inject] public NavigationService? NavService { get; set; }
     [Inject] public MapperClientService? ConnectionService { get; set; }
-    
+
     private string _borderUnderlineClass = " border-b-4 border-solid mud-border-primary";
     private string _buttonBorder = "py-4 px-8 rounded-0";
 
@@ -51,8 +52,7 @@ public partial class NavigationMenu : ComponentBase, IDisposable
 
     private void OnClickHomeButton()
     {
-        NavService?.Navigate(ConnectionService!.IsCurrentlyConnected()
-            ? NavigationService.Pages.DataProperties
-            : NavigationService.Pages.MapperManager);
+        NavService?.Navigate(ConnectionService.IsCurrentlyConnected ?
+            NavigationService.Pages.DataProperties : NavigationService.Pages.MapperManager);
     }
 }

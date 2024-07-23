@@ -8,7 +8,7 @@
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
     <MudText Typo="Typo.body1">Mapper Status:</MudText>
 
-    @if (MapperConnectionService!.IsCurrentlyConnected())
+    @if (MapperConnectionService!.IsCurrentlyConnected)
     {
         <MudText Typo="Typo.body1">
             @_mapperName

@@ -37,7 +37,7 @@ public class MapperClientService
 
     //Todo: change this in settings
     public string LoadedDriver { get; set; } = DriverModels.Bizhawk;
-    public bool IsCurrentlyConnected() => _client.IsMapperLoaded;
+    public bool IsCurrentlyConnected => _client.IsMapperLoaded;
     public Color GetCurrentConnectionColor() => _client.IsMapperLoaded ? 
         ConnectedColor : DisconnectedColor;
     public string GetCurrentConnectionName() => _client.IsMapperLoaded ?
