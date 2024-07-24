@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web.Layout;
@@ -7,10 +8,10 @@ public partial class NavigationMenu : ComponentBase, IDisposable
 {
     [Inject] public NavigationService? NavService { get; set; }
     [Inject] public MapperClientService? ConnectionService { get; set; }
+    [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
 
     private string _borderUnderlineClass = " border-b-4 border-solid mud-border-primary";
     private string _buttonBorder = "py-4 px-8 rounded-0";
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -19,12 +20,14 @@ public partial class NavigationMenu : ComponentBase, IDisposable
         if (ConnectionService is null)
             throw new InvalidOperationException("Connection Service is null.");
         NavService.OnNavigation += StateHasChanged;
+        ChangeNotificationService.OnChange += StateHasChanged;
     }
 
     public void Dispose()
     {
         if(NavService is not null)
             NavService.OnNavigation -= StateHasChanged;
+        ChangeNotificationService.OnChange -= StateHasChanged;
     }
 
     protected override void OnAfterRender(bool firstRender)

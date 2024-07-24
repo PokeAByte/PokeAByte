@@ -9,6 +9,8 @@ public partial class DataProperties
 {
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] public MapperClientService ClientService { get; set; }
+    [Inject] public NavigationService? NavService { get; set; }
+    [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
     private string MapperName { get; set; } = "";
 
@@ -48,6 +50,7 @@ public partial class DataProperties
     {
         MapperName = "";
         PropertyItems = [];
+        ChangeNotificationService.NotifyDataChanged();
     }
 
     private async void OnMapperUnloadedHandler()
@@ -60,6 +63,7 @@ public partial class DataProperties
         {
             Clear();
             StateHasChanged();
+            NavService?.Navigate(NavigationService.Pages.MapperManager);
         });
     }
 }

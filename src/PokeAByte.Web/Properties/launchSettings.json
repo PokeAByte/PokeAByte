@@ -24,6 +24,12 @@
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
+      },
+      "Blazor": {
+        "commandName": "Executable",
+        "workingDirectory": "$(ProjectDir)",
+        "executablePath": "dotnet",
+        "commandLineArgs": "watch run debug --launch-profile http"
       }
     }
   }

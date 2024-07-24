@@ -1,11 +1,15 @@
-﻿<MudPaper Width="100%" Class="px-4 ml-n8 py-2">
+﻿<MudPaper Width="100%" 
+          Height="@PropertyHeight"
+          Class="px-4 ml-n8 py-2 d-flex align-center cursor-pointer">
     <MudStack>
-        <MudGrid Spacing="3" Justify="Justify.FlexStart">
-            <MudItem Class="align-center">
+        <MudGrid Spacing="3"
+                 Justify="Justify.FlexStart"
+                 @onclick="() => Context.IsPropertyExpanded = !Context.IsPropertyExpanded">
+            <MudItem>
                 <MudIconButton Icon="@Icons.Material.Filled.CatchingPokemon"
                                Color="@SetIconColor"
                                aria-label="expand-panel"
-                               Class="ml-auto mud-width-full d-flex"
+                               Class="ml-auto mud-width-full d-flex pt-1"
                                OnClick="() => Context.IsPropertyExpanded = !Context.IsPropertyExpanded"/>
             </MudItem>
             <MudItem Class="align-content-center">

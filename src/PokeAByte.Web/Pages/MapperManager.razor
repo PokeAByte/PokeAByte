@@ -62,6 +62,7 @@
     private const string PanelStyle = "height:55vh;";
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] private MapperClientService? MapperConnectionService { get; set; }
+    [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     private Color _currentStatusColor = Color.Info;
     private string _currentStatusName = "Not Found";
     private string _mapperName = "";
@@ -81,6 +82,7 @@
         _mapperName = "";
         await MapperConnectionService!.UnloadMapper();
         StateHasChanged();
+        ChangeNotificationService.NotifyDataChanged();
     }
     private async Task OnClickUnloadMapper()
     {

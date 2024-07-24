@@ -30,8 +30,11 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
         await InvokeAsync(StateHasChanged);
     }
     private Color SetIconColor =>
-        Context.IsPropertyExpanded ? Color.Secondary : Color.Info;
+        Context.IsPropertyExpanded ? Color.Info : Color.Secondary;
     private string DisplayContent => Context.IsPropertyExpanded ? "display:block;" : "display:none;";
+
+    private string PropertyHeight =>
+        Context.IsPropertyExpanded ? "100%" : "35px";
 
     public void Dispose()
     {

@@ -30,7 +30,7 @@ public class MapperClientService
         clientNotifier.PropertyChangedEvent += HandlePropertyChangedEvent;
     }
 
-    private const Color DisconnectedColor = Color.Error;
+    private const Color DisconnectedColor = Color.Secondary;
     private const Color ConnectedColor = Color.Success;
 
     //Todo: change this in settings

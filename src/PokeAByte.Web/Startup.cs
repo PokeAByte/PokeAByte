@@ -97,6 +97,7 @@ public static class Startup
             });
             services.AddScoped<MapperManagerService>();
             services.AddScoped<NavigationService>();
+            services.AddScoped<ChangeNotificationService>();
             
             //For some reason, the Driver controller requires special DI despite not needing it 
             //in the original implementation? Just add them to the DI
