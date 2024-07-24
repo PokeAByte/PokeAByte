@@ -3,7 +3,7 @@ using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Application
 {
-    public class PokeAByteMapper : IPokeAByteMapper
+    public class PokeAByteMapper : IPokeAByteMapper, IDisposable
     {
         public PokeAByteMapper(
             MetadataSection metadata,
@@ -19,9 +19,15 @@ namespace PokeAByte.Application
 
         public MetadataSection Metadata { get; }
         public MemorySection Memory { get; }
-        public Dictionary<string, IPokeAByteProperty> Properties { get; }
-        public Dictionary<string, ReferenceItems> References { get; }
+        public Dictionary<string, IPokeAByteProperty> Properties { get; private set; }
+        public Dictionary<string, ReferenceItems> References { get; private set;}
 
         public IPokeAByteProperty[] GetAllProperties() => Properties.Values.ToArray();
+
+        public void Dispose()
+        {
+            Properties = [];
+            References = [];
+        }
     }
 }

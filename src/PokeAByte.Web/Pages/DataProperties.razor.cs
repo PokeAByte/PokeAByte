@@ -15,6 +15,8 @@ public partial class DataProperties
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        ClientService.OnReadExceptionHandler(OnReadExceptionOccurredHandler);
+        ClientService.OnMapperIsUnloaded += OnMapperUnloadedHandler;
         var metaResult = ClientService.GetMetaData();
         if (metaResult.IsSuccess)
             MapperName = $"{metaResult.ResultValue?.GameName}";
@@ -41,4 +43,23 @@ public partial class DataProperties
             : "";
     }
     private static int TextSize(int len) => len * 8;
+
+    private void Clear()
+    {
+        MapperName = "";
+        PropertyItems = [];
+    }
+
+    private async void OnMapperUnloadedHandler()
+    {
+        await InvokeAsync(Clear);
+    }
+    private async void OnReadExceptionOccurredHandler()
+    {
+        await InvokeAsync(() =>
+        {
+            Clear();
+            StateHasChanged();
+        });
+    }
 }

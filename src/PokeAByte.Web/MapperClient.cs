@@ -20,7 +20,6 @@ public class MapperClient(
 {    
     //Property Tree 
     private MapperPropertyTree _cachedMapperPropertyTree = new();
-    private readonly MapperSettingsService _mapperSettings = mapperSettings;
 
     public string ConnectionString { get; set; } = "";
     public bool IsMapperLoaded => _mapperModel is not null;
@@ -51,10 +50,9 @@ public class MapperClient(
                 break;
         }
         _mapperModel = GetMapper();
-        if (instance.Mapper != null) _mapperSettings.SetCurrentMapper(instance.Mapper);
+        if (instance.Mapper != null) mapperSettings.SetCurrentMapper(instance.Mapper);
         return _mapperModel is not null;
     }
-
     private MapperModel? GetMapper()
     {
         if (instance.Initalized == false || instance.Mapper == null)
@@ -88,14 +86,12 @@ public class MapperClient(
         _mapperModel = null;
         await instance.ResetState();
     }
-
     public MapperMetaModel? GetMetaData()
     {
         if (!IsMapperLoaded || !instance.Initalized)
             return null;
         return _mapperModel!.Meta;
     }
-
     public Dictionary<string, IEnumerable<GlossaryItemModel>>? GetAllGlossaryItems()
     {
         if (!IsMapperLoaded || !instance.Initalized)
@@ -143,13 +139,13 @@ public class MapperClient(
         var propList = props.ToList();
         foreach (var prop in propList)
         {
-            _cachedMapperPropertyTree.AddProperty(prop, meta, _mapperSettings.OnPropertyExpandedHandler);
+            _cachedMapperPropertyTree.AddProperty(prop, meta, mapperSettings.OnPropertyExpandedHandler);
         }
         foreach (var prop in _cachedMapperPropertyTree.Tree)
         {
             MapperPropertyTreeModel.UpdateDisplayedChildren(prop);
         }
-        _mapperSettings.InitializePropertyExpansions(_cachedMapperPropertyTree.Tree);
+        mapperSettings.InitializePropertyExpansions(_cachedMapperPropertyTree.Tree);
         return _cachedMapperPropertyTree.Tree;
     }
 
@@ -183,5 +179,10 @@ public class MapperClient(
             logger.LogError(e, "Failed to update property.");
             return false;
         }
+    }
+
+    public void AttachOnReadExceptionOccuredHandler(Action onReadExceptionOccuredHandler)
+    {
+        instance.OnReadExceptionOccured += onReadExceptionOccuredHandler;
     }
 }

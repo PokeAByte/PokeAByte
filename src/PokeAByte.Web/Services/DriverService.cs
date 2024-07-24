@@ -67,7 +67,7 @@ public class DriverService
     public async Task<string> TestDrivers()
     {
         //set the list of drivers
-        var driverList = DriverModels.DriverList;
+        var driverList = DriverModels.DriverList.Select(x => x).ToList();
         //get current driver if there is one, otherwise default to bizhawk
         var currentDriver = string.IsNullOrWhiteSpace(_driverModel) ?
             DriverModels.Bizhawk : _driverModel;

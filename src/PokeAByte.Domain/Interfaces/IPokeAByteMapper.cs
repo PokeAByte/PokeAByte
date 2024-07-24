@@ -18,7 +18,7 @@
         public uint End { get; init; }
     }
 
-    public interface IPokeAByteMapper
+    public interface IPokeAByteMapper : IDisposable
     {
         MetadataSection Metadata { get; }
         MemorySection Memory { get; }

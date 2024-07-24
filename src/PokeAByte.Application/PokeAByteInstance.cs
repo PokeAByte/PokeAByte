@@ -26,7 +26,7 @@ namespace PokeAByte.Application
         public IMemoryManager MemoryContainerManager { get; private set; }
         public Dictionary<string, object?> State { get; private set; }
         public Dictionary<string, object?> Variables { get; private set; }
-
+        public event Action? OnReadExceptionOccured;
         private Engine? JavascriptEngine { get; set; }
         private ObjectInstance? JavascriptModuleInstance { get; set; }
 
@@ -67,6 +67,8 @@ namespace PokeAByte.Application
             Initalized = false;
             ReadLoopToken = null;
 
+            Mapper?.Dispose();
+            
             Driver = null;
             Mapper = null;
             PlatformOptions = null;
@@ -220,6 +222,7 @@ namespace PokeAByte.Application
                     _logger.LogError(ex, "An error occured when read looping the mapper.");
 
                     await ResetState();
+                    OnReadExceptionOccured?.Invoke();
                 }
             }
         }

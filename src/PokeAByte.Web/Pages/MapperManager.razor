@@ -68,6 +68,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        MapperConnectionService!.OnReadExceptionHandler(OnReadExceptionOccuredHandler);
         var metaResult = MapperConnectionService!.GetMetaData();
         if (metaResult.IsSuccess)
             _mapperName = $"{metaResult.ResultValue?.GameName}";
@@ -75,10 +76,21 @@
         _currentStatusName = MapperConnectionService?.GetCurrentConnectionName() ?? "Not Found";
     }
 
-    private void OnClickUnloadMapper()
+    private async Task Clear()
     {
-        MapperConnectionService!.UnloadMapper();
+        _mapperName = "";
+        await MapperConnectionService!.UnloadMapper();
         StateHasChanged();
     }
-
+    private async Task OnClickUnloadMapper()
+    {
+        await Clear();
+    }
+    private async void OnReadExceptionOccuredHandler()
+    {
+        await InvokeAsync(async() =>
+        {
+            await Clear();
+        });
+    }
 }
