@@ -8,11 +8,11 @@ public static class ApiHelper
 {    
     public static class EmbededResources
     {
-        public static Stream appsettings_json => ApiHelper.GetEmbeddedResourceStream("GameHook.WebAPI.appsettings.json");
-        public static Stream index_html => ApiHelper.GetEmbeddedResourceStream("GameHook.WebAPI.wwwroot.index.html");
-        public static Stream favicon_ico => ApiHelper.GetEmbeddedResourceStream("GameHook.WebAPI.wwwroot.favicon.ico");
-        public static Stream site_css => ApiHelper.GetEmbeddedResourceStream("GameHook.WebAPI.wwwroot.site.css");
-        public static Stream dist_gameHookMapperClient_js => ApiHelper.GetEmbeddedResourceStream("GameHook.WebAPI.wwwroot.dist.gameHookMapperClient.js");
+        public static Stream appsettings_json => GetEmbeddedResourceStream("PokeAByte.Web.appsettings.json");
+        public static Stream index_html => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.index.html");
+        public static Stream favicon_ico => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.favicon.ico");
+        public static Stream site_css => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.site.css");
+        public static Stream dist_gameHookMapperClient_js => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");
     }
     /// <summary>
     /// Takes the full name of a resource and loads it in to a stream.

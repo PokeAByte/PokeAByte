@@ -1,8 +1,8 @@
-﻿using GameHook.Domain.Interfaces;
-using GameHook.Infrastructure.Github;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Infrastructure.Github;
 
 namespace PokeAByte.Web.Components.Settings;
 

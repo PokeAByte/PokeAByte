@@ -1,6 +1,6 @@
-﻿using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models.Mappers;
-using GameHook.Domain.Models.Properties;
+﻿using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
 
@@ -99,7 +99,7 @@ public class MapperPropertyTreeModel
             ];
         }
     }
-    public void UpdateProperty(IGameHookProperty prop)
+    public void UpdateProperty(IPokeAByteProperty prop)
     {
         Property?.UpdatePropertyModel(prop);
         PropertyChangedEvent?.Invoke(this, EventArgs.Empty);
@@ -198,7 +198,7 @@ public class MapperPropertyTree : IDisposable
         Tree.Clear();
     }
 
-    public void UpdateProperty(IGameHookProperty prop, EventHandler? propertyUpdatedEvent)
+    public void UpdateProperty(IPokeAByteProperty prop, EventHandler? propertyUpdatedEvent)
     {
         var paths = prop.Path.Split('.');
         if (paths.Length == 0) return;

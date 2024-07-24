@@ -116,7 +116,7 @@ class GameHookMapperClient {
     }
 
     async loadMapper() {
-        console.debug('[GameHook Client] Loading mapper.')
+        console.debug('[PokeAByte Client] Loading mapper.')
 
         function assign(final, path, value) {
             let lastKeyIndex = path.length - 1

@@ -1,5 +1,5 @@
-using GameHook.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Web.Controllers
 {
@@ -9,10 +9,10 @@ namespace PokeAByte.Web.Controllers
     [Produces("application/json")]
     [Consumes("application/json")]
     [Route("driver")]
-    public class DriverController(IGameHookDriver gameHookDriver, IGameHookInstance instance) : Controller
+    public class DriverController(IPokeAByteDriver pokeAByteDriver, IPokeAByteInstance instance) : Controller
     {
-        private readonly IGameHookDriver _driver = gameHookDriver;
-        private readonly IGameHookInstance _instance = instance;
+        private readonly IPokeAByteDriver _driver = pokeAByteDriver;
+        private readonly IPokeAByteInstance _instance = instance;
 
         [HttpPut("memory")]
         public async Task<IActionResult> WriteMemory(UpdateMemoryModel model)

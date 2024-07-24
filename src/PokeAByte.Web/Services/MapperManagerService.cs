@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using GameHook.Domain;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
-using GameHook.Domain.Models.Mappers;
-using GameHook.Mappers;
+using PokeAByte.Application.Mappers;
+using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web.Services;

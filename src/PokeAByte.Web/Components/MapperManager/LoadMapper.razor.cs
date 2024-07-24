@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using GameHook.Domain.Models.Mappers;
-using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using PokeAByte.Application.Mappers;
+using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web.Components.MapperManager;

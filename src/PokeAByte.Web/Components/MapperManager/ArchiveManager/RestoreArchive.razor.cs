@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
-using GameHook.Domain;
-using GameHook.Mappers;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using PokeAByte.Application.Mappers;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 

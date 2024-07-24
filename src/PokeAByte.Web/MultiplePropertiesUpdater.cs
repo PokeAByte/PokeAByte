@@ -1,11 +1,11 @@
 ﻿using System.Collections;
-using GameHook.Domain.Interfaces;
+using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Web;
 
 public static class MultiplePropertiesUpdater
 {
-    public static byte[] ConstructUpdatedBytes(Dictionary<IGameHookProperty, string> properties)
+    public static byte[] ConstructUpdatedBytes(Dictionary<IPokeAByteProperty, string> properties)
     {
         if (properties.First().Key.Length is null || properties.First().Key.Length < 0)
             throw new ArgumentException("Property length cannot be null or zero.");

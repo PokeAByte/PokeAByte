@@ -1,5 +1,5 @@
-﻿using GameHook.Domain.Models;
-using GameHook.Domain.Models.Properties;
+﻿using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
 

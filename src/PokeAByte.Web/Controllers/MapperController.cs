@@ -1,15 +1,15 @@
 using System.Text.Json.Serialization;
-using GameHook.Application;
-using GameHook.Domain;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using PokeAByte.Application;
+using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Web.Controllers
 {
     static class MapperHelper
     {
-        public static PropertyModel MapToPropertyModel(this IGameHookProperty x) =>
+        public static PropertyModel MapToPropertyModel(this IPokeAByteProperty x) =>
             new()
             {
                 Path = x.Path,
@@ -129,7 +129,7 @@ namespace PokeAByte.Web.Controllers
     public class MapperController : ControllerBase
     {
         private readonly ILogger<MapperController> _logger;
-        public GameHookInstance Instance { get; }
+        public PokeAByteInstance Instance { get; }
         private readonly AppSettings _appSettings;
         public readonly IBizhawkMemoryMapDriver _bizhawkMemoryMapDriver;
         public readonly IRetroArchUdpPollingDriver _retroArchUdpPollingDriver;
@@ -137,7 +137,7 @@ namespace PokeAByte.Web.Controllers
 
         public MapperController(
             ILogger<MapperController> logger,
-            GameHookInstance gameHookInstance,
+            PokeAByteInstance pokeAByteInstance,
             AppSettings appSettings,
             IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
             IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
@@ -145,7 +145,7 @@ namespace PokeAByte.Web.Controllers
         {
             _logger = logger;
 
-            Instance = gameHookInstance;
+            Instance = pokeAByteInstance;
 
             _appSettings = appSettings;
             _bizhawkMemoryMapDriver = bizhawkMemoryMapDriver;
@@ -310,7 +310,7 @@ namespace PokeAByte.Web.Controllers
                     var path = x.Path.StripEndingRoute().FromRouteToPath();
                     //Since we are already checking if the value is null, we shouldn't need to worry
                     //about it being string.Empty. I just want to stop the compiler from complaining 
-                    return new KeyValuePair<IGameHookProperty, string>
+                    return new KeyValuePair<IPokeAByteProperty, string>
                         (Instance.Mapper.Properties[path], x.Value?.ToString() ?? string.Empty);
                 })
                 .ToDictionary();

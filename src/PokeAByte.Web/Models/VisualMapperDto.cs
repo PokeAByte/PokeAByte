@@ -1,4 +1,4 @@
-﻿using GameHook.Domain.Models.Mappers;
+﻿using PokeAByte.Domain.Models.Mappers;
 
 namespace PokeAByte.Web.Models;
 

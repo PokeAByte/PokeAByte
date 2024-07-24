@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using MudBlazor;
 using PokeAByte.Web.Services;
 
 namespace PokeAByte.Web.Layout;

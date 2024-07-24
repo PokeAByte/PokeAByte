@@ -43,10 +43,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GameHook.Application.Mappers\GameHook.Application.Mappers.csproj" />
-      <ProjectReference Include="..\GameHook.Application\GameHook.Application.csproj" />
-      <ProjectReference Include="..\GameHook.Domain\GameHook.Domain.csproj" />
-      <ProjectReference Include="..\GameHook.Infrastructure\GameHook.Infrastructure.csproj" />
+      <ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
+      <ProjectReference Include="..\PokeAByte.Application\PokeAByte.Application.csproj" />
+      <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
+      <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

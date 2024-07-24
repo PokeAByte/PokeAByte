@@ -1,11 +1,9 @@
-﻿using Antlr4.Runtime.Misc;
-using GameHook.Application;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
-using GameHook.Domain.Models.Mappers;
-using GameHook.Domain.Models.Properties;
-using GameHook.Mappers;
-using PokeAByte.Web.ClientNotifiers;
+﻿using PokeAByte.Application;
+using PokeAByte.Application.Mappers;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
@@ -13,7 +11,7 @@ namespace PokeAByte.Web;
 
 public class MapperClient(
     ILogger<MapperClient> logger,
-    GameHookInstance instance,
+    PokeAByteInstance instance,
     AppSettings appSettings,
     IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
     IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
@@ -161,7 +159,7 @@ public class MapperClient(
         _cachedMapperPropertyTree = new MapperPropertyTree();
     }
 
-    public void UpdateProperty(IGameHookProperty property)
+    public void UpdateProperty(IPokeAByteProperty property)
     {
         if (!IsMapperLoaded || !instance.Initalized) return;
         _mapperModel!.Properties

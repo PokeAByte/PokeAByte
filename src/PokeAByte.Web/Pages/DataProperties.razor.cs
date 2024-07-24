@@ -1,5 +1,4 @@
-﻿using GameHook.Domain.Models.Properties;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;

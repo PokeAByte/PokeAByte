@@ -1,14 +1,14 @@
 ﻿using System.Text.Json.Serialization;
-using GameHook.Application;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
-using GameHook.Infrastructure.Drivers;
-using GameHook.Infrastructure.Drivers.Bizhawk;
-using GameHook.Infrastructure.Github;
-using GameHook.Mappers;
 using Hellang.Middleware.ProblemDetails;
 using Hellang.Middleware.ProblemDetails.Mvc;
 using MudBlazor.Services;
+using PokeAByte.Application;
+using PokeAByte.Application.Mappers;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Infrastructure.Drivers;
+using PokeAByte.Infrastructure.Drivers.Bizhawk;
+using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Hubs;
 using PokeAByte.Web.Services;
@@ -69,7 +69,7 @@ public static class Startup
                 return mapperArchiveManager;
             });
             services.AddSingleton<IGithubRestApi, GithubRestApi>();
-            services.AddSingleton<GameHookInstance>();
+            services.AddSingleton<PokeAByteInstance>();
             services.AddSingleton<ScriptConsole>();
             services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
             services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
@@ -100,19 +100,19 @@ public static class Startup
             
             //For some reason, the Driver controller requires special DI despite not needing it 
             //in the original implementation? Just add them to the DI
-            services.AddSingleton<IGameHookInstance, GameHookInstance>();
-            services.AddSingleton<IGameHookDriver, StaticMemoryDriver>();
+            services.AddSingleton<IPokeAByteInstance, PokeAByteInstance>();
+            services.AddSingleton<IPokeAByteDriver, StaticMemoryDriver>();
     }
     private static MapperClient CreateClient(IServiceProvider services)
     {
         /*    ILogger<MapperClient> logger,
-                IGameHookInstance instance,
+                IPokeAByteInstance instance,
                 AppSettings appSettings,
                 IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
                 IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
                 IStaticMemoryDriver staticMemoryDriver*/
         var logger = services.GetRequiredService<ILogger<MapperClient>>();
-        var instance = services.GetRequiredService<GameHookInstance>();
+        var instance = services.GetRequiredService<PokeAByteInstance>();
         var appSettings = services.GetRequiredService<AppSettings>();
         var bizhawk = services.GetRequiredService<IBizhawkMemoryMapDriver>();
         var retro = services.GetRequiredService<IRetroArchUdpPollingDriver>();

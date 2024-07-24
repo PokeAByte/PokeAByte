@@ -1,4 +1,4 @@
-﻿using GameHook.Domain;
+﻿using PokeAByte.Domain;
 
 namespace PokeAByte.Web.Models;
 

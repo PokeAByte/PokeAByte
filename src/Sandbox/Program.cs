@@ -1,4 +1,4 @@
-﻿using GameHook.Domain.Models.Properties;
+﻿using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 
 namespace Sandbox;
@@ -19,7 +19,7 @@ class Program
         MapperPropertyTree tree = new();
         foreach (var prop in props)
         {
-            tree.AddProperty(prop);
+            //tree.AddProperty(prop);
         }
         
     }

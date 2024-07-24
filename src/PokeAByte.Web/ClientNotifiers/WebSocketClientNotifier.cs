@@ -1,6 +1,6 @@
-using GameHook.Domain;
-using GameHook.Domain.Interfaces;
 using Microsoft.AspNetCore.SignalR;
+using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Web.Hubs;
 
 namespace PokeAByte.Web.ClientNotifiers
@@ -13,14 +13,14 @@ namespace PokeAByte.Web.ClientNotifiers
         public Task SendInstanceReset() =>
             _hubContext.Clients.All.SendAsync("InstanceReset");
 
-        public Task SendMapperLoaded(IGameHookMapper mapper) =>
+        public Task SendMapperLoaded(IPokeAByteMapper mapper) =>
             _hubContext.Clients.All.SendAsync("MapperLoaded");
 
         public Task SendError(IProblemDetails problemDetails) =>
             _hubContext.Clients.All.SendAsync("Error", problemDetails);
 
         public event PropertyChangedEventHandler? PropertyChangedEvent;
-        public async Task SendPropertiesChanged(IEnumerable<IGameHookProperty> properties)
+        public async Task SendPropertiesChanged(IEnumerable<IPokeAByteProperty> properties)
         {
             var props = properties.ToList();
             await _hubContext.Clients.All.SendAsync("PropertiesChanged", props.Select(x => new

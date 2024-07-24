@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web.Services;
@@ -25,7 +25,7 @@ public class MapperSettingsService
         _savedMappers = JsonSerializer.Deserialize<List<MapperSettingsModel>>(jsonStr) ?? [];
     }
     
-    public void SetCurrentMapper(IGameHookMapper mapper)
+    public void SetCurrentMapper(IPokeAByteMapper mapper)
     {
         //Check to see if the mapper exists
         var result = TryLoadMapper(mapper.Metadata.Id, mapper.Metadata.GameName);

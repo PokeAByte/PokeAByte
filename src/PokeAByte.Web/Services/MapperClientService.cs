@@ -1,11 +1,9 @@
-﻿using GameHook.Domain;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
-using GameHook.Domain.Models.Mappers;
-using GameHook.Domain.Models.Properties;
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
-using PokeAByte.Web.ClientNotifiers;
+﻿using MudBlazor;
+using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web.Services;

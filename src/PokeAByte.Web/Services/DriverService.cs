@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
-using GameHook.Domain.Interfaces;
-using GameHook.Domain.Models;
-using GameHook.Infrastructure.Drivers;
-using GameHook.Infrastructure.Drivers.Bizhawk;
 using System.Timers;
+using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using Timer = System.Timers.Timer;
 
 namespace PokeAByte.Web.Services;
 
@@ -20,7 +19,7 @@ public class DriverService
             OnDriverModelChange?.Invoke();
         }
     }
-    private System.Timers.Timer _driverConnectionTestTimer;
+    private Timer _driverConnectionTestTimer;
     private readonly ILogger<DriverService> _logger;
     private readonly IBizhawkMemoryMapDriver _bizhawk;
     private readonly IRetroArchUdpPollingDriver _retroArch;
@@ -107,7 +106,7 @@ public class DriverService
         return string.Empty;
     }
 
-    private async Task<bool> ReadDriver(IGameHookDriver driver)
+    private async Task<bool> ReadDriver(IPokeAByteDriver driver)
     {
         return await driver.TestConnection();
     }
