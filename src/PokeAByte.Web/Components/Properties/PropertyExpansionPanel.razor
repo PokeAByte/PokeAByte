@@ -1,28 +1,43 @@
 ﻿<MudPaper Width="100%" 
           Height="@PropertyHeight"
-          Class="px-4 ml-n8 py-2 d-flex align-center cursor-pointer">
-    <MudStack>
+          Class="px-4 ml-n8 py-2 d-flex align-center"
+          Style="cursor: pointer;"
+          id="expansionPanel">
+    <MudStack id="mudStack"
+              Class="flex-grow-1">
         <MudGrid Spacing="3"
                  Justify="Justify.FlexStart"
-                 @onclick="() => Context.IsPropertyExpanded = !Context.IsPropertyExpanded">
-            <MudItem>
-                <MudIconButton Icon="@Icons.Material.Filled.CatchingPokemon"
-                               Color="@SetIconColor"
+                 id="mudGrid">
+            <MudItem @onclick="OnClickExpand"
+                id="mudItemIcon">
+                <MudIcon Icon="@Icons.Material.Filled.CatchingPokemon"
+                               Color="SetIconColor"
                                aria-label="expand-panel"
-                               Class="ml-auto mud-width-full d-flex pt-1"
-                               OnClick="() => Context.IsPropertyExpanded = !Context.IsPropertyExpanded"/>
+                               id="expansionBall"
+                               Class="ml-auto mud-width-full d-flex pt-1"/>
             </MudItem>
-            <MudItem Class="align-content-center">
-                <MudText Typo="Typo.body2" Style="@Width" Class="d-flex justify-start">
+            <MudItem @onclick="OnClickExpand"
+                     Class="align-content-center" id="mudItem2">
+                <MudText Typo="Typo.body2" Style="@Width" Class="d-flex justify-start" id="mudText">
                     @Context.Name:
                 </MudText>
             </MudItem>
-            <MudItem Class="align-center">
+            <MudItem Class="align-center cursor-default" id="mudItem3">
                 <PropertyValueEditor EditContext="_editContext"/>
             </MudItem>
+            <MudItem @onclick="OnClickExpand"
+                     Class="align-content-center flex-grow-1" Style="width: auto;"></MudItem>
         </MudGrid>
-        <MudContainer Fixed="true" Style="@DisplayContent">
+        <MudContainer Fixed="true" Style="@DisplayContent" Class="cursor-default">
             <PropertyTableView Context="_editContext"/>
         </MudContainer>
     </MudStack>
 </MudPaper>
+<script>
+/*    window.propertyExpansionClickHandler = function (helper) {
+        document.getElementById("expansionPanel").addEventListener
+        ('click', function (event) {
+            helper.invokeMethodAsync('OnClickHandler', event.target.id, event.target.tagName);
+        });
+    };*/
+</script>

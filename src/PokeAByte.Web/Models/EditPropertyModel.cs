@@ -28,7 +28,7 @@ public class EditPropertyModel : PropertyModel
             }                
         }
     }
-
+    public string GetReference => Reference ?? "";
     private bool ValidateValueString(string value)
     {
         return Type switch
@@ -55,7 +55,8 @@ public class EditPropertyModel : PropertyModel
         return int.TryParse(value, out _);
     }
     public ByteArrayProperty ByteArray { get; set; }
-
+    public string AddressString =>
+        Address?.ToString("X") ?? "";
     public static EditPropertyModel FromPropertyModel(PropertyModel model)
     {            
         return new EditPropertyModel

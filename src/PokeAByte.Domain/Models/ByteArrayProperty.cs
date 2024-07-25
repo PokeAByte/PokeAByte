@@ -59,8 +59,8 @@ public class ByteArrayProperty
     }
     public override string ToString()
     {
-        return _byteArray?
-            .Select(b => b.ToString("X2"))
-            .ToString() ?? "";
+        var ba = _byteArray?
+            .Select(b => b.ToString("X2")).ToList() ?? [];
+        return string.Join(' ', ba);
     }
 }

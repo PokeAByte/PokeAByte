@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Hellang.Middleware.ProblemDetails;
 using Hellang.Middleware.ProblemDetails.Mvc;
+using MudBlazor;
 using MudBlazor.Services;
 using PokeAByte.Application;
 using PokeAByte.Application.Mappers;
@@ -22,7 +23,18 @@ public static class Startup
             // Add services to the container.
             services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-            services.AddMudServices();
+            services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+
+                config.SnackbarConfiguration.PreventDuplicates = false;
+                config.SnackbarConfiguration.NewestOnTop = false;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 2500;
+                config.SnackbarConfiguration.HideTransitionDuration = 300;
+                config.SnackbarConfiguration.ShowTransitionDuration = 300;
+                config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            });
             
             //Inherited services from GameHook
             services.AddHttpClient();

@@ -63,7 +63,14 @@ public partial class DataProperties
         {
             Clear();
             StateHasChanged();
-            NavService?.Navigate(NavigationService.Pages.MapperManager);
+            try
+            {
+                NavService?.Navigate(NavigationService.Pages.MapperManager);
+            }
+            catch (Exception _)
+            {
+                // ignored
+            }
         });
     }
 }

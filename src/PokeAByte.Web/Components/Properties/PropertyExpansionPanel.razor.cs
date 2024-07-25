@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
@@ -11,6 +13,7 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
     [Parameter] public MapperPropertyTreeModel Context { get; set; }
     private EditPropertyModel? _editContext;
     [Inject] public PropertyUpdateService PropertyUpdateService { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
     [Parameter] public int TextWidth { get; set; }
     private string Width => $"width:{TextWidth}px;";
 
@@ -23,6 +26,16 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
         }
         base.OnInitialized();
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            /*var helper = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("propertyExpansionClickHandler", helper);*/
+        }
+    }
+
     private async void HandlePropertyUpdate(object? sender, EventArgs e)
     {
         if (_editContext is null) return;
@@ -30,7 +43,7 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
         await InvokeAsync(StateHasChanged);
     }
     private Color SetIconColor =>
-        Context.IsPropertyExpanded ? Color.Info : Color.Secondary;
+        Context.IsPropertyExpanded ? Color.Info : Color.Default;
     private string DisplayContent => Context.IsPropertyExpanded ? "display:block;" : "display:none;";
 
     private string PropertyHeight =>
@@ -40,5 +53,25 @@ public partial class PropertyExpansionPanel : ComponentBase, IDisposable
     {
         if (_editContext is null) return;
         PropertyUpdateService.EventHandlers.Remove(_editContext.Path);
+    }
+
+    public void OnClickExpand()
+    {
+        Context.IsPropertyExpanded = !Context.IsPropertyExpanded;
+        StateHasChanged();
+    }
+    [JSInvokable]
+    public void OnClickHandler(string id, string tag)
+    {
+        /*//propertyValueEditor
+        if(tag is "TD" or "INPUT" || 
+           (tag == "svg" && id != "expansionBall") ||
+           (tag == "DIV" && id != "mudGrid"
+                         && id != "expansionPanel" 
+                         && id != "mudItemIcon"
+                         && id != "mudText"
+                         && id != "mudItem2"))
+            return;
+        Context.IsPropertyExpanded = !Context.IsPropertyExpanded;*/
     }
 }

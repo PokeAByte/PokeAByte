@@ -13,13 +13,13 @@
         <MudText Typo="Typo.body1">
             @_mapperName
         </MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Clear"
-                       Title="Clear"
-                       DisableElevation="true"
-                       Variant="Variant.Outlined"
-                       Color="Color.Secondary"
-                       Size="Size.Small"
-                       OnClick="OnClickUnloadMapper" />
+        <MudButton DisableElevation="true"
+                   Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   Size="Size.Small"
+                   OnClick="OnClickUnloadMapper">
+            Unload Mapper
+        </MudButton>
     }
 </MudStack>
 <MudTabs Elevation="2" 

@@ -9,6 +9,7 @@ namespace PokeAByte.Web.Components.Properties;
 public partial class PropertyValueEditor
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
+    [Inject] public ISnackbar Snackbar { get; set; }
     [Parameter] public EditPropertyModel EditContext { get; set; }
     public MudBaseInput<string>? InputModel { get; set; }
 
@@ -56,8 +57,7 @@ public partial class PropertyValueEditor
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
     //handler it will update when it loses focus. I am not a fan of leaving in empty methods but if it works, it works
     private void InputFocusLostHandler(FocusEventArgs obj){}
-    private string _errorMessage = "";
-    private string _successMessage = "";
+
 
     private async Task Save()
     {
@@ -66,11 +66,11 @@ public partial class PropertyValueEditor
             EditContext.IsFrozen ?? false);
         if (!result.IsSuccess)
         {
-            _errorMessage = result.ToString();
+            Snackbar.Add(result.ToString(), Severity.Error);
         }
         else
         {
-            _successMessage = "Saved successful!";
+            Snackbar.Add("Saved successful!", Severity.Success);
         }
         StateHasChanged();
     }

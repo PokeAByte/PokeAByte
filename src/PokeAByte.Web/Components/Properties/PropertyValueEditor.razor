@@ -1,5 +1,5 @@
 ﻿@using PokeAByte.Web.Models
-<MudStack Row="true">
+<MudStack Row="true" Style="cursor: default !important;">
     @if (EditContext.Type is "string")
     {
         <MudTextField @bind-Value="EditContext.ValueString"
@@ -30,9 +30,9 @@
                          Immediate="true"
                          MaxItems="50"
                          OnKeyDown="OnKeyDownHandler">
-            <MoreItemsTemplate>
-                <MudText Typo="Typo.body1" Class="ml-2">Too many entries, type the name to search</MudText>
-            </MoreItemsTemplate>
+            <BeforeItemsTemplate>
+                <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+            </BeforeItemsTemplate>
         </MudAutocomplete>
     }
     else if (EditContext.Type is "int" or "uint" or "nibble")
@@ -51,7 +51,7 @@
     else if (EditContext.Type is "bit" or "bool")
     {
         <MudSwitch @bind-Value="EditContext.ValueString"
-                   Color="Color.Primary"
+                   Color="Color.Success"
                    Size="Size.Small"
                    Converter="MudSwitchConverter"
                    UnCheckedColor="Color.Secondary"/>
@@ -61,34 +61,16 @@
         <MudText>@EditContext.Value</MudText>
     }
     <MudIconButton Icon="@Icons.Material.Filled.Save"
+                   id="saveButtonIcon"
                    Title="Save"
                    Disabled="!EditContext.IsValueEdited"
                    OnClick="SaveBtnOnClickHandler"/>
-    @*<MudIconButton Icon="@Icons.Material.Filled.Clear"
-                   Title="Clear"
-                   Disabled="!EditContext.IsValueEdited"
-                   OnClick="ClearBtnOnClickHandler"/>*@
     <MudIconButton Icon="@PokeAByteIcons.SnowflakeIconDisabled"
                    Title="Freeze"/>
     @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
                    Title="Pin"/>*@
 </MudStack>
-@if (!string.IsNullOrEmpty(_errorMessage))
-{
-    <MudAlert Severity="Severity.Error"
-              ShowCloseIcon="true"
-              CloseIconClicked="@(() => _errorMessage = "")">
-        @_errorMessage
-    </MudAlert>
-}
-else if (!string.IsNullOrEmpty(_successMessage))
-{
-    <MudAlert Severity="Severity.Success"
-              ShowCloseIcon="true"
-              CloseIconClicked="@(() => _successMessage = "")">
-        @_successMessage
-    </MudAlert>
-}
+
 <style>
     span.mud-switch-base {
         padding: 5px !important;
