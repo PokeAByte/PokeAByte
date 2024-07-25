@@ -10,42 +10,67 @@ else
     <MudText Typo="Typo.h6" Class="py-6">
         @_selectedMapperListFromTable.Count / @_mapperList.Count Mappers Selected!
     </MudText>
-    <MudStack Row="true" Class="pb-2">
-        <MudButton Color="Color.Secondary"
+    <MudGrid Spacing="1" Class="pb-2" Justify="Justify.FlexStart">
+        <MudItem>
+            <MudStack>
+                <MudButton Color="Color.Success"
+                           Variant="Variant.Filled"
+                           Disabled="@(_selectedMapperListFromTable.Count == 0)"
+                           OnClick="OnClickBackupSelected">
+                    Backup Selected
+                </MudButton>
+                <MudButton Color="Color.Secondary"
+                           Variant="Variant.Filled"
+                           Disabled="@(_selectedMapperListFromTable.Count == 0)"
+                           OnClick="OnClickArchiveSelected">
+                    Archive Selected
+                </MudButton>
+            </MudStack>
+        </MudItem>
+        <MudItem>
+            <MudStack>
+                <MudButton Color="Color.Success"
+                           Variant="Variant.Filled"
+                           Disabled="@(_mapperList.Count == 0)"
+                           OnClick="OnClickBackupAll">
+                    Backup All
+                </MudButton>
+                <MudButton Color="Color.Secondary"
+                           Variant="Variant.Filled"
+                           Disabled="@(_mapperList.Count == 0)"
+                           OnClick="OnClickArchiveAll">
+                    Archive All
+                </MudButton>
+            </MudStack>
+        </MudItem>
+        <MudItem>
+            <MudStack>
+                <MudButton Color="Color.Info"
+                           Variant="Variant.Filled"
+                           OnClick="OnClickOpenMapperDirectory">
+                    Open Mapper Directory
+                </MudButton>
+                <MudButton Color="Color.Info"
+                           Variant="Variant.Filled"
+                           OnClick="OnClickOpenArchiveDirectory">
+                    Open Archive Directory
+                </MudButton>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+    <MudStack Row="true">
+        <MudTextField @bind-Value="_mapperListFilter"
+                      Class="py-4"
+                      Label="Filter Updates"
+                      Immediate="true"
+                      Variant="Variant.Filled"/>
+        <MudButton Color="Color.Info"
                    Variant="Variant.Filled"
-                   Disabled="@(_selectedMapperListFromTable.Count == 0)"
-                   OnClick="OnClickArchiveSelected">
-            Archive Selected
-        </MudButton>
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   Disabled="@(_mapperList.Count == 0)"
-                   OnClick="OnClickArchiveAll">
-            Archive All
-        </MudButton>
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   OnClick="OnClickReloadMapperList">
+                   OnClick="OnClickReloadMapperList"
+                   Style="height:40px; align-self: center">
             Reload Mapper List
         </MudButton>
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   OnClick="OnClickOpenMapperDirectory">
-            Open Mapper Directory
-        </MudButton>
-        <MudButton Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   OnClick="OnClickOpenArchiveDirectory">
-            Open Archive Directory
-        </MudButton>
     </MudStack>
-
-    <MudTextField @bind-Value="_mapperListFilter"
-                  Class="py-4"
-                  Label="Filter Updates"
-                  Immediate="true"
-                  Variant="Variant.Filled"/>
-
     @if (MapperListFiltered.Count == 0)
     {
         <MudText Typo="Typo.h6" Class="pb-3">No Mappers Found!</MudText>

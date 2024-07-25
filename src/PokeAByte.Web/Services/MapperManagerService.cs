@@ -157,4 +157,24 @@ public class MapperManagerService(
         var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
         MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
     }
+
+    public void BackupMappers(List<MapperDto> selectedMappersToBackup)
+    {
+        foreach (var mapper in selectedMappersToBackup)
+        {
+            var relativeJsPath = mapper.Path
+                [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
+            var mapperPath = $"{MapperEnvironment.MapperLocalDirectory
+                .Replace("\\", "/")}/{mapper.Path}";
+            var jsPath = $"{MapperEnvironment.MapperLocalDirectory
+                .Replace("\\", "/")}/{relativeJsPath}";
+            mapperArchiveManager.BackupFile(mapper.Path, mapperPath);
+            mapperArchiveManager.BackupFile(relativeJsPath, jsPath);
+        }
+        var archiveFolder = MapperEnvironment.MapperArchiveDirectory;
+        mapperArchiveManager.ArchiveDirectory(archiveFolder);
+        //Update the mapper list
+        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
+        MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
+    }
 }

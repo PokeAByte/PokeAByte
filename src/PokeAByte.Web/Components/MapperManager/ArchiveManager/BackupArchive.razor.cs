@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Models;
@@ -11,7 +12,7 @@ public partial class BackupArchive : ComponentBase
 {
     [Inject] public MapperManagerService ManagerService { get; set; }
     [Inject] public ILogger<BackupArchive> Logger { get; set; }
-    
+    [Inject] public ISnackbar Snackbar { get; set; }
     private List<VisualMapperDto> _mapperList = [];
     private string _mapperListFilter = "";
     private List<VisualMapperDto> MapperListFiltered =>
@@ -68,10 +69,32 @@ public partial class BackupArchive : ComponentBase
         try
         {
             ManagerService.ArchiveMappers(_selectedMappersToBackup);
+            Snackbar.Add("Mappers archived successfully!", Severity.Success);
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Exception!");
+            Snackbar.Add("Mappers failed to archive!", Severity.Error);
+        }
+        _selectedMappersToBackup = [];
+        _isDataLoading = false;
+        StateHasChanged();
+        GetMapperList();
+    }
+
+    private void BackupMappers()
+    {
+        if (_selectedMappersToBackup.Count == 0) return;
+        _isDataLoading = true;
+        try
+        {
+            ManagerService.BackupMappers(_selectedMappersToBackup);
+            Snackbar.Add("Mappers backed up successfully!", Severity.Success);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Exception!");
+            Snackbar.Add("Mappers failed to be backed up!", Severity.Error);
         }
         _selectedMappersToBackup = [];
         _isDataLoading = false;
@@ -109,5 +132,22 @@ public partial class BackupArchive : ComponentBase
     private void OnClickOpenArchiveDirectory()
     {
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
+    }
+
+    private void OnClickBackupSelected()
+    {        
+        if(_selectedMapperListFromTable.Count == 0) return;
+        _selectedMappersToBackup = _selectedMapperListFromTable
+            .Select(x => x.MapperDto)
+            .ToList();
+        _selectedMapperListFromTable = [];
+        BackupMappers();
+    }
+
+    private void OnClickBackupAll()
+    {        
+        if(_mapperList.Count == 0) return;
+        _selectedMappersToBackup = _mapperList.Select(x => x.MapperDto).ToList();
+        BackupMappers();
     }
 }

@@ -28,18 +28,18 @@ else
                    Variant="Variant.Filled"
                    Disabled="@(_selectedMappersFromTable.Count == 0)"
                    OnClick="OnClickUpdateSelected">
-            Update Selected
+            @ButtonLabel Selected
         </MudButton>
         <MudButton Color="Color.Secondary"
                    Variant="Variant.Filled"
                    Disabled="@(_updatedMapperList.Count == 0)"
                    OnClick="OnClickUpdateAll">
-            Update All
+            @ButtonLabel All
         </MudButton>
         <MudButton Color="Color.Secondary"
                    Variant="Variant.Filled"
                    OnClick="OnClickCheckForUpdates">
-            Check for Updates
+            Check for @CheckForLabel
         </MudButton>
         <MudButton Color="Color.Secondary"
                    Variant="Variant.Filled"
@@ -80,7 +80,7 @@ else
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Path" Class="cursor-pointer">
-                <MapperUpdateDetails Context="context" />
+                <MapperDetails Context="context" />
             </MudTd>
         </RowTemplate>
     </MudTable>

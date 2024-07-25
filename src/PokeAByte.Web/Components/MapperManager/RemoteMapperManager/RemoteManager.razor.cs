@@ -6,12 +6,13 @@ using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 
-namespace PokeAByte.Web.Components.MapperManager.UpdateManager;
+namespace PokeAByte.Web.Components.MapperManager.RemoteMapperManager;
 
-public partial class UpdateMappers : ComponentBase
+public partial class RemoteManager : ComponentBase
 {
     [Inject] public MapperManagerService MapperManagerService { get; set; }
-    [Inject] public ILogger<UpdateMappers> Logger { get; set; }
+    [Inject] public ILogger<RemoteManager> Logger { get; set; }
+    [Parameter] public bool IsDownloadMappersPage { get; set; }
     private string _filterString = "";
     private List<VisualMapperComparisonModel> _updatedMapperList = [];
     private List<VisualMapperComparisonModel> UpdatedMapperListFiltered =>
@@ -24,6 +25,8 @@ public partial class UpdateMappers : ComponentBase
     private HashSet<VisualMapperComparisonModel> _selectedMappersFromTable = [];
     private List<MapperComparisonDto> _selectedMappersToDownload = [];
     private bool _isDataLoading = true;
+    private string ButtonLabel => IsDownloadMappersPage ? "Download" : "Update";
+    private string CheckForLabel => IsDownloadMappersPage ? "Downloads" : "Updates";
     protected override async Task OnInitializedAsync()
     {
         OnSelectedItemsChanged += OnSelectedItemsChangedHandler;
@@ -39,10 +42,22 @@ public partial class UpdateMappers : ComponentBase
         var updatesFound = await MapperManagerService.CheckForUpdatesAsync();
         if (updatesFound)
         {
-            _updatedMapperList = MapperManagerService
-                .GetMapperUpdates()
-                .Select(x => new VisualMapperComparisonModel(x))
-                .ToList();
+            if (IsDownloadMappersPage)
+            {
+                _updatedMapperList = MapperManagerService
+                    .GetMapperUpdates()
+                    .Where(x => x.CurrentVersion is null)
+                    .Select(x => new VisualMapperComparisonModel(x))
+                    .ToList();
+            }
+            else
+            {
+                _updatedMapperList = MapperManagerService
+                    .GetMapperUpdates()
+                    .Where(x => x.CurrentVersion is not null)
+                    .Select(x => new VisualMapperComparisonModel(x))
+                    .ToList();
+            }
         }
         _isDataLoading = false;
         StateHasChanged();

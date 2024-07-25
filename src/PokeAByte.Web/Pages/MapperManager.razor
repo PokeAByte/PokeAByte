@@ -2,7 +2,7 @@
 @using PokeAByte.Web.Services
 @using PokeAByte.Web.Components.MapperManager
 @using PokeAByte.Web.Components.MapperManager.ArchiveManager
-@using PokeAByte.Web.Components.MapperManager.UpdateManager
+@using PokeAByte.Web.Components.MapperManager.RemoteMapperManager
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
@@ -34,9 +34,14 @@
             <LoadMapper />
         </MudContainer>
     </MudTabPanel>
+    <MudTabPanel Text="Download">
+        <MudContainer Style="height: auto">
+            <RemoteManager IsDownloadMappersPage="true" />
+        </MudContainer>
+    </MudTabPanel>
     <MudTabPanel Text="Update">
         <MudContainer Style="height: auto">
-            <UpdateMappers />
+            <RemoteManager IsDownloadMappersPage="false"/>
         </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Backup">

@@ -86,16 +86,9 @@ public class MapperArchiveManager : IMapperArchiveManager
         }
     }
 
-    /// <summary>
-    /// Archives a file located in filepath into a temp directory located in
-    /// archivedPath or MapperEnvironment.MapperArchiveDirectory
-    /// </summary>
-    /// <param name="relativeFilename">The file name and extension</param>
-    /// <param name="filepath">The path where the file is located</param>
-    /// <param name="archivedPath">The optional archive path</param>
-    /// <returns>The path where the file was archived</returns>
-    public string ArchiveFile(string relativeFilename, 
-        string filepath, string? archivedPath = null)
+    private DirectoryInfo? CreateArchiveDirectory(string relativeFilename, 
+        string filepath,
+        string? archivedPath = null)
     {
         DirectoryInfo? archiveDirectory = null;
         var archivedDirectoryPath = !string.IsNullOrWhiteSpace(archivedPath) ? 
@@ -110,16 +103,29 @@ public class MapperArchiveManager : IMapperArchiveManager
         {
             _logger.LogWarning($"Failed to move {relativeFilename} because it does not exist.\n" +
                                $"\tPath: {filepath}");
-            return "";
+            return null;
         }
 
+        if (archiveDirectory.Exists) return archiveDirectory;
+        
         //If somehow we fail to create the directory and it doesn't throw an exception, we should still handle it
-        if (!archiveDirectory.Exists)
-        {
-            _logger.LogWarning($"Failed to move {relativeFilename} because " +
-                               $"the local archive directory not exist.");
-            return "";
-        }
+        _logger.LogWarning($"Failed to move {relativeFilename} because " +
+                           $"the local archive directory not exist.");
+        return null;
+    }
+    /// <summary>
+    /// Archives a file located in filepath into a temp directory located in
+    /// archivedPath or MapperEnvironment.MapperArchiveDirectory
+    /// </summary>
+    /// <param name="relativeFilename">The file name and extension</param>
+    /// <param name="filepath">The path where the file is located</param>
+    /// <param name="archivedPath">The optional archive path</param>
+    /// <returns>The path where the file was archived</returns>
+    public string ArchiveFile(string relativeFilename, 
+        string filepath, string? archivedPath = null)
+    {
+        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath, archivedPath);
+        if (archiveDirectory is null) return "";
         try
         {
             var archiveFile = new FileInfo($"{archiveDirectory.FullName}/{relativeFilename}");
@@ -134,7 +140,26 @@ public class MapperArchiveManager : IMapperArchiveManager
             return "";
         }
     }
-
+    public string BackupFile(string relativeFilename, 
+        string filepath, 
+        string? archivedPath = null)
+    {
+        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath, archivedPath);
+        if (archiveDirectory is null) return "";
+        try
+        {
+            var archiveFile = new FileInfo($"{archiveDirectory.FullName}/{relativeFilename}");
+            archiveFile.Directory?.Create();
+            File.Copy(filepath, 
+                archiveFile.FullName);
+            return archiveDirectory.FullName;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"Failed to copy {relativeFilename} because of an exception.");
+            return "";
+        }
+    }
     public void ArchiveDirectory(string directoryPath, string? archivePath = null)
     {
         var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0 || 
