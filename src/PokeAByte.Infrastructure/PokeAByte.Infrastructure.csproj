@@ -12,7 +12,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
-		<ProjectReference Include="..\PokeAByte.Integrations.BizHawk\PokeAByte.Integrations.BizHawk.csproj" />
 		<ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
 	</ItemGroup>
 

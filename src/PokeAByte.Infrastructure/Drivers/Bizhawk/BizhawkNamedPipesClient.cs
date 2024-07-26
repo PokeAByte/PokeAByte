@@ -1,5 +1,5 @@
 ﻿using System.IO.Pipes;
-using PokeAByte.Integrations.BizHawk;
+using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers.Bizhawk;
 

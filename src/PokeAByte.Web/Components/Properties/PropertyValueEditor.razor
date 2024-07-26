@@ -65,8 +65,9 @@
                    Title="Save"
                    Disabled="!EditContext.IsValueEdited"
                    OnClick="SaveBtnOnClickHandler"/>
-    <MudIconButton Icon="@PokeAByteIcons.SnowflakeIconDisabled"
-                   Title="Freeze"/>
+    <MudIconButton Icon="@FreezeIcon"
+                   Title="Freeze"
+                   OnClick="OnClickFreezeHandler"/>
     @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
                    Title="Pin"/>*@
 </MudStack>

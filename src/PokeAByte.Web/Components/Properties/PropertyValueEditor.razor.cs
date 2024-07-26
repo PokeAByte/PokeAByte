@@ -13,6 +13,10 @@ public partial class PropertyValueEditor
     [Parameter] public EditPropertyModel EditContext { get; set; }
     public MudBaseInput<string>? InputModel { get; set; }
 
+    private string FreezeIcon => EditContext.IsFrozen is true
+        ? PokeAByteIcons.SnowflakeIcon
+        : PokeAByteIcons.SnowflakeIconDisabled;
+
     public readonly MudBlazor.Converter<string?, bool?> MudSwitchConverter = new MudBlazor.Converter<string?, bool?>
     {
         SetFunc = text => text?.ToLowerInvariant() == "true",
@@ -91,5 +95,11 @@ public partial class PropertyValueEditor
         {
             await Save();
         }
+    }
+
+    private async Task OnClickFreezeHandler()
+    {
+        EditContext.IsFrozen = !EditContext.IsFrozen;
+        await Save();
     }
 }

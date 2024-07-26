@@ -15,6 +15,11 @@ public class EditPropertyModel : PropertyModel
         set
         {
             _isInitValueSet = true;
+            if (IsFrozen is true)
+            {
+                _valueString = Value?.ToString() ?? "";
+                return;
+            }
             if (_valueString == value)
                 return;
             if (string.IsNullOrEmpty(_valueString))

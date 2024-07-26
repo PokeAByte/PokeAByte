@@ -3,7 +3,6 @@ using System.Text;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Integrations.BizHawk;
 using SharedPlatformConstants = PokeAByte.Domain.Models.SharedPlatformConstants;
 
 #pragma warning disable CA1416 // Validate platform compatibility

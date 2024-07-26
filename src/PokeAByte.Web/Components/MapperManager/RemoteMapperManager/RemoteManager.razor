@@ -24,24 +24,24 @@ else
         @_selectedMappersFromTable.Count / @_updatedMapperList.Count Mappers Selected!
     </MudText>
     <MudStack Row="true" Class="pb-2">
-        <MudButton Color="Color.Secondary"
+        <MudButton Color="Color.Success"
                    Variant="Variant.Filled"
                    Disabled="@(_selectedMappersFromTable.Count == 0)"
                    OnClick="OnClickUpdateSelected">
             @ButtonLabel Selected
         </MudButton>
-        <MudButton Color="Color.Secondary"
+        <MudButton Color="Color.Success"
                    Variant="Variant.Filled"
                    Disabled="@(_updatedMapperList.Count == 0)"
                    OnClick="OnClickUpdateAll">
             @ButtonLabel All
         </MudButton>
-        <MudButton Color="Color.Secondary"
+        <MudButton Color="Color.Info"
                    Variant="Variant.Filled"
                    OnClick="OnClickCheckForUpdates">
             Check for @CheckForLabel
         </MudButton>
-        <MudButton Color="Color.Secondary"
+        <MudButton Color="Color.Primary"
                    Variant="Variant.Filled"
                    OnClick="OnClickOpenMapperDirectory">
             Open Mapper Directory
