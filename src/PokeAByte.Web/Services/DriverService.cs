@@ -37,7 +37,7 @@ public class DriverService
     }
     private void ConfigureService()
     {
-        var userSettings = new UserSettings();
+        /*var userSettings = new UserSettings();
         try
         {
             //Get settings
@@ -50,7 +50,7 @@ public class DriverService
         {
             _logger.LogError(e, "Failed to load settings data.");
         }            
-        DriverModel = userSettings?.DefaultDriver ?? DriverModels.Bizhawk;
+        DriverModel = userSettings?.DefaultDriver ?? DriverModels.Bizhawk;*/
         /*_driverConnectionTestTimer =
             new System.Timers.Timer(userSettings?.DriverTestTimeoutMs ?? 100);
         _driverConnectionTestTimer.Elapsed += OnTimerEvent;
