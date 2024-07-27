@@ -10,7 +10,8 @@ namespace PokeAByte.Web.Components.Properties;
 public partial class PropertyExpansionPanel : ComponentBase, IDisposable
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
-    [Parameter] public MapperPropertyTreeModel Context { get; set; }
+    //[Parameter] public MapperPropertyTreeModel Context { get; set; }
+    [Parameter] public PropertyTreeModel Context { get; set; }
     private EditPropertyModel? _editContext;
     [Inject] public PropertyUpdateService PropertyUpdateService { get; set; }
     [Inject] public IJSRuntime JSRuntime { get; set; }

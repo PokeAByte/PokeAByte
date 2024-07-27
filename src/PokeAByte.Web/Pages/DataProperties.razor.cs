@@ -11,8 +11,11 @@ public partial class DataProperties
     [Inject] public MapperClientService ClientService { get; set; }
     [Inject] public NavigationService? NavService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
-    private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
+    //private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
     private string MapperName { get; set; } = "";
+    private string GetCursor(TreeItemData<PropertyTreeData> context) =>
+        context.HasChildren ? "cursor:pointer" : "cursor:default";
+    public IReadOnlyCollection<TreeItemData<PropertyTreeData>>? PropertyTreeItems { get; set; }
 
     protected override void OnInitialized()
     {
@@ -28,28 +31,25 @@ public partial class DataProperties
     {
         base.OnAfterRender(firstRender);
         if (!firstRender) return;
-        var propsResult = ClientService.GetPropertiesHashSet();
+        var propsResult = ClientService.GetPropertiesTree();
         if (!propsResult.IsSuccess || propsResult.ResultValue is null) return;
-        PropertyItems = propsResult.ResultValue;
-        foreach (var item in PropertyItems)
-        {
-            MapperPropertyTreeModel.UpdateOpenedDisplayedChildren(item);
-        }
+        PropertyTreeItems = propsResult.ResultValue;
         StateHasChanged();
     }
     
-    private string SetIcon(MapperPropertyTreeModel model)
+    private string SetIcon(TreeItemData<PropertyTreeData> model)
     {
         return model.HasChildren
-            ? (model.IsExpanded ? Icons.Material.Filled.FolderOpen : Icons.Material.Filled.Folder)
-            : "";
+            ? (model.Expanded ? Icons.Material.Filled.FolderOpen : Icons.Material.Filled.Folder)
+            : Icons.Material.Filled.Folder;
     }
     private static int TextSize(int len) => len * 8;
 
     private void Clear()
     {
         MapperName = "";
-        PropertyItems = [];
+        PropertyTreeItems = [];
+        //PropertyItems = [];
         ChangeNotificationService.NotifyDataChanged();
     }
 

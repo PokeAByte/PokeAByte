@@ -108,13 +108,13 @@ public class MapperClientService
         return Result.Success(glossaryList);
     }
 
-    public Result<HashSet<MapperPropertyTreeModel>> GetPropertiesHashSet()
+    public Result<List<TreeItemData<PropertyTreeData>>> GetPropertiesTree()
     {
-        var propTree = _client.GetHashSetTree();
-        if (propTree is not null && propTree.Count > 0)
+        var propTree = _client.GetTreeData();
+        if (propTree is not null)
             return Result.Success(propTree);
         return Result
-            .Failure<HashSet<MapperPropertyTreeModel>>(
+            .Failure<List<TreeItemData<PropertyTreeData>>>(
                 Error.NoMapperPropertiesFound);
     }
 

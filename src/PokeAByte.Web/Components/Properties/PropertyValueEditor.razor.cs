@@ -44,18 +44,6 @@ public partial class PropertyValueEditor
             .Select(g => new KeyValuePair<ulong, string>(g.Key, g.Value?.ToString() ?? ""))
             .ToDictionary() ?? [];
     }
-    
-    private Task<IEnumerable<string>> SearchForReference(string arg)
-    {
-        if (string.IsNullOrEmpty(EditContext.Reference))
-            return Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
-        if (string.IsNullOrEmpty(arg))
-            return Task.FromResult(_cachedGlossary.Select(g => g.Value));
-        return Task.FromResult(_cachedGlossary
-            .Where(x => 
-                x.Value.Contains(arg, StringComparison.InvariantCultureIgnoreCase))
-            .Select(g => g.Value));
-    }
 
     //For some reason without this handler (even if it does nothing at all) the input will not update right away.
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
@@ -101,5 +89,17 @@ public partial class PropertyValueEditor
     {
         EditContext.IsFrozen = !EditContext.IsFrozen;
         await Save();
+    }
+
+    private Task<IEnumerable<string>> SearchForReference(string arg1, CancellationToken arg2)
+    {
+        if (string.IsNullOrEmpty(EditContext.Reference))
+            return Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
+        if (string.IsNullOrEmpty(arg1))
+            return Task.FromResult(_cachedGlossary.Select(g => g.Value));
+        return Task.FromResult(_cachedGlossary
+            .Where(x => 
+                x.Value.Contains(arg1, StringComparison.InvariantCultureIgnoreCase))
+            .Select(g => g.Value));
     }
 }
