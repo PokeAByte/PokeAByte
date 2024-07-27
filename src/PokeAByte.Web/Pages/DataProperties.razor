@@ -38,11 +38,10 @@ else
                 <Content>
                     @if (context.HasChildren)
                     {
-                        <MudIconButton Icon="@SetIcon(context)"
-                                       OnClick="() => context.Expanded = !context.Expanded"
+                        <MudIcon Icon="@SetIcon(context)"
                                        Class="pr-2"/>
                     }
-                    @if (property?.Value?.Property != null && property.Expanded)
+                    @if (property?.Value?.Property != null && property.IsParentExpanded)
                     {
                         <PropertyExpansionPanel Context="@property.Value"
                                                 TextWidth="@TextSize(125)"/>

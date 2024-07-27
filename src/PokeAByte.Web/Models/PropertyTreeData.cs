@@ -7,6 +7,9 @@ namespace PokeAByte.Web.Models;
 public sealed class PropertyTreeData : TreeItemData<PropertyTreeModel>
 {
     public int Depth { get; init; }
+    public bool IsParentExpanded => Parent?.Expanded ?? false;
+    public TreeItemData<PropertyTreeData>? Parent { get; init; }
+
     public PropertyTreeData(string text, string icon, PropertyTreeModel property, int depth)
         : base(property)
     {
@@ -49,7 +52,8 @@ public static class PropertyTreeDataExtensions
         {
             Children = treeItemData.Value.HasChildren ? [new TreeItemData<PropertyTreeModel>()] : [],
             Expandable = treeItemData.Value.Expandable,
-            Expanded = treeItemData.Value.Expanded
+            Expanded = treeItemData.Value.Expanded,
+            Parent = treeItemData.Value.Parent
         }; 
         
         var newTreeItemData = new TreeItemData<PropertyTreeData>
@@ -155,7 +159,10 @@ public static class PropertyTreeDataExtensions
                         MapperName = metadata.GameName,
                         FullPath = paths[0]
                     },
-                    index);
+                    index)
+                {
+                    Parent = currentTreePath
+                };
                 child = new TreeItemData<PropertyTreeData>()
                 {
                     Text = paths[index],
