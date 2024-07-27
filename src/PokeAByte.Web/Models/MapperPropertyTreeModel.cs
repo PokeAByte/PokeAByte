@@ -11,8 +11,9 @@ public class MapperPropertyTreeModel
     public required string Name { get; set; }
     public int Depth { get; set; }
     private bool _isExpanded = false;
-
     public bool ShouldTriggerExpandedAction { get; set; } = true;
+    public int CurrentCount { get; set; }
+    private int _totalTake = 150;
 
     //public event EventHandler TreeExpanded;
     public bool IsExpanded 
@@ -36,6 +37,8 @@ public class MapperPropertyTreeModel
     }
     public bool IsPropertyExpanded { get; set; }
     public PropertyModel? Property { get; init; }
+    public MapperPropertyTreeModel? Parent { get; init; }
+    public bool IsParentExpanded => Parent?.IsExpanded ?? false;
     public HashSet<MapperPropertyTreeModel> Children { get; set; } = [];
     public HashSet<MapperPropertyTreeModel> DisplayedChildren { get; set; } = [];
     public int Width { get; set; } = 125;
@@ -43,7 +46,8 @@ public class MapperPropertyTreeModel
     public required Guid MapperId { get; set; }
     public required string MapperName { get; set; }
     public required string FullPath { get; set; }
-
+    public bool HasMoreItems => CurrentCount + _totalTake < Children.Count;
+    public int Index { get; set; } = 0;
     private void MinimizeChildren()
     {
         foreach (var child in 
@@ -71,7 +75,6 @@ public class MapperPropertyTreeModel
             dc.Width = model.GetMaxLength();
         }
     }
-
     public static void UpdateOpenedDisplayedChildren(MapperPropertyTreeModel model)
     {
         foreach (var child in model.Children.Where(x => x._isExpanded))
@@ -80,11 +83,41 @@ public class MapperPropertyTreeModel
             UpdateDisplayedChildren(child);
         }
     }
+
+    public static void AddMoreDisplayedItems(MapperPropertyTreeModel model)
+    {
+        if (model.Parent is null || !model.Parent.HasMoreItems) return;
+        var parent = model.Parent;
+        var items = parent.Children
+            .Skip(parent.CurrentCount)
+            .Take(model._totalTake)
+            .ToHashSet();
+        foreach (var item in items)
+        {
+            parent.DisplayedChildren.Add(item);
+        }
+        parent.CurrentCount += model._totalTake;
+    }
     public static void UpdateDisplayedChildren(MapperPropertyTreeModel model)
     {
         if (model.DisplayedChildren.Count > 1)
             return;
-        model.DisplayedChildren = model.Children;
+        /*if(!model.HasMoreItems)
+            return;*/
+        model.Children = model.Children.OrderBy(x => x.Index).ToHashSet();
+        model.DisplayedChildren = model.Children.Skip(model.CurrentCount).Take(model._totalTake).ToHashSet();
+        model.CurrentCount += model._totalTake;
+        //If we have more items, we should let the user know
+        if (model.HasMoreItems)
+            model.DisplayedChildren.Add(new MapperPropertyTreeModel
+            {
+                Name = "Click to load more items.",
+                MapperId = default,
+                MapperName = "",
+                FullPath = "",
+                IsLoadMoreItemsEntry = true,
+                Parent = model
+            });
         //Lie to the tree view and make it think we have a list of children, we will load them
         //in later when we need them
         foreach (var dc in model.DisplayedChildren.Where(x => x.HasChildren))
@@ -99,6 +132,9 @@ public class MapperPropertyTreeModel
             ];
         }
     }
+
+    public bool IsLoadMoreItemsEntry { get; set; }
+
     public void UpdateProperty(IPokeAByteProperty prop)
     {
         Property?.UpdatePropertyModel(prop);
@@ -172,7 +208,11 @@ public class MapperPropertyTree : IDisposable
                 .Children
                 .FirstOrDefault(x => x.Name == paths[index]);
             if (child is null)
-            {
+            {                
+                var last = currentTreePath.Children
+                    .OrderBy(x => x.Index)
+                    .Select(x => x.Index)
+                    .LastOrDefault();
                 //The child does not exist for this given path, create it.
                 child = new MapperPropertyTreeModel
                 {
@@ -182,12 +222,22 @@ public class MapperPropertyTree : IDisposable
                         model : null,
                     MapperId = metadata.Id,
                     MapperName = metadata.GameName,
-                    FullPath = string.Join(".", paths[..(index+1)])
+                    FullPath = string.Join(".", paths[..(index+1)]),
+                    Parent = currentTreePath,
+                    Index = last + 1
                 };
                 child.PropertyExpandedEvent += onExpanded;
                 //Add the child to the current node
                 currentTreePath.Children.Add(child);
                 currentTreePath.HasChildren = currentTreePath.Children.Count > 0;
+            }
+            else
+            {
+                var last = currentTreePath.Children
+                    .OrderByDescending(x => x.Index)
+                    .Select(x => x.Index)
+                    .LastOrDefault();
+                child.Index = last + 1;
             }
             //Move to the child node 
             currentTreePath = child;

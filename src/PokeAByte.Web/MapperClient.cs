@@ -127,9 +127,6 @@ public class MapperClient(
     
     public HashSet<MapperPropertyTreeModel>? GetHashSetTree()
     {
-        if (_cachedMapperPropertyTree.Tree.Count > 0)
-            return _cachedMapperPropertyTree.Tree;
-        
         var props = GetProperties();
         var meta = GetMetaData();
         if (props is null)

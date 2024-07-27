@@ -22,7 +22,8 @@ else
                  Color="Color.Secondary"
                  Dense="true"
                  Hover="true"
-                 ExpandOnClick="true">
+                 ExpandOnClick="true"
+                 Style="overflow-y:scroll; height: 80vh">
         <ItemTemplate>
             <MudTreeViewItem Items="@context.DisplayedChildren"
                              @bind-Expanded="@context.IsExpanded"
@@ -31,10 +32,18 @@ else
                              Text="@context.Name"
                              Style="overflow:hidden;">
                 <BodyContent Context="bodyContext">
-                    @if (context.Property is not null)
-                    {   
-                        <PropertyExpansionPanel Context="@context" 
+                    @if (context.IsLoadMoreItemsEntry)
+                    {
+                        <MudLink Color="Color.Success"
+                                 OnClick="() => LoadMoreItems(context)">
+                            @context.Name
+                        </MudLink>
+                    }
+                    else if (context.Property is not null && context.IsParentExpanded)
+                    {
+                        <PropertyExpansionPanel Context="@context"
                                                 TextWidth="@TextSize(context.Width)"/>
+                        <MudText>@context.Index</MudText>
                     }
                     else
                     {

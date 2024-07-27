@@ -13,7 +13,7 @@ public partial class DataProperties
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
     private string MapperName { get; set; } = "";
-
+    private bool _isLoadingScroll = false;
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -22,12 +22,6 @@ public partial class DataProperties
         var metaResult = ClientService.GetMetaData();
         if (metaResult.IsSuccess)
             MapperName = $"{metaResult.ResultValue?.GameName}";
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
-        if (!firstRender) return;
         var propsResult = ClientService.GetPropertiesHashSet();
         if (!propsResult.IsSuccess || propsResult.ResultValue is null) return;
         PropertyItems = propsResult.ResultValue;
@@ -35,9 +29,7 @@ public partial class DataProperties
         {
             MapperPropertyTreeModel.UpdateOpenedDisplayedChildren(item);
         }
-        StateHasChanged();
     }
-    
     private string SetIcon(MapperPropertyTreeModel model)
     {
         return model.HasChildren
@@ -72,5 +64,49 @@ public partial class DataProperties
                 // ignored
             }
         });
+    }
+
+    private void OnScroll()
+    {
+        //get all loaded properties where the parent is expanded
+        var loadedProps = PropertyItems
+            .Where(x => x.HasMoreItems)
+            .ToList();
+        if (loadedProps.Count == 0)
+        {
+            _isLoadingScroll = false;
+            return;
+        }
+
+        _isLoadingScroll = true;
+        foreach (var item in loadedProps)
+        {
+            //MapperPropertyTreeModel.UpdateDisplayedChildren(item, true);
+        }
+
+        _isLoadingScroll = false;
+    }
+
+    private void LoadMoreItems(MapperPropertyTreeModel context)
+    {
+        MapperPropertyTreeModel.AddMoreDisplayedItems(context);
+        var parent = context.Parent;
+        if (parent is not null)
+        {
+            //parent.DisplayedChildren.RemoveWhere(x => x.IsLoadMoreItemsEntry);
+
+            if (parent.HasMoreItems)
+            {
+                context.Index = parent
+                    .DisplayedChildren
+                    .OrderBy(x => x.Index)
+                    .Select(x => x.Index)
+                    .LastOrDefault() + 1;
+                parent.DisplayedChildren = parent.DisplayedChildren
+                    .OrderBy(x => x.Index)
+                    .ToHashSet();
+            }
+        }
+        StateHasChanged();
     }
 }
