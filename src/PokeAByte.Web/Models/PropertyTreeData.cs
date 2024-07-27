@@ -6,11 +6,13 @@ namespace PokeAByte.Web.Models;
 
 public sealed class PropertyTreeData : TreeItemData<PropertyTreeModel>
 {
-    public PropertyTreeData(string text, string icon, PropertyTreeModel property)
+    public int Depth { get; init; }
+    public PropertyTreeData(string text, string icon, PropertyTreeModel property, int depth)
         : base(property)
     {
         Text = text;
         Icon = icon;
+        Depth = depth;
     }
     private int GetMaxLength()
     {
@@ -34,6 +36,32 @@ public class PropertyTreeModel
 }
 public static class PropertyTreeDataExtensions
 {
+    public static TreeItemData<PropertyTreeData>? CloneWithoutChildren(this TreeItemData<PropertyTreeData> treeItemData)
+    {
+        if (treeItemData.Value?.Value is null)
+            return null;
+        
+        var treeVal = new PropertyTreeData(
+            treeItemData.Value.Text ?? "",
+            treeItemData.Value.Icon ?? "",
+            treeItemData.Value.Value,
+            treeItemData.Value.Depth)
+        {
+            Children = treeItemData.Value.HasChildren ? [new TreeItemData<PropertyTreeModel>()] : [],
+            Expandable = treeItemData.Value.Expandable,
+            Expanded = treeItemData.Value.Expanded
+        }; 
+        
+        var newTreeItemData = new TreeItemData<PropertyTreeData>
+        {
+            Children = treeItemData.HasChildren ? [new TreeItemData<PropertyTreeData>()] : [],
+            Expandable = treeItemData.Expandable,
+            Text = treeItemData.Text,
+            Icon = treeItemData.Icon,
+            Value = treeVal,
+        };
+        return newTreeItemData;
+    }
     public static void AddProperty(this List<TreeItemData<PropertyTreeData>> tree,
         PropertyModel model, 
         MapperMetaModel metadata)
@@ -46,7 +74,8 @@ public static class PropertyTreeDataExtensions
         {
             //create new entry
             var newPropEntry = new PropertyTreeData(paths[0],
-                    "", new PropertyTreeModel
+                    "", 
+                    new PropertyTreeModel
                     {
                         Name = paths[0],
                         Property = paths.Length == 1
@@ -54,8 +83,9 @@ public static class PropertyTreeDataExtensions
                             : null,
                         MapperId = metadata.Id,
                         MapperName = metadata.GameName,
-                        FullPath = paths[0]
-                    });
+                        FullPath = paths[0],
+                    },
+                    0);
             var newEntry = new TreeItemData<PropertyTreeData>()
             {
                 Text = paths[0],
@@ -63,18 +93,6 @@ public static class PropertyTreeDataExtensions
                 Value = newPropEntry,
                 Children = []
             };
-            /*new TreeItemData<PropertyTreeData>()
-            {
-                Text = paths[0],
-                Icon = "",
-                Value = new
-                Property = paths.Length == 1
-                    ? model
-                    : null,
-                MapperId = metadata.Id,
-                MapperName = metadata.GameName,
-                FullPath = paths[0]
-            };*/
             tree.Add(newEntry);
         }
         //Get the tree we want to add to
@@ -84,7 +102,8 @@ public static class PropertyTreeDataExtensions
         {
             //Node was not found with this given path, create it.
             var newPropEntry = new PropertyTreeData(paths[0],
-                    "", new PropertyTreeModel
+                    "", 
+                    new PropertyTreeModel
                     {
                         Name = paths[0],
                         Property = paths.Length == 1
@@ -93,7 +112,8 @@ public static class PropertyTreeDataExtensions
                         MapperId = metadata.Id,
                         MapperName = metadata.GameName,
                         FullPath = paths[0]
-                    });
+                    },
+                    0);
             currentTreePath = new TreeItemData<PropertyTreeData>()
             {
                 Text = paths[0],
@@ -125,16 +145,17 @@ public static class PropertyTreeDataExtensions
             {
                 //The child does not exist for this given path, create it.
                 var newPropEntry = new PropertyTreeData(paths[0],
-                    "", new PropertyTreeModel
+                    "", 
+                    new PropertyTreeModel
                     {
                         Name = paths[index],
-                        Property = paths.Length == 1
-                            ? model
-                            : null,
+                        Property = paths.Length == index + 1 ? 
+                            model : null,
                         MapperId = metadata.Id,
                         MapperName = metadata.GameName,
                         FullPath = paths[0]
-                    });
+                    },
+                    index);
                 child = new TreeItemData<PropertyTreeData>()
                 {
                     Text = paths[index],

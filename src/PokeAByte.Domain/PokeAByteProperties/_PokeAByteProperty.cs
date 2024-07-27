@@ -106,14 +106,22 @@ namespace PokeAByte.Domain.PokeAByteProperties
             
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
             {
-                if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
+                try
                 {
-                    address = solvedAddress;
+                    if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
+                    {
+                        address = solvedAddress;
+                    }
+                    else
+                    {
+
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    // TODO: Write a log entry here.
+                    Console.WriteLine(e);
                 }
+
             }
 
             if (address == null)
