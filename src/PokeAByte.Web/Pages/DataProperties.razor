@@ -42,7 +42,7 @@ else
                                        OnClick="() => context.Expanded = !context.Expanded"
                                        Class="pr-2"/>
                     }
-                    @if (property?.Value?.Property != null)
+                    @if (property?.Value?.Property != null && property.Expanded)
                     {
                         <PropertyExpansionPanel Context="@property.Value"
                                                 TextWidth="@TextSize(125)"/>
