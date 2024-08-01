@@ -34,25 +34,25 @@
          Class="d-flex justify-center align-content-center">
     <MudTabPanel Text="Load">
         <MudContainer Fixed="true" Style="@PanelStyle">
-            <LoadMapper />
+            <LoadMapper @ref="LoadMapperRef"/>
         </MudContainer>
     </MudTabPanel>
-    <MudTabPanel Text="Download">
+    <MudTabPanel Text="Download" Disabled="@(LoadMapperRef?.IsLoading is true)">
         <MudContainer Style="height: auto">
             <RemoteManager IsDownloadMappersPage="true" />
         </MudContainer>
     </MudTabPanel>
-    <MudTabPanel Text="Update">
+    <MudTabPanel Text="Update" Disabled="@(LoadMapperRef?.IsLoading is true)">
         <MudContainer Style="height: auto">
             <RemoteManager IsDownloadMappersPage="false"/>
         </MudContainer>
     </MudTabPanel>
-    <MudTabPanel Text="Backup">
+    <MudTabPanel Text="Backup" Disabled="@(LoadMapperRef?.IsLoading ?? false)">
         <MudContainer Fixed="true" Style="@PanelStyle">
             <BackupArchive />
         </MudContainer>
     </MudTabPanel>
-    <MudTabPanel Text="Restore">
+    <MudTabPanel Text="Restore" Disabled="@(LoadMapperRef?.IsLoading ?? false)">
         <MudContainer Fixed="true" Style="@PanelStyle">
             <RestoreArchive />
         </MudContainer>
@@ -71,6 +71,8 @@
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] private MapperClientService? MapperConnectionService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
+    public LoadMapper? LoadMapperRef { get; set; }
+
     private Color _currentStatusColor = Color.Info;
     private string _currentStatusName = "Not Found";
     private string _mapperName = "";

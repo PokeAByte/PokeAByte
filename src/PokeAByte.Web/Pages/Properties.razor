@@ -1,4 +1,35 @@
 ﻿@page "/Properties"
 @using PokeAByte.Web.Components.PropertyManager
+@using PokeAByte.Web.Services.Mapper
+@using PokeAByte.Web.Services.Navigation
 
-<PropertyTreeView />
+@if (_finishedLoading)
+{
+    <PropertyTreeView />
+}
+else
+{
+    <MudText Typo="Typo.h4">Loading properties, please wait...</MudText>
+}
+
+@code {
+    [Inject] private MapperClientService ClientService { get; set; }
+    [Inject] private NavigationService NavService { get; set; }
+    private bool _finishedLoading = false;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (!ClientService.IsCurrentlyConnected)
+        {
+            NavService.Navigate(NavigationService.Pages.MapperManager);
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        _finishedLoading = true;
+        StateHasChanged();
+    }
+
+}

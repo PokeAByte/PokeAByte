@@ -13,6 +13,8 @@ public partial class LoadMapper : ComponentBase
 {
     [Inject] public MapperClientService? MapperConnectionService { get; set; }
     [Inject] public NavigationService? NavigationService { get; set; }
+    public bool IsLoading => _isMapperLoading;
+
     private IEnumerable<MapperFileModel>? _mapperFiles;
     private string _selectedMapperId = "";
     private bool _isMapperLoading = false;
@@ -43,9 +45,9 @@ public partial class LoadMapper : ComponentBase
         var result = await MapperConnectionService?.ChangeMapper(_selectedMapperId)!;
         if (result.IsSuccess)
         {
-            _isMapperLoading = false;
             NavigationService?.TogglePropertiesButton();
             NavigationService?.Navigate(NavigationService.Pages.Properties);
+            _isMapperLoading = false;
             StateHasChanged();
         }
         else
