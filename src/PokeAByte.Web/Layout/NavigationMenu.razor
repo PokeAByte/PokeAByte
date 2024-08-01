@@ -1,4 +1,5 @@
 ﻿@using PokeAByte.Web.Services
+@using PokeAByte.Web.Services.Navigation
 <MudGrid Class="d-flex">
      <MudItem xs="4"
               Style="overflow: hidden"
@@ -29,8 +30,8 @@
                           IconColor="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
                           Size="Size.Large"
                           DisableElevation="true"
-                          Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.DataProperties) ?? false"
-                          OnClick="() => NavButtonClickHandler(NavigationService.Pages.DataProperties)"
+                          Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.Properties) ?? false"
+                          OnClick="() => NavButtonClickHandler(NavigationService.Pages.Properties)"
                           Class="@_buttonBorder">
                     Properties
                </MudButton>

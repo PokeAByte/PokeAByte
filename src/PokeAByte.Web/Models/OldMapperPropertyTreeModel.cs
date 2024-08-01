@@ -4,10 +4,10 @@ using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
 
-public class MapperPropertyTreeModel
+public class OldMapperPropertyTreeModel
 {
     public event EventHandler? PropertyChangedEvent;
-    public event Action<MapperPropertyTreeModel>? PropertyExpandedEvent;
+    public event Action<OldMapperPropertyTreeModel>? PropertyExpandedEvent;
     public required string Name { get; set; }
     public int Depth { get; set; }
     private bool _isExpanded = false;
@@ -36,8 +36,8 @@ public class MapperPropertyTreeModel
     }
     public bool IsPropertyExpanded { get; set; }
     public PropertyModel? Property { get; init; }
-    public HashSet<MapperPropertyTreeModel> Children { get; set; } = [];
-    public HashSet<MapperPropertyTreeModel> DisplayedChildren { get; set; } = [];
+    public HashSet<OldMapperPropertyTreeModel> Children { get; set; } = [];
+    public HashSet<OldMapperPropertyTreeModel> DisplayedChildren { get; set; } = [];
     public int Width { get; set; } = 125;
     public bool HasChildren { get; set; }
     public required Guid MapperId { get; set; }
@@ -63,7 +63,7 @@ public class MapperPropertyTreeModel
         return Name.Length;
     }
 
-    private static void UpdateDisplayWidth(MapperPropertyTreeModel model)
+    private static void UpdateDisplayWidth(OldMapperPropertyTreeModel model)
     {
         if (!model.HasChildren) return;
         foreach (var dc in model.DisplayedChildren)
@@ -72,7 +72,7 @@ public class MapperPropertyTreeModel
         }
     }
 
-    public static void UpdateOpenedDisplayedChildren(MapperPropertyTreeModel model)
+    public static void UpdateOpenedDisplayedChildren(OldMapperPropertyTreeModel model)
     {
         foreach (var child in model.Children.Where(x => x._isExpanded))
         {
@@ -80,7 +80,7 @@ public class MapperPropertyTreeModel
             UpdateDisplayedChildren(child);
         }
     }
-    public static void UpdateDisplayedChildren(MapperPropertyTreeModel model)
+    public static void UpdateDisplayedChildren(OldMapperPropertyTreeModel model)
     {
         if (model.DisplayedChildren.Count > 1)
             return;
@@ -89,7 +89,7 @@ public class MapperPropertyTreeModel
         //in later when we need them
         foreach (var dc in model.DisplayedChildren.Where(x => x.HasChildren))
         {
-            dc.DisplayedChildren = [new MapperPropertyTreeModel
+            dc.DisplayedChildren = [new OldMapperPropertyTreeModel
                 {
                     Name = "",
                     MapperId = default,
@@ -108,11 +108,11 @@ public class MapperPropertyTreeModel
 
 public class MapperPropertyTree : IDisposable
 {
-    public HashSet<MapperPropertyTreeModel> Tree { get; } = [];
+    public HashSet<OldMapperPropertyTreeModel> Tree { get; } = [];
 
     public void AddProperty(PropertyModel model, 
         MapperMetaModel metadata,
-        Action<MapperPropertyTreeModel> onExpanded)
+        Action<OldMapperPropertyTreeModel> onExpanded)
     {
         var paths = model.Path.Split('.');
         if (paths.Length == 0)
@@ -121,7 +121,7 @@ public class MapperPropertyTree : IDisposable
         if (Tree.Count == 0)
         {
             //create new entry
-            var newEntry = new MapperPropertyTreeModel
+            var newEntry = new OldMapperPropertyTreeModel
             {
                 Name = paths[0],
                 Property = paths.Length == 1
@@ -141,7 +141,7 @@ public class MapperPropertyTree : IDisposable
         if (currentTreePath is null)
         {
             //Node was not found with this given path, create it.
-            currentTreePath = new MapperPropertyTreeModel
+            currentTreePath = new OldMapperPropertyTreeModel
             {
                 Name = paths[0],
                 Property = paths.Length == 1 ? model : null,
@@ -174,7 +174,7 @@ public class MapperPropertyTree : IDisposable
             if (child is null)
             {
                 //The child does not exist for this given path, create it.
-                child = new MapperPropertyTreeModel
+                child = new OldMapperPropertyTreeModel
                 {
                     Name = paths[index],
                     Depth = index,

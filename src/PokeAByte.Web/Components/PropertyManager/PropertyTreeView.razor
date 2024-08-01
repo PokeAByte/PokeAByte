@@ -1,0 +1,55 @@
+﻿@using PokeAByte.Web.Models
+<MudTreeView Items="PropertyService.PropertyTree"
+             Color="Color.Default"
+             Dense="true"
+             Hover="true"
+             ExpandOnClick="false"
+             Ripple="false">
+    <ItemTemplate>
+        @{
+            var property = context.Value ?? throw new InvalidOperationException("Value cannot be null.");
+            var presenter = context is PropertyTreePresenter treePresenter ? 
+                treePresenter : 
+                null;
+        }
+        <MudTreeViewItem Items="@(context.Children?
+                             .Where(x => x.Value?.CurrentCount <= _maxCount)
+                             .ToList())"
+                         Expanded="@context.Expanded"
+                         Value="@property"
+                         Text="@context.Text"
+                         Class="mud-elevation-1 my-1 px-3 rounded rounded"
+                         Style="background-color:var(--mud-palette-background)"
+                         Disabled="@(presenter?.IsDisabled is true)"
+                         OnClick="() => OnTreeItemClick(context)">
+            <Content>
+                @if (context.HasChildren)
+                {
+                    <MudIcon Icon="@SetIcon(context)"
+                             Class="pr-2"/>
+                }
+                @if (presenter is not null &&
+                     presenter.IsDisabled != true &&
+                     property.PropertyModel is not null &&
+                     property.CurrentCount + 1 <= _maxCount)
+                {
+                    <PropertyExpansionView Context="@presenter"/>
+                }
+                else if (presenter is not null &&
+                         presenter.IsDisabled != true &&
+                         property.PropertyModel is not null &&
+                         property.CurrentCount == _maxCount)
+                {
+                    <MudLink OnClick="() => OnClickLoadEntries(presenter)"
+                             Color="Color.Success">
+                        Click here to load more entries.
+                    </MudLink>
+                }
+                else if (property.PropertyModel is null)
+                {
+                        <MudText Typo="Typo.body2" Class="py-1">@context.Text</MudText>
+                }
+            </Content>
+        </MudTreeViewItem>
+    </ItemTemplate>
+</MudTreeView>

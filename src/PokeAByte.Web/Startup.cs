@@ -13,6 +13,11 @@ using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Hubs;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Drivers;
+using PokeAByte.Web.Services.Mapper;
+using PokeAByte.Web.Services.Navigation;
+using PokeAByte.Web.Services.Notifiers;
+using PokeAByte.Web.Services.Properties;
 
 namespace PokeAByte.Web;
 
@@ -101,7 +106,7 @@ public static class Startup
                 var driverService = x.GetRequiredService<DriverService>();
                 var mapperSettings = x.GetRequiredService<MapperSettingsService>();
                 return new MapperClientService(mapperFs, 
-                    logger, 
+                    logger,
                     CreateClient(x),
                     clientNotif, 
                     propUpdate, 
@@ -110,7 +115,7 @@ public static class Startup
             services.AddScoped<MapperManagerService>();
             services.AddScoped<NavigationService>();
             services.AddScoped<ChangeNotificationService>();
-            
+            services.AddScoped<PropertyService>();
             //For some reason, the Driver controller requires special DI despite not needing it 
             //in the original implementation? Just add them to the DI
             services.AddSingleton<IPokeAByteInstance, PokeAByteInstance>();

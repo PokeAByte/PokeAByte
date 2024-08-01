@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Layout;
 

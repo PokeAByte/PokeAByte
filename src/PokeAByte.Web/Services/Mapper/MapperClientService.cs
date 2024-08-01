@@ -5,14 +5,16 @@ using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
+using PokeAByte.Web.Services.Drivers;
+using PokeAByte.Web.Services.Notifiers;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperClientService
 {
     private readonly IMapperFilesystemProvider _mapperFs;
     private readonly ILogger<MapperClientService> _logger;
-    private readonly MapperClient _client;
+    public readonly MapperClient Client;
     private readonly PropertyUpdateService _propertyUpdateService;
     private readonly DriverService _driverService;
     public MapperClientService(IMapperFilesystemProvider mapperFs,
@@ -24,7 +26,7 @@ public class MapperClientService
     {
         _mapperFs = mapperFs;
         _logger = logger;
-        _client = client;
+        Client = client;
         _propertyUpdateService = propertyUpdateService;
         _driverService = driverService;
         clientNotifier.PropertyChangedEvent += HandlePropertyChangedEvent;
@@ -40,16 +42,16 @@ public class MapperClientService
     {
         get
         {
-            if (_client.IsMapperLoaded is false)
+            if (Client.IsMapperLoaded is false)
             {
                 OnMapperIsUnloaded?.Invoke();
             }
-            return _client.IsMapperLoaded;
+            return Client.IsMapperLoaded;
         }
     }
-    public Color GetCurrentConnectionColor() => _client.IsMapperLoaded ? 
+    public Color GetCurrentConnectionColor() => Client.IsMapperLoaded ? 
         ConnectedColor : DisconnectedColor;
-    public string GetCurrentConnectionName() => _client.IsMapperLoaded ?
+    public string GetCurrentConnectionName() => Client.IsMapperLoaded ?
         "Connected" : "Disconnected";
 
     public List<PropertyModel> Properties { get; set; } = [];
@@ -64,10 +66,10 @@ public class MapperClientService
         var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
         try
         {
-            var result = await _client.LoadMapper(mapper);
+            var result = await Client.LoadMapper(mapper);
             if (result)
             {
-                Properties = _client.GetProperties()?.ToList() ?? [];
+                Properties = Client.GetProperties()?.ToList() ?? [];
             }
             return result ? Result.Success() : 
                 Result.Failure(Error.FailedToLoadMapper,
@@ -101,28 +103,28 @@ public class MapperClientService
 
     public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
     {
-        var glossaryItems = _client.GetGlossaryByKey(key);
+        var glossaryItems = Client.GetGlossaryByKey(key);
         var glossaryList = glossaryItems?.ToList();
         if(glossaryList is null || glossaryList.Count == 0)
             return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
         return Result.Success(glossaryList);
     }
 
-    public Result<List<TreeItemData<PropertyTreeData>>> GetPropertiesTree()
+    public Result<List<TreeItemData<OldPropertyTreeData>>> GetPropertiesTree()
     {
-        var propTree = _client.GetTreeData();
+        var propTree = Client.GetTreeData();
         if (propTree is not null)
             return Result.Success(propTree);
         return Result
-            .Failure<List<TreeItemData<PropertyTreeData>>>(
+            .Failure<List<TreeItemData<OldPropertyTreeData>>>(
                 Error.NoMapperPropertiesFound);
     }
 
     public Result<MapperMetaModel> GetMetaData()
     {
-        if (!_client.IsMapperLoaded)
+        if (!Client.IsMapperLoaded)
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
-        var meta = _client.GetMetaData();
+        var meta = Client.GetMetaData();
         return meta is null ? 
             Result.Failure<MapperMetaModel>(Error.FailedToLoadMetaData) :
             Result.Success(meta);
@@ -133,40 +135,40 @@ public class MapperClientService
         if (string.IsNullOrEmpty(propertyPath) ||
             string.IsNullOrEmpty(value))
             return Result.Failure(Error.StringIsNullOrEmpty);
-        if (!_client.IsMapperLoaded)
+        if (!Client.IsMapperLoaded)
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         var path = propertyPath.StripEndingRoute().FromRouteToPath();
-        if (await _client.WriteProperty(path, value, isFrozen))
+        if (await Client.WriteProperty(path, value, isFrozen))
             return Result.Success();
         return Result.Failure(Error.FailedToUpdateProperty);
     }
     private void HandlePropertyChangedEvent(object sender, PropertyChangedEventArgs args)
     {
-        if(!_client.IsMapperLoaded)
+        if(!Client.IsMapperLoaded)
             return;
         foreach (var prop in args.ChangedProperties)
         {
-            _client.UpdateProperty(prop);
+            Client.UpdateProperty(prop);
             _propertyUpdateService.NotifyChanges(prop.Path);
         }
     }
     public void UpdateEditPropertyModel(EditPropertyModel model)
     {        
-        if(!_client.IsMapperLoaded)
+        if(!Client.IsMapperLoaded)
             return;
-        var prop = _client.GetPropertyByPath(model.Path);
+        var prop = Client.GetPropertyByPath(model.Path);
         model.UpdateFromPropertyModel(prop);
     }
 
     public async Task UnloadMapper()
     {
-        if(!_client.IsMapperLoaded)
+        if(!Client.IsMapperLoaded)
             return;
-        await _client.UnloadMapper();
+        await Client.UnloadMapper();
     }
 
     public void OnReadExceptionHandler(Action handler)
     {
-        _client.AttachOnReadExceptionOccuredHandler(handler);
+        Client.AttachOnReadExceptionOccuredHandler(handler);
     }
 }

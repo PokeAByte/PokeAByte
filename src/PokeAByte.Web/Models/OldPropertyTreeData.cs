@@ -4,13 +4,13 @@ using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
 
-public sealed class PropertyTreeData : TreeItemData<PropertyTreeModel>
+public sealed class OldPropertyTreeData : TreeItemData<PropertyTreeModel>
 {
     public int Depth { get; init; }
     public bool IsParentExpanded => Parent?.Expanded ?? false;
-    public TreeItemData<PropertyTreeData>? Parent { get; init; }
+    public TreeItemData<OldPropertyTreeData>? Parent { get; init; }
 
-    public PropertyTreeData(string text, string icon, PropertyTreeModel property, int depth)
+    public OldPropertyTreeData(string text, string icon, PropertyTreeModel property, int depth)
         : base(property)
     {
         Text = text;
@@ -39,12 +39,12 @@ public class PropertyTreeModel
 }
 public static class PropertyTreeDataExtensions
 {
-    public static TreeItemData<PropertyTreeData>? CloneWithoutChildren(this TreeItemData<PropertyTreeData> treeItemData)
+    public static TreeItemData<OldPropertyTreeData>? CloneWithoutChildren(this TreeItemData<OldPropertyTreeData> treeItemData)
     {
         if (treeItemData.Value?.Value is null)
             return null;
         
-        var treeVal = new PropertyTreeData(
+        var treeVal = new OldPropertyTreeData(
             treeItemData.Value.Text ?? "",
             treeItemData.Value.Icon ?? "",
             treeItemData.Value.Value,
@@ -56,9 +56,9 @@ public static class PropertyTreeDataExtensions
             Parent = treeItemData.Value.Parent
         }; 
         
-        var newTreeItemData = new TreeItemData<PropertyTreeData>
+        var newTreeItemData = new TreeItemData<OldPropertyTreeData>
         {
-            Children = treeItemData.HasChildren ? [new TreeItemData<PropertyTreeData>()] : [],
+            Children = treeItemData.HasChildren ? [new TreeItemData<OldPropertyTreeData>()] : [],
             Expandable = treeItemData.Expandable,
             Text = treeItemData.Text,
             Icon = treeItemData.Icon,
@@ -66,7 +66,7 @@ public static class PropertyTreeDataExtensions
         };
         return newTreeItemData;
     }
-    public static void AddProperty(this List<TreeItemData<PropertyTreeData>> tree,
+    public static void AddProperty(this List<TreeItemData<OldPropertyTreeData>> tree,
         PropertyModel model, 
         MapperMetaModel metadata)
     {
@@ -77,7 +77,7 @@ public static class PropertyTreeDataExtensions
         if (tree.Count == 0)
         {
             //create new entry
-            var newPropEntry = new PropertyTreeData(paths[0],
+            var newPropEntry = new OldPropertyTreeData(paths[0],
                     "", 
                     new PropertyTreeModel
                     {
@@ -90,7 +90,7 @@ public static class PropertyTreeDataExtensions
                         FullPath = paths[0],
                     },
                     0);
-            var newEntry = new TreeItemData<PropertyTreeData>()
+            var newEntry = new TreeItemData<OldPropertyTreeData>()
             {
                 Text = paths[0],
                 Icon = "",
@@ -105,7 +105,7 @@ public static class PropertyTreeDataExtensions
         if (currentTreePath is null)
         {
             //Node was not found with this given path, create it.
-            var newPropEntry = new PropertyTreeData(paths[0],
+            var newPropEntry = new OldPropertyTreeData(paths[0],
                     "", 
                     new PropertyTreeModel
                     {
@@ -118,7 +118,7 @@ public static class PropertyTreeDataExtensions
                         FullPath = paths[0]
                     },
                     0);
-            currentTreePath = new TreeItemData<PropertyTreeData>()
+            currentTreePath = new TreeItemData<OldPropertyTreeData>()
             {
                 Text = paths[0],
                 Icon = "",
@@ -148,7 +148,7 @@ public static class PropertyTreeDataExtensions
             if (child is null)
             {
                 //The child does not exist for this given path, create it.
-                var newPropEntry = new PropertyTreeData(paths[0],
+                var newPropEntry = new OldPropertyTreeData(paths[0],
                     "", 
                     new PropertyTreeModel
                     {
@@ -163,7 +163,7 @@ public static class PropertyTreeDataExtensions
                 {
                     Parent = currentTreePath
                 };
-                child = new TreeItemData<PropertyTreeData>()
+                child = new TreeItemData<OldPropertyTreeData>()
                 {
                     Text = paths[index],
                     Icon = "",

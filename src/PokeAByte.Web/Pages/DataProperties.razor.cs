@@ -2,6 +2,9 @@
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
+using PokeAByte.Web.Services.Navigation;
+using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Pages;
 
@@ -13,9 +16,9 @@ public partial class DataProperties
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     //private HashSet<MapperPropertyTreeModel> PropertyItems { get; set; } = [];
     private string MapperName { get; set; } = "";
-    private string GetCursor(TreeItemData<PropertyTreeData> context) =>
+    private string GetCursor(TreeItemData<OldPropertyTreeData> context) =>
         context.HasChildren ? "cursor:pointer" : "cursor:default";
-    public IReadOnlyCollection<TreeItemData<PropertyTreeData>>? PropertyTreeItems { get; set; }
+    public IReadOnlyCollection<TreeItemData<OldPropertyTreeData>>? PropertyTreeItems { get; set; }
 
     protected override void OnInitialized()
     {
@@ -40,7 +43,7 @@ public partial class DataProperties
         PropertyTreeItems = propsResult
             .ResultValue;
     }
-    private string SetIcon(TreeItemData<PropertyTreeData> model)
+    private string SetIcon(TreeItemData<OldPropertyTreeData> model)
     {
         return model.HasChildren
             ? (model.Expanded ? Icons.Material.Filled.FolderOpen : Icons.Material.Filled.Folder)

@@ -1,4 +1,5 @@
 ﻿using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Navigation;
 
 namespace PokeAByte.Web.Models;
 

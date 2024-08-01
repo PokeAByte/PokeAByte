@@ -1,0 +1,134 @@
+﻿<MudSimpleTable Style="overflow-x: auto;"
+                Bordered="true"
+                Dense="true">
+    <tbody>
+    <tr>
+        <td class="name copyable" @onclick="() => CopyToClipboard(Context.ValueString)"> Value</td>
+        <td class="copyBtn" @onclick="() => CopyToClipboard(Context.ValueString)" >
+            <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
+                     Size="Size.Small"
+                     ViewBox="@_copyBtnViewBox"/>
+        </td>
+        <td style="@($"width:{_valueWidth}px")">
+            <PropertyValueEditor EditContext="Context"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="name copyable" @onclick="() => CopyToClipboard(Context.Path)">Path</td>
+        <td class="copyBtn" @onclick="() => CopyToClipboard(Context.Path)">
+            <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
+                           Size="Size.Small" 
+                           ViewBox="@_copyBtnViewBox" />
+        </td>
+        <td>
+            @Context.Path
+        </td>
+    </tr>
+    <tr>
+        <td class="name">Type</td>
+        <td class="copyBtn">            
+            <MudIcon Size="Size.Small" 
+                     ViewBox="@_copyBtnViewBox" />
+        </td>
+        <td>@Context.Type</td>
+    </tr>
+    <tr>
+        <td class="name copyable" @onclick="() => CopyToClipboard(Context.AddressString)">Address</td>
+        <td class="copyBtn" @onclick="() => CopyToClipboard(Context.AddressString)" >
+            <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
+                           Size="Size.Small"
+                           ViewBox="@_copyBtnViewBox"/>
+        </td>
+        <td>@Context.AddressString</td>
+    </tr>
+    <tr>
+        <td class="name">Length</td>
+        <td class="copyBtn">            
+            <MudIcon Size="Size.Small" 
+                     ViewBox="@_copyBtnViewBox" />
+        </td>
+        <td>@Context.Length</td>
+    </tr>
+    <tr>
+        <td class="name">Size</td>
+        <td class="copyBtn">            
+            <MudIcon Size="Size.Small" 
+                     ViewBox="@_copyBtnViewBox" />
+        </td>
+        <td>@Context.Size</td>
+    </tr>
+    <tr>
+        <td class="name copyable" @onclick="() => CopyToClipboard(Context.GetReference)">Reference</td>
+        <td class="copyBtn" @onclick="() => CopyToClipboard(Context.GetReference)">
+            <MudIcon Icon="@Icons.Material.Filled.ContentCopy" 
+                           Size="Size.Small"
+                     ViewBox="@_copyBtnViewBox"/>
+        </td>
+        <td>
+            @Context.Reference
+        </td>
+    </tr>
+    <tr>
+        <td class="name copyable" @onclick="() => CopyToClipboard(Context.ByteArray.ToString())">Bytes</td>
+        <td class="copyBtn" @onclick="() => CopyToClipboard(Context.ByteArray.ToString())" >
+            <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
+                           Size="Size.Small"
+                     ViewBox="@_copyBtnViewBox"/>
+        </td>
+        <td>
+            <MudGrid Spacing="1" Justify="Justify.FlexStart">
+                <MudItem md="@_byteArray1Break">
+                    <div class="d-flex flex-grow-1 gap-2">
+                        @foreach (var ba in _byteArray1)
+                        {
+                            <div class="flex-shrink-1">
+                                <MudTextField Value="@ba"
+                                              MaxLength="2"
+                                              Class="align-center justify-center mt-n4"
+                                              Style="height: 25px"
+                                              Margin="Margin.Dense"
+                                              ShrinkLabel="true" />
+                            </div>
+                        }
+                    </div>
+                </MudItem>
+                <MudItem md="@_byteArray2Break">
+                    <div class="d-flex flex-grow-1 gap-2">
+                        @foreach (var ba in _byteArray2)
+                        {
+                            <div class="flex-shrink-1">
+                                <MudTextField Value="@ba"
+                                              MaxLength="2"
+                                              Class="align-center justify-center mt-n4"
+                                              Style="height: 25px"
+                                              Margin="Margin.Dense"
+                                              ShrinkLabel="true" />
+                            </div>
+                        }
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </td>
+    </tr>
+    </tbody>
+</MudSimpleTable>
+<style>
+    table {
+        table-layout: fixed; 
+        width: @($"{_tableWidth}px") !important;
+    }
+    td.name {
+        width: @($"{_nameWidth}px");
+    }
+    td.copyable {
+        cursor: pointer !important;
+    }
+    td.copyBtn {
+        padding-top: 8px !important;
+        width: @($"{_copyWidth}px");
+        cursor: pointer !important;
+    }
+    .mud-simple-table.mud-table-dense * tr td {
+        padding: 2px 8px 2px 7px;
+    }
+</style>

@@ -3,7 +3,7 @@ using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperSettingsService
 {
@@ -89,7 +89,57 @@ public class MapperSettingsService
         }
     }
 
-    public void OnPropertyExpandedHandler(MapperPropertyTreeModel prop)
+    public void OnPropertyExpandedHandler(PropertyTreePresenter prop)
+    {
+        if (_currentMapperModel is null)
+            return;
+        if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
+            return;
+        var propModel = _currentMapperModel.Properties
+            .FirstOrDefault(x => 
+                x.PropertyPath == prop.Value.FullPath && 
+                x.PropertyName == prop.Value.Name);
+        if (propModel is null)
+        {
+            //make sure we don't add parents back in
+            var childFound = _currentMapperModel
+                .Properties
+                .Any(x =>
+                    x.PropertyPath != prop.Value.Name &&
+                    x.PropertyPath.Contains(prop.Value.Name));
+            if (childFound)
+                return;
+            var almostFullPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
+            var newPropModel = new PropertySettingsModel
+            {
+                PropertyName = prop.Value.Name,
+                PropertyPath = almostFullPath,
+                IsExpanded = prop.Expanded,
+                HasChildren = prop.HasChildren,
+                HasProperty = prop.Value.PropertyModel is not null
+            };
+            _currentMapperModel.Properties.Add(newPropModel);
+        }
+        else
+        {
+            propModel.IsExpanded = prop.Expanded;
+            if (propModel.IsExpanded == false)
+            {            
+                //remove from list
+                _currentMapperModel.Properties.RemoveAll(x => 
+                    prop.Value.FullPath == x.PropertyPath);
+            }
+        }
+
+        var savedMapper = _savedMappers
+            .FirstOrDefault(x => x == _currentMapperModel);
+        if (savedMapper is null)
+            _savedMappers.Add(_currentMapperModel);
+        else
+            savedMapper = _currentMapperModel;
+        SaveSettings();
+    }
+    public void OnPropertyExpandedHandler(OldMapperPropertyTreeModel prop)
     {
         //find the property
         if (_currentMapperModel is null)
@@ -138,7 +188,22 @@ public class MapperSettingsService
         SaveSettings();
     }
 
-    public void InitializePropertyExpansions(HashSet<MapperPropertyTreeModel> tree)
+    public List<PropertySettingsModel>? GetOpenProperties()
+    {
+        if (_currentMapperModel is null)
+            return null;
+        return _currentMapperModel
+            .Properties.Select(x => new PropertySettingsModel
+            {
+                PropertyName = x.PropertyName,
+                PropertyPath = x.PropertyPath,
+                IsExpanded = x.IsExpanded,
+                HasChildren = x.HasChildren,
+                HasProperty = x.HasProperty
+            })
+            .ToList();
+    }
+    public void InitializePropertyExpansions(HashSet<OldMapperPropertyTreeModel> tree)
     {
         if (_currentMapperModel is null)
             return;

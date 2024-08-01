@@ -1,0 +1,31 @@
+﻿<MudPaper Width="100%"
+          Height="@PropertyHeight"
+          Class="d-flex align-center rounded ml-n4"
+          Elevation="0"
+          Style="cursor: pointer; background-color:var(--mud-palette-surface)">
+    <MudStack Class="flex-grow-1">
+        <MudGrid Spacing="3"
+                 Justify="Justify.FlexStart">
+            <MudItem>
+                <MudIcon Icon="@Icons.Material.Filled.CatchingPokemon"
+                         Color="IconColor"
+                         @onclick="OnClickExpand"
+                         Class="ml-auto mud-width-full d-flex pt-1"/>
+            </MudItem>
+            <MudItem @onclick="OnClickExpand"
+                     Class="align-content-center">
+                <MudText Typo="Typo.body2" Style="@Width" Class="d-flex justify-start" id="mudText">
+                    @Context.Value!.Name:
+                </MudText>
+            </MudItem>
+            <MudItem Class="align-center cursor-default">
+                <PropertyValueEditor EditContext="_editContext"/>
+            </MudItem>
+            <MudItem @onclick="OnClickExpand"
+                     Class="align-content-center flex-grow-1" Style="width: auto;"></MudItem>
+        </MudGrid>
+        <MudContainer Fixed="true" Style="@DisplayContent" Class="cursor-default">
+            <PropertyTableView Context="_editContext"/>
+        </MudContainer>
+    </MudStack>
+</MudPaper>

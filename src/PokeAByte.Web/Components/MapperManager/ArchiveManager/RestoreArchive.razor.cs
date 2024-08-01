@@ -4,6 +4,7 @@ using MudBlazor;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Components.MapperManager.ArchiveManager;
 public partial class RestoreArchive : ComponentBase

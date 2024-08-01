@@ -7,6 +7,7 @@ using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web;
 
@@ -20,7 +21,7 @@ public class MapperClient(
     MapperSettingsService mapperSettings)
 {    
     //Property Tree 
-    private List<TreeItemData<PropertyTreeData>> _cachedMapperPropertyTree = [];
+    private List<TreeItemData<OldPropertyTreeData>> _cachedMapperPropertyTree = [];
 
     public string ConnectionString { get; set; } = "";
     public bool IsMapperLoaded => _mapperModel is not null;
@@ -126,9 +127,9 @@ public class MapperClient(
             .AsEnumerable();
     }
     
-    public List<TreeItemData<PropertyTreeData>>? GetTreeData()
+    public List<TreeItemData<OldPropertyTreeData>>? GetTreeData()
     {
-        var propTree = new List<TreeItemData<PropertyTreeData>>();
+        var propTree = new List<TreeItemData<OldPropertyTreeData>>();
         var props = GetProperties();
         var meta = GetMetaData();
         if (props is null)

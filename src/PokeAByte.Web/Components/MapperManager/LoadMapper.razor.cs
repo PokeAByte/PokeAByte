@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Components.Web;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
+using PokeAByte.Web.Services.Navigation;
 
 namespace PokeAByte.Web.Components.MapperManager;
 
@@ -42,7 +44,8 @@ public partial class LoadMapper : ComponentBase
         if (result.IsSuccess)
         {
             _isMapperLoading = false;
-            NavigationService?.Navigate(NavigationService.Pages.DataProperties);
+            NavigationService?.TogglePropertiesButton();
+            NavigationService?.Navigate(NavigationService.Pages.Properties);
             StateHasChanged();
         }
         else

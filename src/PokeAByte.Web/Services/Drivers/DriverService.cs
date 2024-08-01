@@ -1,10 +1,9 @@
-﻿using System.Text.Json;
-using System.Timers;
+﻿using System.Timers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using Timer = System.Timers.Timer;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Drivers;
 
 public class DriverService
 {

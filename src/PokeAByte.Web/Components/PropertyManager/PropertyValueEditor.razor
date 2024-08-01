@@ -1,0 +1,71 @@
+﻿<MudStack Row="true" Style="cursor: default !important;">
+    @if (EditContext.Type is "string")
+    {
+    <MudTextField @bind-Value="EditContext.ValueString"
+                  Variant="Variant.Text"
+                  Margin="Margin.Dense"
+                  OnBlur="InputFocusLostHandler"
+                  ShrinkLabel="true"
+                  ReadOnly="EditContext.IsReadOnly"
+                  Disabled="EditContext.IsReadOnly"
+                  Immediate="true"
+                  AutoGrow="false"
+                  OnKeyDown="OnKeyDownHandler"/>
+    }
+    else if (!string.IsNullOrEmpty(EditContext.Reference))
+    {
+    <MudAutocomplete @bind-Value="EditContext.ValueString"
+                     SearchFunc="SearchForReference"
+                     Dense="true"
+                     Margin="Margin.Dense"
+                     Class="mt-n1"
+                     Style="height: 25px;"
+                     Adornment="Adornment.None"
+                     OnBlur="InputFocusLostHandler"
+                     ShrinkLabel="true"
+                     MaxItems="15">
+        <BeforeItemsTemplate>
+            <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+        </BeforeItemsTemplate>
+    </MudAutocomplete>
+    }
+    else if (EditContext.Type is "int" or "uint" or "nibble")
+    {
+    <MudTextField @bind-Value="EditContext.ValueString"
+                  Variant="Variant.Text"
+                  Style="height: 25px"
+                  Class=""
+                  Margin="Margin.Dense"
+                  OnBlur="InputFocusLostHandler"
+                  ShrinkLabel="true"
+                  Immediate="true"
+                  OnKeyDown="OnKeyDownHandler"/>
+    }
+    else if (EditContext.Type is "bit" or "bool")
+    {
+    <MudSwitch @bind-Value="EditContext.ValueString"
+               Color="Color.Success"
+               Size="Size.Small"
+               Converter="MudSwitchConverter"
+               UnCheckedColor="@Color.Secondary"/>
+    }
+    else
+    {
+    <MudText>@EditContext.Value</MudText>
+    }
+    <MudIconButton Icon="@Icons.Material.Filled.Save"
+                   id="saveButtonIcon"
+                   Title="Save"
+                   Disabled="!EditContext.IsValueEdited"
+                   OnClick="SaveBtnOnClickHandler"/>
+    <MudIconButton Icon="@FreezeIcon"
+                   Title="Freeze"
+                   OnClick="OnClickFreezeHandler"/>
+    @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
+                   Title="Pin"/>*@
+</MudStack>
+<style>
+    span.mud-switch-base {
+        padding: 5px !important;
+    }
+</style>

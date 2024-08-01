@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using PokeAByte.Web.Models;
+using PokeAByte.Web.Services.Mapper;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Navigation;
 
 public class NavigationService
 {
@@ -9,8 +10,8 @@ public class NavigationService
     
     private readonly List<ButtonModel> _navigationButtons = [];
     private readonly NavigationManager _navigationManager;
-    
-    public NavigationService(NavigationManager navMan)
+    public NavigationService(NavigationManager navMan,
+        MapperClientService mapperClientService)
     {
         _navigationManager = navMan;
         //Todo: This is not always the case
@@ -26,8 +27,8 @@ public class NavigationService
         });
         _navigationButtons.Add(new ButtonModel
         {
-            Page = Pages.DataProperties, 
-            IsDeactivated = false
+            Page = Pages.Properties, 
+            IsDeactivated = true
         });
         _navigationButtons.Add(new ButtonModel
         {
@@ -56,6 +57,7 @@ public class NavigationService
         Pages.MapperConnectionStatus => AppRoutes.MapperConnectionStatus,
         Pages.MapperManager => AppRoutes.MapperManager,
         Pages.DataProperties => AppRoutes.DataProperties,
+        Pages.Properties => AppRoutes.Properties,
         Pages.AppSettings => AppRoutes.AppSettings,
         Pages.Error => AppRoutes.Error,
         _ => AppRoutes.Error
@@ -72,6 +74,7 @@ public class NavigationService
             AppRoutes.Home => Pages.Home,
             AppRoutes.MapperManager => Pages.MapperManager,
             AppRoutes.DataProperties => Pages.DataProperties,
+            AppRoutes.Properties => Pages.Properties,
             AppRoutes.AppSettings => Pages.AppSettings,
             AppRoutes.MapperConnectionStatus => Pages.MapperConnectionStatus,
             _ => Pages.Error
@@ -98,8 +101,17 @@ public class NavigationService
         MapperConnectionStatus,
         MapperManager,
         DataProperties,
+        Properties,
         AppSettings,
-        Error = 99
+        Error = 99,
+    }
+
+    public void TogglePropertiesButton()
+    {
+        var propButton = _navigationButtons
+            .FirstOrDefault(x => x.Page == Pages.Properties);
+        if (propButton is null) return;
+        propButton.IsDeactivated = !propButton.IsDeactivated;
     }
 }
 
@@ -109,6 +121,7 @@ public static class AppRoutes
     public const string MapperConnectionStatus = "/ConnectionStatus";
     public const string MapperManager = "/MapperManager";
     public const string DataProperties = "/DataProperties";
+    public const string Properties = "/Properties";
     public const string AppSettings = "/AppSettings";
     public const string Error = "/Error";
 }
