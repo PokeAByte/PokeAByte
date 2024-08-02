@@ -6,9 +6,6 @@ Poke-A-Byte is designed for research and investigation into system memory
 of populator video game systems. This information is made available
 in an easy-to-use JSON format that is human-readable. \
 Live updates to this data are provided through websockets.
- \
- \
-Join our Discord Server \
 
 ### VSCode Installation
 1) Clone the repo: `git clone https://github.com/Scotts-Thoughts/gamehook.git`
