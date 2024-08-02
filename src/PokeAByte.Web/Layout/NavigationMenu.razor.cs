@@ -29,7 +29,8 @@ public partial class NavigationMenu : ComponentBase, IDisposable
 
     private async void OnMapperIsUnloadedHandler()
     {
-        NavService?.TogglePropertiesButton();
+        NavService?.DisablePropertiesButton();
+        //NavService?.TogglePropertiesButton();
     }
 
     public void Dispose()

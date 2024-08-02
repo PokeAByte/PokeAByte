@@ -110,6 +110,14 @@ public class NavigationService
         if (propButton is null) return;
         propButton.IsDeactivated = !propButton.IsDeactivated;
     }
+
+    public void DisablePropertiesButton()
+    {
+        var propButton = _navigationButtons
+            .FirstOrDefault(x => x.Page == Pages.Properties);
+        if (propButton is null) return;
+        propButton.IsDeactivated = true;   
+    }
 }
 
 public static class AppRoutes
