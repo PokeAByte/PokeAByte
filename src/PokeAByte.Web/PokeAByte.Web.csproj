@@ -48,6 +48,9 @@
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
     </ItemGroup>
 
     <ItemGroup>
