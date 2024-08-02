@@ -83,17 +83,17 @@ public partial class LoadMapper : ComponentBase
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
     }
 
-    private Task<IEnumerable<string>> SearchForMapper(string searchArg, CancellationToken cancellationToken)
+    private async Task<IEnumerable<string>> SearchForMapper(string searchArg, CancellationToken token)
     {
-        if(_mapperFiles is null)
-            return Task.FromResult<IEnumerable<string>>([""]);
+        if (_mapperFiles is null)
+            return [];
         if (string.IsNullOrEmpty(searchArg))
-            return Task.FromResult(_mapperFiles
-                .Select(x => x.DisplayName));
-        return Task.FromResult(_mapperFiles
+            return _mapperFiles
+                .Select(x => x.DisplayName);
+        return _mapperFiles
             .Where(x => x.DisplayName
                 .Contains(searchArg, StringComparison.InvariantCultureIgnoreCase))
-            .Select(x => x.DisplayName));
+            .Select(x => x.DisplayName);
     }
 
     private Task InputFocusLostHandler(FocusEventArgs arg)
@@ -108,5 +108,9 @@ public partial class LoadMapper : ComponentBase
         {
             
         }
+    }
+
+    private void OnInputChanged(ChangeEventArgs arg)
+    {
     }
 }

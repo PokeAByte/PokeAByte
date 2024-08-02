@@ -10,12 +10,12 @@
             <MudAutocomplete Margin="Margin.Dense"
                              Dense="true"
                              T="string"
+                             HelperTextOnFocus="false"
                              Label="Mappers"
                              AnchorOrigin="Origin.BottomCenter"
                              Strict="true"
-                             ResetValueOnEmptyText="true"
-                             CoerceText="false"
-                             @bind-Text="_selectedMapper"
+                             @bind-Value="_selectedMapper"
+                             OnInternalInputChanged="OnInputChanged"
                              SearchFunc="@SearchForMapper">
                 <BeforeItemsTemplate>
                     <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>

@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PokeAByte.Web.Models;
+using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Components.PropertyManager;
 
 public partial class PropertyExpansionView : ComponentBase
 {
+    [Inject] public MapperClientService MapperClientService { get; set; }
     private EditPropertyModel _editContext = new();
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
     [Parameter] public required PropertyTreePresenter Context { get; set; }
@@ -43,7 +45,7 @@ public partial class PropertyExpansionView : ComponentBase
     private async void HandlePropertyUpdate(object? sender, EventArgs e)
     {
         if (_editContext is null) return;
-        //MapperClientService.UpdateEditPropertyModel(_editContext);
+        MapperClientService.UpdateEditPropertyModel(_editContext);
         await InvokeAsync(StateHasChanged);
     }
     private void OnClickExpand()
