@@ -14,7 +14,7 @@ public partial class PropertyTreeView : ComponentBase
     [Inject] private MapperClientService ClientService { get; set; }
     [Inject] private NavigationService? NavService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
-
+    
     private const int CountIncrease = 150;
     private int _maxCount = CountIncrease;
     private string _mapperName = "";
@@ -106,5 +106,29 @@ public partial class PropertyTreeView : ComponentBase
                 // ignored
             }
         });
+    }
+    private string GetWidth(PropertyTreePresenter context)
+    {
+        List<TreeItemData<PropertyTreeItem>>? children;
+        //Get the parent
+        if (context.Parent is not null)
+        {
+            children = context.Parent.Children;
+        }
+        else
+        {
+            //This is the root nodes just get a list of root nodes
+            children = PropertyService
+                .PropertyTree
+                .Where(x => x.HasChildren)
+                .ToList();
+        }
+        //Failed to find children just make the length the size of the entry (8*16 ~= 125 px)
+        if (children is null) return (context.Text?.Length ?? 16 * 8).ToString();
+        //Iterate through the children and get the largest text size
+        var length = children
+            .Aggregate(0, (max, current) =>
+                Math.Max(max, current.Text?.Length ?? 16)) * 10;
+        return length.ToString();
     }
 }

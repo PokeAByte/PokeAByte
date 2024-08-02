@@ -16,7 +16,8 @@ public partial class LoadMapper : ComponentBase
     public bool IsLoading => _isMapperLoading;
 
     private IEnumerable<MapperFileModel>? _mapperFiles;
-    private string _selectedMapperId = "";
+    //private string _selectedMapperId = "";
+    private string _selectedMapper = "";
     private bool _isMapperLoading = false;
     private string? _errorMessage = "";
     private string? _successMessage = "";
@@ -30,21 +31,42 @@ public partial class LoadMapper : ComponentBase
             throw new InvalidOperationException("Navigation service is null.");
         _mapperFiles = MapperConnectionService.GetMappers();
     }
-    private void SelectedValueChangeHandler(IEnumerable<string> values)
+    /*private void SelectedValueChangeHandler(IEnumerable<string> values)
     {
         _selectedMapperId = values.FirstOrDefault() ?? "";
-    }
+    }*/
 
     private async Task LoadMapperOnClickHandler(MouseEventArgs arg)
     {
-        if (string.IsNullOrWhiteSpace(_selectedMapperId))
+        if (string.IsNullOrWhiteSpace(_selectedMapper) || 
+            _mapperFiles is null)
             return;
         if (MapperConnectionService is null)
             return; //todo log
         _isMapperLoading = true;
-        var result = await MapperConnectionService?.ChangeMapper(_selectedMapperId)!;
+        var mapperId = "";
+        try
+        {
+            mapperId = _mapperFiles
+                .Where(x => x.DisplayName == _selectedMapper)
+                .Select(x => x.Id)
+                .SingleOrDefault();
+        }
+        catch (Exception e)
+        {
+            _errorMessage = $"{e.Message}";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(mapperId))
+        {
+            _errorMessage = "Failed to find selected mapper!";
+            return;
+        }
+        var result = await MapperConnectionService?.ChangeMapper(mapperId)!;
         if (result.IsSuccess)
         {
+            _selectedMapper = "";
             NavigationService?.TogglePropertiesButton();
             NavigationService?.Navigate(NavigationService.Pages.Properties);
             _isMapperLoading = false;
@@ -59,5 +81,32 @@ public partial class LoadMapper : ComponentBase
     private void OpenMapperFolder()
     {
         Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+    }
+
+    private Task<IEnumerable<string>> SearchForMapper(string searchArg, CancellationToken cancellationToken)
+    {
+        if(_mapperFiles is null)
+            return Task.FromResult<IEnumerable<string>>([""]);
+        if (string.IsNullOrEmpty(searchArg))
+            return Task.FromResult(_mapperFiles
+                .Select(x => x.DisplayName));
+        return Task.FromResult(_mapperFiles
+            .Where(x => x.DisplayName
+                .Contains(searchArg, StringComparison.InvariantCultureIgnoreCase))
+            .Select(x => x.DisplayName));
+    }
+
+    private Task InputFocusLostHandler(FocusEventArgs arg)
+    {
+        return Task.CompletedTask;
+    }
+
+    private void OnKeyDownHandler(KeyboardEventArgs keyboard)
+    {
+        if (keyboard.Code is "Enter" or "NumpadEnter" &&
+            !string.IsNullOrEmpty(_selectedMapper))
+        {
+            
+        }
     }
 }

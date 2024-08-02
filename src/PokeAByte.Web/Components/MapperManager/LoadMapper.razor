@@ -7,7 +7,21 @@
             </MudText>
         </MudItem>
         <MudItem xs="12">
-            <MudSelect T="string"
+            <MudAutocomplete Margin="Margin.Dense"
+                             Dense="true"
+                             T="string"
+                             Label="Mappers"
+                             AnchorOrigin="Origin.BottomCenter"
+                             Strict="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceText="false"
+                             @bind-Text="_selectedMapper"
+                             SearchFunc="@SearchForMapper">
+                <BeforeItemsTemplate>
+                    <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+                </BeforeItemsTemplate>
+            </MudAutocomplete>
+            @*<MudSelect T="string"
                        SelectedValuesChanged="SelectedValueChangeHandler"
                        Label="Mapper"
                        AnchorOrigin="Origin.BottomCenter">
@@ -21,7 +35,7 @@
                         </MudSelectItem>
                     }
                 }
-            </MudSelect>
+            </MudSelect>*@
         </MudItem>
         <MudItem xs="12">
             @if (!string.IsNullOrEmpty(_errorMessage))
@@ -45,7 +59,7 @@
             <MudButton Variant="Variant.Filled"
                        FullWidth="true"
                        OnClick="LoadMapperOnClickHandler"
-                       Disabled="string.IsNullOrWhiteSpace(_selectedMapperId)">
+                       Disabled="string.IsNullOrWhiteSpace(_selectedMapper)">
                 Load Mapper
             </MudButton>
         </MudItem>

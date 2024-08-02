@@ -1,16 +1,16 @@
 ﻿<MudPaper Width="100%"
           Height="@PropertyHeight"
-          Class="d-flex align-center rounded ml-n4"
+          Class="d-flex align-center rounded ml-n4 px-2 py-1"
           Elevation="0"
           Style="cursor: pointer; background-color:var(--mud-palette-surface)">
     <MudStack Class="flex-grow-1">
         <MudGrid Spacing="3"
                  Justify="Justify.FlexStart">
-            <MudItem>
+            <MudItem Class="d-flex align-content-center justify-center">
                 <MudIcon Icon="@Icons.Material.Filled.CatchingPokemon"
                          Color="IconColor"
                          @onclick="OnClickExpand"
-                         Class="ml-auto mud-width-full d-flex pt-1"/>
+                         Class="ml-1 mud-width-full py-1 align-center align-self-center"/>
             </MudItem>
             <MudItem @onclick="OnClickExpand"
                      Class="align-content-center">

@@ -32,11 +32,11 @@ public partial class PropertyExpansionView : ComponentBase
 
         if (Context.Parent is not null)
         {
-            _textWidth = Context.Parent.GetMaxLength() * 8;
+            _textWidth = Context.Parent.GetMaxLength() * 10;
         }
         else
         {
-            _textWidth = string.IsNullOrEmpty(Context.Text) ? 125 : Context.Text.Length * 8;
+            _textWidth = string.IsNullOrEmpty(Context.Text) ? 125 : Context.Text.Length * 10;
         }
         base.OnInitialized();
     }

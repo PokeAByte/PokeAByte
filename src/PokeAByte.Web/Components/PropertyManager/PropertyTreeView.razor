@@ -18,8 +18,8 @@
                          Expanded="@context.Expanded"
                          Value="@property"
                          Text="@context.Text"
-                         Class="mud-elevation-1 my-1 px-3 rounded rounded"
-                         Style="background-color:var(--mud-palette-background)"
+                         Class="mud-elevation-0 px-4 ml-2 rounded-lg"
+                         Style="background-color:var(--mud-palette-background); margin-top: 2px; margin-bottom: 2px"
                          Disabled="@(presenter?.IsDisabled is true)"
                          OnClick="() => OnTreeItemClick(context)">
             <Content>
@@ -27,6 +27,8 @@
                 {
                     <MudIcon Icon="@SetIcon(context)"
                              Class="pr-2"/>
+                    <MudText Typo="Typo.body2" Class="py-1" Style="@($"width:{GetWidth(presenter)}px;")">@context.Text</MudText>
+                    <MudText Typo="Typo.body2" Class="py-1">@context.Children?.Count Entries</MudText>
                 }
                 @if (presenter is not null &&
                      presenter.IsDisabled != true &&
@@ -45,10 +47,10 @@
                         Click here to load more entries.
                     </MudLink>
                 }
-                else if (property.PropertyModel is null)
+                @*else if (property.PropertyModel is null)
                 {
                         <MudText Typo="Typo.body2" Class="py-1">@context.Text</MudText>
-                }
+                }*@
             </Content>
         </MudTreeViewItem>
     </ItemTemplate>
