@@ -95,6 +95,134 @@ public class MapperSettingsService
             return;
         if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
             return;
+        var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
+        //find the entry with path
+        var foundEntry = _currentMapperModel
+            .Properties
+            .FirstOrDefault(x => x.PropertyPath == partialPath);
+
+        if (prop.Expanded)
+        {
+            //if we found the entry just update it
+            if (foundEntry is not null)
+            {
+                foundEntry.IsExpanded = true;
+            }
+            else
+            {
+                //otherwise create it
+                var newPropModel = new PropertySettingsModel
+                {
+                    PropertyName = prop.Value.Name,
+                    PropertyPath = partialPath,
+                    IsExpanded = true,
+                    HasChildren = prop.HasChildren,
+                    HasProperty = prop.Value.PropertyModel is not null
+                };
+                _currentMapperModel.Properties.Add(newPropModel);
+            }
+        }
+        else
+        {
+            //minimize
+            //get all child paths
+            var foundChildren = _currentMapperModel
+                .Properties
+                .Where(x => x.PropertyPath
+                    .Contains(partialPath, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            //remove all children
+            foreach (var child in foundChildren)
+            {
+                _currentMapperModel.Properties.Remove(child);
+            }
+
+            if (foundEntry is not null)
+            {
+                //remove self
+                _currentMapperModel.Properties.Remove(foundEntry);
+            }
+        }
+        var savedMapper = _savedMappers
+            .FirstOrDefault(x => x == _currentMapperModel);
+        if (savedMapper is null)
+            _savedMappers.Add(_currentMapperModel);
+        else
+            savedMapper = _currentMapperModel;
+        SaveSettings();
+    }
+    /*public void OnPropertyExpandedHandler(PropertyTreePresenter prop)
+    {
+        if (_currentMapperModel is null)
+            return;
+        if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
+            return;
+        var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
+        //try to find it
+        var found = _currentMapperModel
+            .Properties
+            .FirstOrDefault(x => x.PropertyPath == partialPath);
+        if (prop.Expanded)
+        {
+            if (found is not null)
+            {
+                //update it
+                found.IsExpanded = prop.Expanded;
+            }
+            else
+            {
+                //create it
+                var newPropModel = new PropertySettingsModel
+                {
+                    PropertyName = prop.Value.Name,
+                    PropertyPath = partialPath,
+                    IsExpanded = prop.Expanded,
+                    HasChildren = prop.HasChildren,
+                    HasProperty = prop.Value.PropertyModel is not null
+                };
+                _currentMapperModel.Properties.Add(newPropModel);
+            }
+        }
+        else
+        {
+            if (found is not null)
+            {
+                //remove it
+                _currentMapperModel.Properties.Remove(found);
+            }
+            else
+            {
+                //parent is minimized
+                //Find all children
+                var children = _currentMapperModel
+                    .Properties
+                    .Where(x => x
+                        .PropertyPath
+                        .Contains(partialPath, StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+                //remove all children
+                foreach (var child in children)
+                {
+                    _currentMapperModel.Properties.Remove(child);
+                }
+            }
+        }
+        
+        var savedMapper = _savedMappers
+            .FirstOrDefault(x => x == _currentMapperModel);
+        if (savedMapper is null)
+            _savedMappers.Add(_currentMapperModel);
+        else
+            savedMapper = _currentMapperModel;
+        SaveSettings();
+    }*/
+
+    /*public void OnPropertyExpandedHandler(PropertyTreePresenter prop)
+    {
+        if (_currentMapperModel is null)
+            return;
+        if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
+            return;
         var propModel = _currentMapperModel.Properties
             .FirstOrDefault(x => 
                 x.PropertyPath == prop.Value.FullPath && 
@@ -138,7 +266,7 @@ public class MapperSettingsService
         else
             savedMapper = _currentMapperModel;
         SaveSettings();
-    }
+    }*/
     public void OnPropertyExpandedHandler(OldMapperPropertyTreeModel prop)
     {
         //find the property
@@ -188,7 +316,7 @@ public class MapperSettingsService
         SaveSettings();
     }
 
-    public List<PropertySettingsModel>? GetOpenProperties()
+    public List<PropertySettingsModel>? GetMapperModelProperties()
     {
         if (_currentMapperModel is null)
             return null;

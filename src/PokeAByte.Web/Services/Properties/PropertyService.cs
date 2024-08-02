@@ -30,9 +30,30 @@ public class PropertyService(MapperClientService clientService,
         OpenProperties();
         return Result.Success();
     }
+
+    /*private void OpenProperties()
+    {
+        var properties = mapperSettings.GetMapperModelProperties();
+        if (properties is null) return;
+        foreach (var property in properties)
+        {
+            var pathSplit = property.PropertyPath.Split('.');
+            var currentBranch = _propertyTree
+                .FirstOrDefault(x => x.Text == pathSplit[0]);
+            if (currentBranch is PropertyTreePresenter p)
+            {
+                p.Expanded = true;
+                p.IsDisabled = false;
+                while (currentBranch.Value?.FullPath != property.PropertyPath)
+                {
+                    
+                }
+            }
+        }
+    }*/
     private void OpenProperties()
     {
-        var openProperties = mapperSettings.GetOpenProperties();
+        var openProperties = mapperSettings.GetMapperModelProperties();
         if (openProperties is null) return;
         foreach (var openProperty in openProperties)
         {
@@ -58,13 +79,23 @@ public class PropertyService(MapperClientService clientService,
                     {
                         while (currentBranch?.Text != path)
                         {
-                            currentBranch = currentBranch?
-                                .Children?
-                                .FirstOrDefault(x => x.Text == path);
-                            if (currentBranch is PropertyTreePresenter p)
+                            if (currentBranch?.HasChildren is true)
                             {
-                                p.Expanded = openProperty.IsExpanded;
-                                p.IsDisabled = !openProperty.IsExpanded;
+                                foreach (var child in currentBranch.Children!)
+                                {
+                                    if (child is PropertyTreePresenter c &&
+                                        child.Text?
+                                        .Contains(path, StringComparison.InvariantCultureIgnoreCase) is true)
+                                    {
+                                        c.IsDisabled = false;
+                                    }
+
+                                    if (child.Text == path)
+                                    {
+                                        currentBranch = child;
+                                        currentBranch.Expanded = true;
+                                    }
+                                }
                             }
                         }
 
@@ -74,7 +105,7 @@ public class PropertyService(MapperClientService clientService,
                             if (currentBranch is PropertyTreePresenter presenter)
                             {
                                 presenter.IsDisabled = false;
-                                presenter.DisableChildren(!openProperty.IsExpanded);
+                                presenter.DisableChildren(false);
                             }
                         }
                     }
