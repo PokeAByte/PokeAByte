@@ -56,7 +56,6 @@ public class NavigationService
         Pages.Home => AppRoutes.Home,
         Pages.MapperConnectionStatus => AppRoutes.MapperConnectionStatus,
         Pages.MapperManager => AppRoutes.MapperManager,
-        Pages.DataProperties => AppRoutes.DataProperties,
         Pages.Properties => AppRoutes.Properties,
         Pages.AppSettings => AppRoutes.AppSettings,
         Pages.Error => AppRoutes.Error,
@@ -73,7 +72,6 @@ public class NavigationService
         {
             AppRoutes.Home => Pages.Home,
             AppRoutes.MapperManager => Pages.MapperManager,
-            AppRoutes.DataProperties => Pages.DataProperties,
             AppRoutes.Properties => Pages.Properties,
             AppRoutes.AppSettings => Pages.AppSettings,
             AppRoutes.MapperConnectionStatus => Pages.MapperConnectionStatus,
@@ -100,7 +98,6 @@ public class NavigationService
         Home,
         MapperConnectionStatus,
         MapperManager,
-        DataProperties,
         Properties,
         AppSettings,
         Error = 99,
@@ -120,7 +117,6 @@ public static class AppRoutes
     public const string Home = "/Home";
     public const string MapperConnectionStatus = "/ConnectionStatus";
     public const string MapperManager = "/MapperManager";
-    public const string DataProperties = "/DataProperties";
     public const string Properties = "/Properties";
     public const string AppSettings = "/AppSettings";
     public const string Error = "/Error";

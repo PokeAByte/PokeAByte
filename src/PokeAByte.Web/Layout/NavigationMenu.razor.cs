@@ -64,6 +64,6 @@ public partial class NavigationMenu : ComponentBase, IDisposable
     private void OnClickHomeButton()
     {
         NavService?.Navigate(ConnectionService.IsCurrentlyConnected ?
-            NavigationService.Pages.DataProperties : NavigationService.Pages.MapperManager);
+            NavigationService.Pages.Properties : NavigationService.Pages.MapperManager);
     }
 }

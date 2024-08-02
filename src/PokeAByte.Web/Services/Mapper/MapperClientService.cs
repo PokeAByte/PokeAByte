@@ -110,16 +110,6 @@ public class MapperClientService
         return Result.Success(glossaryList);
     }
 
-    public Result<List<TreeItemData<OldPropertyTreeData>>> GetPropertiesTree()
-    {
-        var propTree = Client.GetTreeData();
-        if (propTree is not null)
-            return Result.Success(propTree);
-        return Result
-            .Failure<List<TreeItemData<OldPropertyTreeData>>>(
-                Error.NoMapperPropertiesFound);
-    }
-
     public Result<MapperMetaModel> GetMetaData()
     {
         if (!Client.IsMapperLoaded)

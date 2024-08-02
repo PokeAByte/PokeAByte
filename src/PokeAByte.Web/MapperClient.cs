@@ -20,8 +20,6 @@ public class MapperClient(
     IStaticMemoryDriver staticMemoryDriver,
     MapperSettingsService mapperSettings)
 {    
-    //Property Tree 
-    private List<TreeItemData<OldPropertyTreeData>> _cachedMapperPropertyTree = [];
 
     public string ConnectionString { get; set; } = "";
     public bool IsMapperLoaded => _mapperModel is not null;
@@ -126,29 +124,6 @@ public class MapperClient(
             .Properties
             .AsEnumerable();
     }
-    
-    public List<TreeItemData<OldPropertyTreeData>>? GetTreeData()
-    {
-        var propTree = new List<TreeItemData<OldPropertyTreeData>>();
-        var props = GetProperties();
-        var meta = GetMetaData();
-        if (props is null)
-            return null;
-        if (meta is null)
-            return null;
-        var propList = props.ToList();
-        foreach (var prop in propList)
-        {
-            propTree.AddProperty(prop, meta);
-        }
-        return propTree;
-    }
-
-    public void ClearCachedHashSetTree()
-    {
-        _cachedMapperPropertyTree = [];
-    }
-
     public void UpdateProperty(IPokeAByteProperty property)
     {
         if (!IsMapperLoaded || !instance.Initalized) return;
