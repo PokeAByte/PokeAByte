@@ -2,17 +2,27 @@
 @using PokeAByte.Web.Components.PropertyManager
 @using PokeAByte.Web.Services.Mapper
 @using PokeAByte.Web.Services.Navigation
+@using PokeAByte.Web.Services.Notifiers
 
 @if (_finishedLoading)
 {
-    @if (string.IsNullOrEmpty(_gameName))
-    {
-        <MudText Typo="Typo.h6" Class="pa-2">Properties</MudText>
-    }
-    else
-    {
-        <MudText Typo="Typo.h6" Class="pa-2">Properties for @_gameName</MudText>
-    }
+    <MudStack Row="true">
+        @if (string.IsNullOrEmpty(_gameName))
+        {
+            <MudText Typo="Typo.h6" Class="pa-2">Properties</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.h6" Class="pa-2">Properties for @_gameName</MudText>
+        }
+        <MudButton Style="height:30px; align-self: center;"
+                   Color="Color.Secondary"
+                   Variant="Variant.Filled"
+                   Size="Size.Small"
+                   OnClick="OnClickUnloadMapper">
+            Unload Mapper
+        </MudButton>
+    </MudStack>
     <PropertyTreeView />
 }
 else
@@ -25,6 +35,7 @@ else
 @code {
     [Inject] private MapperClientService ClientService { get; set; }
     [Inject] private NavigationService NavService { get; set; }
+    [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     private bool _finishedLoading = false;
     private string _gameName = "";
     protected override void OnInitialized()
@@ -46,5 +57,14 @@ else
         _finishedLoading = true;
         StateHasChanged();
     }
-
+    private async Task Clear()
+    {
+        await ClientService!.UnloadMapper();
+        StateHasChanged();
+        ChangeNotificationService.NotifyDataChanged();
+    }
+    private async Task OnClickUnloadMapper()
+    {
+        await Clear();
+    }
 }
