@@ -16,7 +16,8 @@
                              Strict="true"
                              @bind-Value="_selectedMapper"
                              OnInternalInputChanged="OnInputChanged"
-                             SearchFunc="@SearchForMapper">
+                             SearchFunc="@SearchForMapper"
+                             MaxItems="50">
                 <BeforeItemsTemplate>
                     <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
                 </BeforeItemsTemplate>
