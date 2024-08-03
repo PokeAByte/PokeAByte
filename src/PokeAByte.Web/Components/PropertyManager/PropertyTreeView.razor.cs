@@ -129,6 +129,7 @@ public partial class PropertyTreeView : ComponentBase
         var length = children
             .Aggregate(0, (max, current) =>
                 Math.Max(max, current.Text?.Length ?? 16)) * 10;
+        if (length < 75) length = 75;
         return length.ToString();
     }
 }
