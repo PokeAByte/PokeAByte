@@ -6,7 +6,7 @@ using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Components.PropertyManager;
 
-public partial class PropertyExpansionView : ComponentBase
+public partial class PropertyExpansionView : ComponentBase, IDisposable
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
     private EditPropertyModel _editContext = new();
@@ -53,5 +53,10 @@ public partial class PropertyExpansionView : ComponentBase
         Context.Value!.IsPropertyExpanded = !Context.Value!.IsPropertyExpanded;
         
         //StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        PropertyUpdateService.EventHandlers.Remove(_editContext.Path);
     }
 }

@@ -21,7 +21,7 @@ else
     <GitHubSettings IsInitiallyVisible="false"/>
 
     <MudText Typo="Typo.h6" Class="py-6">
-        @_selectedMappersFromTable.Count / @_updatedMapperList.Count Mappers Selected!
+        @_selectedMappersFromTable.Count / @_updatedMapperList.Count Mappers Selected
     </MudText>
     <MudStack Row="true" Class="pb-2">
         <MudButton Color="Color.Success"
@@ -47,16 +47,18 @@ else
             Open Mapper Directory
         </MudButton>
     </MudStack>
-
-    <MudTextField @bind-Value="_filterString"
-                  Class="py-4"
-                  Label="Filter Updates"
-                  Immediate="true"
-                  Variant="Variant.Filled"/>
+    @if (_updatedMapperList.Count != 0)
+    {
+        <MudTextField @bind-Value="_filterString"
+                      Class="py-4"
+                      Label="Filter Updates"
+                      Immediate="true"
+                      Variant="Variant.Filled"/>
+    }
 
     @if (UpdatedMapperListFiltered.Count == 0)
     {
-        <MudText Typo="Typo.h6">No Mappers Found!</MudText>
+        <MudText Typo="Typo.h6">No @CheckForLabel Found</MudText>
     }
     else if(UpdatedMapperListFiltered.Count > 0 && !string.IsNullOrEmpty(_filterString))
     {
@@ -64,24 +66,27 @@ else
             @UpdatedMapperListFiltered.Count / @_updatedMapperList.Count Filtered
         </MudText>
     }
-    <MudTable Items="UpdatedMapperListFiltered"
-              SelectedItemsChanged="OnSelectedItemsChanged"
-              Hover="true"
-              MultiSelection="true"
-              SelectOnRowClick="false"
-              OnRowClick="OnRowClick"
-              Dense="true">
-        <ColGroup>
-            <col style="width:45px;"/>
-            <col/>
-        </ColGroup>
-        <HeaderContent>
-            <MudTh>Path</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Path" Class="cursor-pointer">
-                <MapperDetails Context="context" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    @if (_updatedMapperList.Count != 0)
+    {
+        <MudTable Items="UpdatedMapperListFiltered"
+                  SelectedItemsChanged="OnSelectedItemsChanged"
+                  Hover="true"
+                  MultiSelection="true"
+                  SelectOnRowClick="false"
+                  OnRowClick="OnRowClick"
+                  Dense="true">
+            <ColGroup>
+                <col style="width:45px;"/>
+                <col/>
+            </ColGroup>
+            <HeaderContent>
+                <MudTh>Path</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Path" Class="cursor-pointer">
+                    <MapperDetails Context="context" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
 }

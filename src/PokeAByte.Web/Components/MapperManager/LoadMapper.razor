@@ -3,7 +3,7 @@
     <MudGrid>
         <MudItem xs="12">
             <MudText Typo="Typo.body1">
-                Please select a mapper file you would like to load:
+                Select the mapper you would like to load:
             </MudText>
         </MudItem>
         <MudItem xs="12">
@@ -17,7 +17,8 @@
                              @bind-Value="_selectedMapper"
                              OnInternalInputChanged="OnInputChanged"
                              SearchFunc="@SearchForMapper"
-                             MaxItems="50">
+                             MaxItems="50"
+                             OnKeyDown="OnKeyDownHandler">
                 <BeforeItemsTemplate>
                     <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
                 </BeforeItemsTemplate>

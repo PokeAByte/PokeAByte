@@ -9,12 +9,10 @@
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
-    <MudText Typo="Typo.body1">Mapper Status:</MudText>
-
     @if (MapperConnectionService!.IsCurrentlyConnected)
     {
         <MudText Typo="Typo.body1">
-            @_mapperName
+            Mapper Loaded: @_mapperName
         </MudText>
         <MudButton DisableElevation="true"
                    Color="Color.Secondary"
@@ -23,6 +21,12 @@
                    OnClick="OnClickUnloadMapper">
             Unload Mapper
         </MudButton>
+    }
+    else
+    {
+        <MudText Typo="Typo.body1">
+            No Mapper Loaded
+        </MudText>
     }
 </MudStack>
 <MudTabs Elevation="2" 
@@ -49,12 +53,12 @@
         </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Backup" Disabled="@(LoadMapperRef?.IsLoading ?? false)">
-        <MudContainer Fixed="true" Style="@PanelStyle">
+        <MudContainer Fixed="true" Style="height: auto">
             <BackupArchive />
         </MudContainer>
     </MudTabPanel>
     <MudTabPanel Text="Restore" Disabled="@(LoadMapperRef?.IsLoading ?? false)">
-        <MudContainer Fixed="true" Style="@PanelStyle">
+        <MudContainer Fixed="true" Style="height: auto">
             <RestoreArchive />
         </MudContainer>
     </MudTabPanel>

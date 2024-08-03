@@ -36,7 +36,7 @@ public partial class LoadMapper : ComponentBase
         _selectedMapperId = values.FirstOrDefault() ?? "";
     }*/
 
-    private async Task LoadMapperOnClickHandler(MouseEventArgs arg)
+    private async Task LoadMapperOnClickHandler()
     {
         if (string.IsNullOrWhiteSpace(_selectedMapper) || 
             _mapperFiles is null)
@@ -101,12 +101,12 @@ public partial class LoadMapper : ComponentBase
         return Task.CompletedTask;
     }
 
-    private void OnKeyDownHandler(KeyboardEventArgs keyboard)
+    private async void OnKeyDownHandler(KeyboardEventArgs keyboard)
     {
         if (keyboard.Code is "Enter" or "NumpadEnter" &&
             !string.IsNullOrEmpty(_selectedMapper))
         {
-            
+            await LoadMapperOnClickHandler();
         }
     }
 

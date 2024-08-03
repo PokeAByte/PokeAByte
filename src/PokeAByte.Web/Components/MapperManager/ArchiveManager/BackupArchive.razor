@@ -8,7 +8,7 @@
 else
 {
     <MudText Typo="Typo.h6" Class="py-6">
-        @_selectedMapperListFromTable.Count / @_mapperList.Count Mappers Selected!
+        @_selectedMapperListFromTable.Count / @_mapperList.Count Mappers Selected
     </MudText>
     <MudGrid Spacing="1" Class="pb-2" Justify="Justify.FlexStart">
         <MudItem>
@@ -73,7 +73,7 @@ else
     </MudStack>
     @if (MapperListFiltered.Count == 0)
     {
-        <MudText Typo="Typo.h6" Class="pb-3">No Mappers Found!</MudText>
+        <MudText Typo="Typo.h6" Class="pb-3">No Mappers Found</MudText>
     }
     else if(MapperListFiltered.Count > 0 && !string.IsNullOrEmpty(_mapperListFilter))
     {

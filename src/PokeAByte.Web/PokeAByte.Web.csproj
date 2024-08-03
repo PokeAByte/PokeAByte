@@ -30,7 +30,6 @@
       <AdditionalFiles Include="Layout\MainLayout.razor" />
       <AdditionalFiles Include="Layout\NavigationMenu.razor" />
       <AdditionalFiles Include="Pages\AppSettings.razor" />
-      <AdditionalFiles Include="Pages\DataProperties.razor" />
       <AdditionalFiles Include="Pages\Error.razor" />
       <AdditionalFiles Include="Pages\Home.razor" />
       <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />

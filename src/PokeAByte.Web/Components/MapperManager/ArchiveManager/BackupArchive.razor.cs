@@ -14,6 +14,7 @@ public partial class BackupArchive : ComponentBase
     [Inject] public MapperManagerService ManagerService { get; set; }
     [Inject] public ILogger<BackupArchive> Logger { get; set; }
     [Inject] public ISnackbar Snackbar { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
     private List<VisualMapperDto> _mapperList = [];
     private string _mapperListFilter = "";
     private List<VisualMapperDto> MapperListFiltered =>
@@ -108,16 +109,26 @@ public partial class BackupArchive : ComponentBase
         GetMapperList();
     }
 
-    private void OnClickArchiveAll()
+    private async void OnClickArchiveAll()
     {
         if(_mapperList.Count == 0) return;
+        var result = await DialogService.ShowMessageBox(
+            "Warning", "All mappers you have downloaded will be archived. You can find these archived mappers in the 'Restore' tab.",
+            "Archive All!", cancelText:"Cancel");
+        if(result is null or false)
+            return;
         _selectedMappersToBackup = _mapperList.Select(x => x.MapperDto).ToList();
         ArchiveMappers();
     }
 
-    private void OnClickArchiveSelected()
+    private async void OnClickArchiveSelected()
     {
         if(_selectedMapperListFromTable.Count == 0) return;
+        var result = await DialogService.ShowMessageBox(
+            "Warning", "Archiving selected mapper(s) will remove it from your list. You can find the archived mapper(s) in the 'Restore' tab.",
+            "Archive!", cancelText:"Cancel");
+        if(result is null or false)
+            return;
         _selectedMappersToBackup = _selectedMapperListFromTable
             .Select(x => x.MapperDto)
             .ToList();
