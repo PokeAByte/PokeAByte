@@ -5,6 +5,7 @@ using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Components.MapperManager.RemoteMapperManager;
 
@@ -25,8 +26,8 @@ public partial class RemoteManager : ComponentBase
     private HashSet<VisualMapperComparisonModel> _selectedMappersFromTable = [];
     private List<MapperComparisonDto> _selectedMappersToDownload = [];
     private bool _isDataLoading = true;
-    private string ButtonLabel => IsDownloadMappersPage ? "Download" : "Update";
-    private string CheckForLabel => IsDownloadMappersPage ? "Downloads" : "Updates";
+    private string ButtonLabel => IsDownloadMappersPage ? "Mappers" : "Update";
+    private string CheckForLabel => IsDownloadMappersPage ? "Mappers" : "Updates";
     protected override async Task OnInitializedAsync()
     {
         OnSelectedItemsChanged += OnSelectedItemsChangedHandler;

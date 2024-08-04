@@ -59,15 +59,23 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
                 _addressString = value;
 
-                IsMemoryAddressSolved = AddressMath.TrySolve(value, [], out var solvedAddress);
-
-                if (IsMemoryAddressSolved == false)
+                try
                 {
-                    _address = null;
+                    IsMemoryAddressSolved = AddressMath.TrySolve(value, [], out var solvedAddress);
+                    
+                    if (IsMemoryAddressSolved == false)
+                    {
+                        _address = null;
+                    }
+                    else
+                    {
+                        _address = solvedAddress;
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    _address = solvedAddress;
+                    Console.WriteLine(e);
+                    return;
                 }
 
                 FieldsChanged.Add("address");

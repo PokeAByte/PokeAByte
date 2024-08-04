@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
+using PokeAByte.Web.Services.Navigation;
+using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Layout;
 
@@ -21,6 +24,13 @@ public partial class NavigationMenu : ComponentBase, IDisposable
             throw new InvalidOperationException("Connection Service is null.");
         NavService.OnNavigation += StateHasChanged;
         ChangeNotificationService.OnChange += StateHasChanged;
+        ConnectionService.OnMapperIsUnloaded += OnMapperIsUnloadedHandler;
+    }
+
+    private async void OnMapperIsUnloadedHandler()
+    {
+        NavService?.DisablePropertiesButton();
+        //NavService?.TogglePropertiesButton();
     }
 
     public void Dispose()
@@ -55,6 +65,6 @@ public partial class NavigationMenu : ComponentBase, IDisposable
     private void OnClickHomeButton()
     {
         NavService?.Navigate(ConnectionService.IsCurrentlyConnected ?
-            NavigationService.Pages.DataProperties : NavigationService.Pages.MapperManager);
+            NavigationService.Pages.Properties : NavigationService.Pages.MapperManager);
     }
 }

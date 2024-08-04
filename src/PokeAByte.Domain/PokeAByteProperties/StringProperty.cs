@@ -41,9 +41,16 @@ namespace PokeAByte.Domain.PokeAByteProperties
                     }
 
                     return x.Key;
-                }).SelectMany(x => BitConverter
-                    .GetBytes(x)
-                    .Take(Size ?? 0 - 1))
+                }).SelectMany(x =>
+                {
+                    if(Size is null)
+                        return BitConverter
+                            .GetBytes(x)
+                            .Take(new Range(0,1));
+                    return BitConverter
+                        .GetBytes(x)
+                        .Take(Size ?? 1);
+                })
                 .ToArray();
         }
 

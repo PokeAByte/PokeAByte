@@ -1,4 +1,5 @@
-﻿using PokeAByte.Application;
+﻿using MudBlazor;
+using PokeAByte.Application;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
@@ -6,6 +7,7 @@ using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web;
 
@@ -18,8 +20,6 @@ public class MapperClient(
     IStaticMemoryDriver staticMemoryDriver,
     MapperSettingsService mapperSettings)
 {    
-    //Property Tree 
-    private MapperPropertyTree _cachedMapperPropertyTree = new();
 
     public string ConnectionString { get; set; } = "";
     public bool IsMapperLoaded => _mapperModel is not null;
@@ -124,34 +124,6 @@ public class MapperClient(
             .Properties
             .AsEnumerable();
     }
-    
-    public HashSet<MapperPropertyTreeModel>? GetHashSetTree()
-    {
-        var props = GetProperties();
-        var meta = GetMetaData();
-        if (props is null)
-            return null;
-        if (meta is null)
-            return null;
-        var propList = props.ToList();
-        foreach (var prop in propList)
-        {
-            _cachedMapperPropertyTree.AddProperty(prop, meta, mapperSettings.OnPropertyExpandedHandler);
-        }
-        foreach (var prop in _cachedMapperPropertyTree.Tree)
-        {
-            MapperPropertyTreeModel.UpdateDisplayedChildren(prop);
-        }
-        mapperSettings.InitializePropertyExpansions(_cachedMapperPropertyTree.Tree);
-        return _cachedMapperPropertyTree.Tree;
-    }
-
-    public void ClearCachedHashSetTree()
-    {
-        _cachedMapperPropertyTree.Dispose();
-        _cachedMapperPropertyTree = new MapperPropertyTree();
-    }
-
     public void UpdateProperty(IPokeAByteProperty property)
     {
         if (!IsMapperLoaded || !instance.Initalized) return;

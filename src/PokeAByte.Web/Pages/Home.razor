@@ -1,11 +1,12 @@
 ﻿@page "/"
 @page "/Home"
 @using PokeAByte.Web.Services
+@using PokeAByte.Web.Services.Navigation
 <PageTitle>@PageTitle - Home</PageTitle>
 @code
 {
     [CascadingParameter] public string? PageTitle { get; set; }
-    [Inject] public NavigationManager? NavMan { get; set; }
+    [Inject] public NavigationService? NavServ { get; set; }
     [Inject] public ILogger<Home> Logger { get; set; }
 
     protected override void OnInitialized()
@@ -13,7 +14,7 @@
         base.OnInitialized();
         try
         {
-            NavMan?.NavigateTo(AppRoutes.MapperManager);
+            NavServ?.Navigate(NavigationService.Pages.MapperManager);
         }
         catch (Exception e)
         {

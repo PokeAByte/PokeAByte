@@ -1,4 +1,4 @@
-﻿namespace PokeAByte.Web.Services;
+﻿namespace PokeAByte.Web.Services.Notifiers;
 
 public class PropertyUpdateService(ILogger<PropertyUpdateService> logger)
 {

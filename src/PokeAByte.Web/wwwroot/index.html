@@ -119,7 +119,7 @@
             <div class="columns mt-3" v-if="loadingMapperWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
-                        <p class="my-3">Please select the mapper file you would like to load.</p>
+                        <p class="my-3">Select the mapper you would like to load.</p>
                         
                         <select class="input my-3" v-model="loadingMapperSelectedId">
                             <option :value="null"></option>
@@ -210,7 +210,7 @@
             <div class="columns mt-3" v-else-if="mapperUpdaterWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
-                        <p class="my-3">Please select the mapper file you would like to update/download.</p>
+                        <p class="my-3">Select the mapper file you would like to update/download.</p>
                         <label>
                             <span>Filter: </span>
                             <input type="text" v-model="updateSearch" />
@@ -284,7 +284,7 @@
             <div class="columns mt-3" v-else-if="mapperArchiveWindowOpen">
                 <div class="column is-6 is-offset-3">
                     <div class="m-3">
-                        <p class="my-3">Please select an archived mapper file to manage.</p>
+                        <p class="my-3">Select the archived mapper to manage.</p>
                         <label>
                             <span>Filter: </span>
                             <input type="text" v-model="archivedSearch" />

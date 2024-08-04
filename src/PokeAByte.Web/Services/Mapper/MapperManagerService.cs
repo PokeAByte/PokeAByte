@@ -6,7 +6,7 @@ using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Models;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperManagerService(
     IMapperUpdateManager mapperUpdateManager,

@@ -4,6 +4,7 @@ using MudBlazor;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Components.MapperManager.ArchiveManager;
 public partial class RestoreArchive : ComponentBase
@@ -58,7 +59,7 @@ public partial class RestoreArchive : ComponentBase
         if (item is null)
             return;
         var result = await DialogService.ShowMessageBox(
-            "Warning", "Restoring a set of mappers will archive any current mappers you have downloaded.",
+            "Warning", "Restoring a set of mappers will archive any current copy of those mappers.",
             "Restore!", cancelText:"Cancel");
         if (result is null or false)
             return;

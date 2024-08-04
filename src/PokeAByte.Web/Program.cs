@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PokeAByte.Domain.Models;
 using Serilog;
 using Serilog.Events;
@@ -35,7 +36,7 @@ public class Program
             var app = builder.Build();
 
             app.ConfigureApp();
-            
+            Process.Start(new ProcessStartInfo("http://localhost:8085") { UseShellExecute = true});
             app.Run();     
         }
         catch (Exception ex)

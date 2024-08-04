@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <PublicSign>false</PublicSign>
@@ -16,11 +16,11 @@
 
     <ItemGroup>
       <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
-      <PackageReference Include="MudBlazor" Version="6.20.0" />
-      <PackageReference Include="Serilog" Version="4.0.0" />
-      <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+      <PackageReference Include="MudBlazor" Version="7.5.0" />
+      <PackageReference Include="Serilog" Version="4.0.2-dev-02220" />
+      <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
       <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     </ItemGroup>
@@ -30,7 +30,6 @@
       <AdditionalFiles Include="Layout\MainLayout.razor" />
       <AdditionalFiles Include="Layout\NavigationMenu.razor" />
       <AdditionalFiles Include="Pages\AppSettings.razor" />
-      <AdditionalFiles Include="Pages\DataProperties.razor" />
       <AdditionalFiles Include="Pages\Error.razor" />
       <AdditionalFiles Include="Pages\Home.razor" />
       <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />
@@ -48,6 +47,9 @@
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
       <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
     </ItemGroup>
 
     <ItemGroup>

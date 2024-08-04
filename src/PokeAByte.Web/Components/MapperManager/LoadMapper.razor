@@ -3,11 +3,27 @@
     <MudGrid>
         <MudItem xs="12">
             <MudText Typo="Typo.body1">
-                Please select a mapper file you would like to load:
+                Select the mapper you would like to load:
             </MudText>
         </MudItem>
         <MudItem xs="12">
-            <MudSelect T="string"
+            <MudAutocomplete Margin="Margin.Dense"
+                             Dense="true"
+                             T="string"
+                             HelperTextOnFocus="false"
+                             Label="Mappers"
+                             AnchorOrigin="Origin.BottomCenter"
+                             Strict="true"
+                             @bind-Value="_selectedMapper"
+                             OnInternalInputChanged="OnInputChanged"
+                             SearchFunc="@SearchForMapper"
+                             MaxItems="50"
+                             OnKeyDown="OnKeyDownHandler">
+                <BeforeItemsTemplate>
+                    <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+                </BeforeItemsTemplate>
+            </MudAutocomplete>
+            @*<MudSelect T="string"
                        SelectedValuesChanged="SelectedValueChangeHandler"
                        Label="Mapper"
                        AnchorOrigin="Origin.BottomCenter">
@@ -21,7 +37,7 @@
                         </MudSelectItem>
                     }
                 }
-            </MudSelect>
+            </MudSelect>*@
         </MudItem>
         <MudItem xs="12">
             @if (!string.IsNullOrEmpty(_errorMessage))
@@ -43,14 +59,16 @@
         </MudItem>
         <MudItem xs="6">
             <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
                        FullWidth="true"
                        OnClick="LoadMapperOnClickHandler"
-                       Disabled="string.IsNullOrWhiteSpace(_selectedMapperId)">
+                       Disabled="string.IsNullOrWhiteSpace(_selectedMapper)">
                 Load Mapper
             </MudButton>
         </MudItem>
         <MudItem xs="6">
             <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
                        FullWidth="true"
                        OnClick="OpenMapperFolder">
                 Open Mapper Folder

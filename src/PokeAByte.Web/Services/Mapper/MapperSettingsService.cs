@@ -3,7 +3,7 @@ using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
 
-namespace PokeAByte.Web.Services;
+namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperSettingsService
 {
@@ -89,46 +89,60 @@ public class MapperSettingsService
         }
     }
 
-    public void OnPropertyExpandedHandler(MapperPropertyTreeModel prop)
+    public void OnPropertyExpandedHandler(PropertyTreePresenter prop)
     {
-        //find the property
         if (_currentMapperModel is null)
             return;
-        if (_currentMapperModel.MapperGuid != prop.MapperId)
+        if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
             return;
-        var propModel = _currentMapperModel.Properties
-            .FirstOrDefault(x => 
-                x.PropertyPath == prop.FullPath && 
-                x.PropertyName == prop.Name);
-        if (propModel is null)
+        var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
+        //find the entry with path
+        var foundEntry = _currentMapperModel
+            .Properties
+            .FirstOrDefault(x => x.PropertyPath == partialPath);
+
+        if (prop.Expanded)
         {
-            //make sure we don't add parents back in
-            var childFound = _currentMapperModel
-                .Properties
-                .Any(x => x.PropertyPath.Contains(prop.Name));
-            if (childFound)
-                return;
-            var newPropModel = new PropertySettingsModel
+            //if we found the entry just update it
+            if (foundEntry is not null)
             {
-                PropertyName = prop.Name,
-                PropertyPath = prop.FullPath,
-                IsExpanded = prop.IsExpanded,
-                HasChildren = prop.HasChildren,
-                HasProperty = prop.Property is not null
-            };
-            _currentMapperModel.Properties.Add(newPropModel);
+                foundEntry.IsExpanded = true;
+            }
+            else
+            {
+                //otherwise create it
+                var newPropModel = new PropertySettingsModel
+                {
+                    PropertyName = prop.Value.Name,
+                    PropertyPath = partialPath,
+                    IsExpanded = true,
+                    HasChildren = prop.HasChildren,
+                    HasProperty = prop.Value.PropertyModel is not null
+                };
+                _currentMapperModel.Properties.Add(newPropModel);
+            }
         }
         else
         {
-            propModel.IsExpanded = prop.IsExpanded;
-            if (propModel.IsExpanded == false)
-            {            
-                //remove from list
-                _currentMapperModel.Properties.RemoveAll(x => 
-                    prop.FullPath == x.PropertyPath);
+            //minimize
+            //get all child paths
+            var foundChildren = _currentMapperModel
+                .Properties
+                .Where(x => x.PropertyPath
+                    .Contains(partialPath, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            //remove all children
+            foreach (var child in foundChildren)
+            {
+                _currentMapperModel.Properties.Remove(child);
+            }
+
+            if (foundEntry is not null)
+            {
+                //remove self
+                _currentMapperModel.Properties.Remove(foundEntry);
             }
         }
-
         var savedMapper = _savedMappers
             .FirstOrDefault(x => x == _currentMapperModel);
         if (savedMapper is null)
@@ -137,12 +151,11 @@ public class MapperSettingsService
             savedMapper = _currentMapperModel;
         SaveSettings();
     }
-
-    public void InitializePropertyExpansions(HashSet<MapperPropertyTreeModel> tree)
+    public List<PropertySettingsModel>? GetMapperModelProperties()
     {
         if (_currentMapperModel is null)
-            return;
-        var props = _currentMapperModel
+            return null;
+        return _currentMapperModel
             .Properties.Select(x => new PropertySettingsModel
             {
                 PropertyName = x.PropertyName,
@@ -151,51 +164,6 @@ public class MapperSettingsService
                 HasChildren = x.HasChildren,
                 HasProperty = x.HasProperty
             })
-        .ToList();
-        foreach (var prop in props)
-        {
-            var splitPaths = prop.PropertyPath.Split('.');
-            var currentBranch = tree
-                .FirstOrDefault(x => x.FullPath == splitPaths[0]);
-            if(currentBranch is null)
-                continue;
-            foreach (var path in splitPaths)
-            {
-                while (currentBranch.Name != path)
-                {
-                    currentBranch = currentBranch
-                        .Children
-                        .First(x => x.Name == path);
-                    currentBranch.ShouldTriggerExpandedAction = false;
-                    currentBranch.IsExpanded = prop.IsExpanded;
-                    currentBranch.ShouldTriggerExpandedAction = true;
-                }
-
-                if (currentBranch.Name == path)
-                {
-                    currentBranch.ShouldTriggerExpandedAction = false;
-                    currentBranch.IsExpanded = prop.IsExpanded;
-                    currentBranch.ShouldTriggerExpandedAction = true;
-                }
-                /*if (path == currentBranch.Name)
-                {
-                    currentBranch.ShouldTriggerExpandedAction = false;
-                    currentBranch.IsExpanded = prop.IsExpanded;
-                    currentBranch.ShouldTriggerExpandedAction = true;
-                }
-                else
-                {
-                    while (currentBranch.Name != path)
-                    {
-                        currentBranch = currentBranch
-                            .Children
-                            .First(x => x.Name == path);
-                        currentBranch.ShouldTriggerExpandedAction = false;
-                        currentBranch.IsExpanded = prop.IsExpanded;
-                        currentBranch.ShouldTriggerExpandedAction = true;
-                    }
-                }*/
-            }
-        }
+            .ToList();
     }
 }
