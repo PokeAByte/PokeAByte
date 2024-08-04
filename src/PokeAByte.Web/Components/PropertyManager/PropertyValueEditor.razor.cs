@@ -87,9 +87,12 @@ public partial class PropertyValueEditor : ComponentBase
         if (string.IsNullOrEmpty(EditContext.Reference))
             return Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
         if (string.IsNullOrEmpty(arg1))
-            return Task.FromResult(_cachedGlossary.Select(g => g.Value));
+            return Task.FromResult(_cachedGlossary
+                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(g => g.Value));
         return Task.FromResult(_cachedGlossary
             .Where(x => 
+                !string.IsNullOrWhiteSpace(x.Value) &&
                 x.Value.Contains(arg1, StringComparison.InvariantCultureIgnoreCase))
             .Select(g => g.Value));
     }
