@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
@@ -10,6 +11,9 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
     private EditPropertyModel _editContext = new();
+    
+    [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
     [Parameter] public required PropertyTreePresenter Context { get; set; }
     public Color IconColor =>
@@ -58,5 +62,20 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
     public void Dispose()
     {
         PropertyUpdateService.EventHandlers.Remove(_editContext.Path);
+    }
+
+    private async Task CopyToClipboard(object? copy)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", copy);
+            Snackbar.Add($"Copied {copy} to the clipboard!", 
+                Severity.Info);
+        }
+        catch (Exception e)
+        {
+            var msg = "Failed to copy to clipboard!";
+            Snackbar.Add(msg, Severity.Error);
+        }
     }
 }

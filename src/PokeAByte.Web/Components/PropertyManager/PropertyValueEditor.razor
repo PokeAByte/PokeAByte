@@ -1,8 +1,5 @@
 ﻿<MudStack Row="true" Style="cursor: default !important;">
-    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
-             Size="Size.Small"
-             Class="mt-2 cursor-pointer"
-             OnClick="() => CopyToClipboard(EditContext.ValueString)"/>
+
     @if (EditContext.Type is "string")
     {
     <MudTextField @bind-Value="EditContext.ValueString"

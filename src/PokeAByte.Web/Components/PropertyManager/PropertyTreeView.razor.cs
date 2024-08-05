@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
@@ -182,4 +183,5 @@ public partial class PropertyTreeView : ComponentBase
         var len = value.Length;
         return len * 8 < 17 ? "15" : (len * 8).ToString();
     }
+
 }

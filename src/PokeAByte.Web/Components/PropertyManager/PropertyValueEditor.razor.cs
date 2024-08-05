@@ -12,7 +12,6 @@ public partial class PropertyValueEditor : ComponentBase
 {
     [Inject] public required MapperClientService MapperClientService { get; set; }
     [Inject] public required ISnackbar Snackbar { get; set; }
-    [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Parameter]
     public required EditPropertyModel EditContext { get; set; }
     [Parameter] public bool IsShortDisplay { get; set; }
@@ -108,18 +107,5 @@ public partial class PropertyValueEditor : ComponentBase
         return $"{val[..5]}...{val[^5..]}";
     }
 
-    private async Task CopyToClipboard(string copy)
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", copy);
-            Snackbar.Add($"Copied {copy} to the clipboard!", 
-                Severity.Info);
-        }
-        catch (Exception e)
-        {
-            var msg = "Failed to copy to clipboard!";
-            Snackbar.Add(msg, Severity.Error);
-        }
-    }
+
 }

@@ -19,6 +19,13 @@
                 </MudText>
             </MudItem>
             <MudItem Class="align-center cursor-default">
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                               Size="Size.Small"
+                               Style="margin-top:7px;"
+                               Class="cursor-pointer"
+                               OnClick="() => CopyToClipboard(_editContext.ValueString)"/>
+            </MudItem>
+            <MudItem Class="align-center cursor-default">
                 <PropertyValueEditor EditContext="_editContext" IsShortDisplay="true"/>
             </MudItem>
             <MudItem @onclick="OnClickExpand"
