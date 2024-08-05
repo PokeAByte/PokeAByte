@@ -75,4 +75,13 @@ public static class PropertyModelExtensions
         if (updated.IsReadOnly != original.IsReadOnly)
             original.IsFrozen = updated.IsReadOnly;
     }
+
+    public static string ValueAsString(this PropertyModel model)
+    {
+        if (model is { Type: "bitArray", Value: bool[] bArray })
+        {
+            return bArray.Aggregate("", (current, b) => current + (b ? "1" : "0"));
+        }
+        return model.Value?.ToString() ?? "";
+    }
 }

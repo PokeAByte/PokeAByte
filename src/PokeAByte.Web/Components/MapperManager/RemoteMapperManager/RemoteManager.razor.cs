@@ -26,7 +26,7 @@ public partial class RemoteManager : ComponentBase
     private HashSet<VisualMapperComparisonModel> _selectedMappersFromTable = [];
     private List<MapperComparisonDto> _selectedMappersToDownload = [];
     private bool _isDataLoading = true;
-    private string ButtonLabel => IsDownloadMappersPage ? "Mappers" : "Update";
+    private string ButtonLabel => IsDownloadMappersPage ? "Download" : "Update";
     private string CheckForLabel => IsDownloadMappersPage ? "Mappers" : "Updates";
     protected override async Task OnInitializedAsync()
     {

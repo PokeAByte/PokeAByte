@@ -51,7 +51,9 @@
     }
     else
     {
-    <MudText>@EditContext.Value</MudText>
+        <MudText>
+            @FormatString(EditContext.ValueString)
+        </MudText>
     }
     <MudIconButton Icon="@Icons.Material.Filled.Save"
                    id="saveButtonIcon"

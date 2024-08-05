@@ -59,7 +59,7 @@ public partial class RestoreArchive : ComponentBase
         if (item is null)
             return;
         var result = await DialogService.ShowMessageBox(
-            "Warning", "Restoring a set of mappers will archive any current copy of those mappers.",
+            "Warning", "Restoring a set of mappers will archive any current copies of those mappers.",
             "Restore!", cancelText:"Cancel");
         if (result is null or false)
             return;

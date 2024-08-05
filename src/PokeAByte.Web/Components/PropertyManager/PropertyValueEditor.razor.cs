@@ -13,7 +13,9 @@ public partial class PropertyValueEditor : ComponentBase
     [Inject] public required ISnackbar Snackbar { get; set; }
     [Parameter]
     public required EditPropertyModel EditContext { get; set; }
-    
+
+    [Parameter] public bool IsShortDisplay { get; set; }
+
     private Dictionary<ulong, string> _cachedGlossary = []; 
     private string FreezeIcon => EditContext.IsFrozen is true
         ? PokeAByteIcons.SnowflakeIcon
@@ -95,5 +97,11 @@ public partial class PropertyValueEditor : ComponentBase
                 !string.IsNullOrWhiteSpace(x.Value) &&
                 x.Value.Contains(arg1, StringComparison.InvariantCultureIgnoreCase))
             .Select(g => g.Value));
+    }
+
+    private string FormatString(string val)
+    {
+        if (!IsShortDisplay || val.Length <= 15) return val;
+        return $"{val[..5]}...{val[^5..]}";
     }
 }

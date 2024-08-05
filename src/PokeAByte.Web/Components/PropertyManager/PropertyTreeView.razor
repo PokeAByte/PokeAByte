@@ -27,7 +27,10 @@
                 {
                     <MudIcon Icon="@SetIcon(context)"
                              Class="pr-2"/>
-                    <MudText Typo="Typo.body2" Class="py-1" Style="@($"width:{GetWidth(presenter)}px;")">@context.Text</MudText>
+                    <MudText Typo="Typo.body2" Class="py-1" Style="width:15px">@context.Text</MudText>
+                    <MudText Typo="Typo.body2" Class="py-1" Style="@($"width:{GetWidth(presenter, GetAdditionalInfo(context))}px;")">
+                        @GetAdditionalInfo(context)
+                    </MudText>
                     <MudText Typo="Typo.body2" Class="py-1" Style="color:#616161">@context.Children?.Count Entries</MudText>
                 }
                 @if (presenter is not null &&

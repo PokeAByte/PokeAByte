@@ -107,7 +107,7 @@ public partial class PropertyTreeView : ComponentBase
             }
         });
     }
-    private string GetWidth(PropertyTreePresenter context)
+    private string GetWidth(PropertyTreePresenter context, string additionalInfo = "")
     {
         List<TreeItemData<PropertyTreeItem>>? children;
         //Get the parent
@@ -130,6 +130,31 @@ public partial class PropertyTreeView : ComponentBase
             .Aggregate(0, (max, current) =>
                 Math.Max(max, current.Text?.Length ?? 16)) * 10;
         if (length < 75) length = 75;
+        if (!string.IsNullOrWhiteSpace(additionalInfo))
+        {
+            length += additionalInfo.Length * 10;
+        }
         return length.ToString();
+    }
+
+    private string GetAdditionalInfo(TreeItemData<PropertyTreeItem> context)
+    {
+        var intConvert = int.TryParse(context.Text, out var result);
+        if (!intConvert) return "";
+        var firstChild =
+            (context.HasChildren ? 
+                context.Children?.FirstOrDefault(x => x.Value?.Name is "species") : 
+                null) ?? (context.HasChildren ? 
+                context.Children?.First() : 
+                null);
+        if (firstChild?.Value?.PropertyModel == null) return "";
+        return string.IsNullOrWhiteSpace(firstChild.Value.PropertyModel.Value?.ToString()) ? "" : $" ({firstChild.Value.PropertyModel.Value})";
+    }
+
+    private string GetLength(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "0";
+        var len = value.Length;
+        return len * 8 < 17 ? "15" : (len * 8).ToString();
     }
 }

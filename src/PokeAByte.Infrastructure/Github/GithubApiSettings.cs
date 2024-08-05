@@ -141,4 +141,12 @@ public record GithubApiSettings : IGithubApiSettings
             _logger?.LogError(e, "Failed to save changes to the Github Api settings file.");
         }
     }
+
+    public void Clear()
+    {
+        Token = "";
+        Owner = "";
+        Repo = "";
+        Directory = "";
+    }
 }

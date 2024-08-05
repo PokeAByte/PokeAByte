@@ -64,9 +64,10 @@ public class EditPropertyModel : PropertyModel
         Address?.ToString("X") ?? "";
     public static EditPropertyModel FromPropertyModel(PropertyModel model)
     {            
+        
         return new EditPropertyModel
         {
-            ValueString = model.Value?.ToString() ?? "",
+            ValueString = model.ValueAsString(),
             Path = model.Path,
             Type = model.Type,
             MemoryContainer = model.MemoryContainer,

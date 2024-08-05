@@ -12,6 +12,8 @@ public partial class GitHubSettings : ComponentBase
     [Inject] public IGithubRestApi RestApi { get; set; }
     [Inject] public ILogger<GitHubSettings> Logger { get; set; }
     [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Inject] public IDialogService  DialogService { get; set; }
+    [Inject] public ISnackbar Snackbar { get; set; }
     [Parameter] public bool? IsInitiallyVisible { get; set; } = true;
     private bool _isVisible = true;
 
@@ -71,12 +73,14 @@ public partial class GitHubSettings : ComponentBase
             ApiSettings.CopySettings(_apiSettings);
             ApiSettings.SaveChanges();
             _saveChangesResult = (true, "Changes saved successfully!");
+            Snackbar.Add("Changes saved successfully!", Severity.Success);
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Failed to save github settings because of an exception.");
             _saveChangesResult = (false, "Failed to save github settings changes because of an exception. " +
                                          $"{e}");
+            Snackbar.Add("Failed to save github settings!", Severity.Error);
         }
         StateHasChanged();
     }
@@ -90,5 +94,18 @@ public partial class GitHubSettings : ComponentBase
     private void ToggleVisibility()
     {
         _isVisible = !_isVisible;
+    }
+
+    private async Task ClearOnClickHandler()
+    {
+        var result = await DialogService.ShowMessageBox("Warning!",
+            "Clearing the GitHub settings can cause issues with receiving new mappers. Do you want to continue?",
+            yesText: "Clear", cancelText: "Cancel");
+        if (result is true)
+        {
+            _apiSettings.Clear();
+            StateHasChanged();
+            Snackbar.Add("Successfully cleared!", Severity.Info);
+        }
     }
 }

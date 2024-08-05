@@ -16,7 +16,7 @@
             <MudDivider DividerType="DividerType.FullWidth" Class="my-4"/>
         </MudItem>
         <MudItem xs="12">
-            <MudText>GitHub Owner Name: </MudText>
+            <MudText>GitHub Account Name: </MudText>
             <MudTextField @bind-Value="@_apiSettings.Owner"/>
         </MudItem>
         <MudItem xs="12">
@@ -37,7 +37,8 @@
                 Note: This is required if the repository is private or if you want to bypass the
                 GitHub REST Api rate limit. Once you have a token generated <b>do not</b> share it
                 with anyone; for more information please refer to this page:
-                <MudLink Href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
+                <MudLink Target="_blank" 
+                        Href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
                     Managing your personal access tokens
                 </MudLink>
             </MudText>
@@ -53,11 +54,26 @@
             </MudText>
         </MudItem>
         <MudItem xs="12">
-            <MudButtonGroup Color="Color.Secondary" Variant="Variant.Filled">
-                <MudButton OnClick="TestSettingsOnClickHandler">Test Settings</MudButton>
-                <MudButton OnClick="OpenGithubOnClickHandler">Open Github Link</MudButton>
-                <MudButton OnClick="SaveOnClickHandler">Save Settings</MudButton>
-            </MudButtonGroup>
+            <MudButton OnClick="TestSettingsOnClickHandler"
+                       Color="Color.Info"
+                       Variant="Variant.Filled">
+                Test Settings
+            </MudButton>
+            <MudButton OnClick="OpenGithubOnClickHandler"
+                       Color="Color.Primary"
+                       Variant="Variant.Filled">
+                Open Github Link
+            </MudButton>
+            <MudButton OnClick="SaveOnClickHandler"
+                       Color="Color.Success"
+                       Variant="Variant.Filled">
+                Save Settings
+            </MudButton>
+            <MudButton OnClick="ClearOnClickHandler"
+                       Color="Color.Error"
+                       Variant="Variant.Filled">
+                Clear Settings
+            </MudButton>
         </MudItem>
     </MudGrid>
 </MudPaper>
