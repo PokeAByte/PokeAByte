@@ -14,6 +14,7 @@ public partial class LoadMapper : ComponentBase
     [Inject] public MapperClientService? MapperConnectionService { get; set; }
     [Inject] public NavigationService? NavigationService { get; set; }
     public bool IsLoading => _isMapperLoading;
+    public bool HasMappers => _mapperFiles?.Any() ?? false;
 
     private IEnumerable<MapperFileModel>? _mapperFiles;
     //private string _selectedMapperId = "";

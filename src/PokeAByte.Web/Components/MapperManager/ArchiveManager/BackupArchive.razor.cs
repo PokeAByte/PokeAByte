@@ -125,7 +125,7 @@ public partial class BackupArchive : ComponentBase
     {
         if(_selectedMapperListFromTable.Count == 0) return;
         var result = await DialogService.ShowMessageBox(
-            "Warning", "Archiving selected mapper(s) will remove it from your list. You can find the archived mapper(s) in the 'Restore' tab.",
+            "Warning", "Archiving the selected mapper(s) will remove it/them from your list. You can find the archived mapper(s) in the 'Restore' tab.",
             "Archive!", cancelText:"Cancel");
         if(result is null or false)
             return;

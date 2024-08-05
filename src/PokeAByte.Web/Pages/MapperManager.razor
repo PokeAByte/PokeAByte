@@ -30,6 +30,7 @@
     }
 </MudStack>
 <MudTabs Elevation="2" 
+         @ref="TabsRef"
          Rounded="false" 
          ApplyEffectsToContainer="true"
          PanelClass="pa-6"
@@ -42,7 +43,9 @@
             <LoadMapper @ref="LoadMapperRef"/>
         </MudContainer>
     </MudTabPanel>
-    <MudTabPanel Text="Download" Disabled="@(LoadMapperRef?.IsLoading is true)">
+    <MudTabPanel Text="Download" 
+                 @ref="DownloadTabRef"
+                 Disabled="@(LoadMapperRef?.IsLoading is true)">
         <MudContainer Style="height: auto">
             <RemoteManager IsDownloadMappersPage="true" />
         </MudContainer>
@@ -76,7 +79,9 @@
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] private MapperClientService? MapperConnectionService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
-    public LoadMapper? LoadMapperRef { get; set; }
+    private LoadMapper? LoadMapperRef { get; set; }
+    private MudTabPanel? DownloadTabRef { get; set; }
+    private MudTabs? TabsRef { get; set; }
 
     private Color _currentStatusColor = Color.Info;
     private string _currentStatusName = "Not Found";
@@ -90,6 +95,15 @@
             _mapperName = $"{metaResult.ResultValue?.GameName}";
         _currentStatusColor = MapperConnectionService?.GetCurrentConnectionColor() ?? Color.Dark;
         _currentStatusName = MapperConnectionService?.GetCurrentConnectionName() ?? "Not Found";
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (LoadMapperRef?.HasMappers is false)
+        {
+            TabsRef?.ActivatePanel(DownloadTabRef);
+        }
     }
 
     private async Task Clear()
