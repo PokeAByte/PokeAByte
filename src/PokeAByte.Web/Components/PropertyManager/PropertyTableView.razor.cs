@@ -76,6 +76,5 @@ public partial class PropertyTableView : ComponentBase
             Logger.LogError(e, msg);
             Snackbar.Add(msg, Severity.Error);
         }
-        
     }
 }

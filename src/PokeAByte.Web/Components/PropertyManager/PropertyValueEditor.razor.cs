@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
@@ -11,9 +12,9 @@ public partial class PropertyValueEditor : ComponentBase
 {
     [Inject] public required MapperClientService MapperClientService { get; set; }
     [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Parameter]
     public required EditPropertyModel EditContext { get; set; }
-
     [Parameter] public bool IsShortDisplay { get; set; }
 
     private Dictionary<ulong, string> _cachedGlossary = []; 
@@ -26,6 +27,8 @@ public partial class PropertyValueEditor : ComponentBase
         SetFunc = text => text?.ToLowerInvariant() == "true",
         GetFunc = val => val?.ToString().ToLowerInvariant() ?? "false",
     };
+
+    private readonly string _copyBtnViewBox = "0 0 30 30"; 
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -103,5 +106,20 @@ public partial class PropertyValueEditor : ComponentBase
     {
         if (!IsShortDisplay || val.Length <= 15) return val;
         return $"{val[..5]}...{val[^5..]}";
+    }
+
+    private async Task CopyToClipboard(string copy)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", copy);
+            Snackbar.Add($"Copied {copy} to the clipboard!", 
+                Severity.Info);
+        }
+        catch (Exception e)
+        {
+            var msg = "Failed to copy to clipboard!";
+            Snackbar.Add(msg, Severity.Error);
+        }
     }
 }

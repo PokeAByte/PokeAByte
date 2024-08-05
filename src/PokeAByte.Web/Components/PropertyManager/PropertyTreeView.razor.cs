@@ -53,11 +53,36 @@ public partial class PropertyTreeView : ComponentBase
         base.OnInitialized();
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        //Make sure all open properties are enabled
+        foreach (var prop in PropertyService.PropertyTree)
+        {
+            if (prop is PropertyTreePresenter p)
+            {
+                if (p.Expanded)
+                {
+                    p.IsDisabled = false;
+                    if (p.Parent is not null)
+                    {
+                        p.Parent.DisableChildren(false);
+                        p.Parent.IsDisabled = false;
+                    }
+                }
+            }
+        }
+    }
+
     private void OnTreeItemClick(TreeItemData<PropertyTreeItem> context)
     {
         if (!context.Expandable)
             return;
         context.Expanded = !context.Expanded;
+        //Make sure this isn't disabled
+        if (context is PropertyTreePresenter p)
+        {
+            p.IsDisabled = false;
+        }
         if (context.HasChildren)
         {
             //enable children
