@@ -17,6 +17,8 @@ public static class MapperEnvironment
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
     public static string MapperLocalArchiveDirectory => 
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
+    public static string MapperArchiveSavedDataJson => 
+        Path.Combine(BuildEnvironment.ConfigurationDirectory, "mapper_archive_saved_data.json");
     public static string MapperLocalCommitHashFilePath => 
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers", "COMMIT_HASH.txt");
     public static string MapperTemporaryZipFilepath => 

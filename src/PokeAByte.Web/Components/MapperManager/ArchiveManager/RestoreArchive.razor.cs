@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Web.Models;
@@ -23,9 +24,11 @@ public partial class RestoreArchive : ComponentBase
     private Color SetIconColor(bool isExpanded) =>
         isExpanded ? Color.Secondary : Color.Info;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        GetArchivedMappers();
+        await base.OnInitializedAsync();
+        await Task.Delay(100);
         GetArchivedMappers();
     }
 
@@ -78,5 +81,38 @@ public partial class RestoreArchive : ComponentBase
             return;
         MapperManagerService.DeleteArchivedMappers(item.MapperModels);
         GetArchivedMappers();
+    }
+
+    private bool _isChangingNames = false;
+    private void OnClickChangeNameButton()
+    {
+        _isChangingNames = !_isChangingNames;
+        StateHasChanged();
+    }
+
+    private void OnClickSaveNameButton(MapperArchiveModel item)
+    {
+        MapperManagerService.SaveArchivedItem(item);
+        item.IsChangingName = false;
+        StateHasChanged();
+    }
+
+    private static string GetTypeName(ArchiveType itemType)
+    {
+        return itemType switch
+        {
+            ArchiveType.None => "Not Found",
+            ArchiveType.Archived => "Archived",
+            ArchiveType.BackUp => "Back-Up",
+            _ => throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null)
+        };
+    }
+
+    private void OnKeyDownHandler(KeyboardEventArgs args, MapperArchiveModel item)
+    {
+        if (args.Code is "Enter" or "NumpadEnter")
+        {
+            OnClickSaveNameButton(item);
+        }
     }
 }
