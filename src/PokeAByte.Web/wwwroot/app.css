@@ -1,5 +1,7 @@
 .mud-collapse-entering {
-    animation-duration: .2s !important }
+    animation-duration: 1s !important }
+.mud-collapse-exiting {
+    animation-duration: 1s !important }
 tr:nth-child(even) {
     background-color: #424242;
 }

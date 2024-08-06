@@ -38,7 +38,7 @@
                      property.PropertyModel is not null &&
                      property.CurrentCount + 1 <= _maxCount)
                 {
-                    <PropertyExpansionView Context="@presenter"/>
+                    <PropertyExpansionView Context="@presenter" Parent="@this" />
                 }
                 else if (presenter is not null &&
                          presenter.IsDisabled != true &&

@@ -16,6 +16,7 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
     [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
     [Parameter] public required PropertyTreePresenter Context { get; set; }
+    [Parameter] public required PropertyTreeView Parent { get; set; }
     public Color IconColor =>
         Context.Value!.IsPropertyExpanded ? Color.Info : Color.Default;
     private string Width => $"width:{_textWidth}px;";
@@ -51,6 +52,7 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
         if (_editContext is null) return;
         MapperClientService.UpdateEditPropertyModel(_editContext);
         await InvokeAsync(StateHasChanged);
+        await InvokeAsync(Parent.RefreshParent);
     }
     private void OnClickExpand()
     {       

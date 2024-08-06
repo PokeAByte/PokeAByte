@@ -176,4 +176,9 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     {
         PropertyService.ResetTree();
     }
+
+    public async Task RefreshParent()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
 }
