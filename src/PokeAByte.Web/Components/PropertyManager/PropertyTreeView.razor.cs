@@ -9,7 +9,7 @@ using PokeAByte.Web.Services.Properties;
 
 namespace PokeAByte.Web.Components.PropertyManager;
 
-public partial class PropertyTreeView : ComponentBase
+public partial class PropertyTreeView : ComponentBase, IDisposable
 {
     [Inject] private PropertyService PropertyService { get; set; }
     [Inject] private MapperClientService ClientService { get; set; }
@@ -56,21 +56,9 @@ public partial class PropertyTreeView : ComponentBase
 
     protected override void OnAfterRender(bool firstRender)
     {
-        //Make sure all open properties are enabled
-        foreach (var prop in PropertyService.PropertyTree)
+        if (!firstRender)
         {
-            if (prop is PropertyTreePresenter p)
-            {
-                if (p.Expanded)
-                {
-                    p.IsDisabled = false;
-                    if (p.Parent is not null)
-                    {
-                        p.Parent.DisableChildren(false);
-                        p.Parent.IsDisabled = false;
-                    }
-                }
-            }
+            
         }
     }
 
@@ -184,4 +172,8 @@ public partial class PropertyTreeView : ComponentBase
         return len * 8 < 17 ? "15" : (len * 8).ToString();
     }
 
+    public void Dispose()
+    {
+        PropertyService.ResetTree();
+    }
 }

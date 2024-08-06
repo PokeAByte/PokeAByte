@@ -95,7 +95,15 @@ public class MapperSettingsService
             return;
         if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
             return;
-        var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
+        var name = $"{prop.Value.Name}"; 
+        //check to see if prop has a parent
+        if (prop.Parent is not null)
+        {
+            //get the name of the parent and concat it with current name
+            name = $"{prop.Parent.Text}.{prop.Value.Name}";
+        }
+        var partialPath = $"{prop.Value.FullPath[..prop.Value.FullPath.IndexOf(name, StringComparison.Ordinal)]}{name}";
+        //var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
         //find the entry with path
         var foundEntry = _currentMapperModel
             .Properties
