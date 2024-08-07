@@ -20,13 +20,21 @@ public sealed class PropertyTreePresenter : TreeItemData<PropertyTreeItem>
             mapperId,
             mapperName,
             fullPath,
-            property))
+            CreateEditContext(property)))
     {
         Text = text;
         Parent = parent;
         LongestTextLength = text.Length;
         Icon = icon;
     }
+
+    private static EditPropertyModel? CreateEditContext(PropertyModel? property)
+    {
+        if(property is not null)
+            return EditPropertyModel.FromPropertyModel(property);
+        return null;
+    }
+
     public int GetMaxLength()
     {
         if (HasChildren)
@@ -54,7 +62,7 @@ public record PropertyTreeItem(string Name,
     Guid MapperId,
     string MapperName,
     string FullPath,
-    PropertyModel? PropertyModel = null)
+    EditPropertyModel? PropertyModel = null)
 {
     public bool IsPropertyExpanded { get; set; }
     public int CurrentCount { get; private set; }

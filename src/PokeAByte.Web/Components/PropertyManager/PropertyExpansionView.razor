@@ -19,20 +19,20 @@
                 </MudText>
             </MudItem>
             <MudItem Class="align-center cursor-default">
-                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
                                Size="Size.Small"
                                Style="margin-top:7px;"
                                Class="cursor-pointer"
-                               OnClick="() => CopyToClipboard(_editContext.ValueString)"/>
+                               @onclick="() => CopyToClipboard(Context.Value?.PropertyModel?.ValueString)"/>
             </MudItem>
             <MudItem Class="align-center cursor-default">
-                <PropertyValueEditor EditContext="_editContext" IsShortDisplay="true"/>
+                <PropertyValueEditor EditContext="Context.Value?.PropertyModel" IsShortDisplay="true"/>
             </MudItem>
             <MudItem @onclick="OnClickExpand"
                      Class="align-content-center flex-grow-1" Style="width: auto;"></MudItem>
         </MudGrid>
         <MudContainer Fixed="true" Style="@DisplayContent" Class="cursor-default">
-            <PropertyTableView Context="_editContext"/>
+            <PropertyTableView Context="Context.Value?.PropertyModel"/>
         </MudContainer>
     </MudStack>
 </MudPaper>

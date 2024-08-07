@@ -4,7 +4,8 @@
              Dense="true"
              Hover="true"
              ExpandOnClick="false"
-             Ripple="false">
+             Ripple="false"
+             SelectedValueChanged="OnSelectedValueHasChanged">
     <ItemTemplate>
         @{
             var property = context.Value ?? throw new InvalidOperationException("Value cannot be null.");

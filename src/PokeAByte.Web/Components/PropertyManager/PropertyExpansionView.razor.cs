@@ -10,7 +10,7 @@ namespace PokeAByte.Web.Components.PropertyManager;
 public partial class PropertyExpansionView : ComponentBase, IDisposable
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
-    private EditPropertyModel _editContext = new();
+    //private EditPropertyModel _editContext = new();
     
     [Inject] public required ISnackbar Snackbar { get; set; }
     [Inject] public required IJSRuntime JSRuntime { get; set; }
@@ -33,8 +33,9 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
             throw new InvalidOperationException("Context value is null.");
         if (Context.Value!.PropertyModel is not null)
         {
-            _editContext = EditPropertyModel.FromPropertyModel(Context.Value!.PropertyModel);
-            PropertyUpdateService.EventHandlers.TryAdd(_editContext.Path, HandlePropertyUpdate);
+            //_editContext = EditPropertyModel.FromPropertyModel(Context.Value!.PropertyModel);
+
+            PropertyUpdateService.EventHandlers.TryAdd(Context.Value!.PropertyModel.Path, HandlePropertyUpdate);
         }
 
         if (Context.Parent is not null)
@@ -49,21 +50,22 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
     }
     private async void HandlePropertyUpdate(object? sender, EventArgs e)
     {
-        if (_editContext is null) return;
-        MapperClientService.UpdateEditPropertyModel(_editContext);
+        if (Context.Value?.PropertyModel is null) return;
+        MapperClientService.UpdateEditPropertyModel(Context.Value.PropertyModel);
         await InvokeAsync(StateHasChanged);
         await InvokeAsync(Parent.RefreshParent);
     }
     private void OnClickExpand()
     {       
-        Context.Value!.IsPropertyExpanded = !Context.Value!.IsPropertyExpanded;
+        Context.Value!.IsPropertyExpanded = !Context.Value.IsPropertyExpanded;
         
         //StateHasChanged();
     }
 
     public void Dispose()
     {
-        PropertyUpdateService.EventHandlers.Remove(_editContext.Path);
+        if(Context.Value?.PropertyModel?.Path is not null)
+            PropertyUpdateService.EventHandlers.Remove(Context.Value.PropertyModel.Path);
     }
 
     private async Task CopyToClipboard(object? copy)

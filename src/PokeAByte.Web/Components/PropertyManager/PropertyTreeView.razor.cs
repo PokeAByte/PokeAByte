@@ -15,10 +15,12 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     [Inject] private MapperClientService ClientService { get; set; }
     [Inject] private NavigationService? NavService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
-    
+    public Action<PropertyTreeItem?> OnSelectedValueHasChanged { get; set; }
+
     private const int CountIncrease = 150;
     private int _maxCount = CountIncrease;
     private string _mapperName = "";
+
     private void Clear()
     {
         _mapperName = "";
@@ -36,6 +38,7 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     
     protected override void OnInitialized()
     {
+        OnSelectedValueHasChanged += SelectedValueHasChangedHandler;
         ClientService.OnReadExceptionHandler(OnReadExceptionOccurredHandler);
         ClientService.OnMapperIsUnloaded += OnMapperUnloadedHandler;
         var metaResult = ClientService.GetMetaData();
@@ -180,5 +183,19 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     public async Task RefreshParent()
     {
         await InvokeAsync(StateHasChanged);
+    }
+
+    private PropertyTreeItem? _previous;
+    private void SelectedValueHasChangedHandler(PropertyTreeItem? val)
+    {
+        if (_previous?.PropertyModel is not null)
+        {
+            _previous.PropertyModel.ValueString = _previous?.PropertyModel?.Value?.ToString() ?? "";
+            if (_previous?.PropertyModel is not null) _previous.PropertyModel.IsEditing = false;
+        }
+        if (val?.PropertyModel is not null)
+            val.PropertyModel.IsEditing = true;
+        
+        _previous = val;
     }
 }

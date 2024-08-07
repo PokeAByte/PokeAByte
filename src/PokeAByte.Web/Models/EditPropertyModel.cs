@@ -6,6 +6,7 @@ namespace PokeAByte.Web.Models;
 public class EditPropertyModel : PropertyModel
 {
     public bool IsValueEdited { get; set; } = false;
+    public bool IsEditing { get; set; } = false;
     public Dictionary<ulong, string>? GlossaryReference { get; set; }
     private string _valueString = "";
     private bool _isInitValueSet = false;
