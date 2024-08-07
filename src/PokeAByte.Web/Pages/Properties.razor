@@ -62,6 +62,7 @@ else
         await ClientService!.UnloadMapper();
         StateHasChanged();
         ChangeNotificationService.NotifyDataChanged();
+        NavService.Navigate(NavigationService.Pages.MapperManager);
     }
     private async Task OnClickUnloadMapper()
     {
