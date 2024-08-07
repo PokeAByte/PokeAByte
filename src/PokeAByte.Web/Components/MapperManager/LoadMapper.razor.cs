@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Navigation;
 
@@ -22,6 +23,11 @@ public partial class LoadMapper : ComponentBase
     private bool _isMapperLoading = false;
     private string? _errorMessage = "";
     private string? _successMessage = "";
+    private int _currentDriverProgressAttempt = 0;
+    private int _currentDriverAttempt = 0;
+    private int _currentMapperAttempt = 0;
+    private int _currentMapperProgressAttempt = 0;
+
 
     protected override void OnInitialized()
     {
@@ -64,10 +70,14 @@ public partial class LoadMapper : ComponentBase
             _errorMessage = "Failed to find selected mapper!";
             return;
         }
-        var result = await MapperConnectionService?.ChangeMapper(mapperId)!;
+
+        _currentDriverAttempt = 0;
+        _currentMapperAttempt = 0;
+        var result = await MapperConnectionService?
+            .ChangeMapper(mapperId, OnDriverTestFailedCallback, OnMapperTestFailedCallback)!;
         if (result.IsSuccess)
         {
-            _selectedMapper = "";
+            //_selectedMapper = "";
             NavigationService?.TogglePropertiesButton();
             NavigationService?.Navigate(NavigationService.Pages.Properties);
             _isMapperLoading = false;
@@ -78,6 +88,19 @@ public partial class LoadMapper : ComponentBase
             _isMapperLoading = false;
             _errorMessage = result.ToString();
         }
+    }
+    
+    private async void OnDriverTestFailedCallback(int currentAttempt)
+    {
+        _currentDriverAttempt = currentAttempt;
+        _currentDriverProgressAttempt = (int)((double)currentAttempt / DriverService.MaxAttempts * 100);
+        await InvokeAsync(StateHasChanged);
+    }
+    private async void OnMapperTestFailedCallback(int currentAttempt)
+    {
+        _currentMapperAttempt = currentAttempt;
+        _currentMapperProgressAttempt = (int)((double)currentAttempt / DriverService.MaxAttempts * 100);
+        await InvokeAsync(StateHasChanged);
     }
     private void OpenMapperFolder()
     {

@@ -17,6 +17,9 @@ public class MapperClientService
     public readonly MapperClient Client;
     private readonly PropertyUpdateService _propertyUpdateService;
     private readonly DriverService _driverService;
+    private int _currentAttempt = 0;
+    public static readonly int MaxAttempts = 25;
+    private const int MaxWaitMs = 100;
     public MapperClientService(IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
         MapperClient client,
@@ -56,13 +59,39 @@ public class MapperClientService
 
     public List<PropertyModel> Properties { get; set; } = [];
 
-    public async Task<Result> ChangeMapper(string mapperId)
+    public async Task<Result> ChangeMapper(string mapperId,
+        Action<int> driverTestActionHandler,
+        Action<int> mapperTestActionHandler)
     {
-        var driverResult = await _driverService.TestDrivers();
-        if (string.IsNullOrWhiteSpace(driverResult))
-            return Result.Failure(Error.FailedToLoadMapper, 
-                "Driver was not found.");
-        LoadedDriver = driverResult;
+        _currentAttempt = 0;
+        var connected = false;
+        while (!connected && _currentAttempt < MaxAttempts)
+        {
+            try
+            {
+                var driverResult = await _driverService.TestDrivers(driverTestActionHandler);
+                if (string.IsNullOrWhiteSpace(driverResult))
+                    return Result.Failure(Error.FailedToLoadMapper, 
+                        "Driver was not found.");
+                LoadedDriver = driverResult;
+                var result = await ReplaceMapper(mapperId);
+                connected = result.IsSuccess;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
+                connected = false;
+            }
+            _currentAttempt += 1;
+            mapperTestActionHandler?.Invoke(_currentAttempt);
+            await Task.Delay(MaxWaitMs);
+        }
+        return connected ? Result.Success() : Result.Failure(Error.FailedToLoadMapper, "Max attempts reached.");
+    }
+
+    private async Task<Result> ReplaceMapper(string mapperId)
+    {
+        await Client.UnloadMapper();
         var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
         try
         {
@@ -81,7 +110,6 @@ public class MapperClientService
             return Result.Exception(e);
         }
     }
-    
     public IEnumerable<MapperFileModel> GetMappers()
     {
         _mapperFs.CacheMapperFiles();

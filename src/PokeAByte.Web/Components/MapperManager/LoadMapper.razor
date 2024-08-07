@@ -1,4 +1,5 @@
-﻿@if (!_isMapperLoading)
+﻿@using PokeAByte.Web.Services.Drivers
+@if (!_isMapperLoading)
 {
     <MudGrid>
         <MudItem xs="12">
@@ -80,7 +81,11 @@
 else
 {
     <MudText Typo="Typo.body1">
-        Loading Mapper - Please Wait...
+        Loading Driver Attempt # @_currentDriverAttempt
     </MudText>
-    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+    <MudProgressLinear Color="Color.Secondary" Indeterminate="false" Value="_currentDriverProgressAttempt"/>
+    <MudText Typo="Typo.body1">
+        Loading Mapper Attempt # @_currentMapperAttempt
+    </MudText>
+    <MudProgressLinear Color="Color.Secondary" Indeterminate="false" Value="_currentMapperProgressAttempt"/>
 }
