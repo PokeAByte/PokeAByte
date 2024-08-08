@@ -21,6 +21,8 @@ public partial class PropertyValueEditor : ComponentBase
         ? PokeAByteIcons.SnowflakeIcon
         : PokeAByteIcons.SnowflakeIconDisabled;
 
+    private Action<string> OnValueChanged { get; set; }
+
     public readonly MudBlazor.Converter<string?, bool?> MudSwitchConverter = new MudBlazor.Converter<string?, bool?>
     {
         SetFunc = text => text?.ToLowerInvariant() == "true",
@@ -31,6 +33,7 @@ public partial class PropertyValueEditor : ComponentBase
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        OnValueChanged += OnValueChangedHandler;
         if (string.IsNullOrEmpty(EditContext.Reference)) return;
         _cachedGlossary = GetGlossaryByReferenceKey(EditContext.Reference);
         EditContext.GlossaryReference = _cachedGlossary;
@@ -108,4 +111,23 @@ public partial class PropertyValueEditor : ComponentBase
     }
 
 
+    private async Task OnKeyDownAutoCompleteHandler(KeyboardEventArgs key, EditPropertyModel editContext)
+    {
+        if (key.Code is "Enter" or "NumpadEnter" && !string.IsNullOrEmpty(_autocompleteValue))
+        {
+            editContext.ValueString = _autocompleteValue;
+            _autocompleteValue = "";
+            await Save();
+        }
+    }
+    
+    private void OnInputChanged(ChangeEventArgs obj)
+    {
+    }
+
+    private string _autocompleteValue = "";
+    private void OnValueChangedHandler(string val)
+    {
+        _autocompleteValue = val;
+    }
 }

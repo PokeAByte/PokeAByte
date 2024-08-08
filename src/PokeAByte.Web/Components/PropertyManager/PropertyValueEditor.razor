@@ -15,8 +15,7 @@
     }
     else if (!string.IsNullOrEmpty(EditContext.Reference))
     {
-    <MudAutocomplete @bind-Value="EditContext.ValueString"
-                     SearchFunc="SearchForReference"
+    <MudAutocomplete SearchFunc="SearchForReference"
                      Dense="true"
                      Margin="Margin.Dense"
                      Class="mt-n1"
@@ -24,7 +23,10 @@
                      Adornment="Adornment.None"
                      OnBlur="InputFocusLostHandler"
                      ShrinkLabel="true"
-                     MaxItems="15">
+                     MaxItems="15"
+                     ValueChanged="OnValueChanged"
+                     OnKeyDown="(key) => OnKeyDownAutoCompleteHandler(key, EditContext)"
+                     OnInternalInputChanged="OnInputChanged">
         <BeforeItemsTemplate>
             <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
         </BeforeItemsTemplate>
