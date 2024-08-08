@@ -1,4 +1,5 @@
-﻿using PokeAByte.Domain.Models;
+﻿using PokeAByte.Domain;
+using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Models;
@@ -100,5 +101,18 @@ public class EditPropertyModel : PropertyModel
         IsFrozen = model?.IsFrozen;
         IsReadOnly = model?.IsReadOnly ?? false;
         ByteArray = new ByteArrayProperty(model?.Bytes);
+    }
+
+    public void UpdateByteArray()
+    {
+        var bytes = BaseProperty.BytesFromValue(ValueString);
+        ByteArray = new ByteArrayProperty(bytes.ToIntegerArray());
+    }
+    public void UpdateFromByteArray()
+    {
+        ByteArray.UpdateByteArray();
+        var arr = ByteArray.ByteArray?.Select(Convert.ToByte).ToArray();
+        if(arr is not null)
+            ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
     }
 }

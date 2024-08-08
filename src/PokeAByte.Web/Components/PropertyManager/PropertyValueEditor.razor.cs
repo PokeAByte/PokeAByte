@@ -173,4 +173,10 @@ public partial class PropertyValueEditor : ComponentBase
             await Save();
         }
     }
+
+    private void OnTextChangedHandler(string obj)
+    {
+        EditContext.UpdateByteArray();
+        StateHasChanged();
+    }
 }

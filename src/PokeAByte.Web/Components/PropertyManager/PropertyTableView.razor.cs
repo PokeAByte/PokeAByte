@@ -92,7 +92,7 @@ public partial class PropertyTableView : ComponentBase
     private void OnTextChangedHandler(string text)
     {
         //update the value
-        //Context.UpdateFromByteArray();
+        Context.UpdateFromByteArray();
         StateHasChanged();
     }
 }

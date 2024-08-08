@@ -5,6 +5,7 @@ namespace PokeAByte.Domain.Models;
 public class ByteArrayProperty
 {
     private IEnumerable<int>? _byteArray;
+    public IReadOnlyCollection<int>? ByteArray => _byteArray?.ToList().AsReadOnly();
     public List<string> EditableArray { get; private set; } = [];
     public ByteArrayProperty(IEnumerable<int>? byteArray)
     {
@@ -23,8 +24,8 @@ public class ByteArrayProperty
             .Select(b => b.ToString("X2"))
             .ToList();
     }
-    public IEnumerable<int>? GetByteArray()
-        => _byteArray;
+    /*public IEnumerable<int>? GetByteArray()
+        => _byteArray;*/
 
     public void UpdateByteArray()
     {

@@ -13,6 +13,7 @@
                       Immediate="true"
                       AutoGrow="false"
                       MaxLength="@(EditContext.Length ?? 30)"
+                      TextChanged="OnTextChangedHandler"
                       OnKeyDown="OnKeyDownHandler"/>
     }
     else if (EditContext.Type is "string" && !string.IsNullOrEmpty(EditContext.Reference))
@@ -45,6 +46,7 @@
                   OnBlur="InputFocusLostHandler"
                   ShrinkLabel="true"
                   Immediate="true"
+                  TextChanged="OnTextChangedHandler"
                   OnKeyDown="OnKeyDownHandler"/>
     }
     else if (EditContext.Type is "int" or "uint" or "nibble" && !string.IsNullOrEmpty(EditContext.Reference))
