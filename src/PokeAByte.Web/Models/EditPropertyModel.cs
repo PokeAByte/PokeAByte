@@ -82,7 +82,8 @@ public class EditPropertyModel : PropertyModel
             Bytes = model.Bytes,
             IsFrozen = model.IsFrozen,
             IsReadOnly = model.IsReadOnly,
-            ByteArray = new ByteArrayProperty(model.Bytes)
+            ByteArray = new ByteArrayProperty(model.Bytes),
+            BaseProperty = model.BaseProperty
         };
     }
     public void Reset()

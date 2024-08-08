@@ -21,7 +21,8 @@ public partial class PropertyValueEditor : ComponentBase
         ? PokeAByteIcons.SnowflakeIcon
         : PokeAByteIcons.SnowflakeIconDisabled;
 
-    private Action<string> OnValueChanged { get; set; }
+    private Action<string>? OnValueChanged { get; set; }
+    public Action<IntegerValueReference?> OnIntValueChanged { get; set; }
 
     public readonly MudBlazor.Converter<string?, bool?> MudSwitchConverter = new MudBlazor.Converter<string?, bool?>
     {
@@ -34,9 +35,19 @@ public partial class PropertyValueEditor : ComponentBase
     {
         base.OnInitialized();
         OnValueChanged += OnValueChangedHandler;
+        OnIntValueChanged += OnIntValueChangedHandler;
         if (string.IsNullOrEmpty(EditContext.Reference)) return;
         _cachedGlossary = GetGlossaryByReferenceKey(EditContext.Reference);
         EditContext.GlossaryReference = _cachedGlossary;
+        if (EditContext.Type is not "string" && !string.IsNullOrEmpty(EditContext.Reference))
+        {
+            var foundVal = _cachedGlossary
+                .FirstOrDefault(x => x.Value == EditContext.ValueString);
+            if (!string.IsNullOrEmpty(foundVal.Value))
+            {
+                _autocompleteIntValue = new IntegerValueReference(foundVal.Key, foundVal.Value);
+            }
+        }
     }
     private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
     {
@@ -53,8 +64,9 @@ public partial class PropertyValueEditor : ComponentBase
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
     //handler it will update when it loses focus. I am not a fan of leaving in empty methods but if it works, it works
     private void InputFocusLostHandler(FocusEventArgs obj){}
-    private async Task Save()
+    public async Task Save()
     {
+        //Console.WriteLine($"{EditContext.ValueString}");
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
             EditContext.ValueString,
             EditContext.IsFrozen ?? false);
@@ -110,7 +122,6 @@ public partial class PropertyValueEditor : ComponentBase
         return $"{val[..5]}...{val[^5..]}";
     }
 
-
     private async Task OnKeyDownAutoCompleteHandler(KeyboardEventArgs key, EditPropertyModel editContext)
     {
         if (key.Code is "Enter" or "NumpadEnter" && !string.IsNullOrEmpty(_autocompleteValue))
@@ -129,5 +140,37 @@ public partial class PropertyValueEditor : ComponentBase
     private void OnValueChangedHandler(string val)
     {
         _autocompleteValue = val;
+        EditContext.ValueString = val;
+    }
+    private IntegerValueReference? _autocompleteIntValue;
+    private string? _autocompleteIntString;
+    private void OnIntValueChangedHandler(IntegerValueReference val)
+    {
+        _autocompleteIntValue = val;
+        EditContext.ValueString = _autocompleteIntValue.value;
+    }
+    private Task<IEnumerable<IntegerValueReference>> SearchForIntReference(string arg1, CancellationToken arg2)
+    {
+        if (string.IsNullOrEmpty(EditContext.Reference))
+            return Task.FromResult<IEnumerable<IntegerValueReference>>(Array.Empty<IntegerValueReference>());
+        if (string.IsNullOrEmpty(arg1))
+            return Task.FromResult(_cachedGlossary
+                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(g => new IntegerValueReference(g.Key, g.Value)));
+        return Task.FromResult(_cachedGlossary
+            .Where(x => 
+                !string.IsNullOrWhiteSpace(x.Value) &&
+                x.Value.Contains(arg1, StringComparison.InvariantCultureIgnoreCase))
+            .Select(g => new IntegerValueReference(g.Key, g.Value)));
+    }
+
+    private async Task OnKeyDownIntAutoCompleteHandler(KeyboardEventArgs key, EditPropertyModel editContext)
+    {
+        if (key.Code is "Enter" or "NumpadEnter" && !string.IsNullOrEmpty(_autocompleteIntValue?.key.ToString()))
+        {
+            editContext.ValueString = _autocompleteIntValue.value;
+            _autocompleteIntValue = null;
+            await Save();
+        }
     }
 }

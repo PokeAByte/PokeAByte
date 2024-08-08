@@ -156,6 +156,7 @@ public class MapperClientService
         if (!Client.IsMapperLoaded)
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         var path = propertyPath.StripEndingRoute().FromRouteToPath();
+        //Console.WriteLine($"{path}: {value}");
         if (await Client.WriteProperty(path, value, isFrozen))
             return Result.Success();
         return Result.Failure(Error.FailedToUpdateProperty);

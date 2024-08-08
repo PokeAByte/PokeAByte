@@ -25,6 +25,7 @@ public static class MapperHelper
 
             IsFrozen = x.IsFrozen,
             IsReadOnly = x.IsReadOnly,
+            BaseProperty = x
         };
 
     public static Dictionary<string, IEnumerable<GlossaryItemModel>> MapToDictionaryGlossaryItemModel(

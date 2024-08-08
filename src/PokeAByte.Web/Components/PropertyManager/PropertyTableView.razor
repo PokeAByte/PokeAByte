@@ -1,4 +1,5 @@
-﻿<MudSimpleTable Style="overflow-x: auto;"
+﻿@using PokeAByte.Domain
+<MudSimpleTable Style="overflow-x: auto;"
                 Bordered="true"
                 Dense="true">
     <tbody>
@@ -10,7 +11,7 @@
                      ViewBox="@_copyBtnViewBox"/>
         </td>
         <td style="@($"width:{_valueWidth}px")">
-            <PropertyValueEditor EditContext="Context" IsShortDisplay="false" />
+            <PropertyValueEditor EditContext="Context" IsShortDisplay="false" @ref="PropertyValueEditor"/>
         </td>
     </tr>
     <tr>
@@ -76,7 +77,26 @@
                      ViewBox="@_copyBtnViewBox"/>
         </td>
         <td>
-            <MudGrid Spacing="1" Justify="Justify.FlexStart">
+            <MudGrid Spacing="0" Justify="Justify.FlexStart">
+                @for (var i = 0; i < Context.ByteArray.EditableArray.Count; ++i)
+                {
+                    var index = i;
+                    <MudItem md="2">
+                        <div class="d-flex flex-grow-1 gap-2">
+                            <MudTextField @bind-Value="@Context.ByteArray.EditableArray[index]"
+                                          MaxLength="2"
+                                          Class="align-center justify-center mt-n1"
+                                          Style="height: 25px"
+                                          Margin="Margin.Dense"
+                                          Immediate="true"
+                                          OnKeyDown="ArrayOnKeyDownHandler"
+                                          TextChanged="OnTextChangedHandler"
+                                          ShrinkLabel="true"/>
+                        </div>
+                    </MudItem>
+                }
+            </MudGrid>
+            @*<MudGrid Spacing="1" Justify="Justify.FlexStart">
                 <MudItem md="@_byteArray1Break">
                     <div class="d-flex flex-grow-1 gap-2">
                         @foreach (var ba in _byteArray1)
@@ -102,12 +122,13 @@
                                               Class="align-center justify-center mt-n4"
                                               Style="height: 25px"
                                               Margin="Margin.Dense"
+                                              Immediate="true"
                                               ShrinkLabel="true" />
                             </div>
                         }
                     </div>
                 </MudItem>
-            </MudGrid>
+            </MudGrid>*@
         </td>
     </tr>
     </tbody>

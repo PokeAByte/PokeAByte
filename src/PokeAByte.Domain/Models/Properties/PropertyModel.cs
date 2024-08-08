@@ -32,6 +32,7 @@ public class PropertyModel
     public bool? IsFrozen { get; set; }
 
     public bool IsReadOnly { get; set; }
+    public required IPokeAByteProperty BaseProperty { get; set; }
 }
 public static class PropertyModelExtensions
 {

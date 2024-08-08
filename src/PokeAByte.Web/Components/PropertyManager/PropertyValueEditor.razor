@@ -1,5 +1,5 @@
-﻿<MudStack Row="true" Style="cursor: default !important;">
-
+﻿@using PokeAByte.Web.Models
+<MudStack Row="true" Style="cursor: default !important;">
     @if (EditContext.Type is "string")
     {
         <MudTextField @bind-Value="EditContext.ValueString"
@@ -15,7 +15,7 @@
                       MaxLength="@(EditContext.Length ?? 30)"
                       OnKeyDown="OnKeyDownHandler"/>
     }
-    else if (!string.IsNullOrEmpty(EditContext.Reference))
+    else if (EditContext.Type is "string" && !string.IsNullOrEmpty(EditContext.Reference))
     {
     <MudAutocomplete SearchFunc="SearchForReference"
                      Dense="true"
@@ -34,7 +34,7 @@
         </BeforeItemsTemplate>
     </MudAutocomplete>
     }
-    else if (EditContext.Type is "int" or "uint" or "nibble")
+    else if (EditContext.Type is "int" or "uint" or "nibble" && string.IsNullOrEmpty(EditContext.Reference))
     {
 
     <MudTextField @bind-Value="EditContext.ValueString"
@@ -46,6 +46,28 @@
                   ShrinkLabel="true"
                   Immediate="true"
                   OnKeyDown="OnKeyDownHandler"/>
+    }
+    else if (EditContext.Type is "int" or "uint" or "nibble" && !string.IsNullOrEmpty(EditContext.Reference))
+    {
+        <MudAutocomplete SearchFunc="SearchForIntReference"
+                         T="IntegerValueReference?"
+                         Dense="true"
+                         Margin="Margin.Dense"
+                         Class="mt-n1 pab-text"
+                         Style="height: 25px;"
+                         Adornment="Adornment.None"
+                         OnBlur="InputFocusLostHandler"
+                         ShrinkLabel="true"
+                         MaxItems="15"
+                         Value="_autocompleteIntValue"
+                         ValueChanged="OnIntValueChanged"
+                         OnKeyDown="(key) => OnKeyDownIntAutoCompleteHandler(key, EditContext)"
+                         OnInternalInputChanged="OnInputChanged"
+                         ToStringFunc="@(e => e is not null && string.IsNullOrEmpty(e.value) ? "" : e?.value ?? "")">
+            <BeforeItemsTemplate>
+                <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+            </BeforeItemsTemplate>
+        </MudAutocomplete>
     }
     else if (EditContext.Type is "bit" or "bool")
     {
@@ -65,10 +87,12 @@
     <MudIconButton Icon="@Icons.Material.Filled.Save"
                    id="saveButtonIcon"
                    Title="Save"
+                   Style="padding-top: 5px;"
                    Disabled="!EditContext.IsEditing"
                    OnClick="SaveBtnOnClickHandler"/>
     <MudIconButton Icon="@FreezeIcon"
                    Title="Freeze"
+                   Style="padding-top: 5px;"
                    OnClick="OnClickFreezeHandler"/> 
     @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
                    Title="Pin"/>*@

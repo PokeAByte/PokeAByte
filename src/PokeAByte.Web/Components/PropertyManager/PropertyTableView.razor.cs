@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
@@ -11,6 +12,8 @@ public partial class PropertyTableView : ComponentBase
     [Inject] public ISnackbar Snackbar { get; set; }
     [Inject] public ILogger<PropertyTableView> Logger { get; set; }
     [Parameter] public EditPropertyModel Context { get; set; }
+    public required PropertyValueEditor PropertyValueEditor { get; set; }
+
     private List<string> _byteArray1 = [];
     private List<string> _byteArray2 = [];
     private int _byteArray1Break = 2;
@@ -38,7 +41,7 @@ public partial class PropertyTableView : ComponentBase
         _valueWidth = max * 14 > 250 ? max * 14 : 250;
         _tableWidth = _valueWidth + _nameWidth + _copyWidth;
     }
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         UpdateByteArray();
@@ -76,5 +79,20 @@ public partial class PropertyTableView : ComponentBase
             Logger.LogError(e, msg);
             Snackbar.Add(msg, Severity.Error);
         }
+    }
+
+    private async Task ArrayOnKeyDownHandler(KeyboardEventArgs key)
+    {
+        if (key.Code is "Enter" or "NumpadEnter")
+        {
+            await PropertyValueEditor.Save();
+        }
+    }
+
+    private void OnTextChangedHandler(string text)
+    {
+        //update the value
+        //Context.UpdateFromByteArray();
+        StateHasChanged();
     }
 }

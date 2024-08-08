@@ -25,7 +25,7 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
 
     private string DisplayContent => 
         Context.Value?.IsPropertyExpanded is true ? "display:block;" : "display:none;";
-    
+
     private int _textWidth = 125;
     protected override void OnInitialized()
     {
