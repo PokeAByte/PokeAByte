@@ -2,23 +2,24 @@
 
     @if (EditContext.Type is "string")
     {
-    <MudTextField @bind-Value="EditContext.ValueString"
-                  Variant="Variant.Text"
-                  Margin="Margin.Dense"
-                  OnBlur="InputFocusLostHandler"
-                  ShrinkLabel="true"
-                  ReadOnly="EditContext.IsReadOnly"
-                  Disabled="EditContext.IsReadOnly"
-                  Immediate="true"
-                  AutoGrow="false"
-                  OnKeyDown="OnKeyDownHandler"/>
+        <MudTextField @bind-Value="EditContext.ValueString"
+                      Variant="Variant.Text"
+                      Margin="Margin.Dense"
+                      OnBlur="InputFocusLostHandler"
+                      ShrinkLabel="true"
+                      Class="pad-input"
+                      ReadOnly="EditContext.IsReadOnly"
+                      Disabled="EditContext.IsReadOnly"
+                      Immediate="true"
+                      AutoGrow="false"
+                      OnKeyDown="OnKeyDownHandler"/>
     }
     else if (!string.IsNullOrEmpty(EditContext.Reference))
     {
     <MudAutocomplete SearchFunc="SearchForReference"
                      Dense="true"
                      Margin="Margin.Dense"
-                     Class="mt-n1"
+                     Class="mt-n1 pab-text"
                      Style="height: 25px;"
                      Adornment="Adornment.None"
                      OnBlur="InputFocusLostHandler"
@@ -34,10 +35,11 @@
     }
     else if (EditContext.Type is "int" or "uint" or "nibble")
     {
+
     <MudTextField @bind-Value="EditContext.ValueString"
                   Variant="Variant.Text"
                   Style="height: 25px"
-                  Class=""
+                  Class="pab-int"
                   Margin="Margin.Dense"
                   OnBlur="InputFocusLostHandler"
                   ShrinkLabel="true"
@@ -46,6 +48,7 @@
     }
     else if (EditContext.Type is "bit" or "bool")
     {
+        
     <MudSwitch @bind-Value="EditContext.ValueString"
                Color="Color.Success"
                Size="Size.Small"
@@ -54,7 +57,7 @@
     }
     else
     {
-        <MudText>
+        <MudText Class="pab-text">
             @FormatString(EditContext.ValueString)
         </MudText>
     }
@@ -65,12 +68,27 @@
                    OnClick="SaveBtnOnClickHandler"/>
     <MudIconButton Icon="@FreezeIcon"
                    Title="Freeze"
-                   OnClick="OnClickFreezeHandler"/>
+                   OnClick="OnClickFreezeHandler"/> 
     @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
                    Title="Pin"/>*@
 </MudStack>
 <style>
     span.mud-switch-base {
         padding: 5px !important;
+    }
+    .pab-int input {
+        padding: 6px 0 0 !important;
+    }
+    .pab-int {
+        margin: 1px 0 0 !important;
+    }
+    .pab-text {
+        margin: 4px 0 0 !important;
+    }    
+    .pab-text input {
+         padding: 3px 0 0 !important;
+     }
+    .pad-input input {
+        padding: 4px 0 0 !important;        
     }
 </style>
