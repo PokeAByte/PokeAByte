@@ -12,6 +12,7 @@
                       Disabled="EditContext.IsReadOnly"
                       Immediate="true"
                       AutoGrow="false"
+                      MaxLength="@(EditContext.Length ?? 30)"
                       OnKeyDown="OnKeyDownHandler"/>
     }
     else if (!string.IsNullOrEmpty(EditContext.Reference))

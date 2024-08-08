@@ -72,10 +72,23 @@ else
                     </MudItem>
                     <MudItem Class="align-content-center">
                         <MudStack Row="true" Spacing="1" Class="align-content-center align-center">
-                            <MudText Typo="Typo.body2">
+                            <MudText Typo="Typo.body2" Class="pr-2">
                                 Name: 
                             </MudText>
-                            <MudTextField T="string"
+                            <MudTextField @bind-Value="@item.DisplayName"
+                                          Variant="Variant.Text"
+                                          Margin="Margin.Dense"
+                                          ShrinkLabel="true"
+                                          Class="pad-input"
+                                          Immediate="true"
+                                          AutoGrow="false"
+                                          OnKeyDown="(args) => OnKeyDownHandler(args, item)"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.Save"
+                                           id="saveButtonIcon"
+                                           Title="Save"
+                                           Size="Size.Medium"
+                                           OnClick="() => OnClickSaveNameButton(item)"/>
+                            @*<MudTextField T="string"
                                           Margin="Margin.Dense"
                                           Variant="Variant.Text"
                                           ShrinkLabel="true"
@@ -83,7 +96,7 @@ else
                                           Immediate="true"
                                           AutoGrow="false"
                                           OnKeyDown="(args) => OnKeyDownHandler(args, item)"
-                                          @bind-Value="@item.DisplayName"/>
+                                          @bind-Value="@item.DisplayName"/>*@
                         </MudStack>
                     </MudItem>
                     <MudItem Class="align-content-center">
@@ -96,7 +109,8 @@ else
                     </MudItem>
                 </MudGrid>
                 <MudGrid Style="width: 500px;"Justify="Justify.FlexEnd" Spacing="2">
-                    <MudItem Class="align-content-center align-end">
+                    @*<MudItem Class="align-content-center align-end">
+
                         @if (!item.IsChangingName)
                         {
                             <MudButton Color="Color.Success"
@@ -117,7 +131,7 @@ else
                                 Save Name
                             </MudButton>
                         }
-                    </MudItem>
+                    </MudItem>*@
                     <MudItem Class="align-content-center align-end">
                         <MudButton Color="Color.Success"
                                    OnClick="() => OnClickRestoreButton(item)"

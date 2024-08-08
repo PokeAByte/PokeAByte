@@ -12,6 +12,8 @@ public partial class RestoreArchive : ComponentBase
 {
     [Inject] public MapperManagerService MapperManagerService { get; set; }
     [Inject] private IDialogService DialogService { get; set; }
+    [Inject] private ILogger<RestoreArchive> Logger { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
     private bool _isDataLoading;
     private string _mapperListFilter = "";
 
@@ -92,9 +94,19 @@ public partial class RestoreArchive : ComponentBase
 
     private void OnClickSaveNameButton(MapperArchiveModel item)
     {
-        MapperManagerService.SaveArchivedItem(item);
-        item.IsChangingName = false;
-        StateHasChanged();
+        try
+        {
+            MapperManagerService.SaveArchivedItem(item);
+            var name = string.IsNullOrWhiteSpace(item.DisplayName) ? item.BasePath : item.DisplayName;
+            Snackbar.Add($"Successfully saved {name}", Severity.Success);
+            item.IsChangingName = false;
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            Snackbar.Add("Failed to save due to exception. " + e, Severity.Error);
+            Logger.LogError(e, "Failed to save.");
+        }
     }
 
     private static string GetTypeName(ArchiveType itemType)
@@ -103,7 +115,7 @@ public partial class RestoreArchive : ComponentBase
         {
             ArchiveType.None => "Not Found",
             ArchiveType.Archived => "Archived",
-            ArchiveType.BackUp => "Back-Up",
+            ArchiveType.BackUp => "Backup",
             _ => throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null)
         };
     }
