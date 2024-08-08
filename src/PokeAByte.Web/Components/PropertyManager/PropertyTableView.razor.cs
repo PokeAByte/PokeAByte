@@ -91,6 +91,8 @@ public partial class PropertyTableView : ComponentBase
 
     private void OnTextChangedHandler(string text)
     {
+        if(Context.Type is not "string" && !string.IsNullOrEmpty(Context.Reference))
+            return;
         //update the value
         Context.UpdateFromByteArray();
         StateHasChanged();

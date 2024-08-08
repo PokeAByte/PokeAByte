@@ -112,7 +112,15 @@ public class EditPropertyModel : PropertyModel
     {
         ByteArray.UpdateByteArray();
         var arr = ByteArray.ByteArray?.Select(Convert.ToByte).ToArray();
-        if(arr is not null)
-            ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
+        try
+        {
+
+            if(arr is not null)
+                ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
+        }
+        catch
+        {
+            ValueString = this.ValueAsString();
+        }
     }
 }
