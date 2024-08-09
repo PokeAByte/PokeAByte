@@ -19,7 +19,7 @@ public static class MapperHelper
             Reference = x.Reference,
             Bits = x.Bits,
             Description = x.Description,
-
+            
             Value = x.Value,
             Bytes = x.Bytes?.ToIntegerArray(),
 

@@ -230,7 +230,14 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 return;
             }
 
-            value = ToValue(bytes);
+            value = CalculateObjectValue(bytes);
+
+            Value = value;
+        }
+
+        public object? CalculateObjectValue(byte[] bytes)
+        {
+            var value = ToValue(bytes);
 
             if (value != null && AfterReadValueExpression != null)
             {
@@ -250,9 +257,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 value = ComputedReference.GetSingleOrDefaultByKey(Convert.ToUInt64(value))?.Value;
             }
 
-            Value = value;
+            return value;
         }
-
         public async Task WriteValue(string value, bool? freeze)
         {
             if (Bytes == null)

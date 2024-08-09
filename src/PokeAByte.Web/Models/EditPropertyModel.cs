@@ -6,17 +6,14 @@ namespace PokeAByte.Web.Models;
 
 public class EditPropertyModel : PropertyModel
 {
-    public bool IsValueEdited { get; set; } = false;
     public bool IsEditing { get; set; } = false;
     public Dictionary<ulong, string>? GlossaryReference { get; set; }
     private string _valueString = "";
-    private bool _isInitValueSet = false;
     public string ValueString 
     { 
         get => _valueString;
         set
         {
-            _isInitValueSet = true;
             if (IsFrozen is true)
             {
                 _valueString = Value?.ToString() ?? "";
@@ -26,17 +23,53 @@ public class EditPropertyModel : PropertyModel
                 return;
             if (string.IsNullOrEmpty(_valueString))
                 _valueString = value;
-
-            if (ValidateValueString(value))
+            
+            if (ValidateValue(value))
             {
                 _valueString = value;
-                
-                if (_isInitValueSet) IsValueEdited = true;
             }                
         }
     }
+
+    public bool ValidateValueString()
+    {
+        if (string.IsNullOrEmpty(ValueString))
+            return false;
+        try
+        {
+            var value = ValueString;
+            //see if this is a reference
+            if (!string.IsNullOrEmpty(Reference))
+            {
+                //Get the ref key
+                var key = GlossaryReference?
+                    .Where(g => g.Value == value)
+                    .Select(g => g.Key)
+                    .FirstOrDefault();
+                if (key is not null)
+                {
+                    value = key.ToString();
+                }
+            }
+            if (string.IsNullOrEmpty(value))
+                return false;
+             //Try to get bytes
+            var bytes = BaseProperty.BytesFromValue(value);
+            //try to get calculated value
+            var val = BaseProperty.CalculateObjectValue(bytes);
+            //see if object is null
+            if (val is null)
+                return false;
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
     public string GetReference => Reference ?? "";
-    private bool ValidateValueString(string value)
+    private bool ValidateValue(string value)
     {
         return Type switch
         {
@@ -89,8 +122,6 @@ public class EditPropertyModel : PropertyModel
     }
     public void Reset()
     {
-        _isInitValueSet = false;
-        IsValueEdited = false;
         ValueString = Value?.ToString() ?? "";
     }
     public void UpdateFromPropertyModel(PropertyModel? model)

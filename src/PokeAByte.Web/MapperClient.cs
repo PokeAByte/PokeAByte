@@ -138,8 +138,12 @@ public class MapperClient(
         try
         {
             var prop = instance.Mapper.Properties[path];
+            
             if (prop.IsReadOnly)
+            {
                 return false;
+            }
+
             await prop.WriteValue(value, isFrozen);
             return true;
         }

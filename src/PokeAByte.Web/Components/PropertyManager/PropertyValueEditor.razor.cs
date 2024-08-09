@@ -66,6 +66,7 @@ public partial class PropertyValueEditor : ComponentBase
     private void InputFocusLostHandler(FocusEventArgs obj){}
     public async Task Save()
     {
+        //EditContext.ValidateValueString();
         //Console.WriteLine($"{EditContext.ValueString}");
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
             EditContext.ValueString,

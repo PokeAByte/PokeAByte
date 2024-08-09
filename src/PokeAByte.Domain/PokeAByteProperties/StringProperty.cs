@@ -21,7 +21,6 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 .Select(x => ComputedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
                 .ToList();
             
-            Console.WriteLine();
             if (uints.Count + 1 > Length)
             {
                 uints = uints.Take(Length ?? 0 - 1).ToList();

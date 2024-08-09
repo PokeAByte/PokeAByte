@@ -26,7 +26,6 @@
     public interface IPokeAByteProperty
     {
         string Path { get; }
-
         string Type { get; }
         string? MemoryContainer { get; }
         uint? Address { get; }
@@ -47,7 +46,7 @@
         HashSet<string> FieldsChanged { get; }
 
         void ProcessLoop(IMemoryManager container);
-
+        object? CalculateObjectValue(byte[] bytes);
         Task WriteValue(string value, bool? freeze);
         Task WriteBytes(byte[] bytes, bool? freeze);
         Task FreezeProperty(byte[] bytesFrozen);
@@ -56,5 +55,7 @@
         object? ObjectFromBytes(byte[] value);
         byte[] BytesFromValue(string value);
         byte[] BytesFromFullValue();
+        //public string? AfterReadValueExpression { get; set; }
+        
     }
 }

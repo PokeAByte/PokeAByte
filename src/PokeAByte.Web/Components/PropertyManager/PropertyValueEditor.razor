@@ -18,36 +18,35 @@
     }
     else if (EditContext.Type is "string" && !string.IsNullOrEmpty(EditContext.Reference))
     {
-    <MudAutocomplete SearchFunc="SearchForReference"
-                     Dense="true"
-                     Margin="Margin.Dense"
-                     Class="mt-n1 pab-text"
-                     Style="height: 25px;"
-                     Adornment="Adornment.None"
-                     OnBlur="InputFocusLostHandler"
-                     ShrinkLabel="true"
-                     MaxItems="15"
-                     ValueChanged="OnValueChanged"
-                     OnKeyDown="(key) => OnKeyDownAutoCompleteHandler(key, EditContext)"
-                     OnInternalInputChanged="OnInputChanged">
-        <BeforeItemsTemplate>
-            <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
-        </BeforeItemsTemplate>
-    </MudAutocomplete>
+        <MudAutocomplete SearchFunc="SearchForReference"
+                         Dense="true"
+                         Margin="Margin.Dense"
+                         Class="mt-n1 pab-text"
+                         Style="height: 25px;"
+                         Adornment="Adornment.None"
+                         OnBlur="InputFocusLostHandler"
+                         ShrinkLabel="true"
+                         MaxItems="15"
+                         ValueChanged="OnValueChanged"
+                         OnKeyDown="(key) => OnKeyDownAutoCompleteHandler(key, EditContext)"
+                         OnInternalInputChanged="OnInputChanged">
+            <BeforeItemsTemplate>
+                <MudText Typo="Typo.body2" Class="px-2">Type to Search Entries...</MudText>
+            </BeforeItemsTemplate>
+        </MudAutocomplete>
     }
     else if (EditContext.Type is "int" or "uint" or "nibble" && string.IsNullOrEmpty(EditContext.Reference))
     {
-
-    <MudTextField @bind-Value="EditContext.ValueString"
-                  Variant="Variant.Text"
-                  Style="height: 25px"
-                  Class="pab-int"
-                  Margin="Margin.Dense"
-                  OnBlur="InputFocusLostHandler"
-                  ShrinkLabel="true"
-                  Immediate="true"
-                  TextChanged="OnTextChangedHandler"
-                  OnKeyDown="OnKeyDownHandler"/>
+        <MudTextField @bind-Value="EditContext.ValueString"
+                      Variant="Variant.Text"
+                      Style="height: 25px"
+                      Class="pab-int"
+                      Margin="Margin.Dense"
+                      OnBlur="InputFocusLostHandler"
+                      ShrinkLabel="true"
+                      Immediate="true"
+                      TextChanged="OnTextChangedHandler"
+                      OnKeyDown="OnKeyDownHandler"/>
     }
     else if (EditContext.Type is "int" or "uint" or "nibble" && !string.IsNullOrEmpty(EditContext.Reference))
     {
@@ -73,12 +72,12 @@
     }
     else if (EditContext.Type is "bit" or "bool")
     {
-        
-    <MudSwitch @bind-Value="EditContext.ValueString"
-               Color="Color.Success"
-               Size="Size.Small"
-               Converter="MudSwitchConverter"
-               UnCheckedColor="@Color.Secondary"/>
+
+        <MudSwitch @bind-Value="EditContext.ValueString"
+                   Color="Color.Success"
+                   Size="Size.Small"
+                   Converter="MudSwitchConverter"
+                   UnCheckedColor="@Color.Secondary"/>
     }
     else
     {
@@ -95,7 +94,7 @@
     <MudIconButton Icon="@FreezeIcon"
                    Title="Freeze"
                    Style="padding-top: 5px;"
-                   OnClick="OnClickFreezeHandler"/> 
+                   OnClick="OnClickFreezeHandler"/>
     @*<MudIconButton Icon="@Icons.Material.Filled.PushPin"
                    Title="Pin"/>*@
 </MudStack>
