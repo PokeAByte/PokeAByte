@@ -89,7 +89,7 @@
                    id="saveButtonIcon"
                    Title="Save"
                    Style="padding-top: 5px;"
-                   Disabled="!EditContext.IsEditing"
+                   Disabled="!EditContext.IsEditing || EditContext.IsReadOnly"
                    OnClick="SaveBtnOnClickHandler"/>
     <MudIconButton Icon="@FreezeIcon"
                    Title="Freeze"
