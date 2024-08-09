@@ -23,6 +23,15 @@
             Unload Mapper
         </MudButton>
     </MudStack>
+    @if (_gameName.Contains("Deprecated", StringComparison.InvariantCultureIgnoreCase))
+    {
+        <MudText Typo="Typo.body2" Color="Color.Error" Class="px-6 pb-2" Style="width: 50%;">
+            This mapper is deprecated! As such, it will not be updated with new features. 
+            It will not have the same level of features or support as the latest mappers. 
+            This one is provided so that users can continue to use software that was programmed 
+            using these property paths.
+        </MudText>
+    }
     <PropertyTreeView />
 }
 else
