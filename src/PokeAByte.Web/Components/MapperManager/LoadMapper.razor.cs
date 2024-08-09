@@ -37,6 +37,16 @@ public partial class LoadMapper : ComponentBase
         if (NavigationService is null)
             throw new InvalidOperationException("Navigation service is null.");
         _mapperFiles = MapperConnectionService.GetMappers();
+        if (MapperConnectionService.IsCurrentlyConnected)
+        {
+            var found = _mapperFiles.Where(x => x.Id == MapperConnectionService.LoadedMapperName)
+                .Select(x => x.DisplayName)
+                .FirstOrDefault();
+            if (found is not null)
+            {
+                _selectedMapper = found;
+            }
+        }
     }
     /*private void SelectedValueChangeHandler(IEnumerable<string> values)
     {

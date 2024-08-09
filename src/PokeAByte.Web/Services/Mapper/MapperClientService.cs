@@ -20,6 +20,8 @@ public class MapperClientService
     private int _currentAttempt = 0;
     public static readonly int MaxAttempts = 25;
     private const int MaxWaitMs = 100;
+    public string LoadedMapperName { get; private set; }
+
     public MapperClientService(IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
         MapperClient client,
@@ -76,6 +78,7 @@ public class MapperClientService
                 LoadedDriver = driverResult;
                 var result = await ReplaceMapper(mapperId);
                 connected = result.IsSuccess;
+                LoadedMapperName = mapperId;
             }
             catch (Exception e)
             {
