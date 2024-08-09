@@ -79,6 +79,7 @@ public partial class PropertyValueEditor : ComponentBase
         {
             Snackbar.Add("Saved successful!", Severity.Success);
         }
+        
         StateHasChanged();
     }
     private async Task SaveBtnOnClickHandler(MouseEventArgs obj)

@@ -13,7 +13,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             if (Instance.PlatformOptions == null) throw new Exception("Instance.PlatformOptions is NULL.");
             if (Length == null) throw new Exception("Length is NULL.");
 
-            var integerValue = int.Parse(value);
+            int.TryParse(value, out var integerValue);
             var bytes = BitConverter.GetBytes(integerValue).Take(Length ?? 0).ToArray();
             return bytes.ReverseBytesIfLE(Instance.PlatformOptions.EndianType);
         }

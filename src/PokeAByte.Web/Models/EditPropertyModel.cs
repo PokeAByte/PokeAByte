@@ -76,7 +76,7 @@ public class EditPropertyModel : PropertyModel
             "bool" or "bit" => bool.TryParse(value, out _),
             "string" => Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length),
             "int" or "nibble" => CanParseInt(value),
-            "uint" => uint.TryParse(value, out _),
+            "uint" => CanParseUInt(value)/*uint.TryParse(value, out _)*/,
             _ => false
         };
     }
@@ -93,6 +93,19 @@ public class EditPropertyModel : PropertyModel
                 .Count != 0;
         }
         return int.TryParse(value, out _);
+    }
+    private bool CanParseUInt(string value)
+    {
+        //get the reference
+        if (!string.IsNullOrEmpty(Reference) && GlossaryReference is not null)
+        {
+            return GlossaryReference.Where(g =>
+                    g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Select(g => g.Key)
+                .ToList()
+                .Count != 0;
+        }
+        return uint.TryParse(value, out _);
     }
     public ByteArrayProperty ByteArray { get; set; }
     public string AddressString =>
