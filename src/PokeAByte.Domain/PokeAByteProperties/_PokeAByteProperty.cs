@@ -172,7 +172,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             //Store the original, full value
             FullValue = ToValue(bytes);
             
-            if (string.IsNullOrEmpty(Bits) == false)
+            /*if (string.IsNullOrEmpty(Bits) == false)
             {
                 int[] indexes;
 
@@ -218,8 +218,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 }
 
                 outputBits.CopyTo(bytes, 0);
-            }
-
+            }*/
+            bytes = BytesFromBits(bytes);
             if (address != null && BytesFrozen != null && bytes.SequenceEqual(BytesFrozen) == false)
             {
                 // Bytes have changed, but property is frozen, so force the bytes back to the original value.
@@ -235,6 +235,56 @@ namespace PokeAByte.Domain.PokeAByteProperties
             Value = value;
         }
 
+        public byte[] BytesFromBits(byte[] bytes)
+        {
+            if (string.IsNullOrEmpty(Bits)) return bytes;
+            int[] indexes;
+
+            if (Bits.Contains('-'))
+            {
+                var parts = Bits.Split('-');
+
+                if (int.TryParse(parts[0], out int start) && int.TryParse(parts[1], out int end))
+                {
+                    indexes = Enumerable.Range(start, end - start + 1).ToArray();
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}.");
+                }
+            }
+            else if (Bits.Contains(','))
+            {
+                indexes = Bits.Split(',')
+                    .Select(x => int.TryParse(x, out int num) ? num : throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}."))
+                    .ToArray();
+            }
+            else
+            {
+                if (int.TryParse(Bits, out int index))
+                {
+                    indexes = [index];
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}.");
+                }
+            }
+
+            var i = 0;
+            var inputBits = new BitArray(bytes);
+            var outputBits = new BitArray(bytes.Length * 8);
+
+            foreach (var x in indexes)
+            {
+                outputBits[i] = inputBits[x];
+                i += 1;
+            }
+
+            outputBits.CopyTo(bytes, 0);
+
+            return bytes;
+        }
         public object? CalculateObjectValue(byte[] bytes)
         {
             var value = ToValue(bytes);

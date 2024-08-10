@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
+using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Navigation;
@@ -20,7 +21,6 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     private const int CountIncrease = 150;
     private int _maxCount = CountIncrease;
     private string _mapperName = "";
-
     private void Clear()
     {
         _mapperName = "";
@@ -56,15 +56,7 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
         }
         base.OnInitialized();
     }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            
-        }
-    }
-
+    
     private void OnTreeItemClick(TreeItemData<PropertyTreeItem> context)
     {
         if (!context.Expandable)

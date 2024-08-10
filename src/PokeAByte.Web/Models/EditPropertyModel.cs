@@ -26,11 +26,49 @@ public class EditPropertyModel : PropertyModel
             
             if (ValidateValue(value))
             {
-                _valueString = value;
+                _valueString = value; //ValueToString(value);
             }                
         }
     }
 
+    public string ValueToString(string value)
+    {
+        if (string.IsNullOrEmpty(ValueString))
+            return "";
+        try
+        {
+            //see if this is a reference
+            if (!string.IsNullOrEmpty(Reference))
+            {
+                //Get the ref key
+                var key = GlossaryReference?
+                    .Where(g => g.Value == value)
+                    .Select(g => g.Key)
+                    .FirstOrDefault();
+                if (key is not null)
+                {
+                    value = key.ToString() ?? "";
+                }
+            }
+            if (string.IsNullOrEmpty(value))
+                return "";
+            //Try to get bytes
+            var bytes = BaseProperty.BytesFromValue(value);
+            //Get the bits
+            bytes = BaseProperty.BytesFromBits(bytes);
+            //try to get calculated value
+            var val = BaseProperty.CalculateObjectValue(bytes);
+            //see if object is null
+            if (val is null)
+                return "";
+            return val.ToString() ?? "";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return "";
+        }
+    }
     public bool ValidateValueString()
     {
         if (string.IsNullOrEmpty(ValueString))

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using MudBlazor;
+using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 
@@ -15,7 +16,6 @@ public partial class PropertyValueEditor : ComponentBase
     [Parameter]
     public required EditPropertyModel EditContext { get; set; }
     [Parameter] public bool IsShortDisplay { get; set; }
-
     private Dictionary<ulong, string> _cachedGlossary = []; 
     private string FreezeIcon => EditContext.IsFrozen is true
         ? PokeAByteIcons.SnowflakeIcon
@@ -66,8 +66,6 @@ public partial class PropertyValueEditor : ComponentBase
     private void InputFocusLostHandler(FocusEventArgs obj){}
     public async Task Save()
     {
-        //EditContext.ValidateValueString();
-        //Console.WriteLine($"{EditContext.ValueString}");
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
             EditContext.ValueString,
             EditContext.IsFrozen ?? false);
@@ -79,7 +77,6 @@ public partial class PropertyValueEditor : ComponentBase
         {
             Snackbar.Add("Saved successful!", Severity.Success);
         }
-        
         StateHasChanged();
     }
     private async Task SaveBtnOnClickHandler(MouseEventArgs obj)
