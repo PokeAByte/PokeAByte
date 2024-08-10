@@ -9,6 +9,7 @@ using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Infrastructure.Drivers.Bizhawk;
+using PokeAByte.Infrastructure.Drivers.UdpPolling;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Hubs;

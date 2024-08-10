@@ -6,34 +6,22 @@ using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 
-namespace PokeAByte.Infrastructure.Drivers
+namespace PokeAByte.Infrastructure.Drivers.UdpPolling
 {
-    record ReceivedPacket
-    {
-        public ReceivedPacket(string command, uint memoryAddress, byte[] value)
-        {
-            Command = command;
-            MemoryAddress = memoryAddress;
-            Value = value;
-        }
-
-        public string Command { get; }
-        public uint MemoryAddress { get; }
-        public byte[] Value { get; set; }
-    }
-
     public class RetroArchUdpPollingDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     {
         public string ProperName { get; } = "RetroArch";
         public int DelayMsBetweenReads { get; }
-
         private ILogger<RetroArchUdpPollingDriver> Logger { get; }
         private readonly AppSettings _appSettings;
-        private UdpClient UdpClient { get; set; }
+        //private UdpClient UdpClient { get; set; }
+        private UdpClientWrapper _udpClientWrapper;
         private Dictionary<string, ReceivedPacket> Responses { get; set; } = [];
-        private bool _isConnected = false;
 
-        void CreateUdpClient()
+        private CancellationTokenSource _connectionCts = new();
+        //private bool _isConnected = false;
+
+        /*void CreateUdpClient()
         {
             // Dispose of the existing UDP client if it exists.
             UdpClient?.Dispose();
@@ -42,20 +30,26 @@ namespace PokeAByte.Infrastructure.Drivers
             UdpClient = new UdpClient();
             UdpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             UdpClient.Connect(IPAddress.Parse(_appSettings.RETROARCH_LISTEN_IP_ADDRESS), _appSettings.RETROARCH_LISTEN_PORT);
-        }
+        }*/
 
         public RetroArchUdpPollingDriver(ILogger<RetroArchUdpPollingDriver> logger, AppSettings appSettings)
         {
             Logger = logger;
             _appSettings = appSettings;
 
-            CreateUdpClient();
-            UdpClient = UdpClient ?? throw new Exception("Unable to load UDP client.");
+            //CreateUdpClient();
+            _udpClientWrapper = new UdpClientWrapper(
+                _appSettings.RETROARCH_LISTEN_IP_ADDRESS, 
+                _appSettings.RETROARCH_LISTEN_PORT);
+            //UdpClient = UdpClient ?? throw new Exception("Unable to load UDP client.");
 
             DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
-
-            // Wait for messages from the UdpClient.
             Task.Run(async () =>
+            {
+                await ConnectAsync(_connectionCts.Token);
+            });
+            // Wait for messages from the UdpClient.
+            /*Task.Run(async () =>
             {
                 while (true)
                 {
@@ -85,25 +79,25 @@ namespace PokeAByte.Infrastructure.Drivers
                         // We don't want to spam the user with errors.
                     }
                 }
-            });
+            });*/
         }
 
         private static string ToRetroArchHexdecimalString(uint value)
         {
             // TODO: This is somewhat of a hack because
             // RetroArch returns the request 00 as 0.
-
-            if (value <= 9) { return $"{value}"; }
-            else return $"{value:X2}".ToLower();
+            return value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
         }
 
         public async Task WriteBytes(uint memoryAddress, byte[] values)
         {
             var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
-            await SendPacket("WRITE_CORE_MEMORY", $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}");
+            await _udpClientWrapper
+                .SendPacketAsync("WRITE_CORE_MEMORY", 
+                    $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}");
         }
 
-        private async Task SendPacket(string command, string argument)
+        /*private async Task SendPacket(string command, string argument)
         {
             // We require to store the command to watch for
             // the response.
@@ -126,12 +120,12 @@ namespace PokeAByte.Infrastructure.Drivers
 
             _ = await UdpClient.SendAsync(datagram, datagram.Length);
             Logger.LogTrace($"[Outgoing Packet] {outgoingPayload}");
-        }
+        }*/
 
         private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
         {
             var command = $"READ_CORE_MEMORY {ToRetroArchHexdecimalString(memoryAddress)}";
-            await SendPacket(command, $"{length}");
+            await _udpClientWrapper.SendPacketAsync(command, $"{length}");
 
             var responsesKey = $"{command} {length}";
             ReceivedPacket? readCoreMemoryResult = null;
@@ -154,7 +148,7 @@ namespace PokeAByte.Infrastructure.Drivers
             return readCoreMemoryResult.Value;
         }
 
-        private void ReceivePacket(byte[] receiveBytes)
+        /*private void ReceivePacket(byte[] receiveBytes)
         {
             string receiveString = Encoding.ASCII.GetString(receiveBytes).Replace("\n", string.Empty);
             Logger.LogTrace($"[Incoming Packet] {receiveString}");
@@ -176,7 +170,7 @@ namespace PokeAByte.Infrastructure.Drivers
 
             Responses[receiveKey] = new ReceivedPacket(command, memoryAddress, value);
             Logger.LogDebug($"[Incoming Packet] Set response {receiveKey}");
-        }
+        }*/
 
         public async Task<bool> TestConnection()
         {
@@ -210,6 +204,25 @@ namespace PokeAByte.Infrastructure.Drivers
             return results.ToDictionary(x => x.Key, x => x.Value);
         }
 
+        private async Task ConnectAsync(CancellationToken cancellationToken)
+        {
+            _udpClientWrapper.Connect();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await _udpClientWrapper.ReceivePacketAsync(Responses);
+                }
+                catch
+                {
+                    _udpClientWrapper.Dispose();
+                    // Automatically swallow exceptions here because
+                    // they're not useful even if there's an error.
+
+                    // We don't want to spam the user with errors.
+                }
+            }
+        }
         public Task EstablishConnection()
         {
             return Task.CompletedTask;
