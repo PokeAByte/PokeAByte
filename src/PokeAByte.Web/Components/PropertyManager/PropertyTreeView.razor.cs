@@ -16,7 +16,7 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     [Inject] private MapperClientService ClientService { get; set; }
     [Inject] private NavigationService? NavService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
-    public Action<PropertyTreeItem?> OnSelectedValueHasChanged { get; set; }
+    public Action<PropertyTreeItem?>? OnSelectedValueHasChanged { get; set; }
 
     private const int CountIncrease = 150;
     private int _maxCount = CountIncrease;
@@ -38,14 +38,15 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     
     protected override void OnInitialized()
     {
+        UnloadEvents();
         OnSelectedValueHasChanged += SelectedValueHasChangedHandler;
         ClientService.OnReadExceptionHandler(OnReadExceptionOccurredHandler);
-        ClientService.OnMapperIsUnloaded += OnMapperUnloadedHandler;
+        ClientService.OnMapperIsUnloaded += OnMapperUnloadedHandler; 
         var metaResult = ClientService.GetMetaData();
         if (metaResult.IsSuccess)
             _mapperName = $"{metaResult.ResultValue?.GameName}";
         var result = PropertyService.GenerateTree();
-        StateHasChanged();
+        //StateHasChanged();
         if (result.IsSuccess)
         {
             //Todo: show user success
@@ -56,7 +57,14 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
         }
         base.OnInitialized();
     }
-    
+
+    private void UnloadEvents()
+    {
+        if(OnSelectedValueHasChanged is not null) 
+            OnSelectedValueHasChanged -= SelectedValueHasChangedHandler;
+        ClientService.DetachOnReadExceptionHandler(OnReadExceptionOccurredHandler);
+        ClientService.OnMapperIsUnloaded -= OnMapperUnloadedHandler; 
+    }
     private void OnTreeItemClick(TreeItemData<PropertyTreeItem> context)
     {
         if (!context.Expandable)
@@ -170,6 +178,7 @@ public partial class PropertyTreeView : ComponentBase, IDisposable
     public void Dispose()
     {
         PropertyService.ResetTree();
+        UnloadEvents();
     }
 
     public async Task RefreshParent()

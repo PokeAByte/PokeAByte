@@ -6,33 +6,35 @@
 
 @if (_finishedLoading)
 {
-    <MudStack Row="true">
-        @if (string.IsNullOrEmpty(_gameName))
+    <MudStack>
+        <MudStack Row="true">
+            @if (string.IsNullOrEmpty(_gameName))
+            {
+                <MudText Typo="Typo.h6" Class="pa-2">Properties</MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Class="pa-2">Properties for @_gameName</MudText>
+            }
+            <MudButton Style="align-self: center;"
+                       Color="Color.Secondary"
+                       Variant="Variant.Filled"
+                       Size="Size.Small"
+                       OnClick="OnClickUnloadMapper">
+                Unload Mapper
+            </MudButton>
+        </MudStack>
+        @if (_gameName.Contains("Deprecated", StringComparison.InvariantCultureIgnoreCase))
         {
-            <MudText Typo="Typo.h6" Class="pa-2">Properties</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Error" Class="px-6 pb-2" Style="width: 100%;">
+                This mapper is deprecated! As such, it will not be updated with new features. 
+                It will not have the same level of features or support as the latest mappers. 
+                This one is provided so that users can continue to use software that was programmed 
+                using these property paths.
+            </MudText>
         }
-        else
-        {
-            <MudText Typo="Typo.h6" Class="pa-2">Properties for @_gameName</MudText>
-        }
-        <MudButton Style="height:30px; align-self: center;"
-                   Color="Color.Secondary"
-                   Variant="Variant.Filled"
-                   Size="Size.Small"
-                   OnClick="OnClickUnloadMapper">
-            Unload Mapper
-        </MudButton>
+        <PropertyTreeView />
     </MudStack>
-    @if (_gameName.Contains("Deprecated", StringComparison.InvariantCultureIgnoreCase))
-    {
-        <MudText Typo="Typo.body2" Color="Color.Error" Class="px-6 pb-2" Style="width: 50%;">
-            This mapper is deprecated! As such, it will not be updated with new features. 
-            It will not have the same level of features or support as the latest mappers. 
-            This one is provided so that users can continue to use software that was programmed 
-            using these property paths.
-        </MudText>
-    }
-    <PropertyTreeView />
 }
 else
 {

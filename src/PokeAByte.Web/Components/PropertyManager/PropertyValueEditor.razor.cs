@@ -9,7 +9,7 @@ using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Components.PropertyManager;
 
-public partial class PropertyValueEditor : ComponentBase
+public partial class PropertyValueEditor : ComponentBase, IDisposable
 {
     [Inject] public required MapperClientService MapperClientService { get; set; }
     [Inject] public required ISnackbar Snackbar { get; set; }
@@ -61,6 +61,7 @@ public partial class PropertyValueEditor : ComponentBase
         {
             _autocompleteIntValue = new IntegerValueReference(reference.Value.Key, reference.Value.Value);
         }
+        
     }
 
     private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
@@ -179,9 +180,9 @@ public partial class PropertyValueEditor : ComponentBase
 
     private async Task OnKeyDownIntAutoCompleteHandler(KeyboardEventArgs key, EditPropertyModel editContext)
     {
+        await Task.Delay(200);
         if (key.Code is "Enter" or "NumpadEnter" && !string.IsNullOrEmpty(_autocompleteIntValue?.key.ToString()))
         {
-            await Task.Delay(100);
             editContext.ValueString = _autocompleteIntValue.value;
             //_autocompleteIntValue = null;
             await Save();
@@ -192,5 +193,12 @@ public partial class PropertyValueEditor : ComponentBase
     {
         EditContext.UpdateByteArray();
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {        
+        OnValueChanged -= OnValueChangedHandler;
+        OnIntValueChanged -= OnIntValueChangedHandler;
+        Snackbar.Dispose();
     }
 }

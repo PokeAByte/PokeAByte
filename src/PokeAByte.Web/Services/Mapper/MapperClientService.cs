@@ -58,7 +58,8 @@ public class MapperClientService
         ConnectedColor : DisconnectedColor;
     public string GetCurrentConnectionName() => Client.IsMapperLoaded ?
         "Connected" : "Disconnected";
-
+    public string ConnectionStatus => Client.IsMapperLoaded ?
+        "Status: Connected" : "Status: Disconnected";
     public List<PropertyModel> Properties { get; set; } = [];
 
     public async Task<Result> ChangeMapper(string mapperId,
@@ -192,5 +193,9 @@ public class MapperClientService
     public void OnReadExceptionHandler(Action handler)
     {
         Client.AttachOnReadExceptionOccuredHandler(handler);
+    }
+    public void DetachOnReadExceptionHandler(Action handler)
+    {
+        Client.DetachOnReadExceptionOccuredHandler(handler);
     }
 }

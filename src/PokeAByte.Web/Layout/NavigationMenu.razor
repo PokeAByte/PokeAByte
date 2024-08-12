@@ -1,18 +1,28 @@
 ﻿@using PokeAByte.Web.Services
 @using PokeAByte.Web.Services.Navigation
 <MudGrid Class="d-flex">
-     <MudItem xs="4"
+     <MudItem sm="4"
               Style="overflow: hidden"
               Class="align-start justify-start align-content-center">
-          <MudLink Typo="Typo.h5"
-                   Class="ml-3 mr-9"
-                   Underline="Underline.None"
-                   Color="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
-                   OnClick="OnClickHomeButton">
-               Poke-A-Byte
-          </MudLink>
+          <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+               <MudLink Typo="Typo.h5"
+                        Class="ml-3 mr-9"
+                        Underline="Underline.None"
+                        Color="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
+                        OnClick="OnClickHomeButton">
+                    Poke-A-Byte
+               </MudLink>
+          </MudHidden>
+          <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="false">
+               <MudIconButton Icon="@Icons.Material.Filled.Home"
+                              OnClick="OnClickHomeButton"
+                              Variant="Variant.Text"
+                              Size="Size.Large"
+                              Class="mr-1" 
+                              DropShadow="true"/>
+               </MudHidden>
      </MudItem>
-     <MudItem xs="4"
+     <MudItem sm="4" xs="12" Style="@(_breakpointStyle)"
               Class="d-flex align-center justify-center align-content-center">
           <MudButtonGroup OverrideStyles="false">
                <MudButton StartIcon="@Icons.Material.Filled.CatchingPokemon"
@@ -47,13 +57,17 @@
                </MudButton>
           </MudButtonGroup>
      </MudItem>
-     <MudItem xs="4"
+     <MudItem sm="4"
               Class="d-flex align-end justify-end align-content-end">
-          <MudIconButton Icon="@Icons.Material.Filled.PowerSettingsNew"
-                         Size="Size.Large"
-                         Color="ConnectionService!.GetCurrentConnectionColor()"
-                         Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.MapperConnectionStatus) ?? false"
-                         OnClick="() => NavButtonClickHandler(NavigationService.Pages.MapperManager)"
-                         aria-label="connection status"/>
+          <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
+               <MudTooltip Text="@(ConnectionService?.ConnectionStatus)">
+                    <MudIconButton Icon="@Icons.Material.Filled.PowerSettingsNew"
+                                   Size="Size.Large"
+                                   Color="ConnectionService!.GetCurrentConnectionColor()"
+                                   Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.MapperConnectionStatus) ?? false"
+                                   OnClick="() => NavButtonClickHandler(NavigationService.Pages.MapperManager)"
+                                   aria-label="connection status"/>
+               </MudTooltip>
+          </MudHidden>
      </MudItem>
 </MudGrid>

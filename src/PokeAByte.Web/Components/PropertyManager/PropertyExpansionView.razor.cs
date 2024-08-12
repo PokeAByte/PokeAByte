@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
+using MudBlazor.Services;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
@@ -8,7 +9,7 @@ using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Components.PropertyManager;
 
-public partial class PropertyExpansionView : ComponentBase, IDisposable
+public partial class PropertyExpansionView : ComponentBase, IDisposable, IBrowserViewportObserver
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
     //private EditPropertyModel _editContext = new();
@@ -16,14 +17,15 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
     [Inject] public required ISnackbar Snackbar { get; set; }
     [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
+    [Inject] public required IBrowserViewportService BrowserViewportService { get; set; }
     [Parameter] public required PropertyTreePresenter Context { get; set; }
     [Parameter] public required PropertyTreeView Parent { get; set; }
     public Color IconColor =>
         Context.Value!.IsPropertyExpanded ? Color.Info : Color.Default;
     private string Width => $"width:{_textWidth}px;";
-    private string PropertyHeight =>
-        Context.Value?.IsPropertyExpanded is true ? "100%" : "25px";
-
+    private string _propertyHeight = "";
+    private readonly int _browserWidthBreakpoint = 750;
+    private readonly string _propertyWidth = "100%";
     private string DisplayContent => 
         Context.Value?.IsPropertyExpanded is true ? "display:block;" : "display:none;";
 
@@ -35,10 +37,15 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
         if (Context.Value!.PropertyModel is not null)
         {
             //_editContext = EditPropertyModel.FromPropertyModel(Context.Value!.PropertyModel);
-
+            var foundEventHandler = PropertyUpdateService
+                .EventHandlers
+                .FirstOrDefault(x => x.Key == Context.Value!.PropertyModel.Path);
+            if (!string.IsNullOrWhiteSpace(foundEventHandler.Key))
+            {
+                PropertyUpdateService.EventHandlers.Remove(foundEventHandler.Key);
+            }
             PropertyUpdateService.EventHandlers.TryAdd(Context.Value!.PropertyModel.Path, HandlePropertyUpdate);
         }
-
         if (Context.Parent is not null)
         {
             _textWidth = Context.Parent.GetMaxLength() * 10;
@@ -50,25 +57,30 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
         base.OnInitialized();
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {        
-
+        if (firstRender)
+        {
+            await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
+        }
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async void HandlePropertyUpdate(object? sender, EventArgs e)
     {
         if (Context.Value?.PropertyModel is null) return;
+        //Console.WriteLine($"{Context.Value.PropertyModel.Path}");
         MapperClientService.UpdateEditPropertyModel(Context.Value.PropertyModel);
         //await InvokeAsync(StateHasChanged);
         await InvokeAsync(StateHasChanged);
-        await InvokeAsync(Parent.RefreshParent);
         
+        await Task.Delay(100);
         if(Context.Value?.PropertyModel?.Value is null) return;
         if (Context.Value.PropertyModel.ValueString != Context.Value.PropertyModel.Value?.ToString())
         {
             Context.Value.PropertyModel.ValueString = Context.Value.PropertyModel.Value!.ToString()!;
         }
-
+        
         await Task.Delay(100);
         if (Context.Value.PropertyModel.ValueString != Context.Value.PropertyModel.Value?.ToString())
         {
@@ -78,7 +90,14 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
     private void OnClickExpand()
     {       
         Context.Value!.IsPropertyExpanded = !Context.Value.IsPropertyExpanded;
-        
+        if (Context.Value!.IsPropertyExpanded)
+        {
+            _propertyHeight = "100%";
+        }
+        else
+        {
+            _propertyHeight = _browserWidth >= _browserWidthBreakpoint ? _propertyWidth : "100%";
+        }
         //StateHasChanged();
     }
 
@@ -102,4 +121,33 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
             Snackbar.Add(msg, Severity.Error);
         }
     }
+
+    private int _browserWidth = 0;
+    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        _browserWidth = browserViewportEventArgs.BrowserWindowSize.Width;
+        if (Context.Value?.IsPropertyExpanded is true)
+        {
+            _propertyHeight = "100%";
+        }
+        else if (browserViewportEventArgs.BrowserWindowSize.Width < _browserWidthBreakpoint)
+        {
+            _propertyHeight = "100%";
+        }
+        else if (browserViewportEventArgs.BrowserWindowSize.Width >= _browserWidthBreakpoint)
+        {
+            _propertyHeight = _propertyWidth;
+        }
+        
+        return InvokeAsync(StateHasChanged);
+    }
+    public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
+    
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+    {
+        ReportRate = 250,
+        NotifyOnBreakpointOnly = false
+    };
 }

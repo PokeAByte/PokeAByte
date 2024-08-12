@@ -158,4 +158,8 @@ public class MapperClient(
     {
         instance.OnReadExceptionOccured += onReadExceptionOccuredHandler;
     }
+    public void DetachOnReadExceptionOccuredHandler(Action onReadExceptionOccuredHandler)
+    {
+        instance.OnReadExceptionOccured -= onReadExceptionOccuredHandler;
+    }
 }

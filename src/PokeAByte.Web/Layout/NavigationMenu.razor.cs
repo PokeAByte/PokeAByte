@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using MudBlazor.Services;
 using PokeAByte.Web.Services;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Navigation;
@@ -7,11 +8,13 @@ using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Layout;
 
-public partial class NavigationMenu : ComponentBase, IDisposable
+public partial class NavigationMenu : ComponentBase, IDisposable, IBrowserViewportObserver
 {
     [Inject] public NavigationService? NavService { get; set; }
     [Inject] public MapperClientService? ConnectionService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
+    [Inject] public required IBrowserViewportService BrowserViewportService { get; set; }
+    private string? _breakpointStyle;
 
     private string _borderUnderlineClass = " border-b-4 border-solid mud-border-primary";
     private string _buttonBorder = "py-4 px-8 rounded-0";
@@ -40,14 +43,15 @@ public partial class NavigationMenu : ComponentBase, IDisposable
         ChangeNotificationService.OnChange -= StateHasChanged;
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             NavService?.InitializeNavService();
+            await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
             StateHasChanged();
         }
-        base.OnAfterRender(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
     }
     
     private void NavButtonClickHandler(NavigationService.Pages page)
@@ -66,5 +70,27 @@ public partial class NavigationMenu : ComponentBase, IDisposable
     {
         NavService?.Navigate(ConnectionService.IsCurrentlyConnected ?
             NavigationService.Pages.Properties : NavigationService.Pages.MapperManager);
+    }
+
+    public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
+    
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+    {
+        ReportRate = 250,
+        NotifyOnBreakpointOnly = true
+    };
+    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        if (browserViewportEventArgs.Breakpoint == Breakpoint.Xs)
+        {
+            _breakpointStyle = "padding-top:0px; margin-bottom: 30px";
+        }
+        else if (browserViewportEventArgs.BrowserWindowSize.Width >= 600)
+        {
+            _breakpointStyle = "padding-top:24px; margin-bottom:0px";
+        }
+        return InvokeAsync(StateHasChanged);
     }
 }
