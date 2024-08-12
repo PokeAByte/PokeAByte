@@ -49,6 +49,20 @@ public partial class PropertyValueEditor : ComponentBase
             }
         }
     }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender) return;
+        //_autocompleteIntValue
+        var reference = _cachedGlossary?
+            .Where(x => x.Value == EditContext.ValueString)
+            .FirstOrDefault();
+        if (reference.HasValue)
+        {
+            _autocompleteIntValue = new IntegerValueReference(reference.Value.Key, reference.Value.Value);
+        }
+    }
+
     private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
     {
         var glossaryResult = MapperClientService.GetGlossaryByReferenceKey(reference);
