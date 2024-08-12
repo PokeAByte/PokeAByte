@@ -62,6 +62,7 @@
                          MaxItems="15"
                          Value="_autocompleteIntValue"
                          ValueChanged="OnIntValueChanged"
+                         Immediate="true"
                          OnKeyDown="(key) => OnKeyDownIntAutoCompleteHandler(key, EditContext)"
                          OnInternalInputChanged="OnInputChanged"
                          ToStringFunc="@(e => e is not null && string.IsNullOrEmpty(e.value) ? "" : e?.value ?? "")">

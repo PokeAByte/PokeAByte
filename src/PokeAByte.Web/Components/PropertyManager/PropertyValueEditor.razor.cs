@@ -63,7 +63,7 @@ public partial class PropertyValueEditor : ComponentBase
     //For some reason without this handler (even if it does nothing at all) the input will not update right away.
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
     //handler it will update when it loses focus. I am not a fan of leaving in empty methods but if it works, it works
-    private void InputFocusLostHandler(FocusEventArgs obj){}
+    private void InputFocusLostHandler(FocusEventArgs obj) {}
     public async Task Save()
     {
         var result = await MapperClientService.WritePropertyData(EditContext.Path,
@@ -167,8 +167,9 @@ public partial class PropertyValueEditor : ComponentBase
     {
         if (key.Code is "Enter" or "NumpadEnter" && !string.IsNullOrEmpty(_autocompleteIntValue?.key.ToString()))
         {
+            await Task.Delay(100);
             editContext.ValueString = _autocompleteIntValue.value;
-            _autocompleteIntValue = null;
+            //_autocompleteIntValue = null;
             await Save();
         }
     }

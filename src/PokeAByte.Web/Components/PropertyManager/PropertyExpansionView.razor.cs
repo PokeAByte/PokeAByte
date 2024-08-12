@@ -49,12 +49,31 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable
         }
         base.OnInitialized();
     }
+
+    protected override void OnAfterRender(bool firstRender)
+    {        
+
+    }
+
     private async void HandlePropertyUpdate(object? sender, EventArgs e)
     {
         if (Context.Value?.PropertyModel is null) return;
         MapperClientService.UpdateEditPropertyModel(Context.Value.PropertyModel);
+        //await InvokeAsync(StateHasChanged);
         await InvokeAsync(StateHasChanged);
         await InvokeAsync(Parent.RefreshParent);
+        
+        if(Context.Value?.PropertyModel?.Value is null) return;
+        if (Context.Value.PropertyModel.ValueString != Context.Value.PropertyModel.Value?.ToString())
+        {
+            Context.Value.PropertyModel.ValueString = Context.Value.PropertyModel.Value!.ToString()!;
+        }
+
+        await Task.Delay(100);
+        if (Context.Value.PropertyModel.ValueString != Context.Value.PropertyModel.Value?.ToString())
+        {
+            Context.Value.PropertyModel.ValueString = Context.Value.PropertyModel.Value!.ToString()!;
+        }
     }
     private void OnClickExpand()
     {       
