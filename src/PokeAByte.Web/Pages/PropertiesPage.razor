@@ -1,0 +1,98 @@
+﻿@page "/PropertiesPage"
+@using PokeAByte.Web.Services.Mapper
+@using PokeAByte.Web.Services.Navigation
+@using PokeAByte.Web.Services.Notifiers
+@using PokeAByte.Web.Services.Properties
+@using PokeAByte.Web.Components.PropertyComponents
+@if (_finishedLoading)
+{
+    <MudStack>
+        <MudStack Row="true">
+            @if (string.IsNullOrEmpty(_gameName))
+            {
+                <MudText Typo="Typo.h6" Class="pa-2">Properties</MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Class="pa-2">Properties for @_gameName</MudText>
+            }
+            <MudButton Style="align-self: center;"
+                       Color="Color.Secondary"
+                       Variant="Variant.Filled"
+                       Size="Size.Small"
+                       OnClick="OnClickUnloadMapper">
+                Unload Mapper
+            </MudButton>
+        </MudStack>
+        @if (_gameName.Contains("Deprecated", StringComparison.InvariantCultureIgnoreCase))
+        {
+            <MudText Typo="Typo.body2" Color="Color.Error" Class="px-6 pb-2" Style="width: 100%;">
+                This mapper is deprecated! As such, it will not be updated with new features. 
+                It will not have the same level of features or support as the latest mappers. 
+                This one is provided so that users can continue to use software that was programmed 
+                using these property paths.
+            </MudText>
+        }
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <MudText Typo="Typo.body2" 
+                     Color="Color.Error" 
+                     Class="px-6 pb-2" 
+                     Style="width: 100%;">
+                @_error
+            </MudText>
+        }
+        <PropertyTreeView Context="@PropertyService.PropertyTree"/>
+    </MudStack>
+}
+else
+{
+    <MudText Typo="Typo.h5">
+        Loading properties, please wait...
+    </MudText>
+}
+
+@code {
+    [Inject] public required MapperClientService ClientService { get; set; }
+    [Inject] public required NavigationService NavService { get; set; }
+    [Inject] public required ChangeNotificationService ChangeNotificationService { get; set; }
+    [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
+    [Inject] public required PropertyService PropertyService { get; set; }
+    private bool _finishedLoading = false;
+    private string _gameName = "";
+    private string _error = "";
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (!ClientService.IsCurrentlyConnected)
+        {
+            NavService.Navigate(NavigationService.Pages.MapperManager);
+        }
+
+        var metadata = ClientService.GetMetaData();
+        if (metadata.IsSuccess)
+            _gameName = metadata.ResultValue?.GameName ?? "";
+        var result = PropertyService.GenerateTree();
+        _error = result.IsSuccess ? "" : result.ToString();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        _finishedLoading = true;
+        StateHasChanged();
+    }
+
+    private async Task Clear()
+    {
+        await ClientService!.UnloadMapper();
+        StateHasChanged();
+        ChangeNotificationService.NotifyDataChanged();
+        NavService.Navigate(NavigationService.Pages.MapperManager);
+    }
+
+    private async Task OnClickUnloadMapper()
+    {
+        await Clear();
+    }
+}
