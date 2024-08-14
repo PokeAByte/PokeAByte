@@ -2,12 +2,14 @@
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
+using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Services.Properties;
 
 public class PropertyService(MapperClientService clientService, 
     ILogger<PropertyService> logger,
-    MapperSettingsService mapperSettings)
+    MapperSettingsService mapperSettings,
+    PropertyUpdateService propertyUpdateService)
 {
     private MapperClient Client => clientService.Client;
     private List<TreeItemData<PropertyTreeItem>> _propertyTree = [];
@@ -30,27 +32,7 @@ public class PropertyService(MapperClientService clientService,
         OpenProperties();
         return Result.Success();
     }
-
-    /*private void OpenProperties()
-    {
-        var properties = mapperSettings.GetMapperModelProperties();
-        if (properties is null) return;
-        foreach (var property in properties)
-        {
-            var pathSplit = property.PropertyPath.Split('.');
-            var currentBranch = _propertyTree
-                .FirstOrDefault(x => x.Text == pathSplit[0]);
-            if (currentBranch is PropertyTreePresenter p)
-            {
-                p.Expanded = true;
-                p.IsDisabled = false;
-                while (currentBranch.Value?.FullPath != property.PropertyPath)
-                {
-                    
-                }
-            }
-        }
-    }*/
+    
     private void OpenProperties()
     {
         var openProperties = mapperSettings.GetMapperModelProperties();
@@ -121,5 +103,47 @@ public class PropertyService(MapperClientService clientService,
     public void ResetTree()
     {
         _propertyTree = [];
+    }
+
+    public void SetEventHandlers(EventHandler<PropertyUpdateEventArgs> handlePropertyUpdate)
+    {
+        var clientProperties = Client.GetProperties();
+        if(clientProperties is null)
+            return;
+        foreach (var property in clientProperties)
+        {
+            var found = propertyUpdateService
+                .EventHandlers
+                .FirstOrDefault(x => x.Key == property.Path);
+            if (string.IsNullOrWhiteSpace(found.Key))
+            {
+                propertyUpdateService.EventHandlers.TryAdd(property.Path, handlePropertyUpdate);
+            }
+        }
+    }
+
+    public void RemoveEventHandlers()
+    {
+        var clientProperties = Client.GetProperties();
+        if(clientProperties is null)
+            return;
+        foreach (var property in clientProperties)
+        {
+            var found = propertyUpdateService
+                .EventHandlers
+                .FirstOrDefault(x => x.Key == property.Path);
+            if (!string.IsNullOrWhiteSpace(found.Key))
+                propertyUpdateService.EventHandlers.Remove(found.Key);
+        }
+    }
+
+    public void UpdateProperty(string path)
+    {
+        //Find path
+        var property = _propertyTree.FindWithPath(path);
+        var updatedModel = Client.GetPropertyByPath(path);
+        if (updatedModel is null || property is null)
+            return;
+        property.PropertyModel?.UpdateFromPropertyModel(updatedModel);
     }
 }

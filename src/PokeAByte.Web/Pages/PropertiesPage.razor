@@ -4,6 +4,7 @@
 @using PokeAByte.Web.Services.Notifiers
 @using PokeAByte.Web.Services.Properties
 @using PokeAByte.Web.Components.PropertyComponents
+@implements IDisposable
 @if (_finishedLoading)
 {
     <MudStack>
@@ -42,7 +43,7 @@
                 @_error
             </MudText>
         }
-        <PropertyTreeView Context="@PropertyService.PropertyTree"/>
+        <PropertyTreeView Context="@PropertyService.PropertyTree" @ref="_propertyTreeView"/>
     </MudStack>
 }
 else
@@ -58,6 +59,7 @@ else
     [Inject] public required ChangeNotificationService ChangeNotificationService { get; set; }
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
     [Inject] public required PropertyService PropertyService { get; set; }
+    private PropertyTreeView? _propertyTreeView { get; set; }
     private bool _finishedLoading = false;
     private string _gameName = "";
     private string _error = "";
@@ -74,8 +76,25 @@ else
             _gameName = metadata.ResultValue?.GameName ?? "";
         var result = PropertyService.GenerateTree();
         _error = result.IsSuccess ? "" : result.ToString();
+        PropertyService.RemoveEventHandlers();
     }
 
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PropertyService.SetEventHandlers(HandlePropertyUpdate);
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async void HandlePropertyUpdate(object? sender, PropertyUpdateEventArgs propertyUpdateEventArgs)
+    {
+        PropertyService.UpdateProperty(propertyUpdateEventArgs.Path);
+        await InvokeAsync(StateHasChanged);
+        if(_propertyTreeView is not null)
+            await InvokeAsync(_propertyTreeView.RefreshSelf);
+    }
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
@@ -94,5 +113,10 @@ else
     private async Task OnClickUnloadMapper()
     {
         await Clear();
+    }
+
+    public void Dispose()
+    {
+        PropertyService.RemoveEventHandlers();
     }
 }

@@ -75,7 +75,27 @@ public record PropertyTreeItem(string Name,
 
 public static class PropertyTreeExtensions
 {
-    public static void AddProperty(this List<TreeItemData<PropertyTreeItem>> tree, 
+    public static PropertyTreeItem? FindWithPath(this List<TreeItemData<PropertyTreeItem>> tree, string path)
+    {
+        var paths = path.Split(".");
+        if(paths.Length == 0)
+            return null;
+        var currentNode = tree
+            .FirstOrDefault(x => x.Text == paths[0]);
+        if (currentNode is null)
+            return null;
+        for (var i = 1; i < paths.Length; i++)
+        {
+            var child = currentNode
+                .Children?
+                .FirstOrDefault(x => x.Text == paths[i]);
+            if (child is null)
+                return null;
+            currentNode = child;
+        }
+        return currentNode.Value;
+    }
+    public static PropertyTreePresenter? AddProperty(this List<TreeItemData<PropertyTreeItem>> tree, 
         PropertyModel property,
         MapperMetaModel metadata)
     {
@@ -138,5 +158,7 @@ public static class PropertyTreeExtensions
             //Move into the child node and repeat until we finish all paths
             currentNode = child;
         }
+
+        return currentNode as PropertyTreePresenter;
     }
 }

@@ -1,0 +1,11 @@
+﻿@using PokeAByte.Web.Models
+@if(Context is not null)
+{
+    <MudText>
+        @Context.ValueString
+    </MudText>
+}
+@code {
+    [Parameter] public EditPropertyModel? Context { get; set; }
+    [Parameter] public bool IsShortDisplay { get; set; }
+}
