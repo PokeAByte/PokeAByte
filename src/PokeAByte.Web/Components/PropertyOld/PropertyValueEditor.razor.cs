@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.JSInterop;
 using MudBlazor;
-using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 
-namespace PokeAByte.Web.Components.PropertyManager;
+namespace PokeAByte.Web.Components.PropertyOld;
 
 public partial class PropertyValueEditor : ComponentBase, IDisposable
 {

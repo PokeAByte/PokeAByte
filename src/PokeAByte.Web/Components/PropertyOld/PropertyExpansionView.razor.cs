@@ -2,18 +2,15 @@
 using Microsoft.JSInterop;
 using MudBlazor;
 using MudBlazor.Services;
-using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Notifiers;
 
-namespace PokeAByte.Web.Components.PropertyManager;
+namespace PokeAByte.Web.Components.PropertyOld;
 
 public partial class PropertyExpansionView : ComponentBase, IDisposable, IBrowserViewportObserver
 {
     [Inject] public MapperClientService MapperClientService { get; set; }
-    //private EditPropertyModel _editContext = new();
-    
     [Inject] public required ISnackbar Snackbar { get; set; }
     [Inject] public required IJSRuntime JSRuntime { get; set; }
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
@@ -98,7 +95,6 @@ public partial class PropertyExpansionView : ComponentBase, IDisposable, IBrowse
         {
             _propertyHeight = _browserWidth >= _browserWidthBreakpoint ? _propertyWidth : "100%";
         }
-        //StateHasChanged();
     }
 
     public void Dispose()

@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using MudBlazor;
-using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Navigation;
 using PokeAByte.Web.Services.Notifiers;
 using PokeAByte.Web.Services.Properties;
 
-namespace PokeAByte.Web.Components.PropertyManager;
+namespace PokeAByte.Web.Components.PropertyOld;
 
 public partial class PropertyTreeView : ComponentBase, IDisposable
 {

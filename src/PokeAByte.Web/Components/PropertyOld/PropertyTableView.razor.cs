@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 using MudBlazor;
 using PokeAByte.Web.Models;
 
-namespace PokeAByte.Web.Components.PropertyManager;
+namespace PokeAByte.Web.Components.PropertyOld;
 
 public partial class PropertyTableView : ComponentBase
 {

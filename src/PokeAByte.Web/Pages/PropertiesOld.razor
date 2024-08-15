@@ -1,10 +1,10 @@
-﻿@page "/PropertiesPage"
+﻿@page "/PropertiesOld"
+@using PokeAByte.Web.Components.PropertyManager
 @using PokeAByte.Web.Services.Mapper
 @using PokeAByte.Web.Services.Navigation
 @using PokeAByte.Web.Services.Notifiers
-@using PokeAByte.Web.Services.Properties
-@using PokeAByte.Web.Components.PropertyComponents
-@implements IDisposable
+@using PropertyTreeView = PokeAByte.Web.Components.PropertyOld.PropertyTreeView
+
 @if (_finishedLoading)
 {
     <MudStack>
@@ -34,16 +34,7 @@
                 using these property paths.
             </MudText>
         }
-        @if (!string.IsNullOrWhiteSpace(_error))
-        {
-            <MudText Typo="Typo.body2" 
-                     Color="Color.Error" 
-                     Class="px-6 pb-2" 
-                     Style="width: 100%;">
-                @_error
-            </MudText>
-        }
-        <PropertyTreeView Context="@PropertyService.PropertyTree" @ref="_propertyTreeView"/>
+        <PropertyTreeView />
     </MudStack>
 }
 else
@@ -54,16 +45,11 @@ else
 }
 
 @code {
-    [Inject] public required MapperClientService ClientService { get; set; }
-    [Inject] public required NavigationService NavService { get; set; }
-    [Inject] public required ChangeNotificationService ChangeNotificationService { get; set; }
-    [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
-    [Inject] public required PropertyService PropertyService { get; set; }
-    private PropertyTreeView? _propertyTreeView { get; set; }
+    [Inject] private MapperClientService ClientService { get; set; }
+    [Inject] private NavigationService NavService { get; set; }
+    [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
     private bool _finishedLoading = false;
     private string _gameName = "";
-    private string _error = "";
-    
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -75,39 +61,14 @@ else
         var metadata = ClientService.GetMetaData();
         if (metadata.IsSuccess)
             _gameName = metadata.ResultValue?.GameName ?? "";
-        var result = PropertyService.GenerateTree();
-        _error = result.IsSuccess ? "" : result.ToString();
-        PropertyService.RemoveEventHandlers();
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            PropertyService.SetEventHandlers(HandlePropertyUpdate);
-        }
-        return base.OnAfterRenderAsync(firstRender);
-    }
-
-    private bool _shouldUpdateView = true;
-    private async void HandlePropertyUpdate(object? sender, PropertyUpdateEventArgs propertyUpdateEventArgs)
-    {
-        PropertyService.UpdateProperty(propertyUpdateEventArgs.Path);
-        if (_shouldUpdateView)
-        {
-            await InvokeAsync(StateHasChanged);
-            if (_propertyTreeView is not null)
-                await InvokeAsync(_propertyTreeView.RefreshChildren);
-            _shouldUpdateView = false;
-        }
-    }
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
         _finishedLoading = true;
         StateHasChanged();
     }
-
     private async Task Clear()
     {
         await ClientService!.UnloadMapper();
@@ -115,14 +76,8 @@ else
         ChangeNotificationService.NotifyDataChanged();
         NavService.Navigate(NavigationService.Pages.MapperManager);
     }
-
     private async Task OnClickUnloadMapper()
     {
         await Clear();
-    }
-
-    public void Dispose()
-    {
-        PropertyService.RemoveEventHandlers();
     }
 }

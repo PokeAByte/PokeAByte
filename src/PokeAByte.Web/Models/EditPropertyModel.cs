@@ -1,4 +1,5 @@
-﻿using PokeAByte.Domain;
+﻿using System.ComponentModel;
+using PokeAByte.Domain;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Properties;
 
@@ -25,12 +26,22 @@ public class EditPropertyModel : PropertyModel
                 _valueString = value;
             if (ValidateValue(value))
             {
-                //_valueString = ValueToString(value);
                 _valueString = value; //ValueToString(value);
+            }
+            else if(!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
+            {
+                var foundReference = GlossaryReference.Where(g =>
+                        g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(g => new IntegerValueReference(g.Key, g.Value))
+                    .FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(foundReference?.value))
+                {
+                    _valueString = foundReference.value;
+                    _referenceValue = foundReference;
+                }
             }
         }
     }
-
     public string ValueToString(string value)
     {
         if (string.IsNullOrEmpty(ValueString))
@@ -119,16 +130,35 @@ public class EditPropertyModel : PropertyModel
         };
     }
 
+    private IntegerValueReference? _referenceValue = null;
+    public IntegerValueReference? ReferenceValue
+    {
+        get => _referenceValue;
+        set
+        {
+            if (_referenceValue == value || GlossaryReference is null || value is null)
+            {
+                return;
+            }
+            var foundReference = GlossaryReference
+                .Where(x => 
+                    !string.IsNullOrWhiteSpace(x.Value) &&
+                    value.key == x.Key && 
+                    value.value == x.Value)
+                .Select(g => new IntegerValueReference(g.Key, g.Value))
+                .FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(foundReference?.value))
+                return;
+            _referenceValue = foundReference;
+            _valueString = foundReference.value;
+        }
+    }
     private bool CanParseInt(string value)
     {
-        //get the reference
+        //ignore the reference
         if (!string.IsNullOrEmpty(Reference) && GlossaryReference is not null)
         {
-            return GlossaryReference.Where(g =>
-                    g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
-                .Select(g => g.Key)
-                .ToList()
-                .Count != 0;
+            return false;
         }
         return int.TryParse(value, out _);
     }
@@ -196,9 +226,21 @@ public class EditPropertyModel : PropertyModel
         var arr = ByteArray.ByteArray?.Select(Convert.ToByte).ToArray();
         try
         {
-
-            if(arr is not null)
-                ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
+            if (arr is null) return;
+            if (!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
+            {
+                var key = BitConverter.ToUInt64(arr, 0);
+                var foundRef = GlossaryReference?
+                    .Where(x => x.Key == key)
+                    .Select(y => y.Value)
+                    .FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(foundRef))
+                {
+                    ValueString = foundRef;
+                }                
+                return;
+            }
+            ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
         }
         catch
         {
