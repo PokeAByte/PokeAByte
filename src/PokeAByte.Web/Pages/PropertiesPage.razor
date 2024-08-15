@@ -63,6 +63,7 @@ else
     private bool _finishedLoading = false;
     private string _gameName = "";
     private string _error = "";
+    
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -88,12 +89,17 @@ else
         return base.OnAfterRenderAsync(firstRender);
     }
 
+    private bool _shouldUpdateView = true;
     private async void HandlePropertyUpdate(object? sender, PropertyUpdateEventArgs propertyUpdateEventArgs)
     {
         PropertyService.UpdateProperty(propertyUpdateEventArgs.Path);
-        await InvokeAsync(StateHasChanged);
-        if(_propertyTreeView is not null)
-            await InvokeAsync(_propertyTreeView.RefreshSelf);
+        if (_shouldUpdateView)
+        {
+            await InvokeAsync(StateHasChanged);
+            if (_propertyTreeView is not null)
+                await InvokeAsync(_propertyTreeView.RefreshChildren);
+            _shouldUpdateView = false;
+        }
     }
     protected override void OnAfterRender(bool firstRender)
     {

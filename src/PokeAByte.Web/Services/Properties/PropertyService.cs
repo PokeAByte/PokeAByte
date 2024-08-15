@@ -26,13 +26,28 @@ public class PropertyService(MapperClientService clientService,
             return Result.Failure(Error.NoMapperPropertiesFound, "Failed to get properties.");
         foreach (var property in properties)
         {
-            _propertyTree.AddProperty(property, mapperMetadata);
+            var addedProp = _propertyTree.AddProperty(property, mapperMetadata);
+            if (addedProp?.Value?.PropertyModel is null) continue;
+            var reference = addedProp.Value.PropertyModel.Reference;
+            if(string.IsNullOrEmpty(reference)) continue;
+            var glossary = GetGlossaryByReferenceKey(reference);
+            addedProp.Value.PropertyModel.GlossaryReference = glossary;
         }
 
         OpenProperties();
         return Result.Success();
     }
-    
+    private Dictionary<ulong, string> GetGlossaryByReferenceKey(string reference)
+    {
+        var glossaryResult = clientService.GetGlossaryByReferenceKey(reference);
+        if (!glossaryResult.IsSuccess)
+            //todo log
+            return [];
+        var glossaryItems = glossaryResult.ResultValue;
+        return glossaryItems?
+            .Select(g => new KeyValuePair<ulong, string>(g.Key, g.Value?.ToString() ?? ""))
+            .ToDictionary() ?? [];
+    }
     private void OpenProperties()
     {
         var openProperties = mapperSettings.GetMapperModelProperties();

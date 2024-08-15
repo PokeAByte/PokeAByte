@@ -144,9 +144,9 @@
     {
         Refresh -= refreshEvent;
     }
-    public void RefreshSelf()
+    public void RefreshChildren()
     {
-        StateHasChanged();
+        //StateHasChanged();
         Refresh?.Invoke();
     }
 

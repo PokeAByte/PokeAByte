@@ -23,11 +23,11 @@ public class EditPropertyModel : PropertyModel
                 return;
             if (string.IsNullOrEmpty(_valueString))
                 _valueString = value;
-            
             if (ValidateValue(value))
             {
+                //_valueString = ValueToString(value);
                 _valueString = value; //ValueToString(value);
-            }                
+            }
         }
     }
 
