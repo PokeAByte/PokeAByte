@@ -7,14 +7,15 @@ public class ByteArrayProperty
     private IEnumerable<int>? _byteArray;
     public IReadOnlyCollection<int>? ByteArray => _byteArray?.ToList().AsReadOnly();
     public List<string> EditableArray { get; private set; } = [];
-    public ByteArrayProperty(IEnumerable<int>? byteArray)
+    public ByteArrayProperty(IEnumerable<int>? byteArray, int? length)
     {
         _byteArray = byteArray;
-        CreateEditableArray();
+        CreateEditableArray(length);
     }
 
-    private void CreateEditableArray()
+    private void CreateEditableArray(int? length)
     {
+        var len = length ?? 1;
         if (_byteArray is null || !_byteArray.Any())
         {
             EditableArray = [];
@@ -23,10 +24,17 @@ public class ByteArrayProperty
         EditableArray = _byteArray
             .Select(b => b.ToString("X2"))
             .ToList();
+        if (EditableArray.Count < len)
+        {
+            var lenRemaining = len - EditableArray.Count;
+            var range = new List<string>();
+            for (var i = 0; i < lenRemaining; i++)
+            {
+                range.Add(new string(""));
+            }
+            EditableArray.AddRange(range);
+        }
     }
-    /*public IEnumerable<int>? GetByteArray()
-        => _byteArray;*/
-
     public void UpdateByteArray()
     {
         //Should we allow users to create a new _byteArray? Need to look into this more
@@ -34,8 +42,9 @@ public class ByteArrayProperty
             return;
         try
         {
-            _byteArray = EditableArray.Select(bS => 
-                    int.Parse(bS, NumberStyles.HexNumber))
+            _byteArray = EditableArray.Select(bS =>
+                    int.TryParse(bS,NumberStyles.HexNumber,CultureInfo.InvariantCulture, out var bi) ? 
+                        bi : 0)
                 .AsEnumerable();
         }
         catch (Exception e)
@@ -43,7 +52,7 @@ public class ByteArrayProperty
             Console.WriteLine(e);
         }
     }
-    public static ByteArrayProperty? FromString(string? byteString)
+    /*public static ByteArrayProperty? FromString(string? byteString)
     {
         if (string.IsNullOrWhiteSpace(byteString))
             return null;
@@ -57,7 +66,7 @@ public class ByteArrayProperty
             Console.WriteLine(e);
             return null;
         }
-    }
+    }*/
     public override string ToString()
     {
         var ba = _byteArray?

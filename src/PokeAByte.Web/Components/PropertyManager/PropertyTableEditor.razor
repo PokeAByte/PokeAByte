@@ -16,7 +16,7 @@
                          Size="Size.Small"
                          ViewBox="@_copyBtnViewBox"/>
             </td>
-            <td style="@($"width:{_valueWidth}px")">
+            <td style="@($"width:100%")">
                 <PropertyValueEditor Context="Context" IsShortDisplay="true"/>
             </td>
         </tr>
@@ -94,7 +94,8 @@
 <style>
     table {
         table-layout: fixed;
-        width: @($"{_tableWidth}px") !important;
+        /*width: @($"{_tableWidth}px") !important;*/
+        width: 100%;
     }
     td.name {
         width: @($"{_nameWidth}px");

@@ -197,7 +197,7 @@ public class EditPropertyModel : PropertyModel
             Bytes = model.Bytes,
             IsFrozen = model.IsFrozen,
             IsReadOnly = model.IsReadOnly,
-            ByteArray = new ByteArrayProperty(model.Bytes),
+            ByteArray = new ByteArrayProperty(model.Bytes, model.Length),
             BaseProperty = model.BaseProperty
         };
     }
@@ -212,13 +212,13 @@ public class EditPropertyModel : PropertyModel
         Bytes = model?.Bytes;
         IsFrozen = model?.IsFrozen;
         IsReadOnly = model?.IsReadOnly ?? false;
-        ByteArray = new ByteArrayProperty(model?.Bytes);
+        ByteArray = new ByteArrayProperty(model?.Bytes, Length);
     }
 
     public void UpdateByteArray()
     {
         var bytes = BaseProperty.BytesFromValue(ValueString);
-        ByteArray = new ByteArrayProperty(bytes.ToIntegerArray());
+        ByteArray = new ByteArrayProperty(bytes.ToIntegerArray(), Length);
     }
     public void UpdateFromByteArray()
     {
@@ -227,7 +227,7 @@ public class EditPropertyModel : PropertyModel
         try
         {
             if (arr is null) return;
-            if (!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
+            if (Type is not "string" && !string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
                 var key = BitConverter.ToUInt64(arr, 0);
                 var foundRef = GlossaryReference?

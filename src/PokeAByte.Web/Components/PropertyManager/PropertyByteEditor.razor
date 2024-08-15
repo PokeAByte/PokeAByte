@@ -1,9 +1,9 @@
 ﻿@using PokeAByte.Web.Models
-<MudGrid Spacing="0" Justify="Justify.FlexStart">
+<MudGrid Spacing="1" Justify="Justify.FlexStart">
     @for (var i = 0; i < Context.ByteArray.EditableArray.Count; ++i)
     {
     var index = i;
-    <MudItem xs="2" md="2" sm="2">
+    <MudItem xs="2" md="2" sm="2" >
         <div class="d-flex flex-grow-1 gap-2">
             <MudTextField @bind-Value="@Context.ByteArray.EditableArray[index]"
                           MaxLength="2"
@@ -14,7 +14,7 @@
                           OnKeyDown="ArrayOnKeyDownHandler"
                           TextChanged="OnTextChangedHandler"
                           ShrinkLabel="true"
-                          ReadOnly="@(Context.Type is "string" || Context.IsReadOnly)"/>
+                          ReadOnly="@(Context.IsReadOnly)"/>
         </div>
     </MudItem>
     }    
@@ -33,7 +33,6 @@
     }
     private void OnTextChangedHandler(string text)
     {
-        if (Context.Type is "string") return;
         Context.UpdateFromByteArray();
         StateHasChanged();
     }
