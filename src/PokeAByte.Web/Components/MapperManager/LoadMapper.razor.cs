@@ -109,7 +109,7 @@ public partial class LoadMapper : ComponentBase
     private async void OnMapperTestFailedCallback(int currentAttempt)
     {
         _currentMapperAttempt = currentAttempt;
-        _currentMapperProgressAttempt = (int)((double)currentAttempt / DriverService.MaxAttempts * 100);
+        _currentMapperProgressAttempt = (int)((double)currentAttempt / MapperClientService.MaxAttempts * 100);
         await InvokeAsync(StateHasChanged);
     }
     private void OpenMapperFolder()

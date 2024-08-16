@@ -6,6 +6,7 @@
 @using PokeAByte.Web.Services.Notifiers
 
 @using PokeAByte.Web.Services.Mapper
+@using PokeAByte.Web.Services.Properties
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
@@ -79,6 +80,7 @@
     [CascadingParameter] public string? PageTitle { get; set; }
     [Inject] private MapperClientService? MapperConnectionService { get; set; }
     [Inject] private ChangeNotificationService ChangeNotificationService { get; set; }
+    [Inject] private PropertyService? PropertyService { get; set; }
     private LoadMapper? LoadMapperRef { get; set; }
     private MudTabPanel? DownloadTabRef { get; set; }
     private MudTabs? TabsRef { get; set; }
@@ -109,6 +111,7 @@
     private async Task Clear()
     {
         _mapperName = "";
+        PropertyService?.ResetTree();
         await MapperConnectionService!.UnloadMapper();
         StateHasChanged();
         ChangeNotificationService.NotifyDataChanged();

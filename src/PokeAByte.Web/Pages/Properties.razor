@@ -110,6 +110,7 @@ else
 
     private async Task Clear()
     {
+        PropertyService.ResetTree();
         await ClientService!.UnloadMapper();
         StateHasChanged();
         ChangeNotificationService.NotifyDataChanged();

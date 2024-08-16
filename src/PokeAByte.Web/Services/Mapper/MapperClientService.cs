@@ -18,8 +18,8 @@ public class MapperClientService
     private readonly PropertyUpdateService _propertyUpdateService;
     private readonly DriverService _driverService;
     private int _currentAttempt = 0;
-    public static readonly int MaxAttempts = 25;
-    private const int MaxWaitMs = 100;
+    public static readonly int MaxAttempts = 10;
+    private const int MaxWaitMs = 50;
     public string LoadedMapperName { get; private set; }
 
     public MapperClientService(IMapperFilesystemProvider mapperFs,

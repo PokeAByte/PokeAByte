@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <PublishTrimmed>true</PublishTrimmed>
         <RootNamespace>PokeAByte.Utility.BuildMapperTree</RootNamespace>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>

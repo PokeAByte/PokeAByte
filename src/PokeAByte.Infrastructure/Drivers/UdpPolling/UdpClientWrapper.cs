@@ -31,6 +31,7 @@ public class UdpClientWrapper : IDisposable
         _client.Client.SetSocketOption(SocketOptionLevel.Socket, 
             SocketOptionName.ReuseAddress, 
             true);
+        _isDisposed = false;
     }
     public void Connect()
     {

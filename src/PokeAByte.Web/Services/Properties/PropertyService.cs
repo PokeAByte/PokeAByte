@@ -18,6 +18,7 @@ public class PropertyService(MapperClientService clientService,
 
     public Result GenerateTree()
     {
+        _propertyTree = [];
         var mapperMetadata = Client.GetMetaData();
         if (mapperMetadata is null)
             return Result.Failure(Error.FailedToLoadMetaData, "Failed to get metadata.");

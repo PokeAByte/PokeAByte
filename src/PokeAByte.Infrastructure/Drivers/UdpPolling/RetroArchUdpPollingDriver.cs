@@ -183,6 +183,7 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling
             }
             catch (Exception e)
             {
+                Logger.LogError(e, "TestConnection");
                 return false;
             }
         }

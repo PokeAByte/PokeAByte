@@ -217,8 +217,15 @@ public class EditPropertyModel : PropertyModel
 
     public void UpdateByteArray()
     {
-        var bytes = BaseProperty.BytesFromValue(ValueString);
-        ByteArray = new ByteArrayProperty(bytes.ToIntegerArray(), Length);
+        try
+        {
+            var bytes = BaseProperty.BytesFromValue(ValueString);
+            ByteArray = new ByteArrayProperty(bytes.ToIntegerArray(), Length);
+        }
+        catch
+        {
+            // ignored
+        }
     }
     public void UpdateFromByteArray()
     {
