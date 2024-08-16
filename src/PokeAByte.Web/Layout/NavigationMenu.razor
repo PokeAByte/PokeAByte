@@ -29,7 +29,7 @@
                           Variant="Variant.Filled"
                           IconColor="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
                           Size="Size.Large"
-                          DisableElevation="true"
+                          Color="@GetActiveColor(NavigationService.Pages.MapperManager)"
                           Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.MapperManager) ?? false"
                           OnClick="() => NavButtonClickHandler(NavigationService.Pages.MapperManager)"
                           Class="@_buttonBorder">
@@ -39,7 +39,7 @@
                           Variant="Variant.Filled"
                           IconColor="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
                           Size="Size.Large"
-                          DisableElevation="true"
+                          Color="@GetActiveColor(NavigationService.Pages.Properties)"
                           Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.Properties) ?? false"
                           OnClick="() => NavButtonClickHandler(NavigationService.Pages.Properties)"
                           Class="@_buttonBorder">
@@ -49,7 +49,7 @@
                           Variant="Variant.Filled"
                           IconColor="@(ConnectionService?.GetCurrentConnectionColor() ?? Color.Secondary)"
                           Size="Size.Large"
-                          DisableElevation="true"
+                          Color="@GetActiveColor(NavigationService.Pages.AppSettings)"
                           Disabled="NavService!.IsButtonDisabled(NavigationService.Pages.AppSettings) ?? false"
                           OnClick="() => NavButtonClickHandler(NavigationService.Pages.AppSettings)"
                           Class="@_buttonBorder">

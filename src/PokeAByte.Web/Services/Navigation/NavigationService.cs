@@ -40,12 +40,6 @@ public class NavigationService
             Page = Pages.MapperConnectionStatus,
             IsDeactivated = false
         });
-        var currentPage = _navigationButtons
-            .FirstOrDefault(x => x.Page == CurrentPage);
-        if (currentPage is not null)
-        {
-            currentPage.IsDeactivated = true;
-        }
     }
     public bool? IsButtonDisabled(Pages page) =>
         _navigationButtons.FirstOrDefault(x => x.Page == page)?.IsDeactivated;
@@ -83,13 +77,7 @@ public class NavigationService
     {
         if (CurrentPage == navTo)
             return;
-        _navigationButtons
-            .FirstOrDefault(x => x.Page == CurrentPage)?
-            .SetDeactivated(false);
         CurrentPage = navTo;
-        _navigationButtons
-            .FirstOrDefault(x => x.Page == CurrentPage)?
-            .SetDeactivated(true);
         _navigationManager.NavigateTo(GetCurrentPageRoute());
         NotifyStateChange();
     }

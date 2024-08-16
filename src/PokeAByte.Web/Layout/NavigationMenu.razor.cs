@@ -93,4 +93,8 @@ public partial class NavigationMenu : ComponentBase, IDisposable, IBrowserViewpo
         }
         return InvokeAsync(StateHasChanged);
     }
+
+    private Color GetActiveColor(NavigationService.Pages page) =>
+        NavService!.CurrentPage == page ? Color.Info : Color.Default;
+    
 }
