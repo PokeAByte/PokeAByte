@@ -75,7 +75,9 @@ namespace PokeAByte.Application
             BlocksToRead = null;
 
             JavascriptModuleInstance = null;
-
+            HasPreprocessor = false;
+            HasPostprocessor = false;
+            
             MemoryContainerManager = new MemoryManager();
             State = [];
             Variables = [];
