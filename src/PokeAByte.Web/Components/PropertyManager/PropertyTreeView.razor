@@ -1,4 +1,5 @@
-﻿@using PokeAByte.Web.Models
+﻿@using System.Timers
+@using PokeAByte.Web.Models
 @using PokeAByte.Web.Services.Properties
 @implements IDisposable
 <MudTreeView Items="@Context"
@@ -25,13 +26,7 @@
             <Content>
                 @if (presenter.HasChildren)
                 {
-                    <MudIcon Icon="@SetIcon(presenter)"
-                             Class="pr-2"/>
-                    <MudText Typo="Typo.body2" Class="py-1" Style="width:15px">@presenter.Text</MudText>
-                    <MudText Typo="Typo.body2" Class="py-1" Style="@($"width:{GetWidth(presenter, GetAdditionalInfo(context))}px;")">
-                        @GetAdditionalInfo(presenter)
-                    </MudText>
-                    <MudText Typo="Typo.body2" Class="py-1" Style="color:#616161">@context.Children?.Count Entries</MudText>
+                    <PropertyTextViewer Presenter="@presenter" ChildrenCount="@(context.Children?.Count ?? 0)" Parent="@this"/>
                 }
                 else if (presenter is { IsDisabled: false, Value: not null } &&
                      presenter.Value.CurrentCount + 1 <= _maxCount)
@@ -58,6 +53,17 @@
     private const int CountIncrease = 150;
     private int _maxCount = CountIncrease;
 
+    private bool _shouldRender = true;
+
+    protected override bool ShouldRender()
+    {
+        if (_shouldRender)
+        {
+            _shouldRender = false;
+            return true;
+        }
+        return false;
+    }
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -80,58 +86,7 @@
         
         _previous = ctx;
     }
-
-    private string SetIcon(TreeItemData<PropertyTreeItem> context)
-    {        
-        return context.HasChildren
-            ? (context.Expanded ? Icons.Material.Filled.FolderOpen : Icons.Material.Filled.Folder)
-            : Icons.Material.Filled.Folder;
-    }
-
-    private string GetAdditionalInfo(TreeItemData<PropertyTreeItem> context)
-    {
-        var intConvert = int.TryParse(context.Text, out var result);
-        if (!intConvert) return "";
-        var firstChild =
-            (context.HasChildren ? 
-                context.Children?.FirstOrDefault(x => x.Value?.Name is "species") : 
-                null) ?? (context.HasChildren ? 
-                context.Children?.First() : 
-                null);
-        if (firstChild?.Value?.PropertyModel == null) return "";
-        return string.IsNullOrWhiteSpace(firstChild.Value.PropertyModel.Value?.ToString()) ? "" : $" ({firstChild.Value.PropertyModel.Value})";
-    }
-
-    private string GetWidth(PropertyTreePresenter presenter, string additionalInfo)
-    {
-        List<TreeItemData<PropertyTreeItem>>? children;
-        //Get the parent
-        if (presenter.Parent is not null)
-        {
-            children = presenter.Parent.Children;
-        }
-        else
-        {
-            //This is the root nodes just get a list of root nodes
-            children = PropertyService
-                .PropertyTree
-                .Where(x => x.HasChildren)
-                .ToList();
-        }
-        //Failed to find children just make the length the size of the entry (8*16 ~= 125 px)
-        if (children is null) return (presenter.Text?.Length ?? 16 * 8).ToString();
-        //Iterate through the children and get the largest text size
-        var length = children
-            .Aggregate(0, (max, current) =>
-                Math.Max(max, current.Text?.Length ?? 16)) * 10;
-        if (length < 75) length = 75;
-        if (!string.IsNullOrWhiteSpace(additionalInfo))
-        {
-            length += additionalInfo.Length * 10;
-        }
-        return length.ToString();
-    }
-
+    
     private void OnClickLoadEntries(PropertyTreePresenter presenter)
     {
         _maxCount += CountIncrease;
@@ -146,6 +101,7 @@
                 childPresenter.IsDisabled = !childPresenter.Expanded;
             }
         }
+        _shouldRender = true;
         StateHasChanged();
     }
 
@@ -163,6 +119,7 @@
             }
         }
         PropertyService.SaveOpenProperty(context);
+        _shouldRender = true;
     }
 
     public Action? Refresh;
