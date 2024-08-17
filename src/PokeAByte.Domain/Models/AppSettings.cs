@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace PokeAByte.Domain.Models
 {
@@ -15,7 +16,7 @@ namespace PokeAByte.Domain.Models
 
     public class AppSettings
     {
-        public AppSettings(IConfiguration configuration)
+        public AppSettings(IConfiguration configuration, ILogger<AppSettings> logger)
         {
             Urls = configuration["Urls"] ?? string.Empty;
 
@@ -29,7 +30,7 @@ namespace PokeAByte.Domain.Models
             BIZHAWK_DELAY_MS_BETWEEN_READS = int.Parse(configuration.GetRequiredValue("BIZHAWK_DELAY_MS_BETWEEN_READS"));
 
             SHOW_READ_LOOP_STATISTICS = bool.Parse(configuration.GetRequiredValue("SHOW_READ_LOOP_STATISTICS"));
-
+            logger.LogInformation($"AppSettings initialized: RETROARCH_DELAY_MS_BETWEEN_READS: {RETROARCH_DELAY_MS_BETWEEN_READS} and BIZHAWK_DELAY_MS_BETWEEN_READS: {BIZHAWK_DELAY_MS_BETWEEN_READS}");
             if (BuildEnvironment.IsDebug && configuration["MAPPER_DIRECTORY"]?.Length > 0)
             {
                 MAPPER_DIRECTORY = configuration.GetRequiredValue("MAPPER_DIRECTORY");

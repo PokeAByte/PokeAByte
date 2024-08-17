@@ -50,6 +50,10 @@
       <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
       <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
       <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyExpansionView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTreeView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyValueEditor.razor" />
     </ItemGroup>
 
     <ItemGroup>

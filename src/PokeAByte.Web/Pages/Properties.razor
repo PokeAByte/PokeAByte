@@ -99,8 +99,11 @@ else
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
-        _finishedLoading = true;
-        StateHasChanged();
+        if (_finishedLoading == false)
+        {
+            _finishedLoading = true;
+            StateHasChanged();
+        }
     }
 
     private async Task Clear()
