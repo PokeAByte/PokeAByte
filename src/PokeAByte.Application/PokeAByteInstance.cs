@@ -292,7 +292,8 @@ namespace PokeAByte.Application
                 }
                 catch (Exception ex)
                 {
-                    throw new PropertyProcessException($"Property {property.Path} failed to run processor. {ex.Message}", ex);
+                    _logger.LogError($"Property {property.Path} failed to run processor. {ex.Message}");
+                    //throw new PropertyProcessException($"Property {property.Path} failed to run processor. {ex.Message}", ex);
                 }
             }
 
