@@ -53,6 +53,8 @@
                           OnBlur="InputFocusLostHandler"
                           ShrinkLabel="true"
                           Immediate="true"
+                          ReadOnly="Context.IsReadOnly"
+                          Disabled="Context.IsReadOnly"
                           TextChanged="OnTextChangedHandler"
                           OnKeyDown="OnKeyDownHandler"/>
         }
@@ -62,6 +64,8 @@
                        Color="Color.Success"
                        Size="Size.Small"
                        Converter="MudSwitchConverter"
+                       ReadOnly="Context.IsReadOnly"
+                       Disabled="Context.IsReadOnly"
                        UnCheckedColor="@Color.Secondary"/>
         }
         else

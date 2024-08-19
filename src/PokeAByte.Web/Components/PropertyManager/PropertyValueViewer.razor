@@ -28,7 +28,8 @@
                          @onclick="() => CopyToClipboard(Context.Value?.PropertyModel?.ValueString)"/>
             </MudItem>
             <MudItem Class="align-center align-content-center cursor-default">
-                @if (Context.Value?.PropertyModel?.Address is not null)
+                @if (Context.Value?.PropertyModel?.Address is not null || 
+                     Context.Value?.PropertyModel?.Value is not null)
                 {
                     <PropertyValueEditor Context="Context.Value?.PropertyModel" IsShortDisplay="true" @ref="PropertyValueEditor"/>
                 }
