@@ -29,6 +29,7 @@
         string Type { get; }
         string? MemoryContainer { get; }
         uint? Address { get; }
+        string OriginalAddressString { get; }
         int? Length { get; }
         int? Size { get; }
         string? Reference { get; }

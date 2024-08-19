@@ -14,6 +14,7 @@ public static class MapperHelper
             Type = x.Type,
             MemoryContainer = x.MemoryContainer,
             Address = x.Address,
+            OriginalAddressString = x.OriginalAddressString,
             Length = x.Length,
             Size = x.Size,
             Reference = x.Reference,

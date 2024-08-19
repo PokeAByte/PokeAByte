@@ -10,7 +10,7 @@ public class PropertyModel
     public string Type { get; set; } = string.Empty;
 
     public string? MemoryContainer { get; set; } = string.Empty;
-
+    public string? OriginalAddressString { get; set; }
     public uint? Address { get; set; }
 
     public int? Length { get; set; }

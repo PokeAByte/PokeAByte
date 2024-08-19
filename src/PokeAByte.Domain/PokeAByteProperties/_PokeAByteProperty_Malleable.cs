@@ -50,6 +50,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        public string OriginalAddressString { get; }
+
         public string? AddressString
         {
             get { return _addressString; }

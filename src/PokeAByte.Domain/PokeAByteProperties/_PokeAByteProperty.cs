@@ -15,6 +15,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             MemoryContainer = attributes.MemoryContainer;
             AddressString = attributes.Address;
             _originalAddressString = attributes.Address ?? "";
+            OriginalAddressString = _originalAddressString;
             Length = attributes.Length;
             Size = attributes.Size;
             Bits = attributes.Bits;

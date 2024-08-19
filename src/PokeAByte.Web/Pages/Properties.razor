@@ -1,4 +1,5 @@
 ﻿@page "/Properties"
+@using PokeAByte.Domain.Models.Properties
 @using PokeAByte.Web.Services.Mapper
 @using PokeAByte.Web.Services.Navigation
 @using PokeAByte.Web.Services.Notifiers
@@ -44,6 +45,12 @@
             </MudText>
         }
         <PropertyTreeView Context="@PropertyService.PropertyTree" @ref="_propertyTreeView"/>
+        <MudPaper Width="100%">
+            <PropertyErrors Context="@(ClientService
+                .Properties
+                .Where(x => x.Address is null && x.Value is null)
+                .ToList())"/>
+        </MudPaper>
     </MudStack>
 }
 else
@@ -53,6 +60,7 @@ else
     </MudText>
 }
 
+
 @code {
     [Inject] public required MapperClientService ClientService { get; set; }
     [Inject] public required NavigationService NavService { get; set; }
@@ -60,6 +68,7 @@ else
     [Inject] public required PropertyUpdateService PropertyUpdateService { get; set; }
     [Inject] public required PropertyService PropertyService { get; set; }
     private PropertyTreeView? _propertyTreeView { get; set; }
+    private List<PropertyModel> _propertyErrorList = [];
     private bool _finishedLoading = false;
     private string _gameName = "";
     private string _error = "";
@@ -77,6 +86,10 @@ else
             _gameName = metadata.ResultValue?.GameName ?? "";
         var result = PropertyService.GenerateTree();
         _error = result.IsSuccess ? "" : result.ToString();
+        _propertyErrorList = ClientService
+            .Properties
+            .Where(x => x.Address is null && x.Value is null)
+            .ToList();
         PropertyService.RemoveEventHandlers();
     }
 
