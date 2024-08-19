@@ -103,7 +103,6 @@ namespace PokeAByte.Domain.PokeAByteProperties
             {
                 AddressString = _originalAddressString;
             }
-            
             if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
             {
                 try
@@ -114,7 +113,6 @@ namespace PokeAByte.Domain.PokeAByteProperties
                     }
                     else
                     {
-
                     }
                 }
                 catch (Exception e)
@@ -125,7 +123,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
 
             if (address == null)
-            {
+            {                        
                 // There is nothing to do for this property, as it does not have an address or bytes.
                 // Hopefully a postprocessor will pick it up and set it's value!
 
@@ -152,6 +150,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 }
             }
 
+            Address = address;
+            
             if (previousBytes != null && bytes != null && previousBytes.SequenceEqual(bytes))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
@@ -159,11 +159,9 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
                 // Do nothing, we don't need to calculate the new value as
                 // the bytes are the same.
-
                 return;
             }
-
-            Address = address;
+            
             Bytes = bytes?.ToArray();
 
             if (bytes == null)
