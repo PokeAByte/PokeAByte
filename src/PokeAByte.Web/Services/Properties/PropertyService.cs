@@ -47,7 +47,8 @@ public class PropertyService(MapperClientService clientService,
         var glossaryItems = glossaryResult.ResultValue;
         return glossaryItems?
             .Select(g => new KeyValuePair<ulong, string>(g.Key, g.Value?.ToString() ?? ""))
-            .ToDictionary() ?? [];
+            .GroupBy(g => g.Key)
+            .ToDictionary(g => g.Key, g => g.First().Value) ?? [];
     }
     private void OpenProperties()
     {
