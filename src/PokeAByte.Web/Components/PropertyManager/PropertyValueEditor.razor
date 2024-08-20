@@ -174,8 +174,13 @@
     //For some reason without this handler (even if it does nothing at all) the input will not update right away.
     //It would only update when the user clicks out of the textbox then back into it... However, adding in this empty
     //handler it will update when it loses focus. I am not a fan of leaving in empty methods but if it works, it works
-    private void InputFocusLostHandler(FocusEventArgs obj) {}
-    private void OnInputChanged(ChangeEventArgs obj) {}
+    private void InputFocusLostHandler(FocusEventArgs obj)
+    {
+    }
+
+    private void OnInputChanged(ChangeEventArgs obj)
+    {
+    }
     private void OnTextChangedHandler(string obj)
     {
         Context?.UpdateByteArray();
@@ -183,6 +188,8 @@
     }
     private async Task OnKeyDownHandler(KeyboardEventArgs args)
     {
+        /*if(Context is not null)
+            Context.IsEditing = true;*/
         if (args.Code is "Enter" or "NumpadEnter")
         {
             await Save();

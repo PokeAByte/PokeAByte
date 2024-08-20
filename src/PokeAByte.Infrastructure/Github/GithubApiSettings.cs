@@ -20,7 +20,7 @@ public record GithubApiSettings : IGithubApiSettings
     [JsonPropertyName("token")]
     public string Token { get; set; } = "";
     [JsonPropertyName("owner")]
-    public string Owner { get; set; } = "Scotts-Thoughts";
+    public string Owner { get; set; } = "PokeAByte";
     
     [JsonPropertyName("repo")]
     public string Repo { get; set; } = "mappers";
