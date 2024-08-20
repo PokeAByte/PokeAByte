@@ -33,6 +33,7 @@ public partial class NavigationMenu : ComponentBase, IDisposable, IBrowserViewpo
     private async void OnMapperIsUnloadedHandler()
     {
         NavService?.DisablePropertiesButton();
+        await InvokeAsync(StateHasChanged);
         //NavService?.TogglePropertiesButton();
     }
 
@@ -41,6 +42,8 @@ public partial class NavigationMenu : ComponentBase, IDisposable, IBrowserViewpo
         if(NavService is not null)
             NavService.OnNavigation -= StateHasChanged;
         ChangeNotificationService.OnChange -= StateHasChanged;
+        if(ConnectionService is not null)
+            ConnectionService.OnMapperIsUnloaded -= OnMapperIsUnloadedHandler;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

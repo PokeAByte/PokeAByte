@@ -82,6 +82,15 @@ namespace PokeAByte.Domain.PokeAByteProperties
             if (Instance.Mapper == null) { throw new Exception("Instance.Mapper is NULL."); }
             if (Instance.Driver == null) { throw new Exception("Instance.Driver is NULL."); }
 
+            if (Type is "string" && Length is 1 && Value is not null)
+            {
+                var valString = Value.ToString();
+                if (!string.IsNullOrWhiteSpace(valString))
+                {
+                    Length = valString.Length;
+                }
+            }
+            
             if (Instance.GetModuleFunctionResult(ReadFunction, this) == false)
             {
                 // They want to do it themselves entirely in Javascript.
@@ -150,7 +159,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
                     bytes = [0];
                 }
             }
-
+            
+            
             Address = address;
             
             if (previousBytes != null && bytes != null && previousBytes.SequenceEqual(bytes))
