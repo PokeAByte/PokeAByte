@@ -35,6 +35,13 @@
                 using these property paths.
             </MudText>
         }
+        @if (_gameName.Contains("Beta", StringComparison.InvariantCultureIgnoreCase))
+        {
+        <MudText Typo="Typo.body2" Color="Color.Error" Class="px-6 pb-2" Style="width: 100%;">
+            This is a beta mapper, it may contain errors such as incorrect address, missing properties, or
+            properties that return incorrect values.
+        </MudText>
+        }
         @if (!string.IsNullOrWhiteSpace(_error))
         {
             <MudText Typo="Typo.body2" 
