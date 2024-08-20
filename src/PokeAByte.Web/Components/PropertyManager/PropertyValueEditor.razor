@@ -156,6 +156,8 @@
         {
             Snackbar.Add("Saved successful!", Severity.Success);
         }
+
+        Context.IsEditing = false;
         StateHasChanged();
     }
     

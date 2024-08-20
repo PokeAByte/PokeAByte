@@ -93,6 +93,15 @@
         {
             Parent.AttachRefreshEvent(RefreshSelf);
         }
+
+        if (Context.Value?.PropertyModel is { IsEditing: false, Value: not null })
+        {
+            if (!string.IsNullOrWhiteSpace(Context.Value.PropertyModel.Value.ToString()) &&
+                Context.Value.PropertyModel.ValueString != Context.Value.PropertyModel.Value.ToString())
+            {
+                Context.Value.PropertyModel.ValueString = Context.Value.PropertyModel.Value.ToString()!;
+            }
+        }
         base.OnAfterRender(firstRender);
     }
 
@@ -105,7 +114,7 @@
     }
 
     private void RefreshSelf()
-    {
+    {        
         StateHasChanged();
     }
     public void Dispose()
