@@ -121,9 +121,11 @@ public partial class LoadMapper : ComponentBase
     {
         if (_mapperFiles is null)
             return [];
-        if (string.IsNullOrEmpty(searchArg))
+        if (string.IsNullOrEmpty(searchArg) || _selectedMapper == searchArg)
+        {
             return _mapperFiles
                 .Select(x => x.DisplayName);
+        }
         return _mapperFiles
             .Where(x => x.DisplayName
                 .Contains(searchArg, StringComparison.InvariantCultureIgnoreCase))
