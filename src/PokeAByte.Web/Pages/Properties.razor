@@ -46,10 +46,10 @@
         }
         <PropertyTreeView Context="@PropertyService.PropertyTree" @ref="_propertyTreeView"/>
         <MudPaper Width="100%">
-            <PropertyErrors Context="@(ClientService
-                .Properties
-                .Where(x => x.Address is null && x.Value is null && !string.IsNullOrWhiteSpace(x.OriginalAddressString))
-                .ToList())"/>
+            @if (_propertyErrorList.Count != 0)
+            {
+                <PropertyErrors Context="@_propertyErrorList"/>
+            }
         </MudPaper>
     </MudStack>
 }
