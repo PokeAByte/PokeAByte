@@ -48,7 +48,7 @@
         <MudPaper Width="100%">
             <PropertyErrors Context="@(ClientService
                 .Properties
-                .Where(x => x.Address is null && x.Value is null)
+                .Where(x => x.Address is null && x.Value is null && !string.IsNullOrWhiteSpace(x.OriginalAddressString))
                 .ToList())"/>
         </MudPaper>
     </MudStack>
@@ -88,7 +88,7 @@ else
         _error = result.IsSuccess ? "" : result.ToString();
         _propertyErrorList = ClientService
             .Properties
-            .Where(x => x.Address is null && x.Value is null)
+            .Where(x => x.Address is null && x.Value is null && !string.IsNullOrWhiteSpace(x.OriginalAddressString))
             .ToList();
         PropertyService.RemoveEventHandlers();
     }
