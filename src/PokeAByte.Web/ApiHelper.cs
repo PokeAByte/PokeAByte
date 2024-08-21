@@ -9,7 +9,6 @@ public static class ApiHelper
     public static class EmbededResources
     {
         public static Stream appsettings_json => GetEmbeddedResourceStream("PokeAByte.Web.appsettings.json");
-        public static Stream index_html => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.index.html");
         public static Stream favicon_ico => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.favicon.ico");
         public static Stream site_css => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.site.css");
         public static Stream dist_gameHookMapperClient_js => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");

@@ -164,11 +164,11 @@ public static class Startup
             .AddInteractiveServerRenderMode();
         if (BuildEnvironment.IsDebug)
         {
-            app.MapGet("/gh_index", () => Results.Redirect("index.html", false));
+            //app.MapGet("/gh_index", () => Results.Redirect("index.html", false));
         }
         else
         {
-            app.MapGet("/gh_index", () => Results.File(ApiHelper.EmbededResources.index_html, contentType: "text/html"));
+            //app.MapGet("/gh_index", () => Results.File(ApiHelper.EmbededResources.index_html, contentType: "text/html"));
             app.MapGet("/favicon.ico", () => Results.File(ApiHelper.EmbededResources.favicon_ico, contentType: "image/x-icon"));
             app.MapGet("/site.css", () => Results.File(ApiHelper.EmbededResources.site_css, contentType: "text/css"));
             app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.dist_gameHookMapperClient_js, contentType: "application/javascript"));

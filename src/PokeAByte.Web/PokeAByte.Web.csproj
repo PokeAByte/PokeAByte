@@ -67,7 +67,6 @@
       <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
       <EmbeddedResource Remove="Components\PropertiesOld\**" />
       <EmbeddedResource Include="wwwroot\favicon.ico" />
-      <EmbeddedResource Include="wwwroot\index.html" />
       <EmbeddedResource Include="wwwroot\site.css" />
     </ItemGroup>
 
