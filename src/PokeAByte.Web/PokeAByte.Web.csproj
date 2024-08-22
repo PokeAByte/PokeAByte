@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PublicSign>false</PublicSign>
+        <Company>Scott's Thoughts</Company>
+        <AssemblyVersion>0.8.0</AssemblyVersion>
+        <FileVersion>0.8.0</FileVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
+      <PackageReference Include="MudBlazor" Version="7.5.0" />
+      <PackageReference Include="Serilog" Version="4.0.2-dev-02220" />
+      <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+      <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\MapperManager\LoadMapper.razor" />
+      <AdditionalFiles Include="Layout\MainLayout.razor" />
+      <AdditionalFiles Include="Layout\NavigationMenu.razor" />
+      <AdditionalFiles Include="Pages\AppSettings.razor" />
+      <AdditionalFiles Include="Pages\Error.razor" />
+      <AdditionalFiles Include="Pages\Home.razor" />
+      <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />
+      <AdditionalFiles Include="Pages\MapperManager.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Pages\AppSettings.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\DataProperties.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\MapperConnectionStatus.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\MapperManager.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyExpansionPanel.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyExpansionView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTableView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTreeView.razor" />
+      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyValueEditor.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
+      <ProjectReference Include="..\PokeAByte.Application\PokeAByte.Application.csproj" />
+      <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
+      <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
+      <EmbeddedResource Remove="Components\PropertiesOld\**" />
+      <EmbeddedResource Include="wwwroot\favicon.ico" />
+      <EmbeddedResource Include="wwwroot\site.css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="wwwroot\dist\gameHookMapperClient.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Components\PropertiesOld\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Components\PropertiesOld\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Components\PropertiesOld\**" />
+      <None Remove="wwwroot.zip" />
+    </ItemGroup>
+
+</Project>
