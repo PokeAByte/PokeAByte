@@ -8,7 +8,7 @@ in an easy-to-use JSON format that is human-readable. \
 Live updates to this data are provided through websockets.
 
 ### VSCode Installation
-1) Clone the repo: `git clone https://github.com/Scotts-Thoughts/gamehook.git`
+1) Clone the repo: `git clone https://github.com/PokeAByte/PokeAByte.git`
 2) Open VSCode and click `File > Open Folder`, find where you cloned the repo and select the `src` folder
 3) Open a new terminal in VSCode: this can be done by clicking `Terminal` on the top of the window and then `New Terminal`
 4) Click into the terminal and type `dotnet publish`. This will publish all projects into their respective directories
