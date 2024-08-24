@@ -86,7 +86,10 @@
                 context.Children?.First() : 
                 null);
         if (firstChild?.Value?.PropertyModel == null) return "";
-        return string.IsNullOrWhiteSpace(firstChild.Value.PropertyModel.Value?.ToString()) ? "" : $" ({firstChild.Value.PropertyModel.Value})";
+
+		// Only make the "ToString()" call once:
+		var propertyValueString = firstChild.Value.PropertyModel.Value?.ToString();
+        return string.IsNullOrWhiteSpace(propertyValueString) ? "" : $" ({propertyValueString})";
     }
 
     public void Dispose()
