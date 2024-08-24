@@ -92,7 +92,7 @@ public class UdpClientWrapper : IDisposable
         }
 
         var memoryAddress = Convert.ToUInt32(memoryAddressString, 16);
-        var value = valueStringArray.Select(x => Convert.ToByte(x, 16)).ToArray();
+        var value = Array.ConvertAll(valueStringArray, x => Convert.ToByte(x, 16));
 
         var receiveKey = $"{command} {memoryAddressString} {valueStringArray.Length}";
 

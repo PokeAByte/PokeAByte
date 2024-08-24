@@ -353,7 +353,7 @@ namespace PokeAByte.Web.Controllers
                 return ApiHelper.MapperNotLoaded();
 
             var path = model.Path.StripEndingRoute().FromRouteToPath();
-            var actualBytes = model.Bytes.Select(x => (byte)x).ToArray();
+            var actualBytes = Array.ConvertAll(model.Bytes, x => (byte)x);
 
             var prop = Instance.Mapper.Properties[path];
 

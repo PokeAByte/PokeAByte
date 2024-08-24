@@ -10,7 +10,7 @@ namespace PokeAByte.Domain
         public static string ToHexdecimalString(this byte value) => ((uint)value).ToHexdecimalString();
         public static string ToHexdecimalString(this IEnumerable<int> value, string joinCharacter = " ") => string.Join(joinCharacter, value.Select(x => ((uint)x).ToHexdecimalString()));
 
-        public static IEnumerable<int> ToIntegerArray(this byte[] bytes) => bytes.Select(x => (int)x).ToArray();
+        public static IEnumerable<int> ToIntegerArray(this byte[] bytes) => Array.ConvertAll(bytes, x => (int)x);
 
         public static string NormalizeMemoryAddresses(this string value)
         {
