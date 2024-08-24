@@ -10,7 +10,7 @@ public static class MapperEnvironment
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "github_api_settings.json");
     public static string MapperTreeJson => "mapper_tree.json";
     public static string OutdatedMapperTreeJson => 
-        Path.Combine(BuildEnvironment.ConfigurationDirectory, "mappers/outdated_mapper_tree.json");
+        Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers/outdated_mapper_tree.json");
     public static string GithubChangeFilePath =>
         Path.Combine(BuildEnvironment.ConfigurationDirectory, MapperTreeJson);
     public static string MapperLocalDirectory => 
