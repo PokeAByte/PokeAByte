@@ -27,7 +27,7 @@ public class ByteArrayProperty
         if (EditableArray.Count < len)
         {
             var lenRemaining = len - EditableArray.Count;
-            var range = new List<string>();
+            var range = new List<string>(lenRemaining);
             for (var i = 0; i < lenRemaining; i++)
             {
                 range.Add(new string(""));

@@ -137,7 +137,7 @@ namespace PokeAByte.Application
                 throw new ArgumentOutOfRangeException(nameof(size));
 
             int chunkCount = (Data.Length + size - 1) / size;
-            var chunks = new List<IByteArray>();
+            var chunks = new List<IByteArray>(chunkCount);
 
             for (int i = 0; i < chunkCount; i++)
             {

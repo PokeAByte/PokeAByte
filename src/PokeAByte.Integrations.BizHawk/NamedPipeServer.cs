@@ -38,11 +38,8 @@ public class NamedPipeServer : IDisposable
             _pipeServer.EndWaitForConnection(iar);
             Console.WriteLine("Reading 255 bytes of client data...");
             var buffer = new byte[255];
-            var dataList = new List<byte>();
-            var count = _pipeServer
-                .Read(buffer, 
-                    0, 
-                    255);
+            var count = _pipeServer.Read(buffer, 0, 255);
+            var dataList = new List<byte>(count);
             dataList.AddRange(buffer.Take(count));
             while (count == 255)
             {
