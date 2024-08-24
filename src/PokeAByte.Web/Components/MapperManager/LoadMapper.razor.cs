@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Services;
+using PokeAByte.Web.Helper;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Navigation;
@@ -112,9 +114,10 @@ public partial class LoadMapper : ComponentBase
         _currentMapperProgressAttempt = (int)((double)currentAttempt / MapperClientService.MaxAttempts * 100);
         await InvokeAsync(StateHasChanged);
     }
+
     private void OpenMapperFolder()
     {
-        Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+        XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalDirectory);
     }
 
     private async Task<IEnumerable<string>> SearchForMapper(string searchArg, CancellationToken token)

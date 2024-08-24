@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using PokeAByte.Application.Mappers;
+using PokeAByte.Web.Helper;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 using PokeAByte.Web.Services.Mapper;
@@ -51,12 +52,12 @@ public partial class RestoreArchive : ComponentBase
 
     private void OnClickOpenMapperDirectory()
     {
-        Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+        XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalDirectory);
     }
 
     private void OnClickOpenArchiveDirectory()
     {
-        Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
+        XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalArchiveDirectory);
     }
 
     private async Task OnClickRestoreButton(MapperArchiveModel? item)

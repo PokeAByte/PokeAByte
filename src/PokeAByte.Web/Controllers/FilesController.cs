@@ -7,6 +7,7 @@ using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Infrastructure.Github;
+using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web.Controllers
 {
@@ -199,7 +200,7 @@ namespace PokeAByte.Web.Controllers
         {
             try
             {
-                Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+                XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalDirectory);
                 return Ok();
             }
             catch (Exception e)
@@ -214,7 +215,7 @@ namespace PokeAByte.Web.Controllers
         {
             try
             {
-                Process.Start("explorer.exe",MapperEnvironment.MapperLocalArchiveDirectory);
+                XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalArchiveDirectory);
                 return Ok();
             }
             catch (Exception e)
