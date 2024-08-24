@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Web.Helper;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services;
 using PokeAByte.Web.Services.Mapper;
@@ -143,7 +145,7 @@ public partial class RemoteManager : ComponentBase
 
     private void OnClickOpenMapperDirectory()
     {
-        Process.Start("explorer.exe",MapperEnvironment.MapperLocalDirectory);
+        XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalDirectory);
     }
 
     private string GetSelectedIcon(VisualMapperComparisonModel context)
