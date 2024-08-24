@@ -32,18 +32,22 @@ namespace PokeAByte.Domain
                     expression.Parameters[variable.Key] = variable.Value;
                 }
 
-                var result = expression.Evaluate()?.ToString();
-
-                if (uint.TryParse(result, out var castedResult))
-                {
-                    address = castedResult;
+                var result = expression.Evaluate();
+                if (result is int castedResult) {
+                    address = (uint)castedResult;
                     return true;
-                }
-                else
-                {
-                    address = 0x00;
-                    return false;
-                }
+                } else { 
+                    if (uint.TryParse(result.ToString(), out address))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        address = 0x00;
+                        return false;
+                    }
+                } 
+
             }
             catch (Exception ex)
             {
