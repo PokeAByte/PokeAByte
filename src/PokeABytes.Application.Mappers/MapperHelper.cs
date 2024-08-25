@@ -36,11 +36,7 @@ public static class MapperHelper
 
         foreach (var item in glossaryList)
         {
-            dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel()
-            {
-                Key = x.Key,
-                Value = x.Value
-            });
+            dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel(x.Key, x.Value));
         }
 
         return dictionary;

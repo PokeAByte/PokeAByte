@@ -1,9 +1,10 @@
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Application;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Models.Properties;
 
 namespace PokeAByte.Web.Controllers
 {
@@ -28,6 +29,7 @@ namespace PokeAByte.Web.Controllers
 
                 IsFrozen = x.IsFrozen,
                 IsReadOnly = x.IsReadOnly,
+                BaseProperty = x,
             };
 
         public static Dictionary<string, IEnumerable<GlossaryItemModel>> MapToDictionaryGlossaryItemModel(
@@ -37,89 +39,11 @@ namespace PokeAByte.Web.Controllers
 
             foreach (var item in glossaryList)
             {
-                dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel()
-                {
-                    Key = x.Key,
-                    Value = x.Value
-                });
+                dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel(x.Key, x.Value));
             }
 
             return dictionary;
         }
-    }
-
-    public record MapperModel
-    {
-        public MapperMetaModel Meta { get; init; } = null!;
-        public IEnumerable<PropertyModel> Properties { get; init; } = null!;
-        public Dictionary<string, IEnumerable<GlossaryItemModel>> Glossary { get; init; } = null!;
-    }
-
-    public record MapperMetaModel
-    {
-        public Guid Id { get; init; }
-        public string GameName { get; init; } = string.Empty;
-        public string GamePlatform { get; init; } = string.Empty;
-        public string MapperReleaseVersion { get; init; } = string.Empty;
-    }
-
-    public class GlossaryItemModel
-    {
-        public ulong Key { get; init; }
-        public object? Value { get; init; }
-    }
-
-    public record MapperReplaceModel(string Id, string Driver);
-
-    public class PropertyModel
-    {
-        public string Path { get; init; } = string.Empty;
-
-        public string Type { get; init; } = string.Empty;
-
-        public string? MemoryContainer { get; init; } = string.Empty;
-
-        public uint? Address { get; init; }
-
-        public int? Length { get; init; }
-
-        public int? Size { get; init; }
-
-        public string? Reference { get; init; }
-
-        public string? Bits { get; init; }
-
-        public string? Description { get; init; }
-
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-        public object? Value { get; init; }
-
-        public IEnumerable<int>? Bytes { get; init; } = Enumerable.Empty<int>();
-
-        public bool? IsFrozen { get; init; }
-
-        public bool IsReadOnly { get; init; }
-    }
-
-    public class UpdatePropertyValueModel
-    {
-        public string Path { get; init; } = string.Empty;
-        public object? Value { get; init; }
-        public bool? Freeze { get; init; }
-    }
-
-    public class UpdatePropertyBytesModel
-    {
-        public string Path { get; init; } = string.Empty;
-        public int[] Bytes { get; init; } = Array.Empty<int>();
-        public bool? Freeze { get; init; }
-    }
-
-    public class UpdatePropertyFreezeModel
-    {
-        public string Path { get; init; } = string.Empty;
-        public bool Freeze { get; init; }
     }
     
     [ApiController]
@@ -428,11 +352,7 @@ namespace PokeAByte.Web.Controllers
             }
             else
             {
-                return Ok(glossaryItem.Values.Select(x => new GlossaryItemModel()
-                {
-                    Key = x.Key,
-                    Value = x.Value
-                }));
+                return Ok(glossaryItem.Values.Select(x => new GlossaryItemModel(x.Key, x.Value)));
             }
         }
     }
