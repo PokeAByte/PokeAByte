@@ -73,8 +73,8 @@ namespace PokeAByte.Application
             {
                 ReadRanges = memory.Elements("read").Select(x => new ReadRange()
                 {
-                    Start = uint.Parse(x.GetAttributeValue("start").NormalizeMemoryAddresses()),
-                    End = uint.Parse(x.GetAttributeValue("end").NormalizeMemoryAddresses()),
+                    Start = x.GetAttributeValue("start").ParseHexAddress(),
+                    End = x.GetAttributeValue("end").ParseHexAddress(),
                 }).ToArray()
             };
         }
