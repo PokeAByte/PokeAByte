@@ -71,12 +71,6 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
         response = response.Substring(response.IndexOf(' ', 17) + 1);
         // Split the rest of the response into individual hex-byte strings (e.g. ["68","65","6c","6c","6f"])
         var valueStringArray = response.Split(' ');
-
-        if (valueStringArray[0] == "-1") // TODO: I don't think this is useful anymore, but need to verify.
-        {
-            throw new Exception("Command: " + command + "\nReceived: " + response);
-        }
-
         byte[] value = new byte[valueStringArray.Length];
         for (int i = 0; i < value.Length - 1; i++)
         {
