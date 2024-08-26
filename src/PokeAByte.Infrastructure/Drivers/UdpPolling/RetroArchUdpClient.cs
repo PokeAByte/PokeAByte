@@ -17,6 +17,7 @@ public class RetroArchUdpClient : IDisposable
     private readonly int _timeout;
     private readonly IPAddress _ipAddress;
     private readonly int _port;
+    private static AutoResetEvent _dataReceivedEvent = new AutoResetEvent(false);
 
     [MemberNotNullWhen(true, nameof(_client))]
     public bool IsClientConnected =>
@@ -80,62 +81,60 @@ public class RetroArchUdpClient : IDisposable
         _isConnected = true;
     }
 
-
-
-    public async Task<bool> ReceiveAsync()
+    public async Task ReceiveAsync()
     {
         if (!IsClientAlive())
         {
             throw new Exception("UdpClient is still NULL when waiting for messages.");
         }
         this._receivedData = await _client.ReceiveAsync();
-        return true;
+        _dataReceivedEvent.Set();
     }
 
-    public UdpReceiveResult? WaitForData()
-    {
-        UdpReceiveResult? response = null;
-        // TODO: SpinWait is not ideal for this scenario.
-        SpinWait.SpinUntil(() =>
-        {
-            response = _receivedData;
-            return _receivedData != null;
-        }, TimeSpan.FromMilliseconds(_timeout));
-        _receivedData = null;
-        return response;
-    }
-
+    /// <summary>
+    /// Send a command to the emulator and wait for a response without parsing that response.
+    /// </summary>
+    /// <param name="command"> The emulator command. </param>
+    /// <param name="argument"> Emulator command arguments. </param>
+    /// <returns> An awaitable task. </returns>
+    /// <exception cref="Exception">
+    /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
+    /// </exception>
     public async Task SendAsync(string command, string argument)
     {
         if (!IsClientAlive())
         {
             throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
         }
-        var outgoingPayload = $"{command} {argument}";
-        var datagram = Encoding.ASCII.GetBytes(outgoingPayload);
         await semaphoreSlim.WaitAsync();
-        _ = await _client.SendAsync(datagram, datagram.Length);
-        _ = WaitForData();
+        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
+        _dataReceivedEvent.WaitOne(_timeout);
         semaphoreSlim.Release();
     }
 
+    /// <summary>
+    /// Send a command to the emulator and return the response as a string.
+    /// </summary>
+    /// <param name="command"> The emulator command. </param>
+    /// <param name="argument"> Emulator command arguments. </param>
+    /// <returns> The response from the emulator, as a string. </returns>
+    /// <exception cref="Exception">
+    /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
+    /// </exception>
     public async Task<string?> SendReceiveAsync(string command, string argument)
     {
         if (!IsClientAlive())
         {
             throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
         }
-        var outgoingPayload = $"{command} {argument}";
-        var datagram = Encoding.ASCII.GetBytes(outgoingPayload);
         await semaphoreSlim.WaitAsync();
-        _ = await _client.SendAsync(datagram, datagram.Length);
-        UdpReceiveResult? udpData = WaitForData();
+        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
+        _dataReceivedEvent.WaitOne(_timeout);
+        var response = _receivedData;
         semaphoreSlim.Release();
-        if (udpData == null)
-        {
-            return null;
-        }
-        return Encoding.ASCII.GetString(udpData.Value.Buffer).Replace("\n", string.Empty);
+        return response != null 
+            ? Encoding.ASCII.GetString(response.Value.Buffer).Replace("\n", string.Empty)
+            : null;
     }
 
     public void Dispose()

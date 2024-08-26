@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Pipelines;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -19,14 +20,13 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     public NewRetroArchUdpDriver(ILogger<RetroArchUdpPollingDriver> logger, AppSettings appSettings)
     {
         Logger = logger;
+        DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
         _appSettings = appSettings;
         _udpClientWrapper = new RetroArchUdpClient(
             _appSettings.RETROARCH_LISTEN_IP_ADDRESS,
             _appSettings.RETROARCH_LISTEN_PORT,
             _appSettings.RETROARCH_READ_PACKET_TIMEOUT_MS
         );
-
-        DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
         Task.Run(async () =>
         {
             await ConnectAsync(_connectionCts.Token);
@@ -66,10 +66,13 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
             throw new DriverTimeoutException(memoryAddress, "RetroArch", null);
         }
 
-        var splitString = response.Split(' ');
-        var valueStringArray = splitString[2..];
+        // The response from the emulator is "READ_CORE_MEMORY <address> <byte> <byte> <byte> ...."
+        // We cut off the command with the 17 offset, then find the first space after the address:
+        response = response.Substring(response.IndexOf(' ', 17) + 1);
+        // Split the rest of the response into individual hex-byte strings (e.g. ["68","65","6c","6c","6f"])
+        var valueStringArray = response.Split(' ');
 
-        if (valueStringArray[0] == "-1")
+        if (valueStringArray[0] == "-1") // TODO: I don't think this is useful anymore, but need to verify.
         {
             throw new Exception("Command: " + command + "\nReceived: " + response);
         }
@@ -135,16 +138,13 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     /// </returns>
     public async Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
     {
-        var results = await Task.WhenAll(blocks.Select(async x =>
+        var result = new Dictionary<uint, byte[]>();
+        foreach (var block in blocks)
         {
-            // We add one here because otherwise the result is too short.
+            var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
+            result[block.StartingAddress] = data;
+        }
 
-            // Example: 0xAFFF - 0xA000 is 4095 in decimal.
-            // We want to actually return 4096 bytes - we want to include 0xAFFF.
-            var data = await ReadMemoryAddress(x.StartingAddress, x.EndingAddress - x.StartingAddress + 1);
-            return new KeyValuePair<uint, byte[]>(x.StartingAddress, data);
-        }));
-
-        return results.ToDictionary(x => x.Key, x => x.Value);
+        return result;
     }
 }
