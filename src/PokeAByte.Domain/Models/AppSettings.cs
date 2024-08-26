@@ -24,6 +24,7 @@ namespace PokeAByte.Domain.Models
             RETROARCH_LISTEN_PORT = int.Parse(configuration.GetRequiredValue("RETROARCH_LISTEN_PORT"));
             RETROARCH_READ_PACKET_TIMEOUT_MS = int.Parse(configuration.GetRequiredValue("RETROARCH_READ_PACKET_TIMEOUT_MS"));
             RETROARCH_DELAY_MS_BETWEEN_READS = int.Parse(configuration.GetRequiredValue("RETROARCH_DELAY_MS_BETWEEN_READS"));
+            RETROARCH_NEW_DRIVER = bool.Parse(configuration.GetRequiredValue("RETROARCH_NEW_DRIVER"));
 
             RETROARCH_DELAY_MS_BETWEEN_READS = int.Parse(configuration.GetRequiredValue("RETROARCH_DELAY_MS_BETWEEN_READS"));
 
@@ -56,6 +57,7 @@ namespace PokeAByte.Domain.Models
 
         public string Urls { get; }
 
+        public bool RETROARCH_NEW_DRIVER {get;}
         public string RETROARCH_LISTEN_IP_ADDRESS { get; }
         public int RETROARCH_LISTEN_PORT { get; }
         public int RETROARCH_READ_PACKET_TIMEOUT_MS { get; }

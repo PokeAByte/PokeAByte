@@ -90,7 +90,16 @@ public static class Startup
             services.AddSingleton<PokeAByteInstance>();
             services.AddSingleton<ScriptConsole>();
             services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
-            services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
+            // TODO: When removing the old driver, this can be simplified again and the RETROARCH_NEW_DRIVER setting
+            // can be removed.
+            services.AddSingleton<IRetroArchUdpPollingDriver>(x =>
+            {
+                var logger = x.GetRequiredService<ILogger<RetroArchUdpPollingDriver>>();
+                var settings = x.GetRequiredService<AppSettings>();
+                return settings.RETROARCH_NEW_DRIVER
+                    ? new NewRetroArchUdpDriver(logger, settings)
+                    : new RetroArchUdpPollingDriver( logger, settings);
+            });
             services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
             services.AddSingleton<DriverService>();
             services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
