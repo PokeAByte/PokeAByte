@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.IO.Pipelines;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -10,7 +9,6 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
     private CancellationTokenSource _connectionCts = new();
-
     public string ProperName { get; } = "NewRetroArch";
     public int DelayMsBetweenReads { get; }
     private ILogger<RetroArchUdpPollingDriver> Logger { get; }
@@ -47,36 +45,43 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
             catch
             {
                 _udpClientWrapper.Dispose();
-                // Automatically swallow exceptions here because
-                // they're not useful even if there's an error.
-
+                // Automatically swallow exceptions here because they're not useful even if there's an error.
                 // We don't want to spam the user with errors.
             }
         }
     }
 
+    private static byte[] ParseReadMemoryResponse(ReadOnlySpan<byte> input)
+    {
+        // The response from the emulator is "READ_CORE_MEMORY <address> <byte> <byte> <byte> ...."
+        // We cut off the command with the 17 offset, then find the first space after the address:
+        input = input.Slice(17);
+        input = input.Slice(input.IndexOf((byte)' ') + 1);
+        var byteCount = input.Count((byte)' ') + 1;
+        // Then we can skip over the remaining span 3 characters at a time, slicing out each character-pair for the
+        // byte.Parse().
+        int offset = 0;
+        byte[] value = new byte[byteCount];
+        for (int i = 0; i < value.Length - 1; i++)
+        {
+            // While we do technically get ASCII and byte.Parse(ROS<byte>) parses utf8, we can still use it because
+            // UTF8 is backwards compatible with ASCII:
+            value[i] = byte.Parse(input.Slice(offset, 2), NumberStyles.HexNumber);
+            offset += 3;
+        }
+        return value;
+    }
+
     private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
     {
         var command = $"READ_CORE_MEMORY {ToRetroArchHexdecimalString(memoryAddress)}";
-
-        string? response = await _udpClientWrapper.SendReceiveAsync(command, $"{length}");
+        byte[]? response = await _udpClientWrapper.SendCommandAsync(command, $"{length}");
         if (response == null)
         {
             Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
             throw new DriverTimeoutException(memoryAddress, "RetroArch", null);
         }
-
-        // The response from the emulator is "READ_CORE_MEMORY <address> <byte> <byte> <byte> ...."
-        // We cut off the command with the 17 offset, then find the first space after the address:
-        response = response.Substring(response.IndexOf(' ', 17) + 1);
-        // Split the rest of the response into individual hex-byte strings (e.g. ["68","65","6c","6c","6f"])
-        var valueStringArray = response.Split(' ');
-        byte[] value = new byte[valueStringArray.Length];
-        for (int i = 0; i < value.Length - 1; i++)
-        {
-            value[i] = byte.Parse(valueStringArray[i], NumberStyles.HexNumber);
-        }
-        return value;
+        return ParseReadMemoryResponse(response);
     }
 
     /// <summary>
@@ -95,7 +100,7 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     {
         try
         {
-            MemoryAddressBlock testBlock = new("test", 0, 1);
+            var testBlock = new MemoryAddressBlock("test", 0, 1);
             _ = await ReadBytes([testBlock]);
             return true;
         }
@@ -115,7 +120,7 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     public async Task WriteBytes(uint memoryAddress, byte[] values)
     {
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
-        await _udpClientWrapper.SendAsync(
+        _ = await _udpClientWrapper.SendCommandAsync(
             "WRITE_CORE_MEMORY",
             $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}"
         );
@@ -138,7 +143,6 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
             var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
             result[block.StartingAddress] = data;
         }
-
         return result;
     }
 }

@@ -92,36 +92,15 @@ public class RetroArchUdpClient : IDisposable
     }
 
     /// <summary>
-    /// Send a command to the emulator and wait for a response without parsing that response.
-    /// </summary>
-    /// <param name="command"> The emulator command. </param>
-    /// <param name="argument"> Emulator command arguments. </param>
-    /// <returns> An awaitable task. </returns>
-    /// <exception cref="Exception">
-    /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
-    /// </exception>
-    public async Task SendAsync(string command, string argument)
-    {
-        if (!IsClientAlive())
-        {
-            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
-        }
-        await semaphoreSlim.WaitAsync();
-        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
-        _dataReceivedEvent.WaitOne(_timeout);
-        semaphoreSlim.Release();
-    }
-
-    /// <summary>
     /// Send a command to the emulator and return the response as a string.
     /// </summary>
     /// <param name="command"> The emulator command. </param>
     /// <param name="argument"> Emulator command arguments. </param>
-    /// <returns> The response from the emulator, as a string. </returns>
+    /// <returns> The response from the emulator, as an ASCII byte array. </returns>
     /// <exception cref="Exception">
     /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
     /// </exception>
-    public async Task<string?> SendReceiveAsync(string command, string argument)
+    public async Task<byte[]?> SendCommandAsync(string command, string argument)
     {
         if (!IsClientAlive())
         {
@@ -130,11 +109,9 @@ public class RetroArchUdpClient : IDisposable
         await semaphoreSlim.WaitAsync();
         _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
         _dataReceivedEvent.WaitOne(_timeout);
-        var response = _receivedData;
+        byte[]? response = _receivedData?.Buffer;
         semaphoreSlim.Release();
-        return response != null 
-            ? Encoding.ASCII.GetString(response.Value.Buffer).Replace("\n", string.Empty)
-            : null;
+        return response;
     }
 
     public void Dispose()
