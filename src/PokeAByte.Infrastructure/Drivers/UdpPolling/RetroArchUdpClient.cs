@@ -81,14 +81,19 @@ public class RetroArchUdpClient : IDisposable
         _isConnected = true;
     }
 
-    public async Task ReceiveAsync()
+    public async Task<bool> ReceiveAsync()
     {
         if (!IsClientAlive())
         {
-            throw new Exception("UdpClient is still NULL when waiting for messages.");
+            return false;
         }
-        this._receivedData = await _client.ReceiveAsync();
-        _dataReceivedEvent.Set();
+        try {
+            this._receivedData = await _client.ReceiveAsync();
+            _dataReceivedEvent.Set();
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /// <summary>
@@ -109,7 +114,9 @@ public class RetroArchUdpClient : IDisposable
         await semaphoreSlim.WaitAsync();
         _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
         _dataReceivedEvent.WaitOne(_timeout);
+        _dataReceivedEvent.Reset();
         byte[]? response = _receivedData?.Buffer;
+        _receivedData = null;
         semaphoreSlim.Release();
         return response;
     }

@@ -38,15 +38,8 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
         _udpClientWrapper.Connect();
         while (!cancellationToken.IsCancellationRequested)
         {
-            try
-            {
-                await _udpClientWrapper.ReceiveAsync();
-            }
-            catch
-            {
+            if (!await _udpClientWrapper.ReceiveAsync()) {
                 _udpClientWrapper.Dispose();
-                // Automatically swallow exceptions here because they're not useful even if there's an error.
-                // We don't want to spam the user with errors.
             }
         }
     }
@@ -100,8 +93,7 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     {
         try
         {
-            var testBlock = new MemoryAddressBlock("test", 0, 1);
-            _ = await ReadBytes([testBlock]);
+            _ = await ReadMemoryAddress(0,1);
             return true;
         }
         catch (Exception e)
