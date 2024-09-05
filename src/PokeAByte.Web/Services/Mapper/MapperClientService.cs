@@ -63,8 +63,8 @@ public class MapperClientService
     public List<PropertyModel> Properties { get; set; } = [];
 
     public async Task<Result> ChangeMapper(string mapperId,
-        Action<int> driverTestActionHandler,
-        Action<int> mapperTestActionHandler)
+        Action<int>? driverTestActionHandler,
+        Action<int>? mapperTestActionHandler)
     {
         _currentAttempt = 0;
         var connected = false;

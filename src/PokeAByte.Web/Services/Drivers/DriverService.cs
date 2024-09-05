@@ -66,7 +66,7 @@ public class DriverService
         _logger.LogError($"Current Connected Driver: {result}");
         _driverConnectionTestTimer.Start();*/
     }
-    public async Task<string> TestDrivers(Action<int> callback)
+    public async Task<string> TestDrivers(Action<int>? callback)
     {
         _currentAttempt = 0;
         //set the list of drivers
