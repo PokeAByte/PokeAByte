@@ -17,7 +17,7 @@ namespace PokeAByte.Domain.Interfaces
 
         Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks);
 
-        Task WriteBytes(uint startingMemoryAddress, byte[] values);
+        Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
     }
 
     public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }

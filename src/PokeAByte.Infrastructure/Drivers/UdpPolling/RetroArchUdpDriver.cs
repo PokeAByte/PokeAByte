@@ -110,7 +110,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <param name="memoryAddress"> The address as which to start writing. </param>
     /// <param name="values"> The bytes to write to memory. </param>
     /// <returns> An awaitable task. </returns>
-    public async Task WriteBytes(uint memoryAddress, byte[] values)
+    public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
         _ = await _udpClientWrapper.SendCommandAsync(

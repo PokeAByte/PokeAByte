@@ -101,7 +101,7 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             ));
         }
 
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values)
+        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {           
             var platform = SharedPlatformConstants
                 .Information

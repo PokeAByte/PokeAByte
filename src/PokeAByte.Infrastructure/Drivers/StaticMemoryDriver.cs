@@ -59,7 +59,7 @@ namespace PokeAByte.Infrastructure.Drivers
 
             return Task.FromResult(MemoryFragmentLayout);
         }
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values)
+        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)
             {
