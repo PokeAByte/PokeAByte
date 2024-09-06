@@ -1,11 +1,17 @@
 using Microsoft.AspNetCore.SignalR;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
 
 namespace PokeAByte.Web.ClientNotifiers
 {
-    public class WebSocketClientNotifier(ILogger<WebSocketClientNotifier> logger, IHubContext<UpdateHub> hubContext) : IClientNotifier
+    public class WebSocketClientNotifier(
+        AppSettings _appSettings,
+        ILogger<WebSocketClientNotifier> logger, 
+        IHubContext<UpdateHub> hubContext) : IClientNotifier
     {
         private readonly ILogger<WebSocketClientNotifier> _logger = logger;
         private readonly IHubContext<UpdateHub> _hubContext = hubContext;
@@ -14,7 +20,20 @@ namespace PokeAByte.Web.ClientNotifiers
             _hubContext.Clients.All.SendAsync("InstanceReset");
 
         public Task SendMapperLoaded(IPokeAByteMapper mapper) =>
-            _hubContext.Clients.All.SendAsync("MapperLoaded");
+            _hubContext.Clients.All.SendAsync(
+                "MapperLoaded", 
+                new MapperModel {
+                    Meta = new MapperMetaModel
+                    {
+                        Id = mapper.Metadata.Id,
+                        GameName = mapper.Metadata.GameName,
+                        GamePlatform = mapper.Metadata.GamePlatform,
+                        MapperReleaseVersion = _appSettings.MAPPER_VERSION
+                    },
+                    Properties = mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
+                    Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()
+                }
+            );
 
         public Task SendError(IProblemDetails problemDetails) =>
             _hubContext.Clients.All.SendAsync("Error", problemDetails);
