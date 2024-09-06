@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
 using PokeAByte.Application;
-using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
 
@@ -20,8 +19,8 @@ namespace PokeAByte.Web.Hubs
                 "Hello", 
                 _instance.Mapper == null 
                     ? null
-                    : new Controllers.MapperModel {
-                        Meta = new Controllers.MapperMetaModel
+                    : new MapperModel {
+                        Meta = new MapperMetaModel
                         {
                             Id = _instance.Mapper.Metadata.Id,
                             GameName = _instance.Mapper.Metadata.GameName,

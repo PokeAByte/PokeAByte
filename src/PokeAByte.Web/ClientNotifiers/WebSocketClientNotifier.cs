@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
 
