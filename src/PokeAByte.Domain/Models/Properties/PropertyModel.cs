@@ -34,6 +34,7 @@ public class PropertyModel
     public bool IsReadOnly { get; set; }
     public required IPokeAByteProperty BaseProperty { get; set; }
 }
+
 public static class PropertyModelExtensions
 {
     public static void UpdateValues(this PropertyModel? current, PropertyModel? updated)
@@ -55,15 +56,15 @@ public static class PropertyModelExtensions
     }
     public static void UpdatePropertyModel(this PropertyModel original, IPokeAByteProperty updated)
     {
-        if(updated.Path != original.Path)
+        if (updated.Path != original.Path)
             return;
         if (updated.Value != original.Value)
         {
             original.Value = updated.Value;
         }
 
-        if (updated.Bytes != null && 
-            (original.Bytes is null || 
+        if (updated.Bytes != null &&
+            (original.Bytes is null ||
              !updated.Bytes
                  .ToIntegerArray()
                  .SequenceEqual(original.Bytes)))
