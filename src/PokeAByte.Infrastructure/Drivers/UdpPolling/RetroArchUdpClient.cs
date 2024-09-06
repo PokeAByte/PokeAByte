@@ -115,11 +115,17 @@ public class RetroArchUdpClient : IDisposable
             throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
         }
         await semaphoreSlim.WaitAsync();
-        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
-        _dataReceivedEvent.WaitOne(_timeout);
-        _dataReceivedEvent.Reset();
-        byte[]? response = _receivedData?.Buffer;
-        _receivedData = null;
+        byte[]? response = null;
+        int retries = 4;
+        while (retries > 0 && response == null)
+        {
+            _dataReceivedEvent.Reset();
+            _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
+            _dataReceivedEvent.WaitOne(_timeout / 4);
+            response = _receivedData?.Buffer;
+            _receivedData = null;
+            retries--;
+        }
         semaphoreSlim.Release();
         return response;
     }
