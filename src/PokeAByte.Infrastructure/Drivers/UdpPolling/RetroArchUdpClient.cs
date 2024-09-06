@@ -87,11 +87,14 @@ public class RetroArchUdpClient : IDisposable
         {
             return false;
         }
-        try {
+        try
+        {
             this._receivedData = await _client.ReceiveAsync();
             _dataReceivedEvent.Set();
             return true;
-        } catch {
+        }
+        catch
+        {
             return false;
         }
     }

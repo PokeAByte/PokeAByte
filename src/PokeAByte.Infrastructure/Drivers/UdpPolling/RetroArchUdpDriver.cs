@@ -6,16 +6,16 @@ using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
-public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
+public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
     private CancellationTokenSource _connectionCts = new();
-    public string ProperName { get; } = "NewRetroArch";
+    public string ProperName { get; } = "RetroArch";
     public int DelayMsBetweenReads { get; }
-    private ILogger<RetroArchUdpPollingDriver> Logger { get; }
+    private ILogger<RetroArchUdpDriver> Logger { get; }
     private readonly AppSettings _appSettings;
     private RetroArchUdpClient _udpClientWrapper;
 
-    public NewRetroArchUdpDriver(ILogger<RetroArchUdpPollingDriver> logger, AppSettings appSettings)
+    public RetroArchUdpDriver(ILogger<RetroArchUdpDriver> logger, AppSettings appSettings)
     {
         Logger = logger;
         DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
@@ -38,7 +38,8 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
         _udpClientWrapper.Connect();
         while (!cancellationToken.IsCancellationRequested)
         {
-            if (!await _udpClientWrapper.ReceiveAsync()) {
+            if (!await _udpClientWrapper.ReceiveAsync())
+            {
                 _udpClientWrapper.Dispose();
             }
         }
@@ -93,7 +94,7 @@ public class NewRetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDrive
     {
         try
         {
-            _ = await ReadMemoryAddress(0,1);
+            _ = await ReadMemoryAddress(0, 1);
             return true;
         }
         catch (Exception e)
