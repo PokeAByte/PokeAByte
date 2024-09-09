@@ -17,7 +17,6 @@ public class RetroArchUdpClient : IDisposable
     private readonly int _timeout;
     private readonly IPAddress _ipAddress;
     private readonly int _port;
-    private static AutoResetEvent _dataReceivedEvent = new AutoResetEvent(false);
 
     [MemberNotNullWhen(true, nameof(_client))]
     public bool IsClientConnected =>
@@ -90,7 +89,6 @@ public class RetroArchUdpClient : IDisposable
         try
         {
             this._receivedData = await _client.ReceiveAsync();
-            _dataReceivedEvent.Set();
             return true;
         }
         catch
@@ -119,9 +117,8 @@ public class RetroArchUdpClient : IDisposable
         int retries = 4;
         while (retries > 0 && response == null)
         {
-            _dataReceivedEvent.Reset();
             _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
-            _dataReceivedEvent.WaitOne(_timeout / 4);
+            SpinWait.SpinUntil(() => _receivedData != null, TimeSpan.FromMilliseconds(_timeout / 4));
             response = _receivedData?.Buffer;
             _receivedData = null;
             retries--;
