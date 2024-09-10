@@ -4,34 +4,24 @@ public static class ByteExtensions
 {
     public static byte[] ReverseBytesIfLE(this byte[] bytes, EndianTypes endianType)
     {
-        if (bytes.Length == 1) { return bytes; }
-
-        if (endianType == EndianTypes.LittleEndian)
-        {
-            var workingBytes = (byte[])bytes.Clone();
-
-            Array.Reverse(workingBytes);
-
-            return workingBytes;
+        if (bytes.Length == 1 || endianType != EndianTypes.LittleEndian) { 
+            return bytes; 
         }
 
-        return bytes;
+        var workingBytes = (byte[])bytes.Clone();
+        Array.Reverse(workingBytes);
+        return workingBytes;
     }
 
     public static byte[] ReverseBytesIfBE(this byte[] bytes, EndianTypes endianType)
     {
-        if (bytes.Length == 1) { return bytes; }
-
-        if (endianType == EndianTypes.BigEndian)
-        {
-            var workingBytes = (byte[])bytes.Clone();
-
-            Array.Reverse(workingBytes);
-
-            return workingBytes;
+        if (bytes.Length == 1 || endianType != EndianTypes.BigEndian) { 
+            return bytes; 
         }
 
-        return bytes;
+        var workingBytes = (byte[])bytes.Clone();
+        Array.Reverse(workingBytes);
+        return workingBytes;
     }
 
     private static byte[] PadBytes(byte[] data, int size)

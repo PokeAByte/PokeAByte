@@ -141,25 +141,21 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
 
             byte[]? previousBytes = Bytes?.ToArray();
-            byte[]? bytes = null;
+            byte[] bytes;
             object? value;
 
-            if (bytes == null)
-            {
-                if (address == null) { throw new Exception("address is NULL."); }
-                if (Length == null) { throw new Exception("Length is NULL."); }
+            if (address == null) { throw new Exception("address is NULL."); }
+            if (Length == null) { throw new Exception("Length is NULL."); }
 
-                try
-                {
-                    bytes = memoryManager.Get(MemoryContainer, address ?? 0x00, Length ?? 0).Data;
-                }
-                catch (Exception e)
-                {
-                    Address = null;
-                    bytes = [0];
-                }
+            try
+            {
+                bytes = memoryManager.Get(MemoryContainer, address ?? 0x00, Length ?? 0).Data;
             }
-            
+            catch (Exception)
+            {
+                Address = null;
+                bytes = [0];
+            }
             
             Address = address;
             
