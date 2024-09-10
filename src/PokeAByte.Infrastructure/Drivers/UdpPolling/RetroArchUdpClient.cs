@@ -118,7 +118,7 @@ public class RetroArchUdpClient : IDisposable
         while (retries > 0 && response == null)
         {
             _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
-            SpinWait.SpinUntil(() => _receivedData != null, TimeSpan.FromMilliseconds(_timeout / 4));
+            SpinWait.SpinUntil(() => _receivedData != null, TimeSpan.FromMilliseconds(_timeout));
             response = _receivedData?.Buffer;
             _receivedData = null;
             retries--;
