@@ -1,5 +1,4 @@
 ﻿using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
@@ -23,9 +22,19 @@ public class UnsignedIntegerProperty : PokeAByteProperty, IPokeAByteProperty
     {
         if (Instance == null) throw new Exception("Instance is NULL.");
         if (Instance.PlatformOptions == null) throw new Exception("Instance.PlatformOptions is NULL.");
-
-        byte[] value = new byte[8];
-        Array.Copy(data.ReverseBytesIfLE(Instance.PlatformOptions.EndianType), value, data.Length);
-        return BitConverter.ToUInt32(value, 0);
+        // Shortcut: With one byte, we can just cast:
+        if (data.Length == 1)
+        {
+            return (uint)data[0];
+        }
+        // With less than 4 bytes, we have to pad the value before using the bitconverter:
+        if (data.Length >= 4) 
+        {
+            return BitConverter.ToUInt32(data.ReverseBytesIfLE(Instance.PlatformOptions.EndianType), 0);
+        }
+        // With less than 4 bytes, we have to pad the value before using the bitconverter:
+        Span<byte> value = stackalloc byte[4];
+        data.ReverseBytesIfLE(Instance.PlatformOptions.EndianType).AsSpan().CopyTo(value);
+        return BitConverter.ToUInt32(value);
     }
 }
