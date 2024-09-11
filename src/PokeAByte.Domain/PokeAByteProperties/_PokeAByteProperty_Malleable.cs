@@ -63,7 +63,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
                 try
                 {
-                    IsMemoryAddressSolved = AddressMath.TrySolve(value, [], out var solvedAddress);
+                    IsMemoryAddressSolved = AddressMath.TrySolve(value, Instance.Variables, out var solvedAddress);
                     
                     if (IsMemoryAddressSolved == false)
                     {
