@@ -138,7 +138,6 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 return;
             }
 
-            byte[]? previousBytes = Bytes?.ToArray();
             byte[] bytes;
             object? value;
 
@@ -157,7 +156,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             
             Address = address;
             
-            if (previousBytes != null && bytes != null && previousBytes.SequenceEqual(bytes))
+            if (Bytes != null && Bytes.AsSpan().SequenceEqual(bytes))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
                 // updated since last poll.
