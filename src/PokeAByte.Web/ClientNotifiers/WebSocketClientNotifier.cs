@@ -53,7 +53,7 @@ namespace PokeAByte.Web.ClientNotifiers
                 bits = x.Bits,
                 description = x.Description,
                 value = x.Value,
-                bytes = x.Bytes?.Select(x => (int)x).ToArray(),
+                bytes = x.Bytes?.ToIntegerArray(),
 
                 isFrozen = x.IsFrozen,
                 isReadOnly = x.IsReadOnly,
