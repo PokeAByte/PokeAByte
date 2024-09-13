@@ -146,7 +146,17 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             try
             {
-                bytes = memoryManager.Get(MemoryContainer, address ?? 0x00, Length ?? 0).Data;
+                var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length ?? 0);
+                if (readonlyBytes.SequenceEqual(Bytes)) {
+                    // Fast path - if the bytes match, then we can assume the property has not been
+                    // updated since last poll.
+
+                    // Do nothing, we don't need to calculate the new value as
+                    // the bytes are the same.
+                    Address = address;
+                    return;
+                }
+                bytes = readonlyBytes.ToArray();
             }
             catch (Exception)
             {
@@ -155,17 +165,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
             
             Address = address;
-            
-            if (Bytes != null && Bytes.AsSpan().SequenceEqual(bytes))
-            {
-                // Fast path - if the bytes match, then we can assume the property has not been
-                // updated since last poll.
-
-                // Do nothing, we don't need to calculate the new value as
-                // the bytes are the same.
-                return;
-            }
-            
+                
             Bytes = bytes?.ToArray();
 
             if (bytes == null)
