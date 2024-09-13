@@ -107,9 +107,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             MemoryAddress? address = Address;
 
-            var reloadAddressKvp = Instance.Variables
-                .FirstOrDefault(x => x.Key == "reload_addresses");
-            if (reloadAddressKvp.Value is true)
+            if (Instance.Variables.TryGetValue("reload_addresses", out var reloadAddress) && reloadAddress is true)
             {
                 AddressString = _originalAddressString;
             }

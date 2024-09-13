@@ -1,5 +1,4 @@
 ﻿using MudBlazor;
-using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 using PokeAByte.Web.Services.Notifiers;
@@ -129,10 +128,7 @@ public class PropertyService(MapperClientService clientService,
             return;
         foreach (var property in clientProperties)
         {
-            var found = propertyUpdateService
-                .EventHandlers
-                .FirstOrDefault(x => x.Key == property.Path);
-            if (string.IsNullOrWhiteSpace(found.Key))
+            if (!propertyUpdateService.EventHandlers.ContainsKey(property.Path))
             {
                 propertyUpdateService.EventHandlers.TryAdd(property.Path, handlePropertyUpdate);
             }
@@ -146,11 +142,10 @@ public class PropertyService(MapperClientService clientService,
             return;
         foreach (var property in clientProperties)
         {
-            var found = propertyUpdateService
-                .EventHandlers
-                .FirstOrDefault(x => x.Key == property.Path);
-            if (!string.IsNullOrWhiteSpace(found.Key))
-                propertyUpdateService.EventHandlers.Remove(found.Key);
+            if (propertyUpdateService.EventHandlers.ContainsKey(property.Path)) 
+            {
+                propertyUpdateService.EventHandlers.Remove(property.Path);
+            }
         }
     }
 

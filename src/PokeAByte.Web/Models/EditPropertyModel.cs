@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using PokeAByte.Domain;
+﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Properties;
 
@@ -10,8 +9,8 @@ public class EditPropertyModel : PropertyModel
     public bool IsEditing { get; set; } = false;
     public Dictionary<ulong, string>? GlossaryReference { get; set; }
     private string _valueString = "";
-    public string ValueString 
-    { 
+    public string ValueString
+    {
         get => _valueString;
         set
         {
@@ -46,7 +45,7 @@ public class EditPropertyModel : PropertyModel
                     _valueString = value; //ValueToString(value);
                 }
             }
-            else if(!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
+            else if (!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
                 var foundReference = GlossaryReference.Where(g =>
                         g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
@@ -120,7 +119,7 @@ public class EditPropertyModel : PropertyModel
             }
             if (string.IsNullOrEmpty(value))
                 return false;
-             //Try to get bytes
+            //Try to get bytes
             var bytes = BaseProperty.BytesFromValue(value);
             //try to get calculated value
             var val = BaseProperty.CalculateObjectValue(bytes);
@@ -159,9 +158,9 @@ public class EditPropertyModel : PropertyModel
                 return;
             }
             var foundReference = GlossaryReference
-                .Where(x => 
+                .Where(x =>
                     !string.IsNullOrWhiteSpace(x.Value) &&
-                    value.key == x.Key && 
+                    value.key == x.Key &&
                     value.value == x.Value)
                 .Select(g => new IntegerValueReference(g.Key, g.Value))
                 .FirstOrDefault();
@@ -197,8 +196,8 @@ public class EditPropertyModel : PropertyModel
     public string AddressString =>
         Address?.ToString("X") ?? "";
     public static EditPropertyModel FromPropertyModel(PropertyModel model)
-    {            
-        
+    {
+
         return new EditPropertyModel
         {
             ValueString = model.ValueAsString(),
@@ -255,14 +254,10 @@ public class EditPropertyModel : PropertyModel
             if (Type is not "string" && !string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
                 var key = BitConverter.ToUInt64(arr, 0);
-                var foundRef = GlossaryReference?
-                    .Where(x => x.Key == key)
-                    .Select(y => y.Value)
-                    .FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(foundRef))
+                if (GlossaryReference.TryGetValue(key, out var foundRef) && !string.IsNullOrWhiteSpace(foundRef))
                 {
                     ValueString = foundRef;
-                }                
+                }
                 return;
             }
             ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
