@@ -20,8 +20,10 @@ namespace PokeAByte.Application
 
         public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
         {
-            if (area == "default" || area == null) { return DefaultNamespace.get_bytes(memoryAddress, length); }
-            else return Namespaces[area].get_bytes(memoryAddress, length);
+            if (area == "default" || area == null) { 
+                return DefaultNamespace.get_bytes(memoryAddress, length); 
+            }
+            return Namespaces[area].get_bytes(memoryAddress, length);
         }
 
         public void Fill(string area, MemoryAddress memoryAddress, byte[] data)
@@ -32,6 +34,14 @@ namespace PokeAByte.Application
             }
 
             Namespaces[area].Fill(memoryAddress, data);
+        }
+
+        public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
+        {
+            if (area == "default" || area == null) { 
+                return DefaultNamespace.GetReadonlyBytes(memoryAddress, length); 
+            }
+            return Namespaces[area].GetReadonlyBytes(memoryAddress, length);
         }
     }
 
@@ -72,23 +82,28 @@ namespace PokeAByte.Application
 
         public IByteArray get_bytes(MemoryAddress memoryAddress, int length)
         {
+            return new ByteArray(memoryAddress, GetReadonlyBytes(memoryAddress, length).ToArray());
+        }
+
+        public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length)
+        {
             foreach (var fragment in Fragments)
             {
                 if (fragment.Contains(memoryAddress))
                 {
-                    var offset = memoryAddress - fragment.StartingAddress;
+                    int offset = (int)(memoryAddress - fragment.StartingAddress);
 
                     if (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length)
                     {
                         throw new Exception($"Cannot retrieve bytes starting at {memoryAddress.ToHexdecimalString()} (starting address at {fragment.StartingAddress.ToHexdecimalString()} because getting {length} bytes would overflow the fragment array.");
                     }
-
-                    return fragment.Slice((int)offset, length);
+                    return fragment.Data.AsSpan()[offset..(offset + length)];
                 }
             }
 
             throw new Exception($"Memory address {memoryAddress.ToHexdecimalString()} is not contained in any fragment in the namespace.");
         }
+
         public byte get_byte(MemoryAddress memoryAddress) => get_bytes(memoryAddress, 1).get_byte(0);
     }
 
@@ -102,6 +117,7 @@ namespace PokeAByte.Application
 
         public MemoryAddress StartingAddress { get; }
         public byte[] Data { get; }
+
 
         public void Fill(int offset, byte[] data)
         {
