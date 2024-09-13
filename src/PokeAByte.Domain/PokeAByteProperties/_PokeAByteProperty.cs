@@ -249,29 +249,36 @@ namespace PokeAByte.Domain.PokeAByteProperties
         {
             if (string.IsNullOrEmpty(Bits)) return bytes;
             int[] indexes;
-
-            if (Bits.Contains('-'))
+            ReadOnlySpan<char> bitsSpan = Bits.AsSpan();
+            if (bitsSpan.Contains('-'))
             {
-                var parts = Bits.Split('-');
+                var dashIndex = bitsSpan.IndexOf('-');
+                var part1 = bitsSpan.Slice(0, dashIndex);
+                var part2 = bitsSpan.Slice(dashIndex + 1);
 
-                if (int.TryParse(parts[0], out int start) && int.TryParse(parts[1], out int end))
+                if (int.TryParse(part1, out int start) && int.TryParse(part2, out int end))
                 {
                     indexes = Enumerable.Range(start, end - start + 1).ToArray();
                 }
                 else
                 {
-                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}.");
+                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}).");
                 }
             }
-            else if (Bits.Contains(','))
+            else if (bitsSpan.Contains(','))
             {
-                indexes = Bits.Split(',')
-                    .Select(x => int.TryParse(x, out int num) ? num : throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}."))
-                    .ToArray();
+                indexes = new int[bitsSpan.Count(',') + 1];
+                int x = 0;
+                foreach (var range in bitsSpan.Split(','))
+                {
+                    indexes[x++] = int.TryParse(bitsSpan[range], out int number)
+                        ? number
+                        : throw new ArgumentException($"Invalid format for attribute Bits ({Bits}).");
+                }
             }
             else
             {
-                if (int.TryParse(Bits, out int index))
+                if (int.TryParse(bitsSpan, out int index))
                 {
                     indexes = [index];
                 }
