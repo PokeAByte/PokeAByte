@@ -15,7 +15,7 @@ namespace PokeAByte.Domain.Interfaces
 
     public interface IMemoryNamespace
     {
-        ICollection<IByteArray> Fragments { get; }
+        IList<IByteArray> Fragments { get; }
 
         public void Fill(MemoryAddress memoryAddress, byte[] data);
         bool Contains(MemoryAddress memoryAddress);

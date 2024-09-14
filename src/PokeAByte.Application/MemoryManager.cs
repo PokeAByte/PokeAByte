@@ -47,14 +47,15 @@ namespace PokeAByte.Application
 
     public class MemoryNamespace : IMemoryNamespace
     {
-        public ICollection<IByteArray> Fragments { get; } = new List<IByteArray>();
+        public IList<IByteArray> Fragments { get; } = new List<IByteArray>();
 
         public void Fill(MemoryAddress memoryAddress, byte[] data)
         {
             int filledFragments = 0;
 
-            foreach (var fragment in Fragments)
+            for (int i = 0; i < Fragments.Count; i++)
             {
+                IByteArray? fragment = Fragments[i];
                 if (fragment.Contains(memoryAddress))
                 {
                     try
@@ -87,8 +88,9 @@ namespace PokeAByte.Application
 
         public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length)
         {
-            foreach (var fragment in Fragments)
+            for (int i = 0; i < Fragments.Count; i++)
             {
+                IByteArray? fragment = Fragments[i];
                 if (fragment.Contains(memoryAddress))
                 {
                     int offset = (int)(memoryAddress - fragment.StartingAddress);
