@@ -89,16 +89,20 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             }
         }
 
-        public Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
+        public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> _)
         {
             var platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");
 
             var data = GetFromMemoryMappedFile("POKEABYTE_BIZHAWK_DATA.bin", DATA_Length);
 
-            return Task.FromResult(platform.MemoryLayout.ToDictionary(
-                x => x.PhysicalStartingAddress,
-                x => data[x.CustomPacketTransmitPosition..(x.CustomPacketTransmitPosition + x.Length)]
-            ));
+            return Task.FromResult(
+                platform.MemoryLayout.Select(
+                    x => new BlockData(
+                        x.PhysicalEndingAddress, 
+                        data[x.CustomPacketTransmitPosition..(x.CustomPacketTransmitPosition + x.Length)]
+                    )
+                ).ToArray()
+            );
         }
 
         public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)

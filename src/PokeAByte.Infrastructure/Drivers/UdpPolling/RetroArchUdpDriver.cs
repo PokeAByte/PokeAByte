@@ -128,13 +128,14 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// Key is the start of each address block. <br/>
     /// Value is the byte array contained in that block.
     /// </returns>
-    public async Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
+    public async Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
     {
-        var result = new Dictionary<uint, byte[]>();
-        foreach (var block in blocks)
+        var result = new BlockData[blocks.Count];
+        for (int i = 0; i < blocks.Count; i++)
         {
+            MemoryAddressBlock? block = blocks[i];
             var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
-            result[block.StartingAddress] = data;
+            result[i] = new BlockData(block.StartingAddress, data);
         }
         return result;
     }

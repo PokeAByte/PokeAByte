@@ -17,7 +17,7 @@ namespace PokeAByte.Application
         private ScriptConsole ScriptConsoleAdapter { get; }
         private CancellationTokenSource? ReadLoopToken { get; set; }
         private IMapperFilesystemProvider MapperFilesystemProvider { get; }
-        private IEnumerable<MemoryAddressBlock>? BlocksToRead { get; set; }
+        private IList<MemoryAddressBlock>? BlocksToRead { get; set; }
         public List<IClientNotifier> ClientNotifiers { get; }
         public bool Initalized { get; private set; }
         public IPokeAByteDriver? Driver { get; private set; }
@@ -244,7 +244,7 @@ namespace PokeAByte.Application
 
             foreach (var result in driverResult)
             {
-                MemoryContainerManager.DefaultNamespace.Fill(result.Key, result.Value);
+                MemoryContainerManager.DefaultNamespace.Fill(result.Start, result.Data);
             }
 
             ReadDriverStopwatch.Stop();
