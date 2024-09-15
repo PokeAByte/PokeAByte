@@ -21,6 +21,8 @@ public class MapperClientService
     public static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
     public string LoadedMapperName { get; private set; }
+    private DateTime _lastUpdate;
+    private HashSet<string> _pendingUpdates =  new();
 
     public MapperClientService(IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
@@ -167,13 +169,26 @@ public class MapperClientService
     }
     private void HandlePropertyChangedEvent(object sender, PropertyChangedEventArgs args)
     {
-        if(!Client.IsMapperLoaded)
+        if(!Client.IsMapperLoaded) 
+        {
             return;
+        }
         foreach (var prop in args.ChangedProperties)
         {
             Client.UpdateProperty(prop);
-            _propertyUpdateService.NotifyChanges(prop.Path);
+            _pendingUpdates.Add(prop.Path);
         }
+
+        if (_lastUpdate <= DateTime.UtcNow - TimeSpan.FromMilliseconds(100)) {
+
+            foreach (var path in _pendingUpdates)
+            {
+                _propertyUpdateService.NotifyChanges(path);
+            }
+            _lastUpdate = DateTime.UtcNow;
+            _pendingUpdates.Clear();
+        }
+
     }
     public void UpdateEditPropertyModel(EditPropertyModel model)
     {        
