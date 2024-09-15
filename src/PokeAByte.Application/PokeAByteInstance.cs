@@ -283,12 +283,15 @@ namespace PokeAByte.Application
 
             // Processor
             ProcessorStopwatch.Restart();
-
+            var propertiesChanged = new List<IPokeAByteProperty>();
             foreach (var property in Mapper.Properties.Values)
             {
                 try
                 {
                     property.ProcessLoop(MemoryContainerManager);
+                    if (property.FieldsChanged.Any()) {
+                        propertiesChanged.Add(property);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -318,8 +321,7 @@ namespace PokeAByte.Application
             // Fields Changed
             FieldsChangedStopwatch.Restart();
 
-            var propertiesChanged = Mapper.Properties.Values.Where(x => x.FieldsChanged.Any()).ToArray();
-            if (propertiesChanged.Length > 0)
+            if (propertiesChanged.Count > 0)
             {
                 try
                 {
@@ -330,8 +332,8 @@ namespace PokeAByte.Application
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Could not send {propertiesChanged.Length} property change events.");
-                    throw new PropertyProcessException($"Could not send {propertiesChanged.Length} property change events.", ex);
+                    _logger.LogError(ex, $"Could not send {propertiesChanged.Count} property change events.");
+                    throw new PropertyProcessException($"Could not send {propertiesChanged.Count} property change events.", ex);
                 }
             }
 
