@@ -68,7 +68,7 @@ namespace PokeAByte.Application
             ReadLoopToken = null;
 
             Mapper?.Dispose();
-            
+
             Driver = null;
             Mapper = null;
             PlatformOptions = null;
@@ -77,11 +77,11 @@ namespace PokeAByte.Application
             JavascriptModuleInstance = null;
             HasPreprocessor = false;
             HasPostprocessor = false;
-            
+
             MemoryContainerManager = new MemoryManager();
             State = [];
             Variables = [];
-            
+
             await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
         }
 
@@ -284,12 +284,15 @@ namespace PokeAByte.Application
             // Processor
             ProcessorStopwatch.Restart();
             var propertiesChanged = new List<IPokeAByteProperty>();
+            object? reloadAddress;
+            Variables.TryGetValue("reload_addresses", out reloadAddress);
             foreach (var property in Mapper.Properties.Values)
             {
                 try
                 {
-                    property.ProcessLoop(MemoryContainerManager);
-                    if (property.FieldsChanged.Any()) {
+                    property.ProcessLoop(MemoryContainerManager, reloadAddress is true);
+                    if (property.FieldsChanged.Count > 0)
+                    {
                         propertiesChanged.Add(property);
                     }
                 }

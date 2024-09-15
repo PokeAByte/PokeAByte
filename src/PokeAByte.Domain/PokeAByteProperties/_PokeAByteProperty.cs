@@ -76,7 +76,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             => FromValue(FullValue?.ToString() ?? "");
         public HashSet<string> FieldsChanged { get; } = [];
 
-        public void ProcessLoop(IMemoryManager memoryManager)
+        public void ProcessLoop(IMemoryManager memoryManager, bool reloadAddresses)
         {
             if (Instance == null) { throw new Exception("Instance is NULL."); }
             if (Instance.Mapper == null) { throw new Exception("Instance.Mapper is NULL."); }
@@ -107,7 +107,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             MemoryAddress? address = Address;
 
-            if (Instance.Variables.TryGetValue("reload_addresses", out var reloadAddress) && reloadAddress is true)
+            if (reloadAddresses)
             {
                 AddressString = _originalAddressString;
             }
