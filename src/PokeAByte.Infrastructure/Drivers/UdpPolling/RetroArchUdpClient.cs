@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,10 +11,11 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 /// </summary>
 public class RetroArchUdpClient : IDisposable
 {
-    private SemaphoreSlim semaphoreSlim = new(1, 1);
+    private static byte[] _readResponseStart = Encoding.ASCII.GetBytes("READ_CORE_MEMORY");
     private UdpClient? _client;
     private bool _isDisposed = false;
     private bool _isConnected = false;
+    private Dictionary<string, byte[]> _responses = [];
     private readonly int _timeout;
     private readonly IPAddress _ipAddress;
     private readonly int _port;
@@ -80,6 +82,24 @@ public class RetroArchUdpClient : IDisposable
         _isConnected = true;
     }
 
+    private static byte[] ParseReadMemoryResponse(ReadOnlySpan<byte> input)
+    {
+        var byteCount = input.Count((byte)' ') + 1;
+        // Then we can skip over the remaining span 3 characters at a time, slicing out each character-pair for the
+        // byte.Parse().
+        int offset = 0;
+        byte[] value = new byte[byteCount];
+        for (int i = 0; i < value.Length - 1; i++)
+        {
+            // While we do technically get ASCII and byte.Parse(ROS<byte>) parses utf8, we can still use it because
+            // UTF8 is backwards compatible with ASCII:
+            value[i] = byte.Parse(input.Slice(offset, 2), NumberStyles.HexNumber);
+            offset += 3;
+        }
+        return value;
+    }
+
+
     public async Task<bool> ReceiveAsync()
     {
         if (!IsClientAlive())
@@ -88,13 +108,38 @@ public class RetroArchUdpClient : IDisposable
         }
         try
         {
-            this._receivedData = await _client.ReceiveAsync();
+            var response = await _client.ReceiveAsync();
+            Span<byte> bytes = response.Buffer;
+            if (bytes.StartsWith(_readResponseStart)) {
+                bytes = bytes.Slice(17);
+                int space = bytes.IndexOf((byte)' ');
+                string address = Encoding.ASCII.GetString(bytes[..space]);
+                var data = ParseReadMemoryResponse(bytes.Slice(space+1));
+                _responses[string.Concat(address, "-", data.Length.ToString())] = data;
+            }
             return true;
         }
         catch
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Send a command to the emulator without waiting for a response.
+    /// </summary>
+    /// <param name="command"> The emulator command. </param>
+    /// <param name="argument"> Emulator command arguments. </param>
+    /// <exception cref="Exception">
+    /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
+    /// </exception>
+    public async Task SendAsync(string command, string argument)
+    {
+        if (!IsClientAlive())
+        {
+            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
+        }
+        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
     }
 
     /// <summary>
@@ -106,24 +151,21 @@ public class RetroArchUdpClient : IDisposable
     /// <exception cref="Exception">
     /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
     /// </exception>
-    public async Task<byte[]?> SendCommandAsync(string command, string argument)
+    public async Task<byte[]?> SendCommandAsync(string command, string argument1, string argument2)
     {
         if (!IsClientAlive())
         {
-            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
+            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument1} {argument2})");
         }
-        await semaphoreSlim.WaitAsync();
         byte[]? response = null;
-        int retries = 4;
-        while (retries > 0 && response == null)
-        {
-            _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
-            SpinWait.SpinUntil(() => _receivedData != null, TimeSpan.FromMilliseconds(_timeout));
-            response = _receivedData?.Buffer;
-            _receivedData = null;
-            retries--;
-        }
-        semaphoreSlim.Release();
+        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument1} {argument2}"));
+        string key = string.Concat(argument1, "-", argument2);
+        SpinWait.SpinUntil(() =>
+            { 
+                return _responses.TryGetValue(key, out response);
+            }, 
+            TimeSpan.FromMilliseconds(_timeout)
+        );
         return response;
     }
 
