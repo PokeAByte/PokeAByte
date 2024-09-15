@@ -134,8 +134,7 @@ namespace PokeAByte.Application
             {
                 throw new Exception($"The destination array is not long enough. The destination array has a length of {Data.Length} where the source array has a length of {data.Length}.");
             }
-
-            Array.Copy(data, 0, Data, offset, data.Length);
+            data.AsSpan().CopyTo(Data);
         }
 
         public bool Contains(MemoryAddress memoryAddress)
