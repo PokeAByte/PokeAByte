@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using NCalc;
 using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties
@@ -6,6 +7,9 @@ namespace PokeAByte.Domain.PokeAByteProperties
     public abstract partial class PokeAByteProperty : IPokeAByteProperty
     {
         private readonly string _originalAddressString;
+        private Expression? _addressExpression;
+        private bool _hasAddressParameter;
+        
         public PokeAByteProperty(IPokeAByteInstance instance, PropertyAttributes attributes)
         {
             Instance = instance;
@@ -107,34 +111,29 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             MemoryAddress? address = Address;
 
-            if (reloadAddresses)
+            if (reloadAddresses && _hasAddressParameter)
             {
-                AddressString = _originalAddressString;
+                IsMemoryAddressSolved = false;
             }
-            if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
+            if (_addressExpression != null && IsMemoryAddressSolved == false)
             {
                 try
                 {
-                    if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
+                    if (AddressMath.TrySolve(_addressExpression, Instance.Variables, out var solvedAddress))
                     {
                         address = solvedAddress;
-                    }
-                    else
-                    {
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-
             }
 
             if (address == null)
             {                        
                 // There is nothing to do for this property, as it does not have an address or bytes.
                 // Hopefully a postprocessor will pick it up and set it's value!
-
                 return;
             }
 
@@ -158,8 +157,9 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 }
                 bytes = readonlyBytes.ToArray();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 Address = null;
                 bytes = [0];
             }

@@ -4,16 +4,15 @@ namespace PokeAByte.Domain;
 
 public static class AddressMath
 {
-    public static bool TrySolve(string? addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
+    public static bool TrySolve(Expression? addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
     {
-        if (string.IsNullOrEmpty(addressExpression))
+        if (addressExpression == null)
         {
             address = 0x00;
             return false;
         }
         try
         {
-            var expression = new Expression(addressExpression);
             foreach (var variable in variables)
             {
                 if (variable.Value == null)
@@ -27,18 +26,17 @@ public static class AddressMath
                     return false;
                 }
 
-                expression.Parameters[variable.Key] = variable.Value;
+                addressExpression.Parameters[variable.Key] = variable.Value;
             }
-
-            var result = expression.Evaluate();
-            if (result is int castedResult)
+            var result = addressExpression.Evaluate();
+            if (result is uint castedResult)
             {
-                address = (uint)castedResult;
+                address = castedResult;
                 return true;
             }
             else
             {
-                if (uint.TryParse(result.ToString(), out address))
+                if (uint.TryParse(result?.ToString(), out address))
                 {
                     return true;
                 }
