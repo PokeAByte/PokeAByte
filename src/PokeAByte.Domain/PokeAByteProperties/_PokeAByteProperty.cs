@@ -139,13 +139,14 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             byte[] bytes;
             object? value;
+            ReadOnlySpan<byte> readonlyBytes;
 
             if (address == null) { throw new Exception("address is NULL."); }
             if (Length == null) { throw new Exception("Length is NULL."); }
 
             try
             {
-                var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length ?? 0);
+                readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length ?? 0);
                 if (readonlyBytes.SequenceEqual(Bytes)) {
                     // Fast path - if the bytes match, then we can assume the property has not been
                     // updated since last poll.
@@ -162,11 +163,18 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 Console.WriteLine(e);
                 Address = null;
                 bytes = [0];
+                readonlyBytes = bytes.AsSpan();
             }
             
             Address = address;
                 
-            Bytes = bytes?.ToArray();
+            if (_bytes?.Length == bytes.Length) {
+                readonlyBytes.CopyTo(_bytes);
+                FieldsChanged.Add("bytes");
+            } else 
+            {
+                Bytes = bytes.ToArray();
+            }
 
             if (bytes == null)
             {
