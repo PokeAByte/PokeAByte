@@ -61,7 +61,6 @@ public static class PropertyModelExtensions
         {
             original.Value = updated.Value;
         }
-
         if (updated.Bytes != null && 
             (original.Bytes is null || 
              !updated.Bytes

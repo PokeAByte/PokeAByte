@@ -20,13 +20,31 @@ public class EditPropertyModel : PropertyModel
                 _valueString = Value?.ToString() ?? "";
                 return;
             }
+            
             if (_valueString == value)
                 return;
+            
             if (string.IsNullOrEmpty(_valueString))
                 _valueString = value;
+            
             if (ValidateValue(value))
             {
-                _valueString = value; //ValueToString(value);
+                if (Type == "string")
+                {
+                    if (value.Length > Length)
+                    {
+                        var len = Length ?? value.Length;
+                        _valueString = value[..len];
+                    }
+                    else
+                    {
+                        _valueString = value;
+                    }
+                }
+                else
+                {
+                    _valueString = value; //ValueToString(value);
+                }
             }
             else if(!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
@@ -123,7 +141,7 @@ public class EditPropertyModel : PropertyModel
         return Type switch
         {
             "bool" or "bit" => bool.TryParse(value, out _),
-            "string" => Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length),
+            "string" => true/*Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length)*/,
             "int" or "nibble" => CanParseInt(value),
             "uint" => CanParseUInt(value)/*uint.TryParse(value, out _)*/,
             _ => false
