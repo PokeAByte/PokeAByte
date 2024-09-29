@@ -69,6 +69,7 @@ namespace PokeAByte.Application
 
             Mapper?.Dispose();
 
+            Driver?.Disconnect();
             Driver = null;
             Mapper = null;
             PlatformOptions = null;
@@ -94,7 +95,6 @@ namespace PokeAByte.Application
                 _logger.LogDebug("Creating PokeAByte mapper instance...");
 
                 Driver = driver;
-
                 await Driver.EstablishConnection();
 
                 // Load the mapper file.

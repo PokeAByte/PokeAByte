@@ -29,6 +29,8 @@ namespace PokeAByte.Infrastructure.Drivers
             return Task.CompletedTask;
         }
 
+        public Task Disconnect() => Task.CompletedTask;
+
         public Task<bool> TestConnection()
         {
             return Task.FromResult(_isConnected);

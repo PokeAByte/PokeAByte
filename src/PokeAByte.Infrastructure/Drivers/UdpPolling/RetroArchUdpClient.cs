@@ -116,7 +116,7 @@ public class RetroArchUdpClient : IDisposable
 	}
 
 
-	public async Task<bool> ReceiveAsync()
+	public async Task<bool> ReceiveAsync(CancellationToken cancellationToken)
 	{
 		if (!IsClientAlive())
 		{
@@ -124,7 +124,7 @@ public class RetroArchUdpClient : IDisposable
 		}
 		try
 		{
-			var response = await _client.ReceiveAsync();
+			var response = await _client.ReceiveAsync(cancellationToken);
 			Span<byte> bytes = response.Buffer;
 			if (bytes.StartsWith(_readResponseStart))
 			{

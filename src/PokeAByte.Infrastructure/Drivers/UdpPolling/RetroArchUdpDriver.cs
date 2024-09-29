@@ -8,45 +8,52 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
 public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
-    private CancellationTokenSource _connectionCts = new();
+    private CancellationTokenSource? _connectionCts;
     public string ProperName { get; } = "RetroArch";
     public int DelayMsBetweenReads { get; }
     private ILogger<RetroArchUdpDriver> Logger { get; }
     private readonly AppSettings _appSettings;
-    private RetroArchUdpClient _udpClientWrapper;
+    private RetroArchUdpClient? _udpClientWrapper;
 
     public RetroArchUdpDriver(ILogger<RetroArchUdpDriver> logger, AppSettings appSettings)
     {
         Logger = logger;
         DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
         _appSettings = appSettings;
+        
+    }
+
+    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
+
+    private Task ConnectAsync(CancellationToken cancellationToken)
+    {
         _udpClientWrapper = new RetroArchUdpClient(
             _appSettings.RETROARCH_LISTEN_IP_ADDRESS,
             _appSettings.RETROARCH_LISTEN_PORT,
             _appSettings.RETROARCH_READ_PACKET_TIMEOUT_MS
         );
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
-            await ConnectAsync(_connectionCts.Token);
-        });
-    }
-
-    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
-
-    private async Task ConnectAsync(CancellationToken cancellationToken)
-    {
-        _udpClientWrapper.Connect();
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            if (!await _udpClientWrapper.ReceiveAsync())
+            while (!cancellationToken.IsCancellationRequested)
             {
-                _udpClientWrapper.Dispose();
+                if (!await _udpClientWrapper.ReceiveAsync(cancellationToken))
+                {
+                    _udpClientWrapper.Dispose();
+                }
             }
-        }
+            _udpClientWrapper.Dispose();
+            _udpClientWrapper = null;
+        });
+        return Task.CompletedTask;
     }
 
     private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
     {
+        if (_udpClientWrapper == null) 
+        {
+            Logger.LogDebug("Can not read memory, UDP client is unitialized.");
+            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+        }
         var command = $"READ_CORE_MEMORY";
         byte[]? response = await _udpClientWrapper.SendCommandAsync(
             command, 
@@ -56,7 +63,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         if (response == null)
         {
             Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
-            throw new DriverTimeoutException(memoryAddress, "RetroArch", null);
+            throw new DriverTimeoutException(memoryAddress, ProperName, null);
         }
         return response;
     }
@@ -66,6 +73,16 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// </summary>
     /// <returns> A completed task. </returns>
     public Task EstablishConnection() => Task.CompletedTask;
+    
+
+    public async Task Disconnect() {
+        if (_connectionCts != null)
+        {
+            await _connectionCts.CancelAsync();
+            _connectionCts.Dispose();
+            _connectionCts = null;
+        }
+    }
 
     /// <summary>
     /// Tests the connect to retroarch by reading the very first byte of game memory.
@@ -75,6 +92,9 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// </returns>
     public async Task<bool> TestConnection()
     {
+        _connectionCts = new CancellationTokenSource();
+        await ConnectAsync(_connectionCts.Token);
+        
         try
         {
             _ = await ReadMemoryAddress(0, 1);
@@ -95,6 +115,9 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <returns> An awaitable task. </returns>
     public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
+        if (_udpClientWrapper == null) {
+            return;
+        }
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
         await _udpClientWrapper.SendAsync(
             "WRITE_CORE_MEMORY",

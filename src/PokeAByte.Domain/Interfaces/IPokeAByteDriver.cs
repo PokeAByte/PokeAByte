@@ -15,6 +15,7 @@ namespace PokeAByte.Domain.Interfaces
         int DelayMsBetweenReads { get; }
 
         Task EstablishConnection();
+        Task Disconnect();
         Task<bool> TestConnection();
 
         Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks);

@@ -72,6 +72,8 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             return Task.CompletedTask;
         }
 
+        public Task Disconnect() => Task.CompletedTask;
+
         public Task<bool> TestConnection()
         {
             try
