@@ -222,14 +222,29 @@ public class EditPropertyModel : PropertyModel
     {
         ValueString = Value?.ToString() ?? "";
     }
-    public void UpdateFromPropertyModel(PropertyModel? model)
+    public bool UpdateFromPropertyModel(PropertyModel? model)
     {
-        ValueString = model?.Value?.ToString() ?? "";
-        Value = model?.Value;
-        Bytes = model?.Bytes;
-        IsFrozen = model?.IsFrozen;
-        IsReadOnly = model?.IsReadOnly ?? false;
-        ByteArray = new ByteArrayProperty(model?.Bytes, Length);
+        var valueString = model?.Value?.ToString() ?? "";
+        var value = model?.Value;
+        var bytes = model?.Bytes;
+        var isFrozen = model?.IsFrozen;
+        var isReadOnly = model?.IsReadOnly ?? false;
+        var byteArray = new ByteArrayProperty(model?.Bytes, Length);
+        var changed = ValueString != valueString
+            || Value != value
+            || Bytes != bytes
+            || IsFrozen != isFrozen
+            || IsReadOnly != isReadOnly
+            || ByteArray != byteArray;
+        if (changed)  {
+            ValueString = valueString;
+            Value = value;
+            Bytes = bytes;
+            IsFrozen = isFrozen;
+            IsReadOnly = isReadOnly;
+            ByteArray = byteArray;
+        }
+        return changed;
     }
 
     public void UpdateByteArray()

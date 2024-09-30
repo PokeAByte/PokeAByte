@@ -149,13 +149,13 @@ public class PropertyService(MapperClientService clientService,
         }
     }
 
-    public void UpdateProperty(string path)
+    public bool UpdateProperty(string path)
     {
         //Find path
         var property = _propertyTree.FindWithPath(path);
         var updatedModel = Client.GetPropertyByPath(path);
         if (updatedModel is null || property is null)
-            return;
-        property.PropertyModel?.UpdateFromPropertyModel(updatedModel);
+            return false;
+        return property.PropertyModel?.UpdateFromPropertyModel(updatedModel) ?? false;
     }
 }

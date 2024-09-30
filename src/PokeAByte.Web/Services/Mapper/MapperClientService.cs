@@ -179,7 +179,7 @@ public class MapperClientService
             _pendingUpdates.Add(prop.Path);
         }
 
-        if (_lastUpdate <= DateTime.UtcNow - TimeSpan.FromMilliseconds(100)) {
+        if (_lastUpdate <= DateTime.UtcNow - TimeSpan.FromMilliseconds(15)) {
 
             foreach (var path in _pendingUpdates)
             {
