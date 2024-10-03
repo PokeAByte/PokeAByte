@@ -32,8 +32,7 @@ public static class SharedPlatformConstants
         {
             IsBigEndian = true,
             BizhawkIdentifier = "NES",
-            MemoryLayout = new PlatformMemoryLayoutEntry[]
-            {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry
                 {
                     BizhawkIdentifier = "RAM",
@@ -41,14 +40,13 @@ public static class SharedPlatformConstants
                     PhysicalStartingAddress = 0x00,
                     Length = 0x800
                 }
-            }
+            ]
         },
         new PlatformEntry
         {
             IsBigEndian = false,
             BizhawkIdentifier = "SNES",
-            MemoryLayout = new PlatformMemoryLayoutEntry[]
-            {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry
                 {
                     BizhawkIdentifier = "WRAM",
@@ -70,14 +68,13 @@ public static class SharedPlatformConstants
                     PhysicalStartingAddress = 0x7E0000,
                     Length = 0x1FFFF
                 }
-            }
+            ]
         },
         new PlatformEntry()
         {
             IsBigEndian = false,
             BizhawkIdentifier = "GB",
-            MemoryLayout = new PlatformMemoryLayoutEntry[]
-            {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry {
                     BizhawkIdentifier = "WRAM",
                     CustomPacketTransmitPosition = 0,
@@ -96,14 +93,13 @@ public static class SharedPlatformConstants
                     PhysicalStartingAddress = 0xFF80,
                     Length = 0x7E
                 }
-            }
+            ]
         },
         new PlatformEntry()
         {
             IsBigEndian = false,
             BizhawkIdentifier = "GBC",
-            MemoryLayout = new PlatformMemoryLayoutEntry[]
-            {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry {
                     BizhawkIdentifier = "WRAM",
                     CustomPacketTransmitPosition = 0,
@@ -121,15 +117,20 @@ public static class SharedPlatformConstants
                     CustomPacketTransmitPosition = 0x2000 + 0x1FFF + 1,
                     PhysicalStartingAddress = 0xFF80,
                     Length = 0x7E
+                },
+                new PlatformMemoryLayoutEntry {
+                    BizhawkIdentifier = "WRAM 2",
+                    CustomPacketTransmitPosition = 0x2000 + 0x1FFF + 0x7E + 1,
+                    PhysicalStartingAddress = 0x10000,
+                    Length = 0x15FFF - 0x10000,
                 }
-            }
+            ]
         },
         new PlatformEntry
         {
             IsBigEndian = true,
             BizhawkIdentifier = "GBA",
-            MemoryLayout = new PlatformMemoryLayoutEntry[]
-            {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry
                 {
                     BizhawkIdentifier = "EWRAM",
@@ -144,21 +145,21 @@ public static class SharedPlatformConstants
                     PhysicalStartingAddress = 0x03000000,
                     Length = 0x00008000
                 }
-            }
+            ]
         },
         new PlatformEntry()
         {
             IsBigEndian = true,
             BizhawkIdentifier = "NDS",
             FrameSkipDefault = 15,
-            MemoryLayout = new PlatformMemoryLayoutEntry[] {
+            MemoryLayout = [
                 new PlatformMemoryLayoutEntry {
                     BizhawkIdentifier = "Main RAM",
                     CustomPacketTransmitPosition = 0,
                     PhysicalStartingAddress = 0x2000000,
                     Length = 0x400000
                 }
-            }
+            ]
         }
     };
 }
