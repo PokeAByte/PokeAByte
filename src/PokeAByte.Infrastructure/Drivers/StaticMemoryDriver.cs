@@ -29,6 +29,8 @@ namespace PokeAByte.Infrastructure.Drivers
             return Task.CompletedTask;
         }
 
+        public Task Disconnect() => Task.CompletedTask;
+
         public Task<bool> TestConnection()
         {
             return Task.FromResult(_isConnected);
@@ -50,16 +52,16 @@ namespace PokeAByte.Infrastructure.Drivers
             MemoryFragmentLayout = JsonSerializer.Deserialize<Dictionary<uint, byte[]>>(contents) ?? throw new Exception("Cannot deserialize memory fragment layout.");
         }
 
-        public Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks)
+        public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
         {
             if (BuildEnvironment.IsDebug == false)
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            return Task.FromResult(MemoryFragmentLayout);
+            return Task.FromResult(MemoryFragmentLayout.Select(x => new BlockData(x.Key, x.Value)).ToArray());
         }
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values)
+        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)
             {

@@ -46,7 +46,7 @@
 
         HashSet<string> FieldsChanged { get; }
 
-        void ProcessLoop(IMemoryManager container);
+        void ProcessLoop(IMemoryManager container, bool reloadAddresses);
         byte[] BytesFromBits(byte[] bytes);
         object? CalculateObjectValue(byte[] bytes);
         Task WriteValue(string value, bool? freeze);

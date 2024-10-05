@@ -5,7 +5,7 @@ namespace PokeAByte.Domain.Interfaces
         Task SendInstanceReset();
         Task SendMapperLoaded(IPokeAByteMapper mapper);
         Task SendError(IProblemDetails problemDetails);
-        Task SendPropertiesChanged(IEnumerable<IPokeAByteProperty> properties);
+        Task SendPropertiesChanged(IList<IPokeAByteProperty> properties);
         
         public event PropertyChangedEventHandler? PropertyChangedEvent;
     }

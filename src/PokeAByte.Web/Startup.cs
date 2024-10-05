@@ -90,7 +90,7 @@ public static class Startup
             services.AddSingleton<PokeAByteInstance>();
             services.AddSingleton<ScriptConsole>();
             services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
-            services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpPollingDriver>();
+            services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpDriver>();
             services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
             services.AddSingleton<DriverService>();
             services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();

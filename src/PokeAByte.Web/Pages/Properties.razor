@@ -111,10 +111,9 @@ else
 
     private async void HandlePropertyUpdate(object? sender, PropertyUpdateEventArgs propertyUpdateEventArgs)
     {
-        PropertyService.UpdateProperty(propertyUpdateEventArgs.Path);
-        //await InvokeAsync(StateHasChanged);
-        if (_propertyTreeView is not null)
-            await InvokeAsync(_propertyTreeView.RefreshChildren);
+        bool refresh = PropertyService.UpdateProperty(propertyUpdateEventArgs.Path);
+        if (_propertyTreeView is not null && refresh)
+            await InvokeAsync(() => _propertyTreeView.RefreshChildren(propertyUpdateEventArgs.Path)); 
     }
     protected override void OnAfterRender(bool firstRender)
     {

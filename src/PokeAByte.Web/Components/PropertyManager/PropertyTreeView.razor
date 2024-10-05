@@ -124,20 +124,21 @@
         _shouldRender = true;
     }
 
-    public Action? Refresh;
+    public Action<string>? Refresh;
 
-    public void AttachRefreshEvent(Action? refreshEvent)
+    public void AttachRefreshEvent(Action<string>? refreshEvent)
     {
         Refresh += refreshEvent;
     }
-    public void DetachRefreshEvent(Action? refreshEvent)
+    public void DetachRefreshEvent(Action<string>? refreshEvent)
     {
         Refresh -= refreshEvent;
     }
-    public void RefreshChildren()
+
+    public void RefreshChildren(string path)
     {
         //StateHasChanged();
-        Refresh?.Invoke();
+        Refresh?.Invoke(path);
     }
 
     public void Dispose()

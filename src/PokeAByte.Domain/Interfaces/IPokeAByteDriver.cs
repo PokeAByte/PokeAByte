@@ -1,5 +1,7 @@
 namespace PokeAByte.Domain.Interfaces
 {
+    public record BlockData(MemoryAddress Start, byte[] Data);
+
     /// <summary>
     /// Driver interface for interacting with a emulator.
     /// 
@@ -13,11 +15,12 @@ namespace PokeAByte.Domain.Interfaces
         int DelayMsBetweenReads { get; }
 
         Task EstablishConnection();
+        Task Disconnect();
         Task<bool> TestConnection();
 
-        Task<Dictionary<uint, byte[]>> ReadBytes(IEnumerable<MemoryAddressBlock> blocks);
+        Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks);
 
-        Task WriteBytes(uint startingMemoryAddress, byte[] values);
+        Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
     }
 
     public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }

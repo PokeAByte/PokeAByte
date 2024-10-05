@@ -1,11 +1,17 @@
 using Microsoft.AspNetCore.SignalR;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
 
 namespace PokeAByte.Web.ClientNotifiers
 {
-    public class WebSocketClientNotifier(ILogger<WebSocketClientNotifier> logger, IHubContext<UpdateHub> hubContext) : IClientNotifier
+    public class WebSocketClientNotifier(
+        AppSettings _appSettings,
+        ILogger<WebSocketClientNotifier> logger, 
+        IHubContext<UpdateHub> hubContext) : IClientNotifier
     {
         private readonly ILogger<WebSocketClientNotifier> _logger = logger;
         private readonly IHubContext<UpdateHub> _hubContext = hubContext;
@@ -14,16 +20,28 @@ namespace PokeAByte.Web.ClientNotifiers
             _hubContext.Clients.All.SendAsync("InstanceReset");
 
         public Task SendMapperLoaded(IPokeAByteMapper mapper) =>
-            _hubContext.Clients.All.SendAsync("MapperLoaded");
+            _hubContext.Clients.All.SendAsync(
+                "MapperLoaded", 
+                new MapperModel {
+                    Meta = new MapperMetaModel
+                    {
+                        Id = mapper.Metadata.Id,
+                        GameName = mapper.Metadata.GameName,
+                        GamePlatform = mapper.Metadata.GamePlatform,
+                        MapperReleaseVersion = _appSettings.MAPPER_VERSION
+                    },
+                    Properties = mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
+                    Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()
+                }
+            );
 
         public Task SendError(IProblemDetails problemDetails) =>
             _hubContext.Clients.All.SendAsync("Error", problemDetails);
 
         public event PropertyChangedEventHandler? PropertyChangedEvent;
-        public async Task SendPropertiesChanged(IEnumerable<IPokeAByteProperty> properties)
+        public async Task SendPropertiesChanged(IList<IPokeAByteProperty> properties)
         {
-            var props = properties.ToList();
-            await _hubContext.Clients.All.SendAsync("PropertiesChanged", props.Select(x => new
+            await _hubContext.Clients.All.SendAsync("PropertiesChanged", properties.Select(x => new
             {
                 path = x.Path,
                 memoryContainer = x.MemoryContainer,
@@ -34,14 +52,14 @@ namespace PokeAByte.Web.ClientNotifiers
                 bits = x.Bits,
                 description = x.Description,
                 value = x.Value,
-                bytes = x.Bytes?.Select(x => (int)x).ToArray(),
+                bytes = x.Bytes?.ToIntegerArray(),
 
                 isFrozen = x.IsFrozen,
                 isReadOnly = x.IsReadOnly,
 
                 fieldsChanged = x.FieldsChanged
-            }).ToArray());
-            OnPropertyChangedEvent(new PropertyChangedEventArgs(props));
+            }));
+            OnPropertyChangedEvent(new PropertyChangedEventArgs(properties));
         }
 
         protected virtual void OnPropertyChangedEvent(PropertyChangedEventArgs args)

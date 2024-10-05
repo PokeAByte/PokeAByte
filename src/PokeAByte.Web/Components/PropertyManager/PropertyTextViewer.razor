@@ -36,9 +36,14 @@
         if (Presenter.Parent?.Expanded is false) return false;
         return true;
     }
-    private void RefreshSelf()
+    private void RefreshSelf(string path)
     {
-        StateHasChanged();
+        var treeItemData = Presenter as TreeItemData<PropertyTreeItem>;
+        
+        if (treeItemData?.Value?.FullPath == path) 
+        {
+            StateHasChanged();
+        }
     }
     private string GetWidth(PropertyTreePresenter presenter, string additionalInfo)
     {
