@@ -7,6 +7,7 @@
 
 @using PokeAByte.Web.Services.Mapper
 @using PokeAByte.Web.Services.Properties
+@implements IDisposable
 <PageTitle>@PageTitle - Mappers</PageTitle>
 <MudText Typo="Typo.h4" GutterBottom="true">Mapper Manager</MudText>
 <MudStack Row="true" Justify="Justify.FlexStart" Class="d-flex pb-2 align-center">
@@ -126,5 +127,10 @@
         {
             await Clear();
         });
+    }
+
+	public void Dispose()
+    {
+		MapperConnectionService!.DetachOnReadExceptionHandler(OnReadExceptionOccuredHandler);
     }
 }

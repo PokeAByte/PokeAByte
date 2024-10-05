@@ -114,9 +114,11 @@
         return true;
     }
 
-    private void RefreshSelf()
+    private void RefreshSelf(string path)
     {        
-        StateHasChanged();
+        if (Context.Value.PropertyModel.Path == path) {
+            StateHasChanged();
+        }
     }
     public void Dispose()
     {

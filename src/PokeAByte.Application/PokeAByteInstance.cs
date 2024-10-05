@@ -17,7 +17,7 @@ namespace PokeAByte.Application
         private ScriptConsole ScriptConsoleAdapter { get; }
         private CancellationTokenSource? ReadLoopToken { get; set; }
         private IMapperFilesystemProvider MapperFilesystemProvider { get; }
-        private IEnumerable<MemoryAddressBlock>? BlocksToRead { get; set; }
+        private IList<MemoryAddressBlock>? BlocksToRead { get; set; }
         public List<IClientNotifier> ClientNotifiers { get; }
         public bool Initalized { get; private set; }
         public IPokeAByteDriver? Driver { get; private set; }
@@ -68,7 +68,8 @@ namespace PokeAByte.Application
             ReadLoopToken = null;
 
             Mapper?.Dispose();
-            
+
+            Driver?.Disconnect();
             Driver = null;
             Mapper = null;
             PlatformOptions = null;
@@ -77,11 +78,11 @@ namespace PokeAByte.Application
             JavascriptModuleInstance = null;
             HasPreprocessor = false;
             HasPostprocessor = false;
-            
+
             MemoryContainerManager = new MemoryManager();
             State = [];
             Variables = [];
-            
+
             await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
         }
 
@@ -94,7 +95,6 @@ namespace PokeAByte.Application
                 _logger.LogDebug("Creating PokeAByte mapper instance...");
 
                 Driver = driver;
-
                 await Driver.EstablishConnection();
 
                 // Load the mapper file.
@@ -244,7 +244,7 @@ namespace PokeAByte.Application
 
             foreach (var result in driverResult)
             {
-                MemoryContainerManager.DefaultNamespace.Fill(result.Key, result.Value);
+                MemoryContainerManager.DefaultNamespace.Fill(result.Start, result.Data);
             }
 
             ReadDriverStopwatch.Stop();
@@ -283,12 +283,18 @@ namespace PokeAByte.Application
 
             // Processor
             ProcessorStopwatch.Restart();
-
+            var propertiesChanged = new List<IPokeAByteProperty>();
+            object? reloadAddress;
+            Variables.TryGetValue("reload_addresses", out reloadAddress);
             foreach (var property in Mapper.Properties.Values)
             {
                 try
                 {
-                    property.ProcessLoop(MemoryContainerManager);
+                    property.ProcessLoop(MemoryContainerManager, reloadAddress is true);
+                    if (property.FieldsChanged.Count > 0)
+                    {
+                        propertiesChanged.Add(property);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -318,8 +324,7 @@ namespace PokeAByte.Application
             // Fields Changed
             FieldsChangedStopwatch.Restart();
 
-            var propertiesChanged = Mapper.Properties.Values.Where(x => x.FieldsChanged.Any()).ToArray();
-            if (propertiesChanged.Length > 0)
+            if (propertiesChanged.Count > 0)
             {
                 try
                 {
@@ -330,8 +335,8 @@ namespace PokeAByte.Application
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Could not send {propertiesChanged.Length} property change events.");
-                    throw new PropertyProcessException($"Could not send {propertiesChanged.Length} property change events.", ex);
+                    _logger.LogError(ex, $"Could not send {propertiesChanged.Count} property change events.");
+                    throw new PropertyProcessException($"Could not send {propertiesChanged.Count} property change events.", ex);
                 }
             }
 

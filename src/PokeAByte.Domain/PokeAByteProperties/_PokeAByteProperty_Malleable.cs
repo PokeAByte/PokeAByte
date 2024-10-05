@@ -1,4 +1,5 @@
-﻿using PokeAByte.Domain.Interfaces;
+﻿using NCalc;
+using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties
 {
@@ -60,10 +61,19 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 if (value == _addressString) { return; }
 
                 _addressString = value;
-
+                _hasAddressParameter = false;
+                _addressExpression = !string.IsNullOrEmpty(value) 
+                    ? new Expression(value)
+                    : null;
                 try
                 {
-                    IsMemoryAddressSolved = AddressMath.TrySolve(value, [], out var solvedAddress);
+                    if (_addressExpression!=null) {
+                        _addressExpression.EvaluateParameter += OnParamEvaluation;
+                    }
+                    IsMemoryAddressSolved = AddressMath.TrySolve(_addressExpression, Instance.Variables, out var solvedAddress);
+                    if (_addressExpression!=null) {
+                        _addressExpression.EvaluateParameter -= OnParamEvaluation;
+                    }
                     
                     if (IsMemoryAddressSolved == false)
                     {
@@ -82,6 +92,11 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
                 FieldsChanged.Add("address");
             }
+        }
+
+        private void OnParamEvaluation(string name, ParameterArgs args)
+        {
+            _hasAddressParameter = true;
         }
 
         public int? Length

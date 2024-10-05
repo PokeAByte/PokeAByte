@@ -39,10 +39,9 @@ namespace PokeAByte.Web.ClientNotifiers
             _hubContext.Clients.All.SendAsync("Error", problemDetails);
 
         public event PropertyChangedEventHandler? PropertyChangedEvent;
-        public async Task SendPropertiesChanged(IEnumerable<IPokeAByteProperty> properties)
+        public async Task SendPropertiesChanged(IList<IPokeAByteProperty> properties)
         {
-            var props = properties.ToList();
-            await _hubContext.Clients.All.SendAsync("PropertiesChanged", props.Select(x => new
+            await _hubContext.Clients.All.SendAsync("PropertiesChanged", properties.Select(x => new
             {
                 path = x.Path,
                 memoryContainer = x.MemoryContainer,
@@ -53,14 +52,14 @@ namespace PokeAByte.Web.ClientNotifiers
                 bits = x.Bits,
                 description = x.Description,
                 value = x.Value,
-                bytes = x.Bytes?.Select(x => (int)x).ToArray(),
+                bytes = x.Bytes?.ToIntegerArray(),
 
                 isFrozen = x.IsFrozen,
                 isReadOnly = x.IsReadOnly,
 
                 fieldsChanged = x.FieldsChanged
-            }).ToArray());
-            OnPropertyChangedEvent(new PropertyChangedEventArgs(props));
+            }));
+            OnPropertyChangedEvent(new PropertyChangedEventArgs(properties));
         }
 
         protected virtual void OnPropertyChangedEvent(PropertyChangedEventArgs args)

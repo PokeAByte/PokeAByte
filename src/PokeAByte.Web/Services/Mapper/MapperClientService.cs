@@ -12,6 +12,7 @@ namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperClientService
 {
+    private static readonly long _batchTicks = TimeSpan.FromMilliseconds(15).Ticks;
     private readonly IMapperFilesystemProvider _mapperFs;
     private readonly ILogger<MapperClientService> _logger;
     public readonly MapperClient Client;
@@ -21,12 +22,14 @@ public class MapperClientService
     public static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
     public string LoadedMapperName { get; private set; }
+    private long _lastUpdate;
+    private HashSet<string> _pendingUpdates = new();
 
     public MapperClientService(IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
         MapperClient client,
-        IClientNotifier clientNotifier, 
-        PropertyUpdateService propertyUpdateService, 
+        IClientNotifier clientNotifier,
+        PropertyUpdateService propertyUpdateService,
         DriverService driverService)
     {
         _mapperFs = mapperFs;
@@ -168,15 +171,29 @@ public class MapperClientService
     private void HandlePropertyChangedEvent(object sender, PropertyChangedEventArgs args)
     {
         if(!Client.IsMapperLoaded)
+        {
             return;
+        }
         foreach (var prop in args.ChangedProperties)
         {
             Client.UpdateProperty(prop);
-            _propertyUpdateService.NotifyChanges(prop.Path);
+            _pendingUpdates.Add(prop.Path);
         }
+
+        long nowTicks = DateTime.UtcNow.Ticks;
+        if (_lastUpdate <= nowTicks - _batchTicks)
+        {
+            foreach (var path in _pendingUpdates)
+            {
+                _propertyUpdateService.NotifyChanges(path);
+            }
+            _lastUpdate = nowTicks;
+            _pendingUpdates.Clear();
+        }
+
     }
     public void UpdateEditPropertyModel(EditPropertyModel model)
-    {        
+    {
         if(!Client.IsMapperLoaded)
             return;
         var prop = Client.GetPropertyByPath(model.Path);

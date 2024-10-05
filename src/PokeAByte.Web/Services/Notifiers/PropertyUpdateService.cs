@@ -7,6 +7,7 @@ public class PropertyUpdateService(ILogger<PropertyUpdateService> logger)
     public void NotifyChanges(string path)
     {
         var gotValue = EventHandlers.TryGetValue(path, out var eventHandler);
+
         if (gotValue)
         {
             eventHandler?.Invoke(this, new PropertyUpdateEventArgs

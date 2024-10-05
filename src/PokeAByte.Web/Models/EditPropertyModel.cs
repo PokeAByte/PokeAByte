@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using PokeAByte.Domain;
+﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Properties;
 
@@ -10,8 +9,8 @@ public class EditPropertyModel : PropertyModel
     public bool IsEditing { get; set; } = false;
     public Dictionary<ulong, string>? GlossaryReference { get; set; }
     private string _valueString = "";
-    public string ValueString 
-    { 
+    public string ValueString
+    {
         get => _valueString;
         set
         {
@@ -20,15 +19,33 @@ public class EditPropertyModel : PropertyModel
                 _valueString = Value?.ToString() ?? "";
                 return;
             }
+            
             if (_valueString == value)
                 return;
+            
             if (string.IsNullOrEmpty(_valueString))
                 _valueString = value;
+            
             if (ValidateValue(value))
             {
-                _valueString = value; //ValueToString(value);
+                if (Type == "string")
+                {
+                    if (value.Length > Length)
+                    {
+                        var len = Length ?? value.Length;
+                        _valueString = value[..len];
+                    }
+                    else
+                    {
+                        _valueString = value;
+                    }
+                }
+                else
+                {
+                    _valueString = value; //ValueToString(value);
+                }
             }
-            else if(!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
+            else if (!string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
                 var foundReference = GlossaryReference.Where(g =>
                         g.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
@@ -102,7 +119,7 @@ public class EditPropertyModel : PropertyModel
             }
             if (string.IsNullOrEmpty(value))
                 return false;
-             //Try to get bytes
+            //Try to get bytes
             var bytes = BaseProperty.BytesFromValue(value);
             //try to get calculated value
             var val = BaseProperty.CalculateObjectValue(bytes);
@@ -123,7 +140,7 @@ public class EditPropertyModel : PropertyModel
         return Type switch
         {
             "bool" or "bit" => bool.TryParse(value, out _),
-            "string" => Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length),
+            "string" => true/*Length >= (string.IsNullOrEmpty(value) ? 0 : value.Length)*/,
             "int" or "nibble" => CanParseInt(value),
             "uint" => CanParseUInt(value)/*uint.TryParse(value, out _)*/,
             _ => false
@@ -141,9 +158,9 @@ public class EditPropertyModel : PropertyModel
                 return;
             }
             var foundReference = GlossaryReference
-                .Where(x => 
+                .Where(x =>
                     !string.IsNullOrWhiteSpace(x.Value) &&
-                    value.key == x.Key && 
+                    value.key == x.Key &&
                     value.value == x.Value)
                 .Select(g => new IntegerValueReference(g.Key, g.Value))
                 .FirstOrDefault();
@@ -179,8 +196,8 @@ public class EditPropertyModel : PropertyModel
     public string AddressString =>
         Address?.ToString("X") ?? "";
     public static EditPropertyModel FromPropertyModel(PropertyModel model)
-    {            
-        
+    {
+
         return new EditPropertyModel
         {
             ValueString = model.ValueAsString(),
@@ -205,14 +222,19 @@ public class EditPropertyModel : PropertyModel
     {
         ValueString = Value?.ToString() ?? "";
     }
-    public void UpdateFromPropertyModel(PropertyModel? model)
+    
+    public bool UpdateFromPropertyModel(PropertyModel? model)
     {
-        ValueString = model?.Value?.ToString() ?? "";
-        Value = model?.Value;
-        Bytes = model?.Bytes;
-        IsFrozen = model?.IsFrozen;
-        IsReadOnly = model?.IsReadOnly ?? false;
-        ByteArray = new ByteArrayProperty(model?.Bytes, Length);
+        if (model?.BaseProperty.FieldsChanged.Any() is true)  {
+            ValueString = model?.Value?.ToString() ?? "";
+            Value = model?.Value;
+            Bytes = model?.Bytes;
+            IsFrozen = model?.IsFrozen;
+            IsReadOnly = model?.IsReadOnly ?? false;
+            ByteArray = new ByteArrayProperty(model?.Bytes, Length);
+            return true;
+        }
+        return false;
     }
 
     public void UpdateByteArray()
@@ -237,14 +259,10 @@ public class EditPropertyModel : PropertyModel
             if (Type is not "string" && !string.IsNullOrWhiteSpace(Reference) && GlossaryReference is not null)
             {
                 var key = BitConverter.ToUInt64(arr, 0);
-                var foundRef = GlossaryReference?
-                    .Where(x => x.Key == key)
-                    .Select(y => y.Value)
-                    .FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(foundRef))
+                if (GlossaryReference.TryGetValue(key, out var foundRef) && !string.IsNullOrWhiteSpace(foundRef))
                 {
                     ValueString = foundRef;
-                }                
+                }
                 return;
             }
             ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";

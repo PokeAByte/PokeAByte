@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using NCalc;
 using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties
@@ -6,6 +7,9 @@ namespace PokeAByte.Domain.PokeAByteProperties
     public abstract partial class PokeAByteProperty : IPokeAByteProperty
     {
         private readonly string _originalAddressString;
+        private Expression? _addressExpression;
+        private bool _hasAddressParameter;
+        
         public PokeAByteProperty(IPokeAByteInstance instance, PropertyAttributes attributes)
         {
             Instance = instance;
@@ -76,7 +80,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             => FromValue(FullValue?.ToString() ?? "");
         public HashSet<string> FieldsChanged { get; } = [];
 
-        public void ProcessLoop(IMemoryManager memoryManager)
+        public void ProcessLoop(IMemoryManager memoryManager, bool reloadAddresses)
         {
             if (Instance == null) { throw new Exception("Instance is NULL."); }
             if (Instance.Mapper == null) { throw new Exception("Instance.Mapper is NULL."); }
@@ -107,73 +111,70 @@ namespace PokeAByte.Domain.PokeAByteProperties
 
             MemoryAddress? address = Address;
 
-            var reloadAddressKvp = Instance.Variables
-                .FirstOrDefault(x => x.Key == "reload_addresses");
-            if (reloadAddressKvp.Value is true)
+            if (reloadAddresses && _hasAddressParameter)
             {
-                AddressString = _originalAddressString;
+                IsMemoryAddressSolved = false;
             }
-            if (string.IsNullOrEmpty(_addressString) == false && IsMemoryAddressSolved == false)
+            if (_addressExpression != null && IsMemoryAddressSolved == false)
             {
                 try
                 {
-                    if (AddressMath.TrySolve(_addressString, Instance.Variables, out var solvedAddress))
+                    if (AddressMath.TrySolve(_addressExpression, Instance.Variables, out var solvedAddress))
                     {
                         address = solvedAddress;
-                    }
-                    else
-                    {
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-
             }
 
             if (address == null)
             {                        
                 // There is nothing to do for this property, as it does not have an address or bytes.
                 // Hopefully a postprocessor will pick it up and set it's value!
-
                 return;
             }
 
-            byte[]? previousBytes = Bytes?.ToArray();
-            byte[]? bytes = null;
+            byte[] bytes;
             object? value;
+            ReadOnlySpan<byte> readonlyBytes;
 
-            if (bytes == null)
+            if (address == null) { throw new Exception("address is NULL."); }
+            if (Length == null) { throw new Exception("Length is NULL."); }
+
+            try
             {
-                if (address == null) { throw new Exception("address is NULL."); }
-                if (Length == null) { throw new Exception("Length is NULL."); }
+                readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length ?? 0);
+                if (readonlyBytes.SequenceEqual(Bytes)) {
+                    // Fast path - if the bytes match, then we can assume the property has not been
+                    // updated since last poll.
 
-                try
-                {
-                    bytes = memoryManager.Get(MemoryContainer, address ?? 0x00, Length ?? 0).Data;
+                    // Do nothing, we don't need to calculate the new value as
+                    // the bytes are the same.
+                    Address = address;
+                    return;
                 }
-                catch (Exception e)
-                {
-                    Address = null;
-                    bytes = [0];
-                }
+                bytes = readonlyBytes.ToArray();
             }
-            
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Address = null;
+                bytes = [0];
+                readonlyBytes = bytes.AsSpan();
+            }
             
             Address = address;
-            
-            if (previousBytes != null && bytes != null && previousBytes.SequenceEqual(bytes))
+                
+            if (_bytes?.Length == bytes.Length) {
+                readonlyBytes.CopyTo(_bytes);
+                FieldsChanged.Add("bytes");
+            } else 
             {
-                // Fast path - if the bytes match, then we can assume the property has not been
-                // updated since last poll.
-
-                // Do nothing, we don't need to calculate the new value as
-                // the bytes are the same.
-                return;
+                Bytes = bytes.ToArray();
             }
-            
-            Bytes = bytes?.ToArray();
 
             if (bytes == null)
             {
@@ -256,29 +257,36 @@ namespace PokeAByte.Domain.PokeAByteProperties
         {
             if (string.IsNullOrEmpty(Bits)) return bytes;
             int[] indexes;
-
-            if (Bits.Contains('-'))
+            ReadOnlySpan<char> bitsSpan = Bits.AsSpan();
+            if (bitsSpan.Contains('-'))
             {
-                var parts = Bits.Split('-');
+                var dashIndex = bitsSpan.IndexOf('-');
+                var part1 = bitsSpan.Slice(0, dashIndex);
+                var part2 = bitsSpan.Slice(dashIndex + 1);
 
-                if (int.TryParse(parts[0], out int start) && int.TryParse(parts[1], out int end))
+                if (int.TryParse(part1, out int start) && int.TryParse(part2, out int end))
                 {
                     indexes = Enumerable.Range(start, end - start + 1).ToArray();
                 }
                 else
                 {
-                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}.");
+                    throw new ArgumentException($"Invalid format for attribute Bits ({Bits}).");
                 }
             }
-            else if (Bits.Contains(','))
+            else if (bitsSpan.Contains(','))
             {
-                indexes = Bits.Split(',')
-                    .Select(x => int.TryParse(x, out int num) ? num : throw new ArgumentException($"Invalid format for attribute Bits ({Bits}) for path {Path}."))
-                    .ToArray();
+                indexes = new int[bitsSpan.Count(',') + 1];
+                int x = 0;
+                foreach (var range in bitsSpan.Split(','))
+                {
+                    indexes[x++] = int.TryParse(bitsSpan[range], out int number)
+                        ? number
+                        : throw new ArgumentException($"Invalid format for attribute Bits ({Bits}).");
+                }
             }
             else
             {
-                if (int.TryParse(Bits, out int index))
+                if (int.TryParse(bitsSpan, out int index))
                 {
                     indexes = [index];
                 }
