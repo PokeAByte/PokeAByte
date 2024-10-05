@@ -33,6 +33,7 @@ public class PropertyModel
 
     public bool IsReadOnly { get; set; }
     public required IPokeAByteProperty BaseProperty { get; set; }
+    public HashSet<string> FieldsChanged { get; set; } = [];
 }
 
 public static class PropertyModelExtensions
@@ -58,23 +59,22 @@ public static class PropertyModelExtensions
     {
         if (updated.Path != original.Path)
             return;
+            
         if (updated.Value != original.Value)
         {
             original.Value = updated.Value;
         }
-        if (updated.Bytes != null && 
-            (original.Bytes is null || 
-             !updated.Bytes
-                 .ToIntegerArray()
-                 .SequenceEqual(original.Bytes)))
+        if (updated.FieldsChanged.Contains("bytes"))
         {
-            original.Bytes = updated.Bytes.ToIntegerArray();
+            original.Bytes = updated.Bytes?.ToIntegerArray();
         }
 
         if (updated.IsFrozen != original.IsFrozen)
             original.IsFrozen = updated.IsFrozen;
         if (updated.IsReadOnly != original.IsReadOnly)
             original.IsFrozen = updated.IsReadOnly;
+        
+        original.FieldsChanged = new HashSet<string>(updated.FieldsChanged);
     }
 
     public static string ValueAsString(this PropertyModel model)

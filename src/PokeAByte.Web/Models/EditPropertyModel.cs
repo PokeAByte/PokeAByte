@@ -225,7 +225,7 @@ public class EditPropertyModel : PropertyModel
     
     public bool UpdateFromPropertyModel(PropertyModel? model)
     {
-        if (model?.BaseProperty.FieldsChanged.Any() is true)  {
+        if (model?.FieldsChanged.Any() is true)  {
             ValueString = model?.Value?.ToString() ?? "";
             Value = model?.Value;
             Bytes = model?.Bytes;
@@ -262,7 +262,7 @@ public class EditPropertyModel : PropertyModel
                 if (GlossaryReference.TryGetValue(key, out var foundRef) && !string.IsNullOrWhiteSpace(foundRef))
                 {
                     ValueString = foundRef;
-                }
+                } 
                 return;
             }
             ValueString = BaseProperty.ObjectFromBytes(arr)?.ToString() ?? "";
