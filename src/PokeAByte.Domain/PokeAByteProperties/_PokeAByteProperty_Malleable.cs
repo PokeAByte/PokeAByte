@@ -164,6 +164,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             get => _value;
             set
             {
+                if (_value == null && value == null) return;
                 if (_value != null && _value.Equals(value)) return;
 
                 FieldsChanged.Add("value");
@@ -188,6 +189,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             get => _bytes;
             set
             {
+                if (_bytes == null && value == null) return;
                 if (_bytes != null && value != null && _bytes.SequenceEqual(value)) return;
 
                 FieldsChanged.Add("bytes");

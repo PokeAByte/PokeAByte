@@ -316,7 +316,12 @@ namespace PokeAByte.Application
                 {
                     // The function returned false, which means we do not want to continue.
                     return;
-                }
+                } 
+                propertiesChanged.AddRange(
+                    this.Mapper.Properties.Values
+                        .Where(x => !propertiesChanged.Contains(x))
+                        .Where(x => x.FieldsChanged.Count > 0)
+                );
             }
 
             PostprocessorStopwatch.Stop();
