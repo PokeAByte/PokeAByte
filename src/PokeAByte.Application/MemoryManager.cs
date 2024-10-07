@@ -3,6 +3,9 @@ using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Application
 {
+    /// <summary>
+    /// Default implementation of the <see cref="IMemoryManager"/> interface.
+    /// </summary>
     public class MemoryManager : IMemoryManager
     {
         public MemoryManager()
@@ -15,9 +18,12 @@ namespace PokeAByte.Application
             DefaultNamespace = Namespaces["default"];
         }
 
+        /// <inheritdoc />
         public Dictionary<string, IMemoryNamespace> Namespaces { get; private set; }
+        /// <inheritdoc />
         public IMemoryNamespace DefaultNamespace { get; }
 
+        /// <inheritdoc />
         public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
         {
             if (area == "default" || area == null) { 
@@ -26,6 +32,7 @@ namespace PokeAByte.Application
             return Namespaces[area].get_bytes(memoryAddress, length);
         }
 
+        /// <inheritdoc />
         public void Fill(string area, MemoryAddress memoryAddress, byte[] data)
         {
             if (Namespaces.ContainsKey(area) == false)
@@ -36,6 +43,7 @@ namespace PokeAByte.Application
             Namespaces[area].Fill(memoryAddress, data);
         }
 
+        /// <inheritdoc />
         public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
         {
             if (area == "default" || area == null) { 
@@ -47,8 +55,10 @@ namespace PokeAByte.Application
 
     public class MemoryNamespace : IMemoryNamespace
     {
+        /// <inheritdoc />
         public IList<IByteArray> Fragments { get; } = new List<IByteArray>();
 
+        /// <inheritdoc />
         public void Fill(MemoryAddress memoryAddress, byte[] data)
         {
             int filledFragments = 0;
@@ -79,13 +89,16 @@ namespace PokeAByte.Application
             }
         }
 
+        /// <inheritdoc />
         public bool Contains(MemoryAddress memoryAddress) => Fragments.Any(fragment => fragment.Contains(memoryAddress));
 
+        /// <inheritdoc />
         public IByteArray get_bytes(MemoryAddress memoryAddress, int length)
         {
             return new ByteArray(memoryAddress, GetReadonlyBytes(memoryAddress, length).ToArray());
         }
 
+        /// <inheritdoc />
         public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length)
         {
             for (int i = 0; i < Fragments.Count; i++)
@@ -106,6 +119,7 @@ namespace PokeAByte.Application
             throw new Exception($"Memory address {memoryAddress.ToHexdecimalString()} is not contained in any fragment in the namespace.");
         }
 
+        /// <inheritdoc />
         public byte get_byte(MemoryAddress memoryAddress) => get_bytes(memoryAddress, 1).get_byte(0);
     }
 
@@ -118,8 +132,8 @@ namespace PokeAByte.Application
         }
 
         public MemoryAddress StartingAddress { get; }
-        public byte[] Data { get; }
 
+        public byte[] Data { get; }
 
         public void Fill(int offset, byte[] data)
         {
