@@ -23,14 +23,20 @@ public class IntegerProperty : PokeAByteProperty
     {
         if (Instance == null) throw new Exception("Instance is NULL.");
         if (Instance.PlatformOptions == null) throw new Exception("Instance.PlatformOptions is NULL.");
+        return GetInt(data, Instance.PlatformOptions);
+    }
+
+
+    public static int GetInt(byte[] data, IPlatformOptions platformOptions) {
+        // Shortcut: With one byte, we can just cast:
         if (data.Length == 1) //  With one byte, we can just cast.
         {
-            return (int)data[0]; 
+            return data[0]; 
         }
         // With less than 4 bytes, we have to pad the value before using the bitconverter:
         Span<byte> padded = stackalloc byte[4];
         data.AsSpan().CopyTo(padded);
-        if (Instance.PlatformOptions.EndianType == EndianTypes.LittleEndian) {
+        if (platformOptions.EndianType == EndianTypes.LittleEndian) {
             padded.Slice(0, data.Length).Reverse();
         }
         return BitConverter.ToInt32(padded);

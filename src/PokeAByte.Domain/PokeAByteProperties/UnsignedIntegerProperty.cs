@@ -22,19 +22,23 @@ public class UnsignedIntegerProperty : PokeAByteProperty, IPokeAByteProperty
     {
         if (Instance == null) throw new Exception("Instance is NULL.");
         if (Instance.PlatformOptions == null) throw new Exception("Instance.PlatformOptions is NULL.");
+        return GetUint(data, Instance.PlatformOptions);
+    }
+
+    public static uint GetUint(byte[] data, IPlatformOptions platformOptions) {
         // Shortcut: With one byte, we can just cast:
         if (data.Length == 1)
         {
-            return (uint)data[0];
+            return data[0];
         }
         // With less than 4 bytes, we have to pad the value before using the bitconverter:
         if (data.Length >= 4) 
         {
-            return BitConverter.ToUInt32(data.ReverseBytesIfLE(Instance.PlatformOptions.EndianType), 0);
+            return BitConverter.ToUInt32(data.ReverseBytesIfLE(platformOptions.EndianType), 0);
         }
         // With less than 4 bytes, we have to pad the value before using the bitconverter:
         Span<byte> value = stackalloc byte[4];
-        data.ReverseBytesIfLE(Instance.PlatformOptions.EndianType).AsSpan().CopyTo(value);
+        data.ReverseBytesIfLE(platformOptions.EndianType).AsSpan().CopyTo(value);
         return BitConverter.ToUInt32(value);
     }
 }

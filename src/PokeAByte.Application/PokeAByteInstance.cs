@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Application
 {
@@ -265,6 +266,8 @@ namespace PokeAByte.Application
                 property.FieldsChanged.Clear();
             }
 
+            ProcessVariables();
+
             // Preprocessor
             PreprocessorStopwatch.Restart();
 
@@ -316,7 +319,7 @@ namespace PokeAByte.Application
                 {
                     // The function returned false, which means we do not want to continue.
                     return;
-                } 
+                }
                 propertiesChanged.AddRange(
                     this.Mapper.Properties.Values
                         .Where(x => !propertiesChanged.Contains(x))
@@ -348,6 +351,55 @@ namespace PokeAByte.Application
             FieldsChangedStopwatch.Stop();
 
             ReadLoopStopwatch.Stop();
+        }
+
+        /// <summary>
+        /// Process mapper defines variables in order of definition.
+        /// </summary>
+        /// <exception cref="NotImplementedException">
+        /// String type variables are currently not supported.
+        /// </exception>
+        private void ProcessVariables()
+        {
+            if (Mapper == null || PlatformOptions == null)
+            {
+                return;
+            }
+            foreach (var variable in Mapper.Variables)
+            {
+                object? currentValue = null;
+                Variables.TryGetValue(variable.Name, out currentValue);
+                MemoryAddress resolvedAdress = 0;
+                if (AddressMath.TrySolve(new NCalc.Expression(variable.Address), Variables, out resolvedAdress))
+                {
+                    object? newValue = null;
+                    byte[] data = MemoryContainerManager.GetReadonlyBytes(null, resolvedAdress, variable.Size).ToArray();
+                    switch (variable.Type)
+                    {
+                        case "int":
+                            newValue = IntegerProperty.GetInt(data, PlatformOptions);
+                            break;
+                        case "uint":
+                            newValue = UnsignedIntegerProperty.GetUint(data, PlatformOptions);
+                            break;
+                        case "bool":
+                            newValue = data[0] != 0x00;
+                            break;
+                        case "string":
+                            throw new NotImplementedException("TODO: support string variables.");
+                        default:
+                            break;
+                    }
+                    if (newValue != currentValue)
+                    {
+                        Variables[variable.Name] = newValue;
+                        if (variable.Trigger == VariableTrigger.ReloadAddresses)
+                        {
+                            Variables["reload_addresses"] = true;
+                        }
+                    }
+                }
+            }
         }
 
         public object? ExecuteModuleFunction(string? function, IPokeAByteProperty property)

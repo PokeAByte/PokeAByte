@@ -205,7 +205,33 @@ namespace PokeAByte.Application
                 attr.Value = attr.Value.NormalizeMemoryAddresses();
             }
 
-            return new PokeAByteMapper(GetMetadata(doc), GetMemory(doc), GetProperties(doc, instance), GetGlossary(doc));
+            return new PokeAByteMapper(
+                GetMetadata(doc), 
+                GetMemory(doc), 
+                GetProperties(doc, instance), 
+                GetGlossary(doc),
+                GetVariables(doc)
+            );
+        }
+
+        private static IList<MapperVariable> GetVariables(XDocument doc)
+        {
+            return doc.Descendants("variables")
+                .Elements("variable")
+                .Select(element =>
+                {
+                    return new MapperVariable(
+                        element.GetAttributeValue("name"),
+                        element.GetAttributeValue("type"),
+                        int.Parse(element.GetAttributeValue("size")),
+                        element.GetAttributeValue("address").NormalizeMemoryAddresses(),
+                        element.GetOptionalAttributeValue("trigger") switch {
+                            "reload_address" => VariableTrigger.ReloadAddresses,
+                            _ => VariableTrigger.None
+                        }
+                    );
+                })
+                .ToList();
         }
     }
 }
