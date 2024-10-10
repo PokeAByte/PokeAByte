@@ -11,6 +11,18 @@ using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Application
 {
+    internal enum VariableProcessingResult
+    {
+        /// <summary>
+        /// Default result. Nothing to handle.
+        /// </summary>
+        Continue,
+        /// <summary>
+        /// One or more variable has triggered the abortion of the current processing loop step.
+        /// </summary>
+        SkipProcessing,
+    }
+
     public class PokeAByteInstance : IPokeAByteInstance
     {
         private readonly ILogger<PokeAByteInstance> _logger;
@@ -266,7 +278,10 @@ namespace PokeAByte.Application
                 property.FieldsChanged.Clear();
             }
 
-            ProcessVariables();
+            if (ProcessVariables() == VariableProcessingResult.SkipProcessing)
+            {
+                return;
+            }
 
             // Preprocessor
             PreprocessorStopwatch.Restart();
@@ -359,12 +374,15 @@ namespace PokeAByte.Application
         /// <exception cref="NotImplementedException">
         /// String type variables are currently not supported.
         /// </exception>
-        private void ProcessVariables()
+        private VariableProcessingResult ProcessVariables()
         {
             if (Mapper == null || PlatformOptions == null)
             {
-                return;
+                return VariableProcessingResult.Continue;
             }
+            // Allow reload_addresses to be false if the JS does not reset it because the mapper relies
+            // on the variable trigger:
+            bool setReload = false;
             foreach (var variable in Mapper.Variables)
             {
                 object? currentValue = null;
@@ -390,16 +408,26 @@ namespace PokeAByte.Application
                         default:
                             break;
                     }
+                    if (variable.Trigger.HasFlag(VariableTrigger.SkipProcessingIfEqual))
+                    {
+                        if (variable.Compare != null && currentValue == variable.Compare)
+                        {
+                            return VariableProcessingResult.SkipProcessing;
+                        }
+                    }
                     if (newValue != currentValue)
                     {
                         Variables[variable.Name] = newValue;
-                        if (variable.Trigger == VariableTrigger.ReloadAddresses)
+                        if (variable.Trigger.HasFlag(VariableTrigger.ReloadAddresses))
                         {
-                            Variables["reload_addresses"] = true;
+                            setReload = true;
                         }
                     }
                 }
             }
+            Variables["reload_addresses"] = setReload;
+            
+            return VariableProcessingResult.Continue;
         }
 
         public object? ExecuteModuleFunction(string? function, IPokeAByteProperty property)

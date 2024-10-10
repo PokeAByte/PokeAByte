@@ -24,6 +24,7 @@ namespace PokeAByte.Domain.Interfaces
     /// Potential triggers for variable changes. These are evaluated when the calculated new value of the variable
     /// is different to the currently stored one, or on first evaluation of the variable.
     /// </summary>
+    [Flags]
     public enum VariableTrigger {
         /// <summary>
         /// Nothing happens on variable value change. Default.
@@ -34,7 +35,19 @@ namespace PokeAByte.Domain.Interfaces
         /// all addresses. For instance a property may have an address of <c>{base_ptr} + 0xAC</c>. 
         /// If the <c>base_ptr</c> variable changes, then the property address needs to be updated.
         /// </summary>
-        ReloadAddresses
+        /// <remarks>
+        /// XML value: <c>reload_address</c>.
+        /// </remarks>
+        ReloadAddresses = 1,
+        /// <summary>
+        /// Skip the current read loop iteration if the resolved variable value is equal to the variable compare value.
+        /// This can be used to emulate the behavior of the preprocessor script returning <c>false</c>.
+        /// This also skips over the rest of the variable processing.
+        /// </summary>
+        /// <remarks>
+        /// XML value: <c>skip_processing_if</c>.
+        /// </remarks>
+        SkipProcessingIfEqual = 2,
     }
 
     /// <summary>
@@ -56,12 +69,14 @@ namespace PokeAByte.Domain.Interfaces
     /// <param name="Size"> The size of the variable in bytes. E.g. how many bytes make of an <c>int</c>, etc. </param>
     /// <param name="Address"> The address expression for the variable. </param>
     /// <param name="Trigger"> Optional action trigger for when the value of the variable changes. </param>
+    /// <param name="Compare"> Optional value used for comparison on certain <see cref="VariableTrigger"/>s. </param>
     public record MapperVariable(
         string Name, 
         string Type, 
         int Size,
         string Address, 
-        VariableTrigger Trigger
+        VariableTrigger Trigger,
+        object? Compare
     );
 
     public interface IPokeAByteMapper : IDisposable

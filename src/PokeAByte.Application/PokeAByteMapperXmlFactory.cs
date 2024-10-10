@@ -206,9 +206,9 @@ namespace PokeAByte.Application
             }
 
             return new PokeAByteMapper(
-                GetMetadata(doc), 
-                GetMemory(doc), 
-                GetProperties(doc, instance), 
+                GetMetadata(doc),
+                GetMemory(doc),
+                GetProperties(doc, instance),
                 GetGlossary(doc),
                 GetVariables(doc)
             );
@@ -220,18 +220,50 @@ namespace PokeAByte.Application
                 .Elements("variable")
                 .Select(element =>
                 {
+                    var type = element.GetAttributeValue("type");
+                    var compare = element.GetOptionalAttributeValue("compare");
+                    object? compareValue = null;
+                    if (!string.IsNullOrEmpty(compare))
+                    {
+                        compareValue = type switch
+                        {
+                            "int" => int.Parse(compare),
+                            "uint" => uint.Parse(compare),
+                            "bool" => int.Parse(compare) != 0,
+                            _ => null,
+                        };
+                    }
+
                     return new MapperVariable(
                         element.GetAttributeValue("name"),
-                        element.GetAttributeValue("type"),
+                        type,
                         int.Parse(element.GetAttributeValue("size")),
                         element.GetAttributeValue("address").NormalizeMemoryAddresses(),
-                        element.GetOptionalAttributeValue("trigger") switch {
-                            "reload_address" => VariableTrigger.ReloadAddresses,
-                            _ => VariableTrigger.None
-                        }
+                        ParseTrigger(element.GetOptionalAttributeValue("trigger")),
+                        compareValue
                     );
                 })
                 .ToList();
+        }
+
+        private static VariableTrigger ParseTrigger(string? triggerString)
+        {
+            VariableTrigger trigger = VariableTrigger.None;
+            if (string.IsNullOrEmpty(triggerString))
+            {
+                return trigger;
+            }
+            foreach(var item in triggerString.Split(",")) {
+                switch(item.Trim()) {
+                    case "reload_address":
+                        trigger |= VariableTrigger.ReloadAddresses;
+                        break;
+                    case "skip_processing_if":
+                        trigger |= VariableTrigger.SkipProcessingIfEqual;
+                        break;
+                }
+            }
+            return trigger;
         }
     }
 }
