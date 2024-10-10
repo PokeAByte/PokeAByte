@@ -39,8 +39,15 @@ namespace PokeAByte.Domain.PokeAByteProperties
             BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
         }
 
+        /// <summary>
+        /// Parent instance this property belongs to.
+        /// </summary>
         protected IPokeAByteInstance Instance { get; }
+        
+        /// <inheritdoc />
         public string Path { get; }
+        
+        /// <inheritdoc />
         public string Type { get; }
 
         public string? StaticValue { get; }
@@ -63,8 +70,14 @@ namespace PokeAByte.Domain.PokeAByteProperties
             get { return (Type == "bit" || Type == "bool" || Type == "int" || Type == "uint") && Reference != null; }
         }
 
+        /// <inheritdoc />
         public bool IsFrozen => BytesFrozen != null;
+
+        /// <inheritdoc />
         public bool IsReadOnly => AddressString == null;
+
+        /// <inheritdoc />
+        public HashSet<string> FieldsChanged { get; } = [];
 
         protected abstract object? ToValue(byte[] bytes);
         protected abstract byte[] FromValue(string value);
@@ -78,7 +91,6 @@ namespace PokeAByte.Domain.PokeAByteProperties
             => ToValue(bytes);
         public byte[] BytesFromFullValue()
             => FromValue(FullValue?.ToString() ?? "");
-        public HashSet<string> FieldsChanged { get; } = [];
 
         public void ProcessLoop(IMemoryManager memoryManager, bool reloadAddresses)
         {

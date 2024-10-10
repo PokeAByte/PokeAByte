@@ -23,6 +23,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
         private string? _afterReadValueFunction { get; set; }
         private string? _beforeWriteValueFunction { get; set; }
 
+        /// <inheritdoc />
         public string? MemoryContainer
         {
             get { return _memoryContainer; }
@@ -35,6 +36,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public uint? Address
         {
             get { return _address; }
@@ -51,6 +53,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public string OriginalAddressString { get; }
 
         public string? AddressString
@@ -99,6 +102,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             _hasAddressParameter = true;
         }
 
+        /// <inheritdoc />
         public int? Length
         {
             get => _length;
@@ -111,6 +115,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public int? Size
         {
             get => _size;
@@ -123,6 +128,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public string? Bits
         {
             get => _bits;
@@ -135,6 +141,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public string? Reference
         {
             get => _reference;
@@ -147,6 +154,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public string? Description
         {
             get => _description;
@@ -159,6 +167,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public object? Value
         {
             get => _value;
@@ -172,7 +181,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
-
+        /// <inheritdoc />
         public object? FullValue
         {
             get => _fullValue;
@@ -184,6 +193,8 @@ namespace PokeAByte.Domain.PokeAByteProperties
                 _fullValue = value;
             }
         }
+
+        /// <inheritdoc />
         public byte[]? Bytes
         {
             get => _bytes;
@@ -197,6 +208,7 @@ namespace PokeAByte.Domain.PokeAByteProperties
             }
         }
 
+        /// <inheritdoc />
         public byte[]? BytesFrozen
         {
             get => _bytesFrozen;
