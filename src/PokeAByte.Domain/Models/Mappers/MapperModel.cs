@@ -4,7 +4,7 @@ namespace PokeAByte.Domain.Models.Mappers;
 
 public record MapperModel
 {
-    public MapperMetaModel Meta { get; init; } = null!;
-    public IEnumerable<PropertyModel> Properties { get; init; } = null!;
-    public Dictionary<string, IEnumerable<GlossaryItemModel>> Glossary { get; init; } = null!;
+    public required MapperMetaModel Meta { get; init; }
+    public required IEnumerable<PropertyModel> Properties { get; init; }
+    public required Dictionary<string, IEnumerable<GlossaryItemModel>> Glossary { get; init; }
 }
