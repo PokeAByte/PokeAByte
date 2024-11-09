@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using PokeAByte.Domain.Models;
 using Serilog;
 using Serilog.Events;
@@ -35,6 +37,7 @@ public class Program
             
             var app = builder.Build();
 
+            LogVersion(app);
             app.ConfigureApp();
             Process.Start(new ProcessStartInfo("http://localhost:8085") { UseShellExecute = true});
             app.Run();     
@@ -49,5 +52,23 @@ public class Program
         }
     }
 
+    private static void LogVersion(WebApplication app) {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>(); 
 
+        var version = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()
+            ?.Version;
+        logger.LogInformation($"Poke-A-Byte version: {version}");
+        var informationalVersion = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+        if (informationalVersion != null) {
+            var commit = informationalVersion.Contains("+")
+                ? informationalVersion.Split("+")[1]
+                : "<unknown>";
+            logger.LogInformation($"Poke-A-Byte commit: {commit}");
+        }
+    }
 }
