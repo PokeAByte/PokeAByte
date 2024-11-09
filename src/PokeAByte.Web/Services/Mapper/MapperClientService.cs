@@ -180,10 +180,11 @@ public class MapperClientService
             _pendingUpdates.Add(prop.Path);
         }
 
+        var pendingUpdates = _pendingUpdates.ToArray();
         long nowTicks = DateTime.UtcNow.Ticks;
         if (_lastUpdate <= nowTicks - _batchTicks)
         {
-            foreach (var path in _pendingUpdates)
+            foreach (var path in pendingUpdates)
             {
                 _propertyUpdateService.NotifyChanges(path);
             }
