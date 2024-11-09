@@ -75,29 +75,26 @@ public class PropertyService(MapperClientService clientService,
                     //check the children
                     foreach (var path in pathSplit)
                     {
-                        while (currentBranch?.Text != path)
+                        if (currentBranch?.HasChildren is true)
                         {
-                            if (currentBranch?.HasChildren is true)
+                            foreach (var child in currentBranch.Children!)
                             {
-                                foreach (var child in currentBranch.Children!)
-                                {
-                                    if (child is PropertyTreePresenter c &&
-                                        child.Text?
+                                if (child is PropertyTreePresenter c &&
+                                    child.Text?
                                         .Contains(path, StringComparison.InvariantCultureIgnoreCase) is true)
-                                    {
-                                        c.IsDisabled = false;
-                                    }
+                                {
+                                    c.IsDisabled = false;
+                                }
 
-                                    if (child.Text == path)
-                                    {
-                                        currentBranch = child;
-                                        currentBranch.Expanded = true;
-                                    }
+                                if (child.Text == path)
+                                {
+                                    currentBranch = child;
+                                    currentBranch.Expanded = true;
                                 }
                             }
                         }
 
-                        if (currentBranch.Text == path)
+                        if (currentBranch?.Text == path)
                         {
                             currentBranch.Expanded = openProperty.IsExpanded;
                             if (currentBranch is PropertyTreePresenter presenter)
