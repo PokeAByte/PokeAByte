@@ -7,9 +7,22 @@ using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Application
 {
+    internal enum VariableProcessingResult
+    {
+        /// <summary>
+        /// Default result. Nothing to handle.
+        /// </summary>
+        Continue,
+        /// <summary>
+        /// One or more variable has triggered the abortion of the current processing loop step.
+        /// </summary>
+        SkipProcessing,
+    }
+
     public class PokeAByteInstance : IPokeAByteInstance
     {
         private readonly ILogger<PokeAByteInstance> _logger;
@@ -265,6 +278,11 @@ namespace PokeAByte.Application
                 property.FieldsChanged.Clear();
             }
 
+            if (ProcessVariables() == VariableProcessingResult.SkipProcessing)
+            {
+                return;
+            }
+
             // Preprocessor
             PreprocessorStopwatch.Restart();
 
@@ -316,7 +334,7 @@ namespace PokeAByte.Application
                 {
                     // The function returned false, which means we do not want to continue.
                     return;
-                } 
+                }
                 propertiesChanged.AddRange(
                     this.Mapper.Properties.Values
                         .Where(x => !propertiesChanged.Contains(x))
@@ -348,6 +366,68 @@ namespace PokeAByte.Application
             FieldsChangedStopwatch.Stop();
 
             ReadLoopStopwatch.Stop();
+        }
+
+        /// <summary>
+        /// Process mapper defines variables in order of definition.
+        /// </summary>
+        /// <exception cref="NotImplementedException">
+        /// String type variables are currently not supported.
+        /// </exception>
+        private VariableProcessingResult ProcessVariables()
+        {
+            if (Mapper == null || PlatformOptions == null)
+            {
+                return VariableProcessingResult.Continue;
+            }
+            // Allow reload_addresses to be false if the JS does not reset it because the mapper relies
+            // on the variable trigger:
+            bool setReload = false;
+            foreach (var variable in Mapper.Variables)
+            {
+                object? currentValue = null;
+                Variables.TryGetValue(variable.Name, out currentValue);
+                MemoryAddress resolvedAdress = 0;
+                if (AddressMath.TrySolve(new NCalc.Expression(variable.Address), Variables, out resolvedAdress))
+                {
+                    object? newValue = null;
+                    byte[] data = MemoryContainerManager.GetReadonlyBytes(null, resolvedAdress, variable.Size).ToArray();
+                    switch (variable.Type)
+                    {
+                        case "int":
+                            newValue = IntegerProperty.GetInt(data, PlatformOptions);
+                            break;
+                        case "uint":
+                            newValue = UnsignedIntegerProperty.GetUint(data, PlatformOptions);
+                            break;
+                        case "bool":
+                            newValue = data[0] != 0x00;
+                            break;
+                        case "string":
+                            throw new NotImplementedException("TODO: support string variables.");
+                        default:
+                            break;
+                    }
+                    if (variable.Trigger.HasFlag(VariableTrigger.SkipProcessingIfEqual))
+                    {
+                        if (variable.Compare != null && currentValue == variable.Compare)
+                        {
+                            return VariableProcessingResult.SkipProcessing;
+                        }
+                    }
+                    if (newValue != currentValue)
+                    {
+                        Variables[variable.Name] = newValue;
+                        if (variable.Trigger.HasFlag(VariableTrigger.ReloadAddresses))
+                        {
+                            setReload = true;
+                        }
+                    }
+                }
+            }
+            Variables["reload_addresses"] = setReload;
+            
+            return VariableProcessingResult.Continue;
         }
 
         public object? ExecuteModuleFunction(string? function, IPokeAByteProperty property)
