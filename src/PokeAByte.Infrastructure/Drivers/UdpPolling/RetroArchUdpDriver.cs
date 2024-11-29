@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -6,6 +5,9 @@ using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
+/// <summary>
+/// Driver to communicate with RetroArch and compatible emulators.
+/// </summary>
 public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
     private CancellationTokenSource? _connectionCts;
@@ -74,7 +76,10 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <returns> A completed task. </returns>
     public Task EstablishConnection() => Task.CompletedTask;
     
-
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Stops the internal read-loop and disposes the UDP client.
+    /// </remarks>
     public async Task Disconnect() {
         if (_connectionCts != null)
         {
@@ -84,12 +89,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         }
     }
 
-    /// <summary>
-    /// Tests the connect to retroarch by reading the very first byte of game memory.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> if the connection works. <see langword="false"/> if it does not.
-    /// </returns>
+    /// <inheritdoc/>
     public async Task<bool> TestConnection()
     {
         _connectionCts = new CancellationTokenSource();
@@ -107,12 +107,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         }
     }
 
-    /// <summary>
-    /// Tell retroarch to write target bytes into the game memory.
-    /// </summary>
-    /// <param name="memoryAddress"> The address as which to start writing. </param>
-    /// <param name="values"> The bytes to write to memory. </param>
-    /// <returns> An awaitable task. </returns>
+    /// <inheritdoc/>
     public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
         if (_udpClientWrapper == null) {
@@ -125,15 +120,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         );
     }
 
-    /// <summary>
-    /// Read target memory blocks from retroarch.
-    /// </summary>
-    /// <param name="blocks"> Which blocks to read. </param>
-    /// <returns> 
-    /// The dictionary of read blocks. <br/>
-    /// Key is the start of each address block. <br/>
-    /// Value is the byte array contained in that block.
-    /// </returns>
+    /// <inheritdoc/>
     public async Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
     {
         var result = new BlockData[blocks.Count];

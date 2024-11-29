@@ -20,11 +20,46 @@ namespace PokeAByte.Domain.Interfaces
         public uint End { get; init; }
     }
 
+    /// <summary>
+    /// Holds all the data relevant to a given mapper.
+    /// </summary>
+    /// <remarks>
+    /// Exposed to the mapper JavaScript via the <c>__mapper</c> object.
+    /// </remarks>
     public interface IPokeAByteMapper : IDisposable
     {
+        /// <summary>
+        /// Metadata identifiying the mapper.
+        /// </summary>
         MetadataSection Metadata { get; }
+
+        /// <summary>
+        /// The raw memory sections that the mapper specified needing from the emulator. <br/>
+        /// Defaults to an empty <see cref="MemorySection"/> with no read ranges. <br/>
+        /// PokeAByte will default to the read ranges specified in the relevant <see cref="IPlatformOptions"/> 
+        /// implementation in that case.
+        /// </summary>
+        /// <remarks>
+        /// IMPORTANT: Not all driver implementations respect these read ranges.
+        /// For this reason, this property should not be relied on in mapper JavaScript.
+        /// </remarks>
         MemorySection Memory { get; }
+
+        /// <summary>
+        /// A dictionary holding the properties specified by the mapper. <br/>
+        /// The dictionary key is the <see cref="IPokeAByteProperty.Path"/>.
+        /// </summary>
         Dictionary<string, IPokeAByteProperty> Properties { get; }
+
+        /// <summary>
+        /// Provides a glossary to translate game specific IDs and dataytypes into more useful values. <br/>
+        /// Each entry in the glossary is a collection of key-value pairs.
+        /// </summary>
+        /// <remarks>
+        /// Mappers should make sure to always include a <c>defaultCharacterMap</c> glossary entry or specify
+        /// a valid reference for every single <c>string</c> property. <br/>
+        /// See also <see cref="IPokeAByteProperty.Reference"/>.
+        /// </remarks>
         Dictionary<string, ReferenceItems> References { get; }
 
         /// <summary>
