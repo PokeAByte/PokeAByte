@@ -78,7 +78,7 @@ public class MapperClientService
                 var driverResult = await _driverService.TestDrivers(driverTestActionHandler);
                 if (string.IsNullOrWhiteSpace(driverResult))
                     return Result.Failure(Error.FailedToLoadMapper, 
-                        "Driver was not found.");
+                        "No driver could connect to an emulator. Check your emulator settings.");
                 LoadedDriver = driverResult;
                 var result = await ReplaceMapper(mapperId);
                 connected = result.IsSuccess;
