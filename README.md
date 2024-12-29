@@ -7,6 +7,10 @@ of populator video game systems. This information is made available
 in an easy-to-use JSON format that is human-readable. \
 Live updates to this data are provided through websockets.
 
+### Troubleshooting
+
+See the [troubleshooting guide](./docs/Troubleshooting.md).
+
 ### VSCode Installation
 1) Clone the repo: `git clone https://github.com/PokeAByte/PokeAByte.git`
 2) Open VSCode and click `File > Open Folder`, find where you cloned the repo and select the `src` folder
