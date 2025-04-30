@@ -15,9 +15,8 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
         private int IntegrationVersion;
         private string SystemName = string.Empty;
         private const int METADATA_LENGTH = SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE;
-        private const int DATA_Length = SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE;
+        private const int DATA_LENGTH = SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE;
         MemoryMappedViewAccessor? _memoryAccessor;
-        private byte[] _readBuffer = [];
         private SharedPlatformConstants.PlatformEntry? _platform;
 
         public BizhawkMemoryMapDriver(AppSettings appSettings)
@@ -54,8 +53,8 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             {
                 using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                     ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK_DATA.bin", MemoryMappedFileRights.Read)
-                    : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_Length, MemoryMappedFileAccess.Read);
-                _memoryAccessor = mmfData.CreateViewAccessor(0, DATA_Length, MemoryMappedFileAccess.Read);
+                    : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_LENGTH, MemoryMappedFileAccess.Read);
+                _memoryAccessor = mmfData.CreateViewAccessor(0, DATA_LENGTH, MemoryMappedFileAccess.Read);
             }
 			_memoryAccessor.SafeMemoryMappedViewHandle.ReadSpan((ulong)start, span);
             return true;
@@ -100,7 +99,6 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             {
                 await EstablishConnection();
                 _platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");
-                _readBuffer = new byte[DATA_Length];
                 var data = new byte[1];
                 ReadBizhawkData(0, data.AsSpan());
                 return data.Length > 0;
