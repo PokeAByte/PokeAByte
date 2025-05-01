@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
@@ -7,6 +6,7 @@ using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 
 namespace PokeAByte.Application.Mappers;
+
 public class MapperUpdateManager : IMapperUpdateManager
 {
     private readonly ILogger<MapperUpdateManager> _logger;
@@ -37,63 +37,6 @@ public class MapperUpdateManager : IMapperUpdateManager
         }
     }
     
-
-    private static void CleanupTemporaryFiles()
-    {
-        // TODO: 2/8/2024 - Remove this at a future date.
-        var oldMapperJsonFile = Path.Combine(BuildEnvironment.ConfigurationDirectory, "mappers.json");
-        if (File.Exists(oldMapperJsonFile))
-        {
-            File.Delete(oldMapperJsonFile);
-        }
-
-        if (File.Exists(MapperEnvironment.MapperTemporaryZipFilepath))
-        {
-            File.Delete(MapperEnvironment.MapperTemporaryZipFilepath);
-        }
-
-        if (Directory.Exists(MapperEnvironment.MapperTemporaryExtractionDirectory))
-        {
-            Directory.Delete(MapperEnvironment.MapperTemporaryExtractionDirectory, true);
-        }
-    }
-
-    private static async Task DownloadMappers(HttpClient httpClient, string distUrl)
-    {
-        try
-        {
-            CleanupTemporaryFiles();
-
-            // Download the ZIP from Github.
-            var bytes = await httpClient.GetByteArrayAsync(distUrl);
-            await File.WriteAllBytesAsync(MapperEnvironment.MapperTemporaryZipFilepath, bytes);
-
-            // Extract to the temporary directory.
-            using var zout = ZipFile.OpenRead(MapperEnvironment.MapperTemporaryZipFilepath);
-            zout.ExtractToDirectory(MapperEnvironment.MapperTemporaryExtractionDirectory);
-
-            var mapperTemporaryExtractionSubfolderDirectory = Directory.GetDirectories(MapperEnvironment.MapperTemporaryExtractionDirectory).FirstOrDefault() ??
-                throw new Exception("Mappers were downloaded from the server, but did not contain a subfolder.");
-
-            if (Directory.Exists(MapperEnvironment.MapperLocalDirectory))
-            {
-                //make a zipped archived of the old mappers
-                ZipFile.CreateFromDirectory(MapperEnvironment.MapperLocalDirectory, 
-                    Path.Combine(MapperEnvironment.MapperLocalArchiveDirectory, 
-                        $"Mapper_{DateTime.Now:yyyyMMddhhmm}"));
-                
-                Directory.Delete(MapperEnvironment.MapperLocalDirectory, true);
-            }
-
-            // Move from inside of the temporary directory into the main mapper folder.
-            Directory.Move(mapperTemporaryExtractionSubfolderDirectory, MapperEnvironment.MapperLocalDirectory);
-        }
-        finally
-        {
-            CleanupTemporaryFiles();
-        }
-    }
-
     //Returns a list of outdated mappers 
     private async Task<List<MapperComparisonDto>> GetOutdatedMapperList()
     {
@@ -125,6 +68,7 @@ public class MapperUpdateManager : IMapperUpdateManager
         return mapperTree.CompareMapperTrees(remote);
 
     }
+
     public async Task<bool> CheckForUpdates()
     {
         try
@@ -169,48 +113,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             return false;
         }
     }
-    public async Task<bool> CheckForUpdatesDeprecated()
-    {
-        try
-        {
-            if (BuildEnvironment.IsDebug && _appSettings.MAPPER_DIRECTORY_OVERWRITTEN)
-            {
-                _logger.LogWarning("Mapper directory is overwritten, will not perform any updates.");
-                return false;
-            }
 
-            if (string.IsNullOrEmpty(_appSettings.MAPPER_VERSION))
-            {
-                throw new Exception($"Mapper version is not defined in application settings. Please upgrade to the latest version of GameHook.");
-            }
-
-            var localMapperVersion = string.Empty;
-            if (File.Exists(MapperEnvironment.MapperLocalCommitHashFilePath))
-            {
-                localMapperVersion = await File.ReadAllTextAsync(MapperEnvironment.MapperLocalCommitHashFilePath);
-            }
-
-            if (_appSettings.MAPPER_VERSION != localMapperVersion)
-            {
-                _logger.LogInformation($"Downloading new mappers from server.");
-
-                var httpClient = _httpClientFactory.CreateClient();
-
-                await DownloadMappers(httpClient, $"https://github.com/gamehook-io/mappers/archive/{_appSettings.MAPPER_VERSION}.zip");
-                await File.WriteAllTextAsync(MapperEnvironment.MapperLocalCommitHashFilePath, _appSettings.MAPPER_VERSION);
-
-                return true;
-            }
-
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Could not perform update check for mappers.");
-
-            return false;
-        }
-    }
     private void WriteTextToFile(string filepath, string text, DateTime? created = null, DateTime? updated = null)
     {
         if (!string.IsNullOrWhiteSpace(text))  
@@ -233,6 +136,7 @@ public class MapperUpdateManager : IMapperUpdateManager
         }
         _logger.LogWarning($"Failed to write {filepath} because the input data was blank.");
     }
+
     public async Task SaveUpdatedMappersAsync(List<UpdateMapperDto> updatedMappers)
     {
         foreach (var mapper in updatedMappers)

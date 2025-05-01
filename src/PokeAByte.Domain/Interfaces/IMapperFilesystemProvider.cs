@@ -6,6 +6,8 @@
         Local
     }
 
+    public record MapperContent(string Xml, string? ScriptPath, string? ScriptRoot);
+
     public class MapperFilesystemDTO
     {
         public string Id { get; set; } = string.Empty;
@@ -22,5 +24,6 @@
 
         string GetMapperRootDirectory(string absolutePath);
         string GetRelativePath(string absolutePath);
+        Task<MapperContent> LoadContentAsync(string mapperId);
     }
 }

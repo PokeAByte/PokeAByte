@@ -6,9 +6,6 @@ namespace PokeAByte.Application.Mappers;
 
 public static class MapperTreeUtility
 {
-    //public readonly string BaseDirectory = baseDirectory;
-    //public List<string> FileTree = [];
-    //public List<MapperDto> MapperTree = [];
     private static List<string> GenerateFileTree(string baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory))
@@ -36,6 +33,7 @@ public static class MapperTreeUtility
         var ver = xmlReader.ReadContentAsString();
         return ver;
     }
+
     public static List<MapperDto> GenerateMapperDtoTree(string baseDirectory)
     {
         var fileTree = GenerateFileTree(baseDirectory);
@@ -45,6 +43,7 @@ public static class MapperTreeUtility
             .Select(x => MapperDto.Create(baseDirectory, x, GetVersion(x)))
             .ToList();
     }
+
     public static List<MapperDto> Load(string baseDirectory)
     {
         var path = Path.Combine(baseDirectory, "mapper_tree.json");
@@ -71,6 +70,7 @@ public static class MapperTreeUtility
             return GenerateMapperDtoTree(baseDirectory);
         }
     }
+
     public static bool SaveChanges(string baseDirectory, List<MapperDto> mapperTree)
     {
         var path = Path.Combine(baseDirectory, "mapper_tree.json");
@@ -110,10 +110,8 @@ public static class MapperTreeUtilityExtensions
         //Then we run the `Outdated` to compare local and remote's DateUpdatedUtc
         //True means the local mapper is outdated, otherwise it means they aren't outdated
         //or `DateUpdatedUtc` is null
-        var outdated = local.Where(x =>
-                x.Outdated(remoteTree
-                    .FirstOrDefault(y =>
-                        y.Path == x.Path)))
+        var outdated = local
+            .Where(x => x.Outdated(remoteTree .FirstOrDefault(y => y.Path == x.Path)))
             .Select(localMapper => new MapperComparisonDto()
             {
                 CurrentVersion = localMapper,

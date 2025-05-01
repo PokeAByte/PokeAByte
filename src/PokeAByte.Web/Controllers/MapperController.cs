@@ -53,7 +53,7 @@ static class MapperHelper
 public class MapperController : ControllerBase
 {
     private readonly ILogger<MapperController> _logger;
-    public PokeAByteInstance Instance { get; }
+    public IPokeAByteInstance Instance { get; }
     private readonly AppSettings _appSettings;
     public readonly IBizhawkMemoryMapDriver _bizhawkMemoryMapDriver;
     public readonly IRetroArchUdpPollingDriver _retroArchUdpPollingDriver;
@@ -61,7 +61,7 @@ public class MapperController : ControllerBase
 
     public MapperController(
         ILogger<MapperController> logger,
-        PokeAByteInstance pokeAByteInstance,
+        IPokeAByteInstance pokeAByteInstance,
         AppSettings appSettings,
         IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
         IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
@@ -194,6 +194,8 @@ public class MapperController : ControllerBase
     [HttpPost("set-property-value")]
     public async Task<ActionResult> UpdatePropertyValueAsync(UpdatePropertyValueModel model)
     {
+        Console.WriteLine(Instance.Initalized);
+        Console.WriteLine(Instance.Mapper != null);
         if (Instance.Initalized == false || Instance.Mapper == null)
             return ApiHelper.MapperNotLoaded();
 

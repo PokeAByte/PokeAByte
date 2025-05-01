@@ -1,6 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
 using Hellang.Middleware.ProblemDetails;
 using Hellang.Middleware.ProblemDetails.Mvc;
+using Microsoft.AspNetCore.StaticFiles.Infrastructure;
+using Microsoft.Extensions.FileProviders;
 using PokeAByte.Application;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
@@ -64,44 +67,15 @@ public static class Startup
             mapperArchiveManager.GenerateArchivedList();
             return mapperArchiveManager;
         });
-        services.AddSingleton<IGithubRestApi, GithubRestApi>();
-        services.AddSingleton<PokeAByteInstance>();
+        services.AddSingleton<IGithubRestApi, GithubRestApi>();        
         services.AddSingleton<ScriptConsole>();
         services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
         services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpDriver>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<DriverService>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
-
-        services.AddSingleton<MapperSettingsService>();
-        //PokeAByte Services
-        services.AddSingleton(x =>
-        {
-            var mapperFs = x.GetRequiredService<IMapperFilesystemProvider>();
-            var logger = x.GetRequiredService<ILogger<MapperClientService>>();
-            var driverService = x.GetRequiredService<DriverService>();
-            return new MapperClientService(mapperFs,
-                logger,
-                CreateClient(x),
-                driverService
-            );
-        });
-        //For some reason, the Driver controller requires special DI despite not needing it 
-        //in the original implementation? Just add them to the DI
+        services.AddSingleton<MapperClientService>();
         services.AddSingleton<IPokeAByteInstance, PokeAByteInstance>();
-        services.AddSingleton<IPokeAByteDriver, StaticMemoryDriver>();
-    }
-
-    private static MapperClient CreateClient(IServiceProvider services)
-    {
-        var logger = services.GetRequiredService<ILogger<MapperClient>>();
-        var instance = services.GetRequiredService<PokeAByteInstance>();
-        var appSettings = services.GetRequiredService<AppSettings>();
-        var bizhawk = services.GetRequiredService<IBizhawkMemoryMapDriver>();
-        var retro = services.GetRequiredService<IRetroArchUdpPollingDriver>();
-        var staticMem = services.GetRequiredService<IStaticMemoryDriver>();
-        var mapperSettings = services.GetRequiredService<MapperSettingsService>();
-        return new MapperClient(logger, instance, appSettings, bizhawk, retro, staticMem, mapperSettings);
     }
 
     public static void ConfigureApp(this WebApplication app)
@@ -123,13 +97,24 @@ public static class Startup
         app.UseRouting();
         app.UseStaticFiles();
 
-        if (BuildEnvironment.IsDebug)
+        var provider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
+        app.UseSpaStaticFiles(new StaticFileOptions
         {
-            //app.MapGet("/gh_index", () => Results.Redirect("index.html", false));
-        }
-        else
+            FileProvider = provider,
+            RequestPath = "",
+        });
+        app.UseSpa(configuration =>
         {
-            //app.MapGet("/gh_index", () => Results.File(ApiHelper.EmbededResources.index_html, contentType: "text/html"));
+            configuration.Options.DefaultPageStaticFileOptions = new StaticFileOptions(new SharedOptions
+            {
+                FileProvider = provider,
+            });
+            configuration.Options.DefaultPage = "/index.html";
+        });
+
+
+        if (!BuildEnvironment.IsDebug)
+        {
             app.MapGet("/favicon.ico", () => Results.File(ApiHelper.EmbededResources.favicon_ico, contentType: "image/x-icon"));
             app.MapGet("/site.css", () => Results.File(ApiHelper.EmbededResources.site_css, contentType: "text/css"));
             app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.dist_gameHookMapperClient_js, contentType: "application/javascript"));

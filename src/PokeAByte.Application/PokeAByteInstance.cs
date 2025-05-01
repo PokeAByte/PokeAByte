@@ -44,7 +44,12 @@ namespace PokeAByte.Application
         private Stopwatch PostprocessorStopwatch { get; set; } = new();
         private Stopwatch FieldsChangedStopwatch { get; set; } = new();
 
-        public PokeAByteInstance(ILogger<PokeAByteInstance> logger, AppSettings appSettings, ScriptConsole scriptConsoleAdapter, IMapperFilesystemProvider provider, IEnumerable<IClientNotifier> clientNotifiers)
+        public PokeAByteInstance(
+            ILogger<PokeAByteInstance> logger, 
+            AppSettings appSettings, 
+            ScriptConsole scriptConsoleAdapter, 
+            IMapperFilesystemProvider provider, 
+            IEnumerable<IClientNotifier> clientNotifiers)
         {
             _logger = logger;
             _appSettings = appSettings;
@@ -104,23 +109,8 @@ namespace PokeAByte.Application
                 }
 
                 // Get the file path from the filesystem provider.
-                var mapperFile = MapperFilesystemProvider.MapperFiles.SingleOrDefault(x => x.Id == mapperId) ??
-                                 throw new Exception($"Unable to determine a mapper with the ID of {mapperId}.");
-
-                if (File.Exists(mapperFile.AbsolutePath) == false)
-                {
-                    throw new FileNotFoundException($"File was not found in the {mapperFile.Type} mapper folder.", mapperFile.DisplayName);
-                }
-
-                var mapperContents = await File.ReadAllTextAsync(mapperFile.AbsolutePath);
-                if (mapperFile.AbsolutePath.EndsWith(".xml"))
-                {
-                    Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperFile.AbsolutePath, mapperContents);
-                }
-                else
-                {
-                    throw new Exception($"Invalid file extension for mapper.");
-                }
+                var mapperContent = await MapperFilesystemProvider.LoadContentAsync(mapperId);
+                Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
 
                 PlatformOptions = Mapper.Metadata.GamePlatform switch
                 {
@@ -140,11 +130,10 @@ namespace PokeAByte.Application
                     StringCompilationAllowed = false
                 };
 
-                var javascriptAbsolutePath = mapperFile.AbsolutePath.Replace(".xml", ".js");
-                if (File.Exists(javascriptAbsolutePath))
+                if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
                 {
-                    var rootDirectory = MapperFilesystemProvider.GetMapperRootDirectory(javascriptAbsolutePath);
-                    engineOptions.EnableModules(rootDirectory, true);
+                    
+                    engineOptions.EnableModules(mapperContent.ScriptRoot, true);
 
                     JavascriptEngine = new Engine(engineOptions)
                         .SetValue("__console", ScriptConsoleAdapter)
@@ -154,8 +143,7 @@ namespace PokeAByte.Application
                         .SetValue("__memory", MemoryContainerManager)
                         .SetValue("__driver", Driver);
 
-                    JavascriptModuleInstance = JavascriptEngine.Modules.Import(MapperFilesystemProvider.GetRelativePath(javascriptAbsolutePath));
-
+                    JavascriptModuleInstance = JavascriptEngine.Modules.Import(mapperContent.ScriptPath);
                     HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");
                     HasPostprocessor = JavascriptModuleInstance.HasProperty("postprocessor");
                 }

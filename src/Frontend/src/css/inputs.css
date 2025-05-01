@@ -1,0 +1,92 @@
+button,
+input,
+input[type="checkbox"] {
+	margin-top: var(--margin-0);
+	font-size: var(--font-size-0);
+	color: var(--text-primary);
+	padding: var(--margin-0);
+	border: 2px solid var(--color-border-0);
+	background-color: var(--color-surface-1);
+
+	&:hover {
+		background-color: var(--color-surface-2);
+		border-color: var(--color-border-1);
+	}
+
+	&[disabled] {
+		border: 2px solid var(--color-border-0);
+		background-color: var(--color-surface-0);
+		color: var(--color-tone-1);
+	}
+
+	&:focus-visible {
+		outline: 2px dashed var(--color-highlight);
+	}
+
+	&.highlight {
+		color: var(--color-highlight)
+	}
+}
+
+input[type="checkbox"] {
+	appearance: none;
+	height: 2rem;
+	width: 2rem;
+	display: grid;
+	place-content: center;
+	&:not([role="switch"])  {
+		&:checked:before {
+			content: "";
+			height: 1rem;
+			width: 1rem;
+			transition: 120ms transform ease-in-out;
+			background-color: var(--color-tone-5);
+		}
+	}
+	&[role="switch"] {
+		width: 4rem;
+		&:before {
+			content: "";
+			height: 1rem;
+			width: 1rem;
+			transition: 120ms transform ease-in-out;
+			background-color: var(--color-red);
+			transform: translateX(+100%);
+		}
+		&:checked:before {
+			background-color: var(--color-green);
+			transform: translateX(-100%);
+		}
+	}
+}
+
+form {
+	display: table;
+}
+
+.field {
+	display: table-row;
+	padding-bottom: var(--margin-2);
+
+	input {
+		width: 50%;
+		display: table-cell;
+	}
+
+	label {
+		width: 50%;
+		display: table-cell;
+	}
+
+	& ~ small {
+		margin-bottom: none;
+	}
+}
+
+.field ~ small {
+	display: block;
+}
+
+button {
+	border-style: outset;
+}

@@ -4,9 +4,9 @@ public sealed record Error(string Code, string? Description)
 {
     public override string ToString()
     {
-        return (string.IsNullOrWhiteSpace(Description) ?
-                   "" :
-                   $"{Description}");
+        return string.IsNullOrWhiteSpace(Description)
+            ? ""
+            : $"{Description}";
     }
 
     public static readonly Error None = new(string.Empty, null);

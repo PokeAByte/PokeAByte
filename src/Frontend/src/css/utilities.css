@@ -1,0 +1,41 @@
+.layout-box {
+	padding-left: 12.5%;
+	padding-right: 12.5%;
+}
+
+.no-padding {
+	margin: 0;
+	padding: 0;
+}
+
+.text-red {
+	color: var(--color-red);
+}
+
+.text-green {
+	color: var(--color-green);
+}
+
+.border-red {
+	border-color: var(--color-red);
+}
+
+.border-blue {
+	border-color: var(--color-highlight) !important;
+}
+.border-green {
+	border-color: var(--color-green);
+}
+.border-purple {
+	border-color: var(--color-purple);
+}
+
+.margin-top {
+	margin-top: var(--margin-1);
+}
+.margin-left {
+	margin-left: var(--margin-1);
+}
+.margin-right {
+	margin-right: var(--margin-1);
+}

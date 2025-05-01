@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
-using PokeAByte.Application;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
 
 namespace PokeAByte.Web.Hubs;
 
-public class UpdateHub(PokeAByteInstance instance, Domain.Models.AppSettings appSettings) : Hub
+public class UpdateHub(IPokeAByteInstance instance, Domain.Models.AppSettings appSettings) : Hub
 {
     public override Task OnConnectedAsync()
     {

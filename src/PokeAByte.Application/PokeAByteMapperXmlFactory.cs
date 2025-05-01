@@ -155,7 +155,7 @@ namespace PokeAByte.Application
                 });
         }
 
-        public static IPokeAByteMapper LoadMapperFromFile(IPokeAByteInstance? instance, string filePath, string mapperContents)
+        public static IPokeAByteMapper LoadMapperFromFile(IPokeAByteInstance? instance, string mapperContents)
         {
             var doc = XDocument.Parse(mapperContents.Replace("{", string.Empty).Replace("}", string.Empty));
 

@@ -39,7 +39,7 @@ public class Program
 
             LogVersion(app);
             app.ConfigureApp();
-            Process.Start(new ProcessStartInfo("http://localhost:8085") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("http://localhost:8085/ui/mappers") { UseShellExecute = true });
             app.Run();
         }
         catch (Exception ex)

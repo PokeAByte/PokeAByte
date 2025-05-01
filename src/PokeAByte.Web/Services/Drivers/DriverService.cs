@@ -23,6 +23,9 @@ public class DriverService
         _staticMemory = staticMemory;
     }
 
+    public IBizhawkMemoryMapDriver Bizhawk => _bizhawk;
+    public IRetroArchUdpPollingDriver RetroArch => _retroArch;
+    public IStaticMemoryDriver StaticMemory => _staticMemory;
 
     public async Task<string> TestDrivers(Action<int>? callback)
     {
@@ -41,15 +44,15 @@ public class DriverService
                 switch (currentDriver)
                 {
                     case DriverModels.Bizhawk:
-                        connects = await ReadDriver(_bizhawk);
+                        connects = await _bizhawk.TestConnection();
                         driverList.Remove(DriverModels.Bizhawk);
                         break;
                     case DriverModels.RetroArch:
-                        connects = await ReadDriver(_retroArch);
+                        connects = await _retroArch.TestConnection();
                         driverList.Remove(DriverModels.RetroArch);
                         break;
                     case DriverModels.StaticMemory:
-                        connects = await ReadDriver(_staticMemory);
+                        connects = await _staticMemory.TestConnection();
                         driverList.Remove(DriverModels.StaticMemory);
                         break;
                     default:
@@ -75,12 +78,9 @@ public class DriverService
 
         //If it connects then return the driver name, otherwise return empty
         if (connects)
+        {
             return currentDriver ?? "";
+        }
         return string.Empty;
-    }
-
-    private async Task<bool> ReadDriver(IPokeAByteDriver driver)
-    {
-        return await driver.TestConnection();
     }
 }

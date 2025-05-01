@@ -11,12 +11,6 @@ using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web.Controllers
 {
-    public class MapperFileModel
-    {
-        public string Id { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-    }
-
     [ApiController]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -28,8 +22,7 @@ namespace PokeAByte.Web.Controllers
         IMapperArchiveManager archiveManager,
         IGithubApiSettings githubApiSettings) : ControllerBase
     {
-        private static string MapperLocalDirectory =>
-            Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
+        private static string MapperLocalDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
         public IMapperFilesystemProvider MapperFilesystemProvider { get; } = mapperFilesystemProvider;
 
         [HttpGet("mappers")]

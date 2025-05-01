@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Services.Mapper;
@@ -12,12 +13,16 @@ namespace PokeAByte.Web.Controllers;
 public class MapperServiceController : ControllerBase
 {
     private readonly ILogger<MapperServiceController> _logger;
+    private readonly IPokeAByteInstance _instance;
     private readonly MapperClientService _mapperClientService;
 
-    public MapperServiceController(ILogger<MapperServiceController> logger,
+    public MapperServiceController(
+        ILogger<MapperServiceController> logger,
+        IPokeAByteInstance instance,
         MapperClientService mapperClientService)
     {
         _logger = logger;
+        _instance = instance;
         _mapperClientService = mapperClientService;
     }
 
@@ -77,11 +82,13 @@ public class MapperServiceController : ControllerBase
     [Route("get-properties")]
     public ActionResult<List<PropertyModel>> GetProperties()
     {
-        var properties = _mapperClientService.Properties;
-        if (properties.Count == 0)
+        if (_instance.Mapper == null || _instance.Mapper.Properties.Count == 0)
         {
             return NotFound();
         }
+        var properties = _instance.Mapper.Properties.Values
+            .Select(x => x.MapToPropertyModel())
+            .ToList();
         return Ok(properties);
     }
 

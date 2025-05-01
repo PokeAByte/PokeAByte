@@ -1,0 +1,61 @@
+
+.tree {
+	--tree-spacing: 24px;
+	--tree-radius: 10px;
+	padding-left: 0;
+	li {
+		display: block;
+		font-size: var(--font-size-0);
+		position: relative;
+		padding-left: calc(2 * var(--tree-spacing) - var(--tree-radius) - 2px);
+	}
+	
+	ul {
+		margin-left: calc(var(--tree-radius) - var(--tree-spacing));
+		padding-left: 0;
+		border-left: 2px solid white;
+		li::before {
+			content: '';
+			display: block;
+			position: absolute;
+			top: calc(var(--tree-spacing) * -1 + 5px);
+			left: -2px;
+			width: calc(var(--tree-spacing));
+			height: calc(var(--tree-spacing) * 1.5);
+			border: solid #ddd;
+			border-width: 0 0 2px 2px;
+		}
+	}
+	summary {
+		display: block;
+		cursor: pointer;
+		line-height: 36px;
+		&::marker {
+			display: none;
+		}
+		&:focus {
+			outline: none;
+		}
+		&:focus-visible {
+			outline: 1px dotted #000;
+		}
+		&::before {
+			z-index: 1;
+		}
+		&::before {
+			content: '';
+			position: absolute;
+			left: calc(var(--tree-spacing) - var(--tree-radius) - 1px);
+			width: calc(2 * var(--tree-radius));
+			height: calc(2 * var(--tree-radius));
+			clip-path: circle(35% at 50% 65%);
+			background: #ddd;
+			top: 5px;
+		}
+	}
+	details{
+		&[open]>summary::before {
+			background-position: calc(-2 * var(--tree-radius)) 0;
+		}
+	}
+}
