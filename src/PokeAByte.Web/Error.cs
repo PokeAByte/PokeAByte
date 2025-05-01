@@ -4,8 +4,8 @@ public sealed record Error(string Code, string? Description)
 {
     public override string ToString()
     {
-        return (string.IsNullOrWhiteSpace(Description) ? 
-                   "" : 
+        return (string.IsNullOrWhiteSpace(Description) ?
+                   "" :
                    $"{Description}");
     }
 

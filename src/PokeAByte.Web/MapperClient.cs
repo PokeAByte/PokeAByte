@@ -1,12 +1,9 @@
-﻿using MudBlazor;
-using PokeAByte.Application;
+﻿using PokeAByte.Application;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Web.Models;
-using PokeAByte.Web.Services;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web;
@@ -19,9 +16,7 @@ public class MapperClient(
     IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
     IStaticMemoryDriver staticMemoryDriver,
     MapperSettingsService mapperSettings)
-{    
-
-    public string ConnectionString { get; set; } = "";
+{
     public bool IsMapperLoaded => _mapperModel is not null;
     private MapperModel? _mapperModel;
     public async Task<bool> LoadMapper(MapperReplaceModel mapper)
@@ -35,7 +30,7 @@ public class MapperClient(
         {
             case DriverModels.Bizhawk:
                 await instance.Load(bizhawkMemoryMapDriver, mapper.Id);
-                logger.LogDebug("Bizhawk driver loaded."); 
+                logger.LogDebug("Bizhawk driver loaded.");
                 break;
             case DriverModels.RetroArch:
                 await instance.Load(retroArchUdpPollingDriver, mapper.Id);
@@ -92,12 +87,6 @@ public class MapperClient(
             return null;
         return _mapperModel!.Meta;
     }
-    public Dictionary<string, IEnumerable<GlossaryItemModel>>? GetAllGlossaryItems()
-    {
-        if (!IsMapperLoaded || !instance.Initalized)
-            return null;
-        return _mapperModel!.Glossary;
-    }
 
     public IEnumerable<GlossaryItemModel>? GetGlossaryByKey(string key)
     {
@@ -105,15 +94,6 @@ public class MapperClient(
             return null;
         var gotVal = _mapperModel!.Glossary.TryGetValue(key, out var val);
         return gotVal ? val : null;
-    }
-
-    public PropertyModel? GetPropertyByPath(string path)
-    {
-        if (!IsMapperLoaded || !instance.Initalized)
-            return null;
-        return _mapperModel!
-            .Properties
-            .FirstOrDefault(x => x.Path == path);
     }
 
     public IEnumerable<PropertyModel>? GetProperties()
@@ -124,6 +104,7 @@ public class MapperClient(
             .Properties
             .AsEnumerable();
     }
+
     public void UpdateProperty(IPokeAByteProperty property)
     {
         if (!IsMapperLoaded || !instance.Initalized) return;
@@ -138,7 +119,7 @@ public class MapperClient(
         try
         {
             var prop = instance.Mapper.Properties[path];
-            
+
             if (prop.IsReadOnly)
             {
                 return false;
@@ -152,14 +133,5 @@ public class MapperClient(
             logger.LogError(e, "Failed to update property.");
             return false;
         }
-    }
-
-    public void AttachOnReadExceptionOccuredHandler(Action onReadExceptionOccuredHandler)
-    {
-        instance.OnReadExceptionOccured += onReadExceptionOccuredHandler;
-    }
-    public void DetachOnReadExceptionOccuredHandler(Action onReadExceptionOccuredHandler)
-    {
-        instance.OnReadExceptionOccured -= onReadExceptionOccuredHandler;
     }
 }

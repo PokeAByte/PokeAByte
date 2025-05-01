@@ -18,19 +18,19 @@ public class Result
     public static Result Success() => new Result(true, Error.None);
     public static Result<TValue> Success<TValue>(TValue value) =>
         new(true, Error.None, value);
-    
+
     public static Result Failure(Error error, string additionalErrorMessage = "") =>
         new Result(false, error, additionalErrorMessage: additionalErrorMessage);
-    public static Result Failure(string additionalErrorMessage) => 
+    public static Result Failure(string additionalErrorMessage) =>
         new Result(false, Error.GeneralError, additionalErrorMessage: additionalErrorMessage);
     public static Result<TValue> Failure<TValue>(Error error, string additionalErrorMessage = "") =>
         new(false, error, additionalErrorMessage: additionalErrorMessage);
-    
-    public static Result Exception(Exception exception) => 
+
+    public static Result Exception(Exception exception) =>
         new Result(false, Error.Exception, exception);
     public static Result<TValue> Exception<TValue>(Exception exception) =>
         new(false, Error.Exception, exception: exception);
-    
+
     public override string ToString()
     {
         if (IsSuccess)

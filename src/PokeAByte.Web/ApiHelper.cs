@@ -5,7 +5,7 @@ namespace PokeAByte.Web;
 
 
 public static class ApiHelper
-{    
+{
     public static class EmbededResources
     {
         public static Stream appsettings_json => GetEmbeddedResourceStream("PokeAByte.Web.appsettings.json");

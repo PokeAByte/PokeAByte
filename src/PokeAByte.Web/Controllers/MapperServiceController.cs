@@ -14,7 +14,7 @@ public class MapperServiceController : ControllerBase
     private readonly ILogger<MapperServiceController> _logger;
     private readonly MapperClientService _mapperClientService;
 
-    public MapperServiceController(ILogger<MapperServiceController> logger, 
+    public MapperServiceController(ILogger<MapperServiceController> logger,
         MapperClientService mapperClientService)
     {
         _logger = logger;
@@ -42,8 +42,8 @@ public class MapperServiceController : ControllerBase
         try
         {
             var mapperResult = await _mapperClientService.ChangeMapper(
-                mapperId, 
-                null, 
+                mapperId,
+                null,
                 null);
             if (mapperResult.IsSuccess)
             {
@@ -130,9 +130,4 @@ public class MapperServiceController : ControllerBase
     }
 }
 
-public class PropertyUpdateModel
-{
-    public string Path { get; set; }
-    public string Value { get; set; }
-    public bool IsFrozen { get; set; }
-}
+public record PropertyUpdateModel(string Path, string Value, bool IsFrozen);

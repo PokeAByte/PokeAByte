@@ -1,12 +1,9 @@
-namespace PokeAByte.Domain.Interfaces
+namespace PokeAByte.Domain.Interfaces;
+
+public interface IClientNotifier
 {
-    public interface IClientNotifier
-    {
-        Task SendInstanceReset();
-        Task SendMapperLoaded(IPokeAByteMapper mapper);
-        Task SendError(IProblemDetails problemDetails);
-        Task SendPropertiesChanged(IList<IPokeAByteProperty> properties);
-        
-        public event PropertyChangedEventHandler? PropertyChangedEvent;
-    }
+    Task SendInstanceReset();
+    Task SendMapperLoaded(IPokeAByteMapper mapper);
+    Task SendError(IProblemDetails problemDetails);
+    Task SendPropertiesChanged(IList<IPokeAByteProperty> properties);
 }

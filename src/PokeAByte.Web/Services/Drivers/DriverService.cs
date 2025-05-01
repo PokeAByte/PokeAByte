@@ -1,71 +1,29 @@
-﻿using System.Timers;
-using PokeAByte.Domain.Interfaces;
+﻿using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using Timer = System.Timers.Timer;
 
 namespace PokeAByte.Web.Services.Drivers;
 
 public class DriverService
 {
-    public event Action? OnDriverModelChange;
     private string _driverModel = DriverModels.Bizhawk;
     public static readonly int MaxAttempts = 25;
     private const int MaxPauseMs = 50;
     private int _currentAttempt = 0;
-    public string DriverModel
-    {
-        get => _driverModel;
-        private set
-        {
-            _driverModel = value;
-            OnDriverModelChange?.Invoke();
-        }
-    }
-    private Timer _driverConnectionTestTimer;
-    private readonly ILogger<DriverService> _logger;
+
     private readonly IBizhawkMemoryMapDriver _bizhawk;
     private readonly IRetroArchUdpPollingDriver _retroArch;
     private readonly IStaticMemoryDriver _staticMemory;
-    public DriverService(ILogger<DriverService> logger, 
-        IBizhawkMemoryMapDriver bizhawk, 
-        IRetroArchUdpPollingDriver retroArch, 
+    public DriverService(
+        IBizhawkMemoryMapDriver bizhawk,
+        IRetroArchUdpPollingDriver retroArch,
         IStaticMemoryDriver staticMemory)
     {
-        _logger = logger;
         _bizhawk = bizhawk;
         _retroArch = retroArch;
         _staticMemory = staticMemory;
-        ConfigureService();
     }
-    private void ConfigureService()
-    {
-        /*var userSettings = new UserSettings();
-        try
-        {
-            //Get settings
-            if (!File.Exists(BuildEnvironment.UserSettingsJson)) return;
-            var jsonStr = File.ReadAllText(BuildEnvironment.UserSettingsJson);
-            if (!string.IsNullOrWhiteSpace(jsonStr))
-                userSettings = JsonSerializer.Deserialize<UserSettings>(jsonStr);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to load settings data.");
-        }            
-        DriverModel = userSettings?.DefaultDriver ?? DriverModels.Bizhawk;*/
-        /*_driverConnectionTestTimer =
-            new System.Timers.Timer(userSettings?.DriverTestTimeoutMs ?? 100);
-        _driverConnectionTestTimer.Elapsed += OnTimerEvent;
-        _driverConnectionTestTimer.AutoReset = true;
-        _driverConnectionTestTimer.Enabled = false;*/
-    }
-    private async void OnTimerEvent(object? source, ElapsedEventArgs e)
-    {
-        /*_driverConnectionTestTimer.Stop();
-        var result = await TestDrivers();
-        _logger.LogError($"Current Connected Driver: {result}");
-        _driverConnectionTestTimer.Start();*/
-    }
+
+
     public async Task<string> TestDrivers(Action<int>? callback)
     {
         _currentAttempt = 0;

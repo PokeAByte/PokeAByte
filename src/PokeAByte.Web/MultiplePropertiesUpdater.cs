@@ -13,15 +13,15 @@ public static class MultiplePropertiesUpdater
         var desiredLength = properties.First().Key.Length!.Value;
         var len = desiredLength * 8;
         //Make sure we do not go over the maximum allowed bytes!
-        var totalBitCount = 
-            properties.Aggregate(new int(),(prev, next) =>
+        var totalBitCount =
+            properties.Aggregate(new int(), (prev, next) =>
             {
                 var bitRange = GetBitRange(next.Key.Bits);
                 return prev + bitRange.Length;
             });
         if (totalBitCount >= len)
             throw new InvalidOperationException("Total bit count exceeds the maximum size of the bit array.");
-        
+
         //We want to fill this new output array with the original value to maintain consistency 
         var outputBits = new BitArray(properties.First().Key.BytesFromFullValue());
 
@@ -35,7 +35,7 @@ public static class MultiplePropertiesUpdater
                 outputBits[bitRange[i]] = inputBits[i];
             }
         }
-       
+
         var outputBytes = new byte[desiredLength];
         outputBits.CopyTo(outputBytes, 0);
         return outputBytes;

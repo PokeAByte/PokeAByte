@@ -8,7 +8,6 @@ namespace PokeAByte.Web.Services.Mapper;
 public class MapperSettingsService
 {
     private List<MapperSettingsModel> _savedMappers = [];
-    private MapperSettingsModel? _currentMapperModel;
     private ILogger<MapperSettingsService> _logger { get; set; }
 
     public MapperSettingsService(ILogger<MapperSettingsService> logger)
@@ -16,15 +15,16 @@ public class MapperSettingsService
         _logger = logger;
         LoadMappers();
     }
+
     private void LoadMappers()
     {
         if (!File.Exists(BuildEnvironment.MapperSettingsJson)) return;
         var jsonStr = File.ReadAllText(BuildEnvironment.MapperSettingsJson);
-        if(string.IsNullOrWhiteSpace(jsonStr))
+        if (string.IsNullOrWhiteSpace(jsonStr))
             return;
         _savedMappers = JsonSerializer.Deserialize<List<MapperSettingsModel>>(jsonStr) ?? [];
     }
-    
+
     public void SetCurrentMapper(IPokeAByteMapper mapper)
     {
         //Check to see if the mapper exists
@@ -36,19 +36,11 @@ public class MapperSettingsService
             {
                 MapperGuid = mapper.Metadata.Id,
                 MapperName = mapper.Metadata.GameName,
-                Properties = []
             };
             //add it to the list
             _savedMappers.Add(newMapper);
-            //set it as the current mapper
-            _currentMapperModel = newMapper;
             //Persist data to disk
             SaveSettings();
-        }
-        else
-        {
-            //found mapper, set it as the current mapper
-            _currentMapperModel = result.ResultValue;
         }
     }
 
@@ -87,91 +79,5 @@ public class MapperSettingsService
             _logger.LogError(result.ToString(), e);
             return result;
         }
-    }
-
-    public void OnPropertyExpandedHandler(PropertyTreePresenter prop)
-    {
-        if (_currentMapperModel is null)
-            return;
-        if (_currentMapperModel.MapperGuid != prop.Value?.MapperId)
-            return;
-        var name = $"{prop.Value.Name}"; 
-        //check to see if prop has a parent
-        if (prop.Parent is not null)
-        {
-            //get the name of the parent and concat it with current name
-            name = $"{prop.Parent.Text}.{prop.Value.Name}";
-        }
-        var partialPath = $"{prop.Value.FullPath[..prop.Value.FullPath.IndexOf(name, StringComparison.Ordinal)]}{name}";
-        //var partialPath = prop.Value.FullPath[..prop.Value.FullPath.LastIndexOf('.')];
-        //find the entry with path
-        var foundEntry = _currentMapperModel
-            .Properties
-            .FirstOrDefault(x => x.PropertyPath == partialPath);
-
-        if (prop.Expanded)
-        {
-            //if we found the entry just update it
-            if (foundEntry is not null)
-            {
-                foundEntry.IsExpanded = true;
-            }
-            else
-            {
-                //otherwise create it
-                var newPropModel = new PropertySettingsModel
-                {
-                    PropertyName = prop.Value.Name,
-                    PropertyPath = partialPath,
-                    IsExpanded = true,
-                    HasChildren = prop.HasChildren,
-                    HasProperty = prop.Value.PropertyModel is not null
-                };
-                _currentMapperModel.Properties.Add(newPropModel);
-            }
-        }
-        else
-        {
-            //minimize
-            //get all child paths
-            var foundChildren = _currentMapperModel
-                .Properties
-                .Where(x => x.PropertyPath
-                    .Contains(partialPath, StringComparison.InvariantCultureIgnoreCase))
-                .ToList();
-            //remove all children
-            foreach (var child in foundChildren)
-            {
-                _currentMapperModel.Properties.Remove(child);
-            }
-
-            if (foundEntry is not null)
-            {
-                //remove self
-                _currentMapperModel.Properties.Remove(foundEntry);
-            }
-        }
-        var savedMapper = _savedMappers
-            .FirstOrDefault(x => x == _currentMapperModel);
-        if (savedMapper is null)
-            _savedMappers.Add(_currentMapperModel);
-        else
-            savedMapper = _currentMapperModel;
-        SaveSettings();
-    }
-    public List<PropertySettingsModel>? GetMapperModelProperties()
-    {
-        if (_currentMapperModel is null)
-            return null;
-        return _currentMapperModel
-            .Properties.Select(x => new PropertySettingsModel
-            {
-                PropertyName = x.PropertyName,
-                PropertyPath = x.PropertyPath,
-                IsExpanded = x.IsExpanded,
-                HasChildren = x.HasChildren,
-                HasProperty = x.HasProperty
-            })
-            .ToList();
     }
 }

@@ -16,44 +16,12 @@
 
     <ItemGroup>
       <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
-      <PackageReference Include="MudBlazor" Version="7.5.0" />
       <PackageReference Include="Serilog" Version="4.0.2-dev-02220" />
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
       <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
       <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <AdditionalFiles Include="Components\MapperManager\LoadMapper.razor" />
-      <AdditionalFiles Include="Layout\MainLayout.razor" />
-      <AdditionalFiles Include="Layout\NavigationMenu.razor" />
-      <AdditionalFiles Include="Pages\AppSettings.razor" />
-      <AdditionalFiles Include="Pages\Error.razor" />
-      <AdditionalFiles Include="Pages\Home.razor" />
-      <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />
-      <AdditionalFiles Include="Pages\MapperManager.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Components\Pages\AppSettings.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\DataProperties.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\MapperConnectionStatus.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\MapperManager.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyExpansionPanel.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyExpansionView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTreeView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyValueEditor.razor" />
     </ItemGroup>
 
     <ItemGroup>

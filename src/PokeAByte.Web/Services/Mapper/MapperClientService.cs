@@ -1,51 +1,38 @@
-﻿using MudBlazor;
-using PokeAByte.Domain;
-using PokeAByte.Domain.Interfaces;
+﻿using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
-using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperClientService
 {
-    private static readonly long _batchTicks = TimeSpan.FromMilliseconds(15).Ticks;
     private readonly IMapperFilesystemProvider _mapperFs;
     private readonly ILogger<MapperClientService> _logger;
     public readonly MapperClient Client;
-    private readonly PropertyUpdateService _propertyUpdateService;
     private readonly DriverService _driverService;
     private int _currentAttempt = 0;
     public static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
-    public string LoadedMapperName { get; private set; }
-    private long _lastUpdate;
-    private HashSet<string> _pendingUpdates = new();
+    public string? LoadedMapperName { get; private set; }
 
-    public MapperClientService(IMapperFilesystemProvider mapperFs,
+    public MapperClientService(
+        IMapperFilesystemProvider mapperFs,
         ILogger<MapperClientService> logger,
         MapperClient client,
-        IClientNotifier clientNotifier,
-        PropertyUpdateService propertyUpdateService,
         DriverService driverService)
     {
         _mapperFs = mapperFs;
         _logger = logger;
         Client = client;
-        _propertyUpdateService = propertyUpdateService;
         _driverService = driverService;
-        clientNotifier.PropertyChangedEvent += HandlePropertyChangedEvent;
     }
-
-    private const Color DisconnectedColor = Color.Secondary;
-    private const Color ConnectedColor = Color.Success;
-
     //Todo: change this in settings
     public string LoadedDriver { get; set; } = DriverModels.Bizhawk;
+
     public event Action? OnMapperIsUnloaded;
+
     public bool IsCurrentlyConnected
     {
         get
@@ -57,12 +44,7 @@ public class MapperClientService
             return Client.IsMapperLoaded;
         }
     }
-    public Color GetCurrentConnectionColor() => Client.IsMapperLoaded ? 
-        ConnectedColor : DisconnectedColor;
-    public string GetCurrentConnectionName() => Client.IsMapperLoaded ?
-        "Connected" : "Disconnected";
-    public string ConnectionStatus => Client.IsMapperLoaded ?
-        "Status: Connected" : "Status: Disconnected";
+
     public List<PropertyModel> Properties { get; set; } = [];
 
     public async Task<Result> ChangeMapper(string mapperId,
@@ -77,7 +59,7 @@ public class MapperClientService
             {
                 var driverResult = await _driverService.TestDrivers(driverTestActionHandler);
                 if (string.IsNullOrWhiteSpace(driverResult))
-                    return Result.Failure(Error.FailedToLoadMapper, 
+                    return Result.Failure(Error.FailedToLoadMapper,
                         "No driver could connect to an emulator. Check your emulator settings.");
                 LoadedDriver = driverResult;
                 var result = await ReplaceMapper(mapperId);
@@ -107,9 +89,9 @@ public class MapperClientService
             {
                 Properties = Client.GetProperties()?.ToList() ?? [];
             }
-            return result ? Result.Success() : 
-                Result.Failure(Error.FailedToLoadMapper,
-                    "Please see logs for more info.");
+            return result
+                ? Result.Success()
+                : Result.Failure(Error.FailedToLoadMapper, "Please see logs for more info.");
         }
         catch (Exception e)
         {
@@ -117,6 +99,7 @@ public class MapperClientService
             return Result.Exception(e);
         }
     }
+
     public IEnumerable<MapperFileModel> GetMappers()
     {
         _mapperFs.CacheMapperFiles();
@@ -127,20 +110,11 @@ public class MapperClientService
         });
     }
 
-    /*public Result<List<PropertyModel>> GetProperties()
-    {
-        var mapperProps = _client.GetProperties();
-        var propertyModels = mapperProps?.ToList();
-        if (propertyModels is null || propertyModels.Count == 0)
-            return Result.Failure<List<PropertyModel>>(Error.NoMapperPropertiesFound);
-        return Result.Success(propertyModels);
-    }*/
-
     public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
     {
         var glossaryItems = Client.GetGlossaryByKey(key);
         var glossaryList = glossaryItems?.ToList();
-        if(glossaryList is null || glossaryList.Count == 0)
+        if (glossaryList is null || glossaryList.Count == 0)
             return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
         return Result.Success(glossaryList);
     }
@@ -150,7 +124,7 @@ public class MapperClientService
         if (!Client.IsMapperLoaded)
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         var meta = Client.GetMetaData();
-        return meta is null ? 
+        return meta is null ?
             Result.Failure<MapperMetaModel>(Error.FailedToLoadMetaData) :
             Result.Success(meta);
     }
@@ -168,52 +142,11 @@ public class MapperClientService
             return Result.Success();
         return Result.Failure(Error.FailedToUpdateProperty);
     }
-    private void HandlePropertyChangedEvent(object sender, PropertyChangedEventArgs args)
-    {
-        if(!Client.IsMapperLoaded)
-        {
-            return;
-        }
-        foreach (var prop in args.ChangedProperties)
-        {
-            Client.UpdateProperty(prop);
-            _pendingUpdates.Add(prop.Path);
-        }
-
-        var pendingUpdates = _pendingUpdates.ToArray();
-        long nowTicks = DateTime.UtcNow.Ticks;
-        if (_lastUpdate <= nowTicks - _batchTicks)
-        {
-            foreach (var path in pendingUpdates)
-            {
-                _propertyUpdateService.NotifyChanges(path);
-            }
-            _lastUpdate = nowTicks;
-            _pendingUpdates.Clear();
-        }
-
-    }
-    public void UpdateEditPropertyModel(EditPropertyModel model)
-    {
-        if(!Client.IsMapperLoaded)
-            return;
-        var prop = Client.GetPropertyByPath(model.Path);
-        model.UpdateFromPropertyModel(prop);
-    }
 
     public async Task UnloadMapper()
     {
-        if(!Client.IsMapperLoaded)
+        if (!Client.IsMapperLoaded)
             return;
         await Client.UnloadMapper();
-    }
-
-    public void OnReadExceptionHandler(Action handler)
-    {
-        Client.AttachOnReadExceptionOccuredHandler(handler);
-    }
-    public void DetachOnReadExceptionHandler(Action handler)
-    {
-        Client.DetachOnReadExceptionOccuredHandler(handler);
     }
 }

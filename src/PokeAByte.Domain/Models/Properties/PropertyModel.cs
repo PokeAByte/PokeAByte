@@ -27,7 +27,7 @@ public class PropertyModel
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public object? Value { get; set; }
 
-    public IEnumerable<int>? Bytes { get; set; } = Enumerable.Empty<int>();
+    public int[]? Bytes { get; set; } = [];
 
     public bool? IsFrozen { get; set; }
 

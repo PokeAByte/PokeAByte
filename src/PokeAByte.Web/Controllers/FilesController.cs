@@ -22,13 +22,13 @@ namespace PokeAByte.Web.Controllers
     [Consumes("application/json")]
     [Route("files")]
     public class FilesController(IMapperFilesystemProvider mapperFilesystemProvider,
-        ILogger<FilesController> logger, 
-        IMapperUpdateManager updateManager, 
+        ILogger<FilesController> logger,
+        IMapperUpdateManager updateManager,
         IGithubRestApi githubRest,
         IMapperArchiveManager archiveManager,
         IGithubApiSettings githubApiSettings) : ControllerBase
-    {        
-        private static string MapperLocalDirectory => 
+    {
+        private static string MapperLocalDirectory =>
             Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
         public IMapperFilesystemProvider MapperFilesystemProvider { get; } = mapperFilesystemProvider;
 
@@ -55,7 +55,7 @@ namespace PokeAByte.Web.Controllers
             var updatesFound = await updateManager.CheckForUpdates();
             return updatesFound ? Ok(true) : Ok(false);
         }
-        
+
         [HttpGet("mapper/get_updates")]
         public ActionResult<IEnumerable<MapperDto>> GetMapperUpdatesAsync()
         {
@@ -83,9 +83,9 @@ namespace PokeAByte.Web.Controllers
             try
             {
                 var mapperDownloads = mappers
-                    .Select(m => 
-                        m.LatestVersion ?? 
-                        (m.CurrentVersion ?? 
+                    .Select(m =>
+                        m.LatestVersion ??
+                        (m.CurrentVersion ??
                          throw new InvalidOperationException("Current Version and Latest version are both null.")))
                     .ToList();
                 await githubRest.DownloadMapperFiles(mapperDownloads, updateManager.SaveUpdatedMappersAsync);
@@ -97,7 +97,7 @@ namespace PokeAByte.Web.Controllers
                 return ApiHelper.BadRequestResult("Failed to download mappers.");
             }
         }
-        
+
         [HttpGet("mapper/get_archived")]
         public ActionResult GetArchivedMappersAsync()
         {
@@ -124,7 +124,7 @@ namespace PokeAByte.Web.Controllers
                 return ApiHelper.BadRequestResult($"Exception: {e}");
             }
         }
-        
+
         [HttpPost("mapper/delete_mappers")]
         public ActionResult DeleteMappers(IEnumerable<ArchivedMapperDto> archivedMappers)
         {
@@ -138,7 +138,7 @@ namespace PokeAByte.Web.Controllers
                 return ApiHelper.BadRequestResult($"Exception: {e}");
             }
         }
-        
+
         [HttpGet("mapper/refresh_archived_list")]
         public ActionResult RefreshArchivedList()
         {
@@ -168,7 +168,7 @@ namespace PokeAByte.Web.Controllers
                 await CheckForUpdates();
                 githubApiSettings.CopySettings(settings);
                 githubApiSettings.SaveChanges();
-                
+
                 return Ok();
             }
             catch (Exception e)
@@ -209,7 +209,7 @@ namespace PokeAByte.Web.Controllers
                 return ApiHelper.BadRequestResult(e.ToString());
             }
         }
-        
+
         [HttpGet("open_mapper_archive_folder")]
         public ActionResult OpenMapperArchiveFolder()
         {
