@@ -13,7 +13,7 @@ namespace PokeAByte.Infrastructure.Drivers
 
         private readonly ILogger<StaticMemoryDriver> _logger;
         private Dictionary<uint, byte[]> MemoryFragmentLayout { get; set; } = [];
-        private bool _isConnected = false;
+        private static bool _isConnected = false;
         public StaticMemoryDriver(ILogger<StaticMemoryDriver> logger)
         {
             _logger = logger;
@@ -69,6 +69,11 @@ namespace PokeAByte.Infrastructure.Drivers
             }
 
             return Task.CompletedTask;
+        }
+
+        public static Task<bool> Probe(AppSettings _)
+        {
+            return Task.FromResult(_isConnected);
         }
     }
 }

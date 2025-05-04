@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using PokeAByte.Application;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
@@ -52,7 +51,7 @@ static class MapperHelper
 [Route("mapper")]
 public class MapperController : ControllerBase
 {
-    private readonly ILogger<MapperController> _logger;
+
     public IPokeAByteInstance Instance { get; }
     private readonly AppSettings _appSettings;
     public readonly IBizhawkMemoryMapDriver _bizhawkMemoryMapDriver;
@@ -60,15 +59,12 @@ public class MapperController : ControllerBase
     public readonly IStaticMemoryDriver _staticMemoryDriver;
 
     public MapperController(
-        ILogger<MapperController> logger,
         IPokeAByteInstance pokeAByteInstance,
         AppSettings appSettings,
         IBizhawkMemoryMapDriver bizhawkMemoryMapDriver,
         IRetroArchUdpPollingDriver retroArchUdpPollingDriver,
         IStaticMemoryDriver nullDriver)
     {
-        _logger = logger;
-
         Instance = pokeAByteInstance;
 
         _appSettings = appSettings;

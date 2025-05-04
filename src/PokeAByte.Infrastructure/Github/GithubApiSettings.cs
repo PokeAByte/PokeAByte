@@ -115,7 +115,7 @@ public record GithubApiSettings : IGithubApiSettings
                 deserialized.Token;
             return deserialized;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             logger.LogWarning($"Failed to parse {MapperEnvironment.GithubApiSettings}. " +
                               $"Github Api settings failed to load.");

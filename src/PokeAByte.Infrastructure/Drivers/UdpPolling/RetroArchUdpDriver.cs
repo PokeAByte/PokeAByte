@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Net;
+using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -72,7 +74,10 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// A no-op interface implementation.
     /// </summary>
     /// <returns> A completed task. </returns>
-    public Task EstablishConnection() => Task.CompletedTask;
+    public async Task EstablishConnection() {
+        _connectionCts = new CancellationTokenSource();
+        await ConnectAsync(_connectionCts.Token);
+    }
     
 
     public async Task Disconnect() {
@@ -81,29 +86,6 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             await _connectionCts.CancelAsync();
             _connectionCts.Dispose();
             _connectionCts = null;
-        }
-    }
-
-    /// <summary>
-    /// Tests the connect to retroarch by reading the very first byte of game memory.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> if the connection works. <see langword="false"/> if it does not.
-    /// </returns>
-    public async Task<bool> TestConnection()
-    {
-        _connectionCts = new CancellationTokenSource();
-        await ConnectAsync(_connectionCts.Token);
-        
-        try
-        {
-            _ = await ReadMemoryAddress(0, 1);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "TestConnection");
-            return false;
         }
     }
 
@@ -142,5 +124,27 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             return new BlockData(block.StartingAddress, data);
         });
         return await Task.WhenAll(tasks);
+    }
+
+    public static async Task<bool> Probe(AppSettings appSettings)
+    {
+        using var client = new UdpClient();
+        IPEndPoint endpoint = new IPEndPoint(
+            IPAddress.Parse(appSettings.RETROARCH_LISTEN_IP_ADDRESS), 
+            appSettings.RETROARCH_LISTEN_PORT
+        );
+        client.Client.SetSocketOption(
+            SocketOptionLevel.Socket,
+            SocketOptionName.ReuseAddress,
+            true
+        );
+        try {
+            client.Connect(endpoint);
+            await client.SendAsync("READ_CORE_MEMORY 0 1"u8.ToArray());
+            var result = await client.ReceiveAsync();
+            return result.Buffer.AsSpan().StartsWith("READ_CORE_MEMORY 0"u8);
+        } catch (Exception) {
+            return false;
+        }
     }
 }

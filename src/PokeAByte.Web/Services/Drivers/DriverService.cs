@@ -1,85 +1,56 @@
 ﻿using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Infrastructure.Drivers;
+using PokeAByte.Infrastructure.Drivers.Bizhawk;
+using PokeAByte.Infrastructure.Drivers.UdpPolling;
 
 namespace PokeAByte.Web.Services.Drivers;
 
 public class DriverService
 {
-    private string _driverModel = DriverModels.Bizhawk;
     public static readonly int MaxAttempts = 25;
     private const int MaxPauseMs = 50;
     private int _currentAttempt = 0;
-
+    private readonly AppSettings _appSettings;
     private readonly IBizhawkMemoryMapDriver _bizhawk;
     private readonly IRetroArchUdpPollingDriver _retroArch;
     private readonly IStaticMemoryDriver _staticMemory;
-    public DriverService(
-        IBizhawkMemoryMapDriver bizhawk,
-        IRetroArchUdpPollingDriver retroArch,
-        IStaticMemoryDriver staticMemory)
-    {
-        _bizhawk = bizhawk;
-        _retroArch = retroArch;
-        _staticMemory = staticMemory;
-    }
 
     public IBizhawkMemoryMapDriver Bizhawk => _bizhawk;
     public IRetroArchUdpPollingDriver RetroArch => _retroArch;
     public IStaticMemoryDriver StaticMemory => _staticMemory;
 
+
+    public DriverService(
+        AppSettings appSettings,
+        IBizhawkMemoryMapDriver bizhawk,
+        IRetroArchUdpPollingDriver retroArch,
+        IStaticMemoryDriver staticMemory)
+    {
+        _appSettings = appSettings;
+        _bizhawk = bizhawk;
+        _retroArch = retroArch;
+        _staticMemory = staticMemory;
+    }
+
     public async Task<string> TestDrivers(Action<int>? callback)
     {
         _currentAttempt = 0;
-        //set the list of drivers
-        var driverList = DriverModels.DriverList.Select(x => x).ToList();
-        //get current driver if there is one, otherwise default to bizhawk
-        var currentDriver = string.IsNullOrWhiteSpace(_driverModel) ?
-            DriverModels.Bizhawk : _driverModel;
         //Test the drivers
-        var connects = false;
-        while (!connects && _currentAttempt < MaxAttempts)
+        while (_currentAttempt < MaxAttempts)
         {
-            while (!connects && driverList.Count > 0)
-            {
-                switch (currentDriver)
-                {
-                    case DriverModels.Bizhawk:
-                        connects = await _bizhawk.TestConnection();
-                        driverList.Remove(DriverModels.Bizhawk);
-                        break;
-                    case DriverModels.RetroArch:
-                        connects = await _retroArch.TestConnection();
-                        driverList.Remove(DriverModels.RetroArch);
-                        break;
-                    case DriverModels.StaticMemory:
-                        connects = await _staticMemory.TestConnection();
-                        driverList.Remove(DriverModels.StaticMemory);
-                        break;
-                    default:
-                        connects = false;
-                        break;
-                }
-
-                //Set the next driver to test
-                if (!connects)
-                {
-                    currentDriver = driverList.FirstOrDefault();
-                    if (string.IsNullOrWhiteSpace(currentDriver))
-                        break;
-                }
+            if (await BizhawkMemoryMapDriver.Probe(_appSettings)) {
+                await _bizhawk.EstablishConnection();
+                return DriverModels.Bizhawk;
+            } else if (await RetroArchUdpDriver.Probe(_appSettings)) {
+                await _retroArch.EstablishConnection();
+                return DriverModels.RetroArch;
+            } else if (await StaticMemoryDriver.Probe(_appSettings)) {
+                return DriverModels.StaticMemory;
             }
-
-            if (connects) break;
             _currentAttempt += 1;
             callback?.Invoke(_currentAttempt);
-            driverList = DriverModels.DriverList.Select(x => x).ToList();
             await Task.Delay(MaxPauseMs);
-        }
-
-        //If it connects then return the driver name, otherwise return empty
-        if (connects)
-        {
-            return currentDriver ?? "";
         }
         return string.Empty;
     }

@@ -1,3 +1,5 @@
+using PokeAByte.Domain.Models;
+
 namespace PokeAByte.Domain.Interfaces
 {
     public record BlockData(MemoryAddress Start, byte[] Data);
@@ -16,11 +18,12 @@ namespace PokeAByte.Domain.Interfaces
 
         Task EstablishConnection();
         Task Disconnect();
-        Task<bool> TestConnection();
 
         Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks);
 
         Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
+
+        static virtual Task<bool> Probe(AppSettings appSettings) => Task.FromResult(false);
     }
 
     public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
