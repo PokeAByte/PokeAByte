@@ -28,46 +28,32 @@ public class StringProperty : PokeAByteProperty, IPokeAByteProperty
 
         var nullTerminationKey = ComputedReference.Values.First(x => x.Value == null);
         uints.Add(nullTerminationKey);
-        /*var returnBytes = ulongArray
-            .Select(x => (byte)x)
-            .ToArray();*/
         return uints
             .Select(x =>
             {
-                if (x?.Value == null)
-                {
-                    return nullTerminationKey.Key;
-                }
-
-                return x.Key;
+                return x?.Value == null
+                    ? nullTerminationKey.Key
+                    : x.Key;
             }).SelectMany(x =>
             {
-                if (Size is null)
-                    return BitConverter
-                        .GetBytes(x)
-                        .Take(new Range(0, 1));
-                return BitConverter
-                    .GetBytes(x)
-                    .Take(Size ?? 1);
+                return Size is null
+                    ? BitConverter.GetBytes(x).Take(new Range(0, 1))
+                    : BitConverter.GetBytes(x).Take(Size.Value);
             })
             .ToArray();
     }
 
     protected override object? ToValue(byte[] data)
     {
-        if (Instance == null) throw new Exception("Instance is NULL.");
-        if (Instance.PlatformOptions == null) throw new Exception("Instance.PlatformOptions is NULL.");
         if (ComputedReference == null) { throw new Exception("ReferenceObject is NULL."); }
 
-        string?[] results = Array.Empty<string>();
-
+        string?[] results = [];
         if (Size > 1)
         {
             // For strings that have characters mapper to more than a single byte.
             results = data.Chunk(Size.Value).Select(b =>
             {
-                var value = b.ReverseBytesIfBE(Instance.PlatformOptions.EndianType).get_ulong_be();
-
+                var value = b.ReverseBytesIfBE(_endian).get_ulong_be();
                 var referenceItem = ComputedReference.Values.SingleOrDefault(x => x.Key == value);
                 return referenceItem?.Value?.ToString() ?? null;
             }).ToArray();

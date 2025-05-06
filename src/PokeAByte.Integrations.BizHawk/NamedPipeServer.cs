@@ -40,16 +40,16 @@ public class NamedPipeServer : IDisposable
             var buffer = new byte[255];
             var dataList = new List<byte>();
             var count = _pipeServer
-                .Read(buffer, 
-                    0, 
+                .Read(buffer,
+                    0,
                     255);
             dataList.AddRange(buffer.Take(count));
             while (count == 255)
             {
                 Console.WriteLine("Reading 255 more bytes of client data...");
                 count = _pipeServer
-                    .Read(buffer, 
-                        0, 
+                    .Read(buffer,
+                        0,
                         255);
                 dataList.AddRange(buffer.Take(count));
             }

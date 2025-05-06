@@ -10,8 +10,8 @@ public class GithubRestApi : IGithubRestApi
 {
     private readonly IGithubApiSettings _apiSettings;
     private readonly ILogger<GithubRestApi> _logger;
-    
-    public GithubRestApi(ILogger<GithubRestApi> logger,  
+
+    public GithubRestApi(ILogger<GithubRestApi> logger,
         IGithubApiSettings apiSettings)
     {
         _logger = logger;
@@ -32,7 +32,7 @@ public class GithubRestApi : IGithubRestApi
         if(!string.IsNullOrWhiteSpace(_apiSettings.GetTokenValue()))
             headers.Add("Authorization", _apiSettings.GetFormattedToken());
     }*/
-    public async Task DownloadMapperFiles(List<MapperDto> mapperDtos, 
+    public async Task DownloadMapperFiles(List<MapperDto> mapperDtos,
         Func<List<UpdateMapperDto>, Task> postDownloadAction,
         Action<int>? currentProcessCountUpdate = null)
     {
@@ -51,7 +51,7 @@ public class GithubRestApi : IGithubRestApi
             var jsData = await ResponseMessageToJson(jsResponse);
             //Add them to the list
             updatedMapperList.Add(new UpdateMapperDto(
-                xmlPath, xmlData ?? "", 
+                xmlPath, xmlData ?? "",
                 jsPath, jsData ?? "",
                 mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
             count++;
@@ -73,7 +73,7 @@ public class GithubRestApi : IGithubRestApi
             return null;
         }
     }
-    
+
     public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
         await GetContentRequest(MapperEnvironment.MapperTreeJson, true);
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
@@ -84,7 +84,7 @@ public class GithubRestApi : IGithubRestApi
             _logger.LogError("The Url generated for the GET request was null.");
             return null;
         }
-        
+
         if (path is null && isFile is false)
         {
             _logger.LogInformation($"The path for sending a GET request is null, " +
@@ -95,7 +95,7 @@ public class GithubRestApi : IGithubRestApi
         {
             return null;
         }
-        
+
         if (path != string.Empty)
         {
             url += $"/contents/{path}";
@@ -114,7 +114,7 @@ public class GithubRestApi : IGithubRestApi
         };
         if (!string.IsNullOrWhiteSpace(_apiSettings.GetTokenValue()))
         {
-            clientRequest.Headers.Add("Authorization",_apiSettings.GetFormattedToken());
+            clientRequest.Headers.Add("Authorization", _apiSettings.GetFormattedToken());
         }
         //UpdateRequestHeaders(clientRequest.Headers);
         using var client = new HttpClient();
@@ -126,9 +126,9 @@ public class GithubRestApi : IGithubRestApi
         var result = await GetMapperTreeFile();
         if (result is null)
             return "Response from server was null.";
-        return result.IsSuccessStatusCode ? "" : 
-            result.StatusCode == HttpStatusCode.NotFound ? 
-                "The mapper tree json was not found." : 
+        return result.IsSuccessStatusCode ? "" :
+            result.StatusCode == HttpStatusCode.NotFound ?
+                "The mapper tree json was not found." :
                 $"Reason: {result.ReasonPhrase}";
     }
 }

@@ -9,23 +9,23 @@ namespace PokeAByte.Infrastructure.Github;
 public record GithubApiSettings : IGithubApiSettings
 {
     //Accept
-    [JsonPropertyName("accept")] 
+    [JsonPropertyName("accept")]
     public string Accept { get; set; } = "application/vnd.github.v3.raw";//"application/vnd.github+json";
-    
+
     //X-GitHub-Api-Version
     [JsonPropertyName("api_version")]
     public string ApiVersion { get; set; } = "2022-11-28";
-    
+
     //Authorization
     [JsonPropertyName("token")]
     public string Token { get; set; } = "";
     [JsonPropertyName("owner")]
     public string Owner { get; set; } = "PokeAByte";
-    
+
     [JsonPropertyName("repo")]
     public string Repo { get; set; } = "mappers";
-    
-    [JsonPropertyName("dir")] 
+
+    [JsonPropertyName("dir")]
     public string Directory { get; set; } = "";
 
     [JsonIgnore] public static string GithubApiUrl = "https://api.github.com/repos/";
@@ -92,9 +92,9 @@ public record GithubApiSettings : IGithubApiSettings
                               $"Mapper update settings failed to load.");
             return new GithubApiSettings(logger, token);
         }
-        
+
         //Load the json
-        var jsonData = File.ReadAllText(MapperEnvironment.GithubApiSettings);        
+        var jsonData = File.ReadAllText(MapperEnvironment.GithubApiSettings);
         //Blank json data, just return 
         if (string.IsNullOrWhiteSpace(jsonData))
         {
@@ -110,8 +110,8 @@ public record GithubApiSettings : IGithubApiSettings
             if (deserialized is null)
                 return new GithubApiSettings(logger);
             deserialized.SetLogger(logger);
-            deserialized.Token = string.IsNullOrWhiteSpace(deserialized.Token) ? 
-                token ?? "" : 
+            deserialized.Token = string.IsNullOrWhiteSpace(deserialized.Token) ?
+                token ?? "" :
                 deserialized.Token;
             return deserialized;
         }
@@ -134,7 +134,7 @@ public record GithubApiSettings : IGithubApiSettings
 
         try
         {
-            File.WriteAllText(MapperEnvironment.GithubApiSettings,jsonData);
+            File.WriteAllText(MapperEnvironment.GithubApiSettings, jsonData);
         }
         catch (Exception e)
         {

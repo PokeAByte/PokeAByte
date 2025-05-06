@@ -26,6 +26,7 @@ namespace PokeAByte.Domain.Interfaces
         MemorySection Memory { get; }
         Dictionary<string, IPokeAByteProperty> Properties { get; }
         Dictionary<string, ReferenceItems> References { get; }
+        public IPlatformOptions PlatformOptions { get; }
 
         /// <summary>
         /// Copies all properties under the source path into the appopriate desitnation path properties. <br/>
@@ -55,11 +56,12 @@ namespace PokeAByte.Domain.Interfaces
             foreach (var key in Properties.Keys.Where(key => key.AsSpan().StartsWith(destinationPath)))
             {
                 var property = Properties[key] as PokeAByteProperty;
-                if (property == null) {
+                if (property == null)
+                {
                     continue;
                 }
                 var sourceKey = string.Concat(sourcePath, key.Substring(destPathLength));
-                
+
                 if (Properties.TryGetValue(sourceKey, out var source))
                 {
                     property.MemoryContainer = source.MemoryContainer;

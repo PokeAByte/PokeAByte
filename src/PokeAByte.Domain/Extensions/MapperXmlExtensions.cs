@@ -42,7 +42,8 @@ public static class MapperXmlExtensions
         var childElements = el.Elements().Select(x => x.GetOptionalAttributeValue("name") ?? string.Empty).ToArray();
 
         // Check if all child elements are numbers
-        if (childElements.Any(e => int.TryParse(e, out _)) == false) {
+        if (childElements.Any(e => int.TryParse(e, out _)) == false)
+        {
             return false;
         }
 
@@ -63,7 +64,7 @@ public static class MapperXmlExtensions
     {
         return el.Parent?.IsArray() ?? false;
     }
-    
+
     public static string? GetElementActualName(this XElement el)
     {
         if (el.Name.LocalName is "property" || el.Name.LocalName is "class")
@@ -91,7 +92,7 @@ public static class MapperXmlExtensions
     public static string GetElementPath(this XElement el)
     {
         var elementName = el.Attribute("name")?.Value;
-        
+
         return el
                    .AncestorsAndSelf().InDocumentOrder().Reverse()
                    .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)

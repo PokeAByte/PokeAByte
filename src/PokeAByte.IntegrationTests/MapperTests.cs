@@ -32,7 +32,7 @@ namespace PokeAByte.IntegrationTests
         #region Gameboy Advance
         //[DataRow("gba_metroid_fusion", "gba_pokemon_emerald_0")]
 
-        [DataRow("deprecated_pokemon_emerald_deprecated", "gba_pokemon_emerald_0")] 
+        [DataRow("deprecated_pokemon_emerald_deprecated", "gba_pokemon_emerald_0")]
         [DataRow("gba_pokemon_emerald", "gba_pokemon_emerald_0")]
 
         [DataRow("deprecated_pokemon_firered_leafgreen_deprecated", "gba_pokemon_emerald_0")] //TODO: change save states

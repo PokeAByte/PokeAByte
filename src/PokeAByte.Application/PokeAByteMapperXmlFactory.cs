@@ -79,7 +79,7 @@ namespace PokeAByte.Application
             };
         }
 
-        static IEnumerable<IPokeAByteProperty> GetProperties(XDocument doc, IPokeAByteInstance? instance)
+        static IEnumerable<IPokeAByteProperty> GetProperties(XDocument doc, IPokeAByteInstance? instance, EndianTypes endianType)
         {
             return doc.Descendants("properties").Descendants("property")
                 .Select<XElement, IPokeAByteProperty>(x =>
@@ -107,6 +107,7 @@ namespace PokeAByte.Application
                             AfterReadValueExpression = x.GetOptionalAttributeValue("after-read-value-expression"),
                             AfterReadValueFunction = x.GetOptionalAttributeValue("after-read-value-function"),
                             BeforeWriteValueFunction = x.GetOptionalAttributeValue("before-write-value-function"),
+                            EndianType = endianType,
                         };
 
                         if (type == "binaryCodedDecimal") return new BinaryCodedDecimalProperty(instance, variables);
@@ -204,8 +205,25 @@ namespace PokeAByte.Application
             {
                 attr.Value = attr.Value.NormalizeMemoryAddresses();
             }
-
-            return new PokeAByteMapper(GetMetadata(doc), GetMemory(doc), GetProperties(doc, instance), GetGlossary(doc));
+            var metaData = GetMetadata(doc);
+            IPlatformOptions platformOptions = metaData.GamePlatform switch
+            {
+                "NES" => new NES_PlatformOptions(),
+                "SNES" => new SNES_PlatformOptions(),
+                "GB" => new GB_PlatformOptions(),
+                "GBC" => new GBC_PlatformOptions(),
+                "GBA" => new GBA_PlatformOptions(),
+                "PSX" => new PSX_PlatformOptions(),
+                "NDS" => new NDS_PlatformOptions(),
+                _ => throw new Exception($"Unknown game platform {metaData.GamePlatform}.")
+            };
+            return new PokeAByteMapper(
+                metaData,
+                platformOptions,
+                GetMemory(doc),
+                GetProperties(doc, instance, platformOptions.EndianType),
+                GetGlossary(doc)
+            );
         }
     }
 }

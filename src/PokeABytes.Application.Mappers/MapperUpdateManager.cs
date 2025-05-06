@@ -16,11 +16,11 @@ public class MapperUpdateManager : IMapperUpdateManager
     private readonly IMapperArchiveManager _mapperArchiveManager;
     private readonly IGithubRestApi _githubRestApi;
 
-    public MapperUpdateManager(ILogger<MapperUpdateManager> logger, 
-        AppSettings appSettings, 
+    public MapperUpdateManager(ILogger<MapperUpdateManager> logger,
+        AppSettings appSettings,
         IHttpClientFactory httpClientFactory,
-        MapperUpdaterSettings mapperUpdaterSettingsManager, 
-        IGithubRestApi githubRestApi, 
+        MapperUpdaterSettings mapperUpdaterSettingsManager,
+        IGithubRestApi githubRestApi,
         IMapperArchiveManager mapperArchiveManager)
     {
         _logger = logger;
@@ -36,7 +36,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             Directory.CreateDirectory(BuildEnvironment.ConfigurationDirectory);
         }
     }
-    
+
     //Returns a list of outdated mappers 
     private async Task<List<MapperComparisonDto>> GetOutdatedMapperList()
     {
@@ -56,12 +56,12 @@ public class MapperUpdateManager : IMapperUpdateManager
             _logger.LogError("Could not read the remote json file.");
             return [];
         }
-        var remote = remoteDeserialized            
+        var remote = remoteDeserialized
             .Select(m => m with { Path = m.Path.Trim('/').Trim('\\') })
             .ToList();
         //Get the current version the user has on their filesystem
         var mapperTree = MapperTreeUtility
-            .Load(MapperEnvironment.MapperLocalDirectory)            
+            .Load(MapperEnvironment.MapperLocalDirectory)
             .Select(m => m with { Path = m.Path.Trim('/').Trim('\\') })
             .ToList();
         //Compare the mapper trees and return a list of outdated mappers
@@ -102,7 +102,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             var outdatedMappers = await GetOutdatedMapperList();
             //Save the outdated mapper list
             var jsonData = JsonSerializer.Serialize(outdatedMappers);
-            await File.WriteAllTextAsync(MapperEnvironment.OutdatedMapperTreeJson,jsonData);
+            await File.WriteAllTextAsync(MapperEnvironment.OutdatedMapperTreeJson, jsonData);
             _mapperUpdaterSettings.RequiresUpdate = true;
             _mapperUpdaterSettings.SaveChanges(_logger);
             return true;
@@ -116,7 +116,7 @@ public class MapperUpdateManager : IMapperUpdateManager
 
     private void WriteTextToFile(string filepath, string text, DateTime? created = null, DateTime? updated = null)
     {
-        if (!string.IsNullOrWhiteSpace(text))  
+        if (!string.IsNullOrWhiteSpace(text))
         {
             try
             {
@@ -143,9 +143,9 @@ public class MapperUpdateManager : IMapperUpdateManager
         {
             var mapperPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
             var jsPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath, 
+            _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath,
                 mapperPath);
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath, 
+            _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath,
                 jsPath);
             WriteTextToFile(mapperPath, mapper.XmlData, mapper.Created, mapper.Updated);
             WriteTextToFile(jsPath, mapper.JsData, mapper.Created, mapper.Updated);

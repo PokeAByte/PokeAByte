@@ -39,13 +39,18 @@ public class DriverService
         //Test the drivers
         while (_currentAttempt < MaxAttempts)
         {
-            if (await BizhawkMemoryMapDriver.Probe(_appSettings)) {
+            if (await BizhawkMemoryMapDriver.Probe(_appSettings))
+            {
                 await _bizhawk.EstablishConnection();
                 return DriverModels.Bizhawk;
-            } else if (await RetroArchUdpDriver.Probe(_appSettings)) {
+            }
+            else if (await RetroArchUdpDriver.Probe(_appSettings))
+            {
                 await _retroArch.EstablishConnection();
                 return DriverModels.RetroArch;
-            } else if (await StaticMemoryDriver.Probe(_appSettings)) {
+            }
+            else if (await StaticMemoryDriver.Probe(_appSettings))
+            {
                 return DriverModels.StaticMemory;
             }
             _currentAttempt += 1;

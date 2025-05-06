@@ -167,7 +167,7 @@ public class MapperFilesystemProvider : IMapperFilesystemProvider
 
     public async Task<MapperContent> LoadContentAsync(string mapperId)
     {
-         // Get the file path from the filesystem provider.
+        // Get the file path from the filesystem provider.
         var mapperFile = MapperFiles.SingleOrDefault(x => x.Id == mapperId) ??
             throw new Exception($"Unable to determine a mapper with the ID of {mapperId}.");
 
@@ -176,7 +176,7 @@ public class MapperFilesystemProvider : IMapperFilesystemProvider
             throw new FileNotFoundException($"File was not found in the {mapperFile.Type} mapper folder.", mapperFile.DisplayName);
         }
         var mapperContents = await File.ReadAllTextAsync(mapperFile.AbsolutePath);
-        if (!mapperFile.AbsolutePath.EndsWith(".xml")) 
+        if (!mapperFile.AbsolutePath.EndsWith(".xml"))
         {
             throw new Exception($"Invalid file extension for mapper.");
         }

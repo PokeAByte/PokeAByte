@@ -20,8 +20,9 @@ namespace PokeAByte.Application
 
         public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
         {
-            if (area == "default" || area == null) { 
-                return DefaultNamespace.get_bytes(memoryAddress, length); 
+            if (area == "default" || area == null)
+            {
+                return DefaultNamespace.get_bytes(memoryAddress, length);
             }
             return Namespaces[area].get_bytes(memoryAddress, length);
         }
@@ -38,8 +39,9 @@ namespace PokeAByte.Application
 
         public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
         {
-            if (area == "default" || area == null) { 
-                return DefaultNamespace.GetReadonlyBytes(memoryAddress, length); 
+            if (area == "default" || area == null)
+            {
+                return DefaultNamespace.GetReadonlyBytes(memoryAddress, length);
             }
             return Namespaces[area].GetReadonlyBytes(memoryAddress, length);
         }

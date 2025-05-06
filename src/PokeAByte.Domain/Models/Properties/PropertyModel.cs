@@ -59,7 +59,7 @@ public static class PropertyModelExtensions
     {
         if (updated.Path != original.Path)
             return;
-            
+
         if (updated.Value != original.Value)
         {
             original.Value = updated.Value;
@@ -73,7 +73,7 @@ public static class PropertyModelExtensions
             original.IsFrozen = updated.IsFrozen;
         if (updated.IsReadOnly != original.IsReadOnly)
             original.IsFrozen = updated.IsReadOnly;
-        
+
         original.FieldsChanged = new HashSet<string>(updated.FieldsChanged);
     }
 

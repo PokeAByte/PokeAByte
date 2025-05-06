@@ -16,7 +16,7 @@ public record MapperXmlFileDto
             .Trim('/')
             .Trim('\\');*/
         //relativePath = relativePath[relativePath.LastIndexOf()]
-        
+
         return new MapperXmlFileDto
         {
             FilePath = filePath,

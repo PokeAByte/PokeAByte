@@ -21,9 +21,10 @@ public static partial class Extensions
     /// <returns> The parsed uint. </returns>
     /// <exception cref="Exception"></exception>
     public static uint ParseHexAddress(this string value)
-    { 
+    {
         var span = value.AsSpan();
-        if (span.StartsWith("0x")) {
+        if (span.StartsWith("0x"))
+        {
             span = span[2..];
         }
         try
@@ -82,7 +83,7 @@ public static partial class Extensions
 
     public static async Task ForEachAsync<T>(this List<T> list, Func<T, Task> func)
     {
-        foreach (var value in list) 
+        foreach (var value in list)
         {
             await func(value);
         }

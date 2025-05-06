@@ -14,7 +14,7 @@ public record MapperUpdaterSettings
     public string? MapperDownloadBaseUrl { get; set; }
     [JsonPropertyName("archive_limit")]
     public int ArchiveLimit { get; set; } = 10;
-    [JsonPropertyName("requires_update")] 
+    [JsonPropertyName("requires_update")]
     public bool RequiresUpdate { get; set; } = false;
 
     public static MapperUpdaterSettings Load(ILogger logger)
@@ -48,7 +48,7 @@ public record MapperUpdaterSettings
             logger.LogWarning($"Failed to parse {MapperEnvironment.MapperUpdateSettingsFile}. " +
                               $"Mapper update settings failed to load.");
             return new MapperUpdaterSettings();
-        }        
+        }
     }
     public void SaveChanges(ILogger logger)
     {
@@ -61,7 +61,7 @@ public record MapperUpdaterSettings
 
         try
         {
-            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile,jsonData);
+            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile, jsonData);
         }
         catch (Exception e)
         {

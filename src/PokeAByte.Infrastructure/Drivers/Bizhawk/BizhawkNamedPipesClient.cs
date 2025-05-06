@@ -11,17 +11,17 @@ public static class BizhawkNamedPipesClient
     {
         try
         {
-            NamedPipeClientStream client = new(".", 
+            NamedPipeClientStream client = new(".",
                 PipeName,
                 PipeDirection.Out,
                 PipeOptions.Asynchronous);
             var contractBytes = contract.Serialize();
             client.Connect(timeoutMs);
-            client.BeginWrite(contractBytes, 
-                0, 
-                contractBytes.Length, 
-                SendAsync, 
-                client);  
+            client.BeginWrite(contractBytes,
+                0,
+                contractBytes.Length,
+                SendAsync,
+                client);
         }
         catch (Exception e)
         {
@@ -31,7 +31,7 @@ public static class BizhawkNamedPipesClient
     }
     private static void SendAsync(IAsyncResult iar)
     {
-        if (iar.AsyncState is null) 
+        if (iar.AsyncState is null)
             throw new InvalidOperationException("Named pipe client is null.");
         try
         {

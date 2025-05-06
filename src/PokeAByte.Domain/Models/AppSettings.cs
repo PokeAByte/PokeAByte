@@ -29,7 +29,6 @@ namespace PokeAByte.Domain.Models
 
             BIZHAWK_DELAY_MS_BETWEEN_READS = int.Parse(configuration.GetRequiredValue("BIZHAWK_DELAY_MS_BETWEEN_READS"));
 
-            SHOW_READ_LOOP_STATISTICS = bool.Parse(configuration.GetRequiredValue("SHOW_READ_LOOP_STATISTICS"));
             logger.LogInformation($"AppSettings initialized: RETROARCH_DELAY_MS_BETWEEN_READS: {RETROARCH_DELAY_MS_BETWEEN_READS} and BIZHAWK_DELAY_MS_BETWEEN_READS: {BIZHAWK_DELAY_MS_BETWEEN_READS}");
             if (BuildEnvironment.IsDebug && configuration["MAPPER_DIRECTORY"]?.Length > 0)
             {
@@ -45,7 +44,7 @@ namespace PokeAByte.Domain.Models
 
             LOG_HTTP_TRAFFIC = bool.Parse(configuration.GetRequiredValue("LOG_HTTP_TRAFFIC"));
 
-            var processPath = Path.GetDirectoryName(Environment.ProcessPath) ?? 
+            var processPath = Path.GetDirectoryName(Environment.ProcessPath) ??
                               throw new Exception("Unable to determine process path.");
             var localMapperDirectory = Path.Combine(processPath, "mappers");
             if (Directory.Exists(localMapperDirectory))
@@ -62,8 +61,6 @@ namespace PokeAByte.Domain.Models
         public int RETROARCH_DELAY_MS_BETWEEN_READS { get; }
 
         public int BIZHAWK_DELAY_MS_BETWEEN_READS { get; }
-
-        public bool SHOW_READ_LOOP_STATISTICS { get; }
 
         public string MAPPER_VERSION { get; }
 

@@ -15,8 +15,8 @@ public static class MapperTreeUtility
             Directory.CreateDirectory(baseDirectory);
         }
         return Directory
-            .GetFiles(baseDirectory, 
-            "*.*", 
+            .GetFiles(baseDirectory,
+            "*.*",
             SearchOption.AllDirectories)
             .Where(x => x.EndsWith(".xml"))
             .ToList();
@@ -88,7 +88,7 @@ public static class MapperTreeUtility
         File.WriteAllText(path, jsonData);
         return true;
     }
-    
+
 }
 
 public static class MapperTreeUtilityExtensions
@@ -111,7 +111,7 @@ public static class MapperTreeUtilityExtensions
         //True means the local mapper is outdated, otherwise it means they aren't outdated
         //or `DateUpdatedUtc` is null
         var outdated = local
-            .Where(x => x.Outdated(remoteTree .FirstOrDefault(y => y.Path == x.Path)))
+            .Where(x => x.Outdated(remoteTree.FirstOrDefault(y => y.Path == x.Path)))
             .Select(localMapper => new MapperComparisonDto()
             {
                 CurrentVersion = localMapper,

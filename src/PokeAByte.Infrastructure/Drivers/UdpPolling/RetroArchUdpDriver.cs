@@ -22,7 +22,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         Logger = logger;
         DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
         _appSettings = appSettings;
-        
+
     }
 
     private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
@@ -51,15 +51,15 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 
     private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
     {
-        if (_udpClientWrapper == null) 
+        if (_udpClientWrapper == null)
         {
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
             throw new DriverTimeoutException(memoryAddress, ProperName, null);
         }
         var command = $"READ_CORE_MEMORY";
         byte[]? response = await _udpClientWrapper.SendCommandAsync(
-            command, 
-            ToRetroArchHexdecimalString(memoryAddress), 
+            command,
+            ToRetroArchHexdecimalString(memoryAddress),
             length.ToString()
         );
         if (response == null)
@@ -74,13 +74,15 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// A no-op interface implementation.
     /// </summary>
     /// <returns> A completed task. </returns>
-    public async Task EstablishConnection() {
+    public async Task EstablishConnection()
+    {
         _connectionCts = new CancellationTokenSource();
         await ConnectAsync(_connectionCts.Token);
     }
-    
 
-    public async Task Disconnect() {
+
+    public async Task Disconnect()
+    {
         if (_connectionCts != null)
         {
             await _connectionCts.CancelAsync();
@@ -97,7 +99,8 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <returns> An awaitable task. </returns>
     public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
-        if (_udpClientWrapper == null) {
+        if (_udpClientWrapper == null)
+        {
             return;
         }
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
@@ -119,7 +122,8 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     public async Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
     {
         var result = new BlockData[blocks.Count];
-        var tasks =  blocks.Select(async (block) => {
+        var tasks = blocks.Select(async (block) =>
+        {
             var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
             return new BlockData(block.StartingAddress, data);
         });
@@ -130,7 +134,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     {
         using var client = new UdpClient();
         IPEndPoint endpoint = new IPEndPoint(
-            IPAddress.Parse(appSettings.RETROARCH_LISTEN_IP_ADDRESS), 
+            IPAddress.Parse(appSettings.RETROARCH_LISTEN_IP_ADDRESS),
             appSettings.RETROARCH_LISTEN_PORT
         );
         client.Client.SetSocketOption(
@@ -138,12 +142,15 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             SocketOptionName.ReuseAddress,
             true
         );
-        try {
+        try
+        {
             client.Connect(endpoint);
             await client.SendAsync("READ_CORE_MEMORY 0 1"u8.ToArray());
             var result = await client.ReceiveAsync();
             return result.Buffer.AsSpan().StartsWith("READ_CORE_MEMORY 0"u8);
-        } catch (Exception) {
+        }
+        catch (Exception)
+        {
             return false;
         }
     }

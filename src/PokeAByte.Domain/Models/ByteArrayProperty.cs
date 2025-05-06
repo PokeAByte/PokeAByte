@@ -38,12 +38,12 @@ public class ByteArrayProperty
     public void UpdateByteArray()
     {
         //Should we allow users to create a new _byteArray? Need to look into this more
-        if(_byteArray is null || !_byteArray.Any())
+        if (_byteArray is null || !_byteArray.Any())
             return;
         try
         {
             _byteArray = EditableArray.Select(bS =>
-                    int.TryParse(bS,NumberStyles.HexNumber,CultureInfo.InvariantCulture, out var bi) ? 
+                    int.TryParse(bS, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var bi) ?
                         bi : 0)
                 .AsEnumerable();
         }

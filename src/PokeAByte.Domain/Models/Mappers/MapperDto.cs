@@ -23,8 +23,8 @@ public record MapperDto
             DisplayName = file.Name,
             Version = version,
             DateCreatedUtc = file.CreationTimeUtc,
-            DateUpdatedUtc = file.LastWriteTimeUtc <= file.CreationTimeUtc ? 
-                null : 
+            DateUpdatedUtc = file.LastWriteTimeUtc <= file.CreationTimeUtc ?
+                null :
                 file.LastWriteTimeUtc
         };
     }
@@ -58,25 +58,25 @@ public record MapperDto
 [JsonSerializable(typeof(List<MapperDto>))]
 public partial class MapperDtoContext : JsonSerializerContext
 {
-    
+
 }
 public record MapperComparisonDto
 {
     public MapperDto? CurrentVersion { get; set; } = null;
     public MapperDto? LatestVersion { get; set; } = null;
-    public string GetVersion() => 
+    public string GetVersion() =>
         (string.IsNullOrEmpty(LatestVersion?.Version) ?
-            string.IsNullOrEmpty(CurrentVersion?.Version) ? 
-                string.Empty : 
+            string.IsNullOrEmpty(CurrentVersion?.Version) ?
+                string.Empty :
                 CurrentVersion?.Version :
-        LatestVersion.Version) ?? 
+        LatestVersion.Version) ??
         string.Empty;
-    public string GetPath() => 
+    public string GetPath() =>
         (string.IsNullOrEmpty(CurrentVersion?.Path) ?
-            string.IsNullOrEmpty(LatestVersion?.Path) ? 
-                string.Empty : 
+            string.IsNullOrEmpty(LatestVersion?.Path) ?
+                string.Empty :
                 LatestVersion?.Path :
-            CurrentVersion?.Path) ?? 
+            CurrentVersion?.Path) ??
         string.Empty;
 
     public bool Search(string searchFilter)

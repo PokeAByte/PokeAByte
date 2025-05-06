@@ -4,8 +4,9 @@ public static class ByteExtensions
 {
     public static byte[] ReverseBytesIfLE(this byte[] bytes, EndianTypes endianType)
     {
-        if (bytes.Length == 1 || endianType != EndianTypes.LittleEndian) { 
-            return bytes; 
+        if (bytes.Length == 1 || endianType != EndianTypes.LittleEndian)
+        {
+            return bytes;
         }
 
         var workingBytes = (byte[])bytes.Clone();
@@ -15,8 +16,9 @@ public static class ByteExtensions
 
     public static byte[] ReverseBytesIfBE(this byte[] bytes, EndianTypes endianType)
     {
-        if (bytes.Length == 1 || endianType != EndianTypes.BigEndian) { 
-            return bytes; 
+        if (bytes.Length == 1 || endianType != EndianTypes.BigEndian)
+        {
+            return bytes;
         }
 
         var workingBytes = (byte[])bytes.Clone();

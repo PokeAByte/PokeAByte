@@ -67,7 +67,7 @@ public static class Startup
             mapperArchiveManager.GenerateArchivedList();
             return mapperArchiveManager;
         });
-        services.AddSingleton<IGithubRestApi, GithubRestApi>();        
+        services.AddSingleton<IGithubRestApi, GithubRestApi>();
         services.AddSingleton<ScriptConsole>();
         services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
         services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpDriver>();

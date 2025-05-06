@@ -82,7 +82,7 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
             {
                 throw new VisibleException("BizHawk connection is established, but does not have a game running.");
             }
-            _platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) 
+            _platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName)
                 ?? throw new Exception($"System {SystemName} is not yet supported.");
             return Task.CompletedTask;
         }
@@ -152,7 +152,7 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk
                     ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK.bin", MemoryMappedFileRights.Read)
                     : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK.bin", FileMode.Open, null, METADATA_LENGTH, MemoryMappedFileAccess.Read);
                 using var accessor = mmfData.CreateViewAccessor(0, METADATA_LENGTH, MemoryMappedFileAccess.Read);
-                byte[] metaData = new  byte[METADATA_LENGTH];
+                byte[] metaData = new byte[METADATA_LENGTH];
                 accessor.ReadArray(0, metaData, 0, METADATA_LENGTH);
                 return Task.FromResult(metaData[1] == SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION);
             }

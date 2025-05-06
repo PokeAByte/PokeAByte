@@ -19,9 +19,7 @@ public static class AddressMath
                 {
                     // This is a situation where the javascript has set a variable to null,
                     // this can be done for a variety of reasons that are game-specific.
-
                     // In this case, we don't want to evalulate the expression, and instead return null.
-
                     address = 0x00;
                     return false;
                 }
@@ -29,9 +27,9 @@ public static class AddressMath
                 addressExpression.Parameters[variable.Key] = variable.Value;
             }
             var result = addressExpression.Evaluate();
-            if (result is uint castedResult)
+            if (result is double doubleResult)
             {
-                address = castedResult;
+                address = (uint)doubleResult;
                 return true;
             }
             else
