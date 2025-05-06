@@ -24,7 +24,6 @@ public class MapperUpdateManager : IMapperUpdateManager
     {
         _logger = logger;
         _appSettings = appSettings;
-        _httpClientFactory = httpClientFactory;
         _mapperUpdaterSettings = mapperUpdaterSettingsManager;
         _githubRestApi = githubRestApi;
         _mapperArchiveManager = mapperArchiveManager;

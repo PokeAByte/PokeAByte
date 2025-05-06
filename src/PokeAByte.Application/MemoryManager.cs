@@ -5,11 +5,11 @@ namespace PokeAByte.Application
 {
     public class MemoryManager : IMemoryManager
     {
-        public MemoryManager()
+        public MemoryManager(uint gameMemorySize)
         {
             Namespaces = new Dictionary<string, IMemoryNamespace>()
             {
-                { "default", new MemoryNamespace() }
+                { "default", new StaticMemoryContainer(gameMemorySize) }
             };
 
             DefaultNamespace = Namespaces["default"];

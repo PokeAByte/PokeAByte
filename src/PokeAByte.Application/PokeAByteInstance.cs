@@ -44,7 +44,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         MapperFilesystemProvider = provider;
         ClientNotifiers = clientNotifiers.ToList();
 
-        MemoryContainerManager = new MemoryManager();
+        MemoryContainerManager = new MemoryManager(0);
         State = [];
         Variables = [];
     }
@@ -70,7 +70,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         HasPreprocessor = false;
         HasPostprocessor = false;
 
-        MemoryContainerManager = new MemoryManager();
+        MemoryContainerManager = new MemoryManager(0);
         State = [];
         Variables = [];
 
@@ -97,6 +97,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             // Get the file path from the filesystem provider.
             var mapperContent = await MapperFilesystemProvider.LoadContentAsync(mapperId);
             Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
+            MemoryContainerManager = new MemoryManager(Mapper.PlatformOptions.MemorySize);
 
             var engineOptions = new Options
             {

@@ -5,5 +5,7 @@
         public EndianTypes EndianType { get; }
 
         public MemoryAddressBlock[] Ranges { get; }
+
+        uint MemorySize { get; }
     }
 }
