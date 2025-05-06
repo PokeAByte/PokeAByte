@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
@@ -27,7 +26,7 @@ public class WebSocketClientNotifier(AppSettings _appSettings, IHubContext<Updat
                     GamePlatform = mapper.Metadata.GamePlatform,
                     MapperReleaseVersion = _appSettings.MAPPER_VERSION
                 },
-                Properties = mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
+                Properties = mapper.Properties.Values,
                 Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()
             }
         );
@@ -39,23 +38,6 @@ public class WebSocketClientNotifier(AppSettings _appSettings, IHubContext<Updat
 
     public Task SendPropertiesChanged(IList<IPokeAByteProperty> properties)
     {
-        return _hubContext.Clients.All.SendAsync("PropertiesChanged", properties.Select(x => new
-        {
-            path = x.Path,
-            memoryContainer = x.MemoryContainer,
-            address = x.Address,
-            length = x.Length,
-            size = x.Size,
-            reference = x.Reference,
-            bits = x.Bits,
-            description = x.Description,
-            value = x.Value,
-            bytes = x.Bytes?.ToIntegerArray(),
-
-            isFrozen = x.IsFrozen,
-            isReadOnly = x.IsReadOnly,
-
-            fieldsChanged = x.FieldsChanged
-        }));
+        return _hubContext.Clients.All.SendAsync("PropertiesChanged", properties);
     }
 }

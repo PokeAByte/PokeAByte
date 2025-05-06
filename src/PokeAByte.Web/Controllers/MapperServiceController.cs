@@ -80,15 +80,13 @@ public class MapperServiceController : ControllerBase
 
     [HttpGet]
     [Route("get-properties")]
-    public ActionResult<List<PropertyModel>> GetProperties()
+    public ActionResult<List<IPokeAByteProperty>> GetProperties()
     {
         if (_instance.Mapper == null || _instance.Mapper.Properties.Count == 0)
         {
             return NotFound();
         }
-        var properties = _instance.Mapper.Properties.Values
-            .Select(x => x.MapToPropertyModel())
-            .ToList();
+        var properties = _instance.Mapper.Properties.Values;
         return Ok(properties);
     }
 

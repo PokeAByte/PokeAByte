@@ -11,7 +11,6 @@ public class MapperUpdateManager : IMapperUpdateManager
 {
     private readonly ILogger<MapperUpdateManager> _logger;
     private readonly AppSettings _appSettings;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly MapperUpdaterSettings _mapperUpdaterSettings;
     private readonly IMapperArchiveManager _mapperArchiveManager;
     private readonly IGithubRestApi _githubRestApi;

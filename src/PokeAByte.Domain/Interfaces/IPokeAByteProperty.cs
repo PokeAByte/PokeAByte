@@ -1,4 +1,43 @@
-﻿namespace PokeAByte.Domain.Interfaces;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace PokeAByte.Domain.Interfaces;
+
+public class ByteArrayJsonConverter : JsonConverter<byte[]>
+{
+    public override byte[] Read(
+        ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartArray)
+        {
+            throw new JsonException();
+        }
+        reader.Read();
+
+        var elements = new List<byte>();
+
+        while (reader.TokenType != JsonTokenType.EndArray)
+        {
+            elements.Add(JsonSerializer.Deserialize<byte>(ref reader, options)!);
+
+            reader.Read();
+        }
+
+        return elements.ToArray();
+    }
+
+    public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+
+        foreach (byte item in value)
+        {
+            JsonSerializer.Serialize(writer, item, options);
+        }
+
+        writer.WriteEndArray();
+    }
+}
 
 public record PropertyAttributes
 {
@@ -26,25 +65,57 @@ public record PropertyAttributes
 
 public interface IPokeAByteProperty
 {
+    [JsonPropertyName("path")]
     string Path { get; }
+
+    [JsonPropertyName("type")]
     string Type { get; }
+
+    [JsonPropertyName("memoryContainer")]
     string? MemoryContainer { get; }
+
+    [JsonPropertyName("address")]
     uint? Address { get; }
+
+    [JsonIgnore]
     string OriginalAddressString { get; }
+
+    [JsonPropertyName("length")]
     int? Length { get; }
+
+    [JsonPropertyName("size")]
     int? Size { get; }
+
+    [JsonPropertyName("reference")]
     string? Reference { get; }
+
+    [JsonPropertyName("bits")]
     string? Bits { get; }
+
+    [JsonPropertyName("description")]
     string? Description { get; }
 
+    [JsonPropertyName("value")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     object? Value { get; set; }
+
+    [JsonIgnore]
     object? FullValue { get; set; }
+
+    [JsonPropertyName("bytes")]
+    [JsonConverter(typeof(ByteArrayJsonConverter))]
     byte[]? Bytes { get; }
+
+    [JsonIgnore]
     byte[]? BytesFrozen { get; }
 
+    [JsonPropertyName("isFrozen")]
     bool IsFrozen { get; }
+    
+    [JsonPropertyName("isReadOnly")]
     bool IsReadOnly { get; }
 
+    [JsonPropertyName("fieldsChanged")]
     HashSet<string> FieldsChanged { get; }
 
     void ProcessLoop(IPokeAByteInstance instance, IMemoryManager container, bool reloadAddresses);
@@ -58,5 +129,4 @@ public interface IPokeAByteProperty
     object? ObjectFromBytes(byte[] value);
     byte[] BytesFromValue(string value);
     byte[] BytesFromFullValue();
-    //public string? AfterReadValueExpression { get; set; }
 }

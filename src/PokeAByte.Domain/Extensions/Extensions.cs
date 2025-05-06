@@ -12,8 +12,6 @@ public static partial class Extensions
     public static string ToHexdecimalString(this byte value) => ((uint)value).ToHexdecimalString();
     public static string ToHexdecimalString(this IEnumerable<int> value, string joinCharacter = " ") => string.Join(joinCharacter, value.Select(x => ((uint)x).ToHexdecimalString()));
 
-    public static int[] ToIntegerArray(this byte[] bytes) => Array.ConvertAll(bytes, x => (int)x);
-
     /// <summary>
     /// Parse a hex memory address into a uint. 
     /// </summary>

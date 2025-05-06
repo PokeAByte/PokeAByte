@@ -9,28 +9,6 @@ namespace PokeAByte.Web.Controllers;
 
 static class MapperHelper
 {
-    public static PropertyModel MapToPropertyModel(this IPokeAByteProperty x) =>
-        new()
-        {
-            Path = x.Path,
-
-            Type = x.Type,
-            MemoryContainer = x.MemoryContainer,
-            Address = x.Address,
-            Length = x.Length,
-            Size = x.Size,
-            Reference = x.Reference,
-            Bits = x.Bits,
-            Description = x.Description,
-
-            Value = x.Value,
-            Bytes = x.Bytes?.ToIntegerArray(),
-
-            IsFrozen = x.IsFrozen,
-            IsReadOnly = x.IsReadOnly,
-            BaseProperty = x,
-        };
-
     public static Dictionary<string, IEnumerable<GlossaryItemModel>> MapToDictionaryGlossaryItemModel(
         this IEnumerable<ReferenceItems> glossaryList)
     {
@@ -88,7 +66,7 @@ public class MapperController : ControllerBase
                 GamePlatform = Instance.Mapper.Metadata.GamePlatform,
                 MapperReleaseVersion = _appSettings.MAPPER_VERSION
             },
-            Properties = Instance.Mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
+            Properties = Instance.Mapper.Properties.Values,
             Glossary = Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
         };
 
@@ -161,16 +139,16 @@ public class MapperController : ControllerBase
     }
 
     [HttpGet("properties")]
-    public ActionResult<IEnumerable<PropertyModel>> GetProperties()
+    public ActionResult<IEnumerable<IPokeAByteProperty>> GetProperties()
     {
         if (Instance.Initalized == false || Instance.Mapper == null)
             return ApiHelper.MapperNotLoaded();
 
-        return Ok(Instance.Mapper.Properties.Values.Select(x => x.MapToPropertyModel()));
+        return Ok(Instance.Mapper.Properties.Values);
     }
 
     [HttpGet("properties/{**path}/")]
-    public ActionResult<PropertyModel?> GetProperty(string path)
+    public ActionResult<IPokeAByteProperty?> GetProperty(string path)
     {
         if (Instance.Initalized == false || Instance.Mapper == null)
             return ApiHelper.MapperNotLoaded();
@@ -184,7 +162,7 @@ public class MapperController : ControllerBase
             return NotFound();
         }
 
-        return Ok(prop.MapToPropertyModel());
+        return Ok(prop);
     }
 
     [HttpPost("set-property-value")]

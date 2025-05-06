@@ -1,5 +1,11 @@
 # Future
 
+## Breaking
+
+* Replaced the previous frontend (UI) with a new one written in Preact.
+* Removed the internal performance measurements and the `SHOW_READ_LOOP_STATISTICS` setting.
+* Removed the intermediate `PropertyModel` type that is returned from some REST endpoints. The data given to clients may slightly differ now.
+
 ## Features
 
 * Added linux support for the Bizhawk integration tool.
@@ -7,12 +13,19 @@
 
 ## Performance
 
-- Improved the performance of the bizhawk driver by being smarter with the work done per read and reducing the memory overhead.
+* Improved the performance of the bizhawk driver by being smarter with the work done per read and reducing the memory overhead.
+* Some minor performance improvements by not repeatedly parsing the `Bits` string.
+* Reduced memory footprint by getting rid of blazor/mudblazor.
+  * This also improved performance somewhat because the update mechanism for the blazor UI no longer exists.
+* Minor memory usage improvement by only instantiating the Bizhawk and Retroarch drivers when a connection to the respective
+  emulator can be established.
+* Fixed some minor memory leaks that occur when repeatedly loading and unloading mappers.
+* Serialize `IPokeAByteProperty` directly instead of using an intermediary anonymous object for the `PropertiesChanged` websocket event.
 
 # 0.8.1 (2024-11-09)
 ## Bug Fix
 
-    Fixed a race condition in MapperClientService.cs in function HandlePropertyChangedEvent where _pendingUpdates was being modified while it was being read
+* Fixed a race condition in MapperClientService.cs in function HandlePropertyChangedEvent where _pendingUpdates was being modified while it was being read
 
 # 0.8.0 (2024-11-09)
 

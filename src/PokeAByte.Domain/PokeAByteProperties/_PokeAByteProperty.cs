@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Buffers;
+using System.Collections;
 using NCalc;
 using PokeAByte.Domain.Interfaces;
 
@@ -6,10 +7,17 @@ namespace PokeAByte.Domain.PokeAByteProperties;
 
 public abstract partial class PokeAByteProperty : IPokeAByteProperty
 {
+    private static SearchValues<char> _plainAddressSearch = SearchValues.Create("1234567890 -+");
     private readonly string _originalAddressString;
     private Expression? _addressExpression;
     private bool _hasAddressParameter;
     protected EndianTypes _endian;
+    private bool _isMemoryAddressSolved;
+
+    private bool ShouldRunReferenceTransformer
+    {
+        get { return (Type == "bit" || Type == "bool" || Type == "int" || Type == "uint") && Reference != null; }
+    }
 
     public PokeAByteProperty(IPokeAByteInstance instance, PropertyAttributes attributes)
     {
@@ -57,13 +65,6 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    private bool IsMemoryAddressSolved { get; set; }
-
-    private bool ShouldRunReferenceTransformer
-    {
-        get { return (Type == "bit" || Type == "bool" || Type == "int" || Type == "uint") && Reference != null; }
-    }
-
     public bool IsFrozen => BytesFrozen != null;
     public bool IsReadOnly => AddressString == null;
 
@@ -105,9 +106,9 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         MemoryAddress? address = Address;
         if (reloadAddresses && _hasAddressParameter)
         {
-            IsMemoryAddressSolved = false;
+            _isMemoryAddressSolved = false;
         }
-        if (_addressExpression != null && IsMemoryAddressSolved == false)
+        if (_addressExpression != null && _isMemoryAddressSolved == false)
         {
             try
             {

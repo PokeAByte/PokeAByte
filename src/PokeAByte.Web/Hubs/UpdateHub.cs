@@ -20,7 +20,7 @@ public class UpdateHub(IPokeAByteInstance instance, Domain.Models.AppSettings ap
                     GamePlatform = instance.Mapper.Metadata.GamePlatform,
                     MapperReleaseVersion = appSettings.MAPPER_VERSION
                 },
-                Properties = instance.Mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
+                Properties = instance.Mapper.Properties.Values,
                 Glossary = instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
             };
 
