@@ -88,8 +88,9 @@ public record GithubApiSettings : IGithubApiSettings
         //Setting file does not exist, just continue like normal
         if (!File.Exists(MapperEnvironment.GithubApiSettings))
         {
-            logger.LogWarning($"{MapperEnvironment.GithubApiSettings} does not exist. " +
-                              $"Mapper update settings failed to load.");
+            logger.LogWarning(
+                $"{MapperEnvironment.GithubApiSettings} does not exist. Mapper update settings failed to load."
+            );
             return new GithubApiSettings(logger, token);
         }
 

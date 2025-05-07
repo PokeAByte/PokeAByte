@@ -15,15 +15,10 @@ public static class MapperEnvironment
     public static string OutdatedMapperTreeJson =>
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers/outdated_mapper_tree.json");
 
-    public static string GithubChangeFilePath =>
-        Path.Combine(BuildEnvironment.ConfigurationDirectory, MapperTreeJson);
-
-    public static string MapperLocalDirectory =>
-        Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
+    public static string MapperLocalDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
 
     public static string MapperLocalArchiveDirectory =>
         Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
 
-    public static string MapperArchiveDirectory =>
-        Path.Combine(MapperLocalDirectory, "Archive");
+    public static string MapperArchiveDirectory => Path.Combine(MapperLocalDirectory, "Archive");
 }

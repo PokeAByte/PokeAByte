@@ -12,22 +12,23 @@ public class MapperArchiveManager : IMapperArchiveManager
     private Dictionary<string, List<ArchivedMapperDto>> _archivedMappers = [];
 
     public IReadOnlyDictionary<string, IReadOnlyList<ArchivedMapperDto>> GetArchivedMappers()
-        => _archivedMappers.Select(x =>
-                new KeyValuePair<string, IReadOnlyList<ArchivedMapperDto>>(x.Key, x.Value.AsReadOnly()))
+        => _archivedMappers.Select(
+                x => new KeyValuePair<string, IReadOnlyList<ArchivedMapperDto>>(x.Key, x.Value.AsReadOnly())
+            )
             .ToDictionary()
             .AsReadOnly();
 
     public MapperArchiveManager(ILogger<MapperArchiveManager> logger)
     {
         _logger = logger;
+        GenerateArchivedList();
     }
 
     private List<MapperXmlFileDto> FindAllXmlFiles(string path, string basePath = "")
     {
         if (!Directory.Exists(MapperEnvironment.MapperLocalArchiveDirectory))
         {
-            _logger.LogWarning($"Failed to find archived files, {MapperEnvironment.MapperLocalArchiveDirectory}" +
-                               $" does not exist.");
+            _logger.LogWarning($"Failed to find archived files, {MapperEnvironment.MapperLocalArchiveDirectory} does not exist.");
             return [];
         }
 
@@ -86,33 +87,26 @@ public class MapperArchiveManager : IMapperArchiveManager
         }
     }
 
-    private DirectoryInfo? CreateArchiveDirectory(string relativeFilename,
-        string filepath,
-        string? archivedPath = null)
+    private DirectoryInfo? CreateArchiveDirectory(string relativeFilename, string filepath)
     {
-        DirectoryInfo? archiveDirectory = null;
-        var archivedDirectoryPath = !string.IsNullOrWhiteSpace(archivedPath) ?
-            archivedPath :
-            MapperEnvironment.MapperArchiveDirectory;
         //Create a tmp dir to store old mappers
-        archiveDirectory = !Directory.Exists(archivedDirectoryPath) ?
-            Directory.CreateDirectory(archivedDirectoryPath) :
-            new DirectoryInfo(archivedDirectoryPath);
+        DirectoryInfo? archiveDirectory = !Directory.Exists(MapperEnvironment.MapperArchiveDirectory) 
+            ? Directory.CreateDirectory(MapperEnvironment.MapperArchiveDirectory) 
+            : new DirectoryInfo(MapperEnvironment.MapperArchiveDirectory);
 
         if (!File.Exists(filepath))
         {
-            _logger.LogWarning($"Failed to move {relativeFilename} because it does not exist.\n" +
-                               $"\tPath: {filepath}");
+            _logger.LogWarning($"Failed to move {relativeFilename} because it does not exist.\n\tPath: {filepath}");
             return null;
         }
 
         if (archiveDirectory.Exists) return archiveDirectory;
 
         //If somehow we fail to create the directory and it doesn't throw an exception, we should still handle it
-        _logger.LogWarning($"Failed to move {relativeFilename} because " +
-                           $"the local archive directory not exist.");
+        _logger.LogWarning($"Failed to move {relativeFilename} because the local archive directory not exist.");
         return null;
     }
+
     /// <summary>
     /// Archives a file located in filepath into a temp directory located in
     /// archivedPath or MapperEnvironment.MapperArchiveDirectory
@@ -121,10 +115,9 @@ public class MapperArchiveManager : IMapperArchiveManager
     /// <param name="filepath">The path where the file is located</param>
     /// <param name="archivedPath">The optional archive path</param>
     /// <returns>The path where the file was archived</returns>
-    public string ArchiveFile(string relativeFilename,
-        string filepath, string? archivedPath = null)
+    public string ArchiveFile(string relativeFilename, string filepath)
     {
-        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath, archivedPath);
+        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath);
         if (archiveDirectory is null) return "";
         try
         {
@@ -140,18 +133,16 @@ public class MapperArchiveManager : IMapperArchiveManager
             return "";
         }
     }
-    public string BackupFile(string relativeFilename,
-        string filepath,
-        string? archivedPath = null)
+
+    public string BackupFile(string relativeFilename, string filepath)
     {
-        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath, archivedPath);
+        var archiveDirectory = CreateArchiveDirectory(relativeFilename, filepath);
         if (archiveDirectory is null) return "";
         try
         {
             var archiveFile = new FileInfo($"{archiveDirectory.FullName}/{relativeFilename}");
             archiveFile.Directory?.Create();
-            File.Copy(filepath,
-                archiveFile.FullName);
+            File.Copy(filepath, archiveFile.FullName);
             return archiveDirectory.FullName;
         }
         catch (Exception e)
@@ -160,25 +151,23 @@ public class MapperArchiveManager : IMapperArchiveManager
             return "";
         }
     }
-    public void ArchiveDirectory(string directoryPath, string? archivePath = null)
-    {
-        var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0 ||
-                           Directory.GetFiles(directoryPath).Length != 0;
 
-        var archiveDirectoryPath = !string.IsNullOrWhiteSpace(archivePath) ?
-            archivePath :
-            MapperEnvironment.MapperLocalArchiveDirectory;
+    public void ArchiveDirectory(string directoryPath)
+    {
+        var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0 
+            || Directory.GetFiles(directoryPath).Length != 0;
+
+        var archiveDirectory = MapperEnvironment.MapperLocalArchiveDirectory;
 
         if (archiveFiles)
         {
-            var archiveDir = Directory.CreateDirectory(archiveDirectoryPath);
-            Directory.Move(directoryPath,
-                Path.Combine(archiveDir.FullName, $"Mapper_{DateTime.Now:yyyyMMddhhmmss}"));
+            var archiveDir = Directory.CreateDirectory(archiveDirectory);
+            Directory.Move(directoryPath, Path.Combine(archiveDir.FullName, $"Mapper_{DateTime.Now:yyyyMMddhhmmss}"));
         }
 
         try
         {
-            //Clean out tmp dir
+            // Clean out tmp dir
             if (Directory.Exists(directoryPath))
             {
                 Directory.Delete(directoryPath, true);
@@ -188,8 +177,8 @@ public class MapperArchiveManager : IMapperArchiveManager
         {
             _logger.LogError(e, "Failed to remove the archive folder because of an exception.");
         }
-
     }
+
     public void RestoreMappersFromArchive(List<ArchivedMapperDto> archivedMappers)
     {
         if (archivedMappers.Count == 0)
@@ -203,6 +192,7 @@ public class MapperArchiveManager : IMapperArchiveManager
         //Regenerate the archive list
         GenerateArchivedList();
     }
+
     private void RestoreMapperFromArchive(ArchivedMapperDto archivedMapper)
     {
         //Locate the original file
@@ -227,11 +217,8 @@ public class MapperArchiveManager : IMapperArchiveManager
         //Restore the old archived file
         RestoreFile(archivedPath, mapperPath, archiveBasePath);
         RestoreFile(archivedJsPath, mapperJsPath, archiveBasePath);
-        /*if(File.Exists(archivedPath))
-            File.Move(archivedPath, mapperPath);
-        if(File.Exists(archivedJsPath))
-            File.Move(archivedJsPath, mapperJsPath);*/
     }
+
     private void RestoreFile(string sourceFile, string destinationFile, string sourcePath)
     {
         if (!File.Exists(sourceFile)) return;
@@ -276,5 +263,4 @@ public class MapperArchiveManager : IMapperArchiveManager
             Directory.Delete(archiveDir, true);
         }
     }
-
 }

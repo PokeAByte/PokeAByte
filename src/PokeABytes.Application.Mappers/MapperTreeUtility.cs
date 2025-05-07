@@ -88,7 +88,6 @@ public static class MapperTreeUtility
         File.WriteAllText(path, jsonData);
         return true;
     }
-
 }
 
 public static class MapperTreeUtilityExtensions

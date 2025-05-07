@@ -17,7 +17,6 @@ public class MapperUpdateManager : IMapperUpdateManager
 
     public MapperUpdateManager(ILogger<MapperUpdateManager> logger,
         AppSettings appSettings,
-        IHttpClientFactory httpClientFactory,
         MapperUpdaterSettings mapperUpdaterSettingsManager,
         IGithubRestApi githubRestApi,
         IMapperArchiveManager mapperArchiveManager)
@@ -141,10 +140,8 @@ public class MapperUpdateManager : IMapperUpdateManager
         {
             var mapperPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
             var jsPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath,
-                mapperPath);
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath,
-                jsPath);
+            _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath, mapperPath);
+            _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath, jsPath);
             WriteTextToFile(mapperPath, mapper.XmlData, mapper.Created, mapper.Updated);
             WriteTextToFile(jsPath, mapper.JsData, mapper.Created, mapper.Updated);
         }

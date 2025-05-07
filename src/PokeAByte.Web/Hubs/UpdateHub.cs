@@ -1,27 +1,28 @@
 using Microsoft.AspNetCore.SignalR;
-using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
+using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Hubs;
 
-public class UpdateHub(IPokeAByteInstance instance, Domain.Models.AppSettings appSettings) : Hub
+public class UpdateHub(IInstanceService instanceService, Domain.Models.AppSettings appSettings) : Hub
 {
     public override Task OnConnectedAsync()
     {
-        var mapperModel = instance.Mapper == null
+        var mapper = instanceService.Instance?.Mapper;
+        var mapperModel = mapper == null
             ? null
             : new MapperModel
             {
                 Meta = new MapperMetaModel
                 {
-                    Id = instance.Mapper.Metadata.Id,
-                    GameName = instance.Mapper.Metadata.GameName,
-                    GamePlatform = instance.Mapper.Metadata.GamePlatform,
+                    Id = mapper.Metadata.Id,
+                    GameName = mapper.Metadata.GameName,
+                    GamePlatform = mapper.Metadata.GamePlatform,
                     MapperReleaseVersion = appSettings.MAPPER_VERSION
                 },
-                Properties = instance.Mapper.Properties.Values,
-                Glossary = instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
+                Properties = mapper.Properties.Values,
+                Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()
             };
 
         return this.Clients.Caller.SendAsync("Hello", mapperModel);

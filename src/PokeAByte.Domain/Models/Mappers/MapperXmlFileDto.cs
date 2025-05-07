@@ -11,11 +11,6 @@ public record MapperXmlFileDto
         filePath = filePath.Replace('\\', '/');
         var relativePath = filePath[pathBase.Length..filePath.LastIndexOf('/')];
         var fullPath = filePath[..filePath.LastIndexOf('/')];
-        /*var relativePath = filePath[..filePath
-            .LastIndexOf(fileName, StringComparison.Ordinal)]
-            .Trim('/')
-            .Trim('\\');*/
-        //relativePath = relativePath[relativePath.LastIndexOf()]
 
         return new MapperXmlFileDto
         {

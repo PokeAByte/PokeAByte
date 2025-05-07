@@ -9,8 +9,6 @@ using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Infrastructure.Drivers;
-using PokeAByte.Infrastructure.Drivers.Bizhawk;
-using PokeAByte.Infrastructure.Drivers.UdpPolling;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Hubs;
@@ -39,7 +37,6 @@ public static class Startup
         services.AddProblemDetails((options) =>
         {
             options.ShouldLogUnhandledException = (ctx, e, d) => true;
-
             options.IncludeExceptionDetails = (ctx, ex) =>
             {
                 return BuildEnvironment.IsDebug;
@@ -60,22 +57,14 @@ public static class Startup
             var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
             return MapperUpdaterSettings.Load(logger);
         });
-        services.AddSingleton<IMapperArchiveManager, MapperArchiveManager>(x =>
-        {
-            var logger = x.GetRequiredService<ILogger<MapperArchiveManager>>();
-            var mapperArchiveManager = new MapperArchiveManager(logger);
-            mapperArchiveManager.GenerateArchivedList();
-            return mapperArchiveManager;
-        });
+        services.AddSingleton<IMapperArchiveManager, MapperArchiveManager>();
         services.AddSingleton<IGithubRestApi, GithubRestApi>();
         services.AddSingleton<ScriptConsole>();
-        services.AddSingleton<IBizhawkMemoryMapDriver, BizhawkMemoryMapDriver>();
-        services.AddSingleton<IRetroArchUdpPollingDriver, RetroArchUdpDriver>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
-        services.AddSingleton<DriverService>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
+        services.AddSingleton<IInstanceService, InstanceService>();
+        services.AddSingleton<IDriverService, DriverService>();
         services.AddSingleton<MapperClientService>();
-        services.AddSingleton<IPokeAByteInstance, PokeAByteInstance>();
     }
 
     public static void ConfigureApp(this WebApplication app)

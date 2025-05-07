@@ -13,16 +13,16 @@ namespace PokeAByte.Web.Controllers;
 public class MapperServiceController : ControllerBase
 {
     private readonly ILogger<MapperServiceController> _logger;
-    private readonly IPokeAByteInstance _instance;
+    private readonly IInstanceService _instanceService;
     private readonly MapperClientService _mapperClientService;
 
     public MapperServiceController(
         ILogger<MapperServiceController> logger,
-        IPokeAByteInstance instance,
+        IInstanceService instanceService,
         MapperClientService mapperClientService)
     {
         _logger = logger;
-        _instance = instance;
+        _instanceService = instanceService;
         _mapperClientService = mapperClientService;
     }
 
@@ -46,10 +46,7 @@ public class MapperServiceController : ControllerBase
     {
         try
         {
-            var mapperResult = await _mapperClientService.ChangeMapper(
-                mapperId,
-                null,
-                null);
+            var mapperResult = await _mapperClientService.ChangeMapper(mapperId);
             if (mapperResult.IsSuccess)
             {
                 return Ok();
@@ -82,11 +79,11 @@ public class MapperServiceController : ControllerBase
     [Route("get-properties")]
     public ActionResult<List<IPokeAByteProperty>> GetProperties()
     {
-        if (_instance.Mapper == null || _instance.Mapper.Properties.Count == 0)
+        if (_instanceService.Instance?.Mapper == null || _instanceService.Instance.Mapper.Properties.Count == 0)
         {
             return NotFound();
         }
-        var properties = _instance.Mapper.Properties.Values;
+        var properties = _instanceService.Instance.Mapper.Properties.Values;
         return Ok(properties);
     }
 

@@ -89,14 +89,16 @@ public static class MapperXmlExtensions
         }
     }
 
-    public static string GetElementPath(this XElement el)
+    public static string GetElementPath(this XElement element)
     {
-        var elementName = el.Attribute("name")?.Value;
-
-        return el
-                   .AncestorsAndSelf().InDocumentOrder().Reverse()
-                   .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)
-                   .ReplaceStart("mapper.properties.", string.Empty).ReplaceEnd(".property.", string.Empty) +
-               $".{elementName}";
+        var elementName = element.Attribute("name")?.Value;
+        return element
+            .AncestorsAndSelf()
+            .InDocumentOrder()
+            .Reverse()
+            .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)
+            .ReplaceStart("mapper.properties.", string.Empty)
+            .ReplaceEnd(".property.", string.Empty) 
+            + $".{elementName}";
     }
 }

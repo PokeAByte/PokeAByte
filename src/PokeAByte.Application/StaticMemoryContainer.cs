@@ -1,5 +1,3 @@
-
-
 using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Application;

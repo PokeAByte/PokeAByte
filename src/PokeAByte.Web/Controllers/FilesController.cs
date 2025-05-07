@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Application.Mappers;
@@ -76,10 +75,9 @@ namespace PokeAByte.Web.Controllers
             try
             {
                 var mapperDownloads = mappers
-                    .Select(m =>
-                        m.LatestVersion ??
-                        (m.CurrentVersion ??
-                         throw new InvalidOperationException("Current Version and Latest version are both null.")))
+                    .Select(m => m.LatestVersion ??
+                        (m.CurrentVersion ?? throw new InvalidOperationException("Current Version and Latest version are both null."))
+                    )
                     .ToList();
                 await githubRest.DownloadMapperFiles(mapperDownloads, updateManager.SaveUpdatedMappersAsync);
                 return Ok();

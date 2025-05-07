@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Jint;
 using Jint.Native;
 using Jint.Native.Object;
@@ -12,21 +13,22 @@ namespace PokeAByte.Application;
 public class PokeAByteInstance : IPokeAByteInstance
 {
     private readonly ILogger<PokeAByteInstance> _logger;
+    public event InstanceProcessingAbort? OnProcessingAbort;
     private ScriptConsole ScriptConsoleAdapter { get; }
-    private CancellationTokenSource? ReadLoopToken { get; set; }
-    private IMapperFilesystemProvider MapperFilesystemProvider { get; }
-    private MemoryAddressBlock[]? BlocksToRead { get; set; }
+    private CancellationTokenSource ReadLoopToken { get; set; }
+    private MemoryAddressBlock[] BlocksToRead { get; set; }
     public List<IClientNotifier> ClientNotifiers { get; }
-    public bool Initalized { get; private set; }
-    public IPokeAByteDriver? Driver { get; private set; }
-    public IPokeAByteMapper? Mapper { get; private set; }
+    public IPokeAByteDriver Driver { get; private set; }
+    public IPokeAByteMapper Mapper { get; private set; }
     public IMemoryManager MemoryContainerManager { get; private set; }
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
-    private Engine? JavascriptEngine { get; set; }
+    private Engine JavascriptEngine { get; set; }
     private ObjectInstance? JavascriptModuleInstance { get; set; }
 
+    [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPreprocessor { get; set; }
+    [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPostprocessor { get; set; }
 
 #if DEBUG
@@ -36,136 +38,83 @@ public class PokeAByteInstance : IPokeAByteInstance
     public PokeAByteInstance(
         ILogger<PokeAByteInstance> logger,
         ScriptConsole scriptConsoleAdapter,
-        IMapperFilesystemProvider provider,
-        IEnumerable<IClientNotifier> clientNotifiers)
+        IEnumerable<IClientNotifier> clientNotifiers,
+        MapperContent mapperContent,
+        IPokeAByteDriver driver)
     {
         _logger = logger;
         ScriptConsoleAdapter = scriptConsoleAdapter;
-        MapperFilesystemProvider = provider;
+        Driver = driver;
+        State = [];
+        Variables = [];
         ClientNotifiers = clientNotifiers.ToList();
+        ReadLoopToken = new CancellationTokenSource();
 
-        MemoryContainerManager = new MemoryManager(0);
-        State = [];
-        Variables = [];
+        // Get the file path from the filesystem provider.
+        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
+        MemoryContainerManager = new MemoryManager(Mapper.PlatformOptions.MemorySize);
+
+        InitializeJSEngine(mapperContent);
+
+        // Calculate the blocks to read from the mapper memory addresses.
+        BlocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
+        if (BlocksToRead.Any())
+        {
+            _logger.LogInformation($"Using {BlocksToRead.Count()} memory read ranges from mapper.");
+        }
+        else
+        {
+            _logger.LogInformation("Using default driver memory read ranges.");
+            BlocksToRead = Mapper.PlatformOptions.Ranges;
+        }
     }
 
-    public async Task ResetState()
-    {
-        if (ReadLoopToken != null && ReadLoopToken.Token.CanBeCanceled)
+    [MemberNotNull(nameof(JavascriptEngine))]
+    private void InitializeJSEngine(MapperContent mapperContent) {
+        var engineOptions = new Options
         {
-            ReadLoopToken.Cancel();
+            Strict = true,
+            StringCompilationAllowed = false
+        };
+
+        if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
+        {
+
+            engineOptions.EnableModules(mapperContent.ScriptRoot, true);
+
+            JavascriptEngine = new Engine(engineOptions)
+                .SetValue("__console", ScriptConsoleAdapter)
+                .SetValue("__state", State)
+                .SetValue("__variables", Variables)
+                .SetValue("__mapper", Mapper)
+                .SetValue("__memory", MemoryContainerManager)
+                .SetValue("__driver", Driver);
+
+            JavascriptModuleInstance = JavascriptEngine.Modules.Import(mapperContent.ScriptPath);
+            HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");
+            HasPostprocessor = JavascriptModuleInstance.HasProperty("postprocessor");
         }
-
-        Initalized = false;
-        ReadLoopToken = null;
-
-        Mapper?.Dispose();
-        JavascriptEngine?.Dispose();
-        Driver?.Disconnect();
-        Driver = null;
-        Mapper = null;
-        BlocksToRead = null;
-
-        JavascriptModuleInstance = null;
-        HasPreprocessor = false;
-        HasPostprocessor = false;
-
-        MemoryContainerManager = new MemoryManager(0);
-        State = [];
-        Variables = [];
-
-        await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
+        else
+        {
+            JavascriptEngine = new Engine(engineOptions);
+        }
     }
 
-    public async Task Load(IPokeAByteDriver driver, string mapperId)
-    {
-        try
-        {
-            await ResetState();
+    public async Task StartProcessing() {
+        // Read twice
+        await Read();
+        await Read();
 
-            _logger.LogDebug("Creating PokeAByte mapper instance...");
-
-            Driver = driver;
-            await Driver.EstablishConnection();
-
-            // Load the mapper file.
-            if (string.IsNullOrEmpty(mapperId))
-            {
-                throw new ArgumentException("ID was NULL or empty.", nameof(mapperId));
-            }
-
-            // Get the file path from the filesystem provider.
-            var mapperContent = await MapperFilesystemProvider.LoadContentAsync(mapperId);
-            Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
-            MemoryContainerManager = new MemoryManager(Mapper.PlatformOptions.MemorySize);
-
-            var engineOptions = new Options
-            {
-                Strict = true,
-                StringCompilationAllowed = false
-            };
-
-            if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
-            {
-
-                engineOptions.EnableModules(mapperContent.ScriptRoot, true);
-
-                JavascriptEngine = new Engine(engineOptions)
-                    .SetValue("__console", ScriptConsoleAdapter)
-                    .SetValue("__state", State)
-                    .SetValue("__variables", Variables)
-                    .SetValue("__mapper", Mapper)
-                    .SetValue("__memory", MemoryContainerManager)
-                    .SetValue("__driver", Driver);
-
-                JavascriptModuleInstance = JavascriptEngine.Modules.Import(mapperContent.ScriptPath);
-                HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");
-                HasPostprocessor = JavascriptModuleInstance.HasProperty("postprocessor");
-            }
-            else
-            {
-                JavascriptEngine = new Engine(engineOptions);
-            }
-
-            // Calculate the blocks to read from the mapper memory addresses.
-            BlocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
-
-            if (BlocksToRead.Any())
-            {
-                _logger.LogInformation($"Using {BlocksToRead.Count()} memory read ranges from mapper.");
-            }
-            else
-            {
-                _logger.LogInformation("Using default driver memory read ranges.");
-                BlocksToRead = Mapper.PlatformOptions.Ranges;
-            }
-
-            // Read twice
-            await Read();
-            await Read();
-
-            Initalized = true;
-
-            await ClientNotifiers.ForEachAsync(async x => await x.SendMapperLoaded(Mapper));
-
-            // Start the read loop once successfully running once.
-            ReadLoopToken = new CancellationTokenSource();
-            _ = Task.Run(ReadLoop, ReadLoopToken.Token);
-
-            _logger.LogInformation($"Loaded mapper for {Mapper.Metadata.GameName} ({Mapper.Metadata.Id}).");
-        }
-        catch
-        {
-            await ResetState();
-            throw;
-        }
+        await ClientNotifiers.ForEachAsync(async x => await x.SendMapperLoaded(Mapper));
+        // Start the read loop once successfully running once.
+        
+        _ = Task.Run(ReadLoop, ReadLoopToken.Token);
+        _logger.LogInformation($"Loaded mapper for {Mapper.Metadata.GameName} ({Mapper.Metadata.Id}).");
     }
 
     private async Task ReadLoop()
     {
-        if (Driver == null) throw new Exception("Driver is null.");
-
-        while (ReadLoopToken != null && ReadLoopToken.IsCancellationRequested == false)
+        while (ReadLoopToken.IsCancellationRequested == false)
         {
             try
             {
@@ -175,17 +124,15 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured when read looping the mapper.");
-                await ResetState();
+                if (OnProcessingAbort != null) {
+                    await OnProcessingAbort.Invoke();
+                }
             }
         }
     }
 
     private async Task Read()
     {
-        if (Driver == null) throw new Exception("Driver is null.");
-        if (Mapper == null) throw new Exception("Mapper is null.");
-        if (BlocksToRead == null) throw new Exception("BlocksToRead is null.");
-
         var driverResult = await Driver.ReadBytes(BlocksToRead);
 
         foreach (var result in driverResult)
@@ -212,8 +159,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Preprocessor
         if (HasPreprocessor)
         {
-            if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
-
             if (JavascriptModuleInstance.Get("preprocessor").Call().ToObject() as bool? == false)
             {
                 // The function returned false, which means we do not want to continue.
@@ -244,8 +189,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Postprocessor
         if (HasPostprocessor)
         {
-            if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
-
             if (JavascriptModuleInstance.Get("postprocessor").Call().ToObject() as bool? == false)
             {
                 // The function returned false, which means we do not want to continue.
@@ -276,23 +219,29 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
     }
 
-    public object? ExecuteModuleFunction(string? function, IPokeAByteProperty property)
+    public object? ExecuteModuleFunction(string function, IPokeAByteProperty property)
     {
-        if (string.IsNullOrEmpty(function)) { return null; }
-
-        if (JavascriptEngine == null) throw new Exception("JavascriptEngine is null.");
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
 
         return JavascriptModuleInstance.Get(function).Call(JsValue.FromObject(JavascriptEngine, property)).ToObject();
     }
 
-    public object? ExecuteExpression(string? expression, object x)
+    public object? ExecuteExpression(string expression, object x)
     {
-        if (expression == null) { throw new Exception($"Expression is NULL when evaluating object {x}."); }
-        if (JavascriptEngine == null) throw new Exception("JavascriptEngine is null.");
-
         return JavascriptEngine.SetValue("x", x).Evaluate(expression).ToObject();
     }
 
-    public bool? GetModuleFunctionResult(string? function, IPokeAByteProperty property) => ExecuteModuleFunction(function, property) as bool?;
+    public bool? GetModuleFunctionResult(string function, IPokeAByteProperty property) => ExecuteModuleFunction(function, property) as bool?;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (ReadLoopToken.Token.CanBeCanceled)
+        {
+            ReadLoopToken.Cancel();
+        }
+        Mapper.Dispose();
+        JavascriptEngine?.Dispose();
+        await Driver.Disconnect();
+        await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
+    }
 }

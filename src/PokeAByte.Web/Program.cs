@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using PokeAByte.Domain.Models;
 using Serilog;
 using Serilog.Events;
@@ -18,8 +17,6 @@ public class Program
             .CreateBootstrapLogger();
         try
         {
-            if (!File.Exists(BuildEnvironment.UserSettingsJson))
-                File.Create(BuildEnvironment.UserSettingsJson);
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseSerilog((bc, sp, lc) =>
                 lc.MinimumLevel.Information()

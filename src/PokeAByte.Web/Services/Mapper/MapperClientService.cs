@@ -2,7 +2,6 @@
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Services.Drivers;
 
 namespace PokeAByte.Web.Services.Mapper;
@@ -10,9 +9,10 @@ namespace PokeAByte.Web.Services.Mapper;
 public class MapperClientService(
     IMapperFilesystemProvider mapperFs,
     ILogger<MapperClientService> logger,
-    IPokeAByteInstance instance,
+    IInstanceService instanceService,
+    IMapperFilesystemProvider mapperFilesystemProvider,
     AppSettings appSettings,
-    DriverService driverService
+    IDriverService driverService
 )
 {
     private int _currentAttempt = 0;
@@ -22,14 +22,9 @@ public class MapperClientService(
     //Todo: change this in settings
     public string LoadedDriver { get; set; } = DriverModels.Bizhawk;
 
-    public bool IsCurrentlyConnected
-    {
-        get => instance.Initalized && instance.Mapper != null;
-    }
+    public bool IsCurrentlyConnected => instanceService.Instance != null;
 
-    public async Task<Result> ChangeMapper(string mapperId,
-        Action<int>? driverTestActionHandler,
-        Action<int>? mapperTestActionHandler)
+    public async Task<Result> ChangeMapper(string mapperId)
     {
         _currentAttempt = 0;
         var connected = false;
@@ -37,12 +32,13 @@ public class MapperClientService(
         {
             try
             {
-                var driverResult = await driverService.TestDrivers(driverTestActionHandler);
-                if (string.IsNullOrWhiteSpace(driverResult))
-                    return Result.Failure(Error.FailedToLoadMapper,
-                        "No driver could connect to an emulator. Check your emulator settings.");
-                LoadedDriver = driverResult;
-                var result = await ReplaceMapper(mapperId);
+                var driver = await driverService.TestDrivers();
+                if (driver == null)
+                    return Result.Failure(
+                        Error.FailedToLoadMapper,
+                        "No driver could connect to an emulator. Check your emulator settings."
+                    );
+                var result = await ReplaceMapper(mapperId, driver);
                 connected = result.IsSuccess;
             }
             catch (Exception e)
@@ -51,19 +47,17 @@ public class MapperClientService(
                 connected = false;
             }
             _currentAttempt += 1;
-            mapperTestActionHandler?.Invoke(_currentAttempt);
             await Task.Delay(MaxWaitMs);
         }
         return connected ? Result.Success() : Result.Failure(Error.FailedToLoadMapper, "Max attempts reached.");
     }
 
-    private async Task<Result> ReplaceMapper(string mapperId)
+    private async Task<Result> ReplaceMapper(string mapperId, IPokeAByteDriver driver)
     {
-        await instance.ResetState();
-        var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
+        await instanceService.StopProcessing();
         try
         {
-            var result = await LoadMapper(mapper);
+            var result = await LoadMapper(mapperId, driver);
             return result
                 ? Result.Success()
                 : Result.Failure(Error.FailedToLoadMapper, "Please see logs for more info.");
@@ -87,7 +81,8 @@ public class MapperClientService(
 
     public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
     {
-        if (instance.Initalized == false || instance.Mapper == null)
+        var instance = instanceService.Instance;
+        if (instance == null)
         {
             return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
         }
@@ -105,7 +100,8 @@ public class MapperClientService(
 
     public Result<MapperMetaModel> GetMetaData()
     {
-        if (instance.Initalized == false || instance.Mapper == null)
+        var instance = instanceService.Instance;
+        if (instance == null)
         {
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         }
@@ -127,7 +123,8 @@ public class MapperClientService(
         {
             return Result.Failure(Error.StringIsNullOrEmpty);
         }
-        if (!instance.Initalized || instance.Mapper is null)
+        var instance = instanceService.Instance;
+        if (instance == null)
         {
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         }
@@ -154,39 +151,43 @@ public class MapperClientService(
 
     public async Task UnloadMapper()
     {
-        if (!instance.Initalized || instance.Mapper == null)
-        {
-            return;
-        }
-
-        await instance.ResetState();
+        await instanceService.StopProcessing();
     }
 
-    private async Task<bool> LoadMapper(MapperReplaceModel mapper)
+    private async Task<bool> LoadMapper(string mapperId, IPokeAByteDriver driver)
     {
-        if (!instance.Initalized || instance.Mapper == null)
+        // Load the mapper file.
+        if (string.IsNullOrEmpty(mapperId))
+        {
+            throw new ArgumentException("ID was NULL or empty.", nameof(mapperId));
+        }
+
+        // Get the file path from the filesystem provider.
+        var mapperContent = await mapperFilesystemProvider.LoadContentAsync(mapperId);
+        var instance = instanceService.Instance;
+        if (instance == null)
         {
             logger.LogDebug("Poke-A-Byte instance has not been initialized!");
         }
         logger.LogDebug("Replacing mapper.");
-        switch (mapper.Driver)
+        switch (driver)
         {
-            case DriverModels.Bizhawk:
-                await instance.Load(driverService.Bizhawk, mapper.Id);
+            case IBizhawkMemoryMapDriver:
+                await instanceService.LoadMapper(mapperContent, driver);
                 logger.LogDebug("Bizhawk driver loaded.");
                 break;
-            case DriverModels.RetroArch:
-                await instance.Load(driverService.RetroArch, mapper.Id);
+            case IRetroArchUdpPollingDriver:
+                await instanceService.LoadMapper(mapperContent, driver);
                 logger.LogDebug("Retroarch driver loaded.");
                 break;
-            case DriverModels.StaticMemory:
-                await instance.Load(driverService.StaticMemory, mapper.Id);
+            case IStaticMemoryDriver:
+                await instanceService.LoadMapper(mapperContent, driver);
                 logger.LogDebug("Static memory driver loaded.");
                 break;
             default:
                 logger.LogError("A valid driver was not supplied.");
                 break;
         }
-        return instance.Initalized && instance.Mapper != null;
+        return instanceService.Instance != null;
     }
 }

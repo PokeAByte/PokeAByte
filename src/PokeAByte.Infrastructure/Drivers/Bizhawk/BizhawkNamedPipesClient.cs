@@ -21,7 +21,8 @@ public static class BizhawkNamedPipesClient
                 0,
                 contractBytes.Length,
                 SendAsync,
-                client);
+                client
+            );
         }
         catch (Exception e)
         {

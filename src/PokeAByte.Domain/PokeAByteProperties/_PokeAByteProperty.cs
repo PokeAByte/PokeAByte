@@ -59,7 +59,6 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
     {
         get
         {
-            if (Instance.Mapper == null) throw new Exception("Instance.Mapper is NULL.");
             if (Reference == null) return null;
             return Instance.Mapper.References[Reference];
         }
@@ -90,7 +89,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
             }
         }
 
-        if (instance.GetModuleFunctionResult(ReadFunction, this) == false)
+        if (ReadFunction != null && instance.GetModuleFunctionResult(ReadFunction, this) == false)
         {
             // They want to do it themselves entirely in Javascript.
             return;
@@ -186,13 +185,11 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         {
             // Bytes have changed, but property is frozen, so force the bytes back to the original value.
             // Pretend nothing has changed. :)
-            if (instance.Driver == null) { throw new Exception("Instance.Driver is NULL."); }
             _ = instance.Driver.WriteBytes((MemoryAddress)address, BytesFrozen);
             return;
         }
 
         value = CalculateObjectValue(instance, bytes);
-
         Value = value;
     }
 
@@ -269,7 +266,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
             outputBits.CopyTo(bytes, 0);
         }
 
-        if (Instance.GetModuleFunctionResult(BeforeWriteValueFunction, this) == false)
+        if (BeforeWriteValueFunction != null && Instance.GetModuleFunctionResult(BeforeWriteValueFunction, this) == false)
         {
             // They want to do it themselves entirely in Javascript.
             return;
@@ -280,9 +277,6 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     public async Task WriteBytes(byte[] bytesToWrite, bool? freeze)
     {
-        if (Instance == null) throw new Exception("Instance is NULL.");
-        if (Instance.Driver == null) throw new Exception("Driver is NULL.");
-
         if (Address == null) throw new Exception($"{Path} does not have an address. Cannot write data to an empty address.");
         if (Length == null) throw new Exception($"{Path}'s length is NULL, so we can't write bytes.");
 
@@ -297,7 +291,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
             else if (Bytes != null) bytes[i] = Bytes[i];
         }
 
-        if (Instance.GetModuleFunctionResult(WriteFunction, (IPokeAByteProperty)this) == false)
+        if (WriteFunction != null && Instance.GetModuleFunctionResult(WriteFunction, this) == false)
         {
             // They want to do it themselves entirely in Javascript.
             return;

@@ -8,11 +8,11 @@ public static class ApiHelper
 {
     public static class EmbededResources
     {
-        public static Stream appsettings_json => GetEmbeddedResourceStream("PokeAByte.Web.appsettings.json");
         public static Stream favicon_ico => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.favicon.ico");
         public static Stream site_css => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.site.css");
         public static Stream dist_gameHookMapperClient_js => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");
     }
+    
     /// <summary>
     /// Takes the full name of a resource and loads it in to a stream.
     /// </summary>
@@ -28,15 +28,6 @@ public static class ApiHelper
         if (stream == null) { throw new Exception($"Unable to load embeded resource: {resourceName}"); }
 
         return stream;
-    }
-
-    /// <summary>
-    /// Get the list of all emdedded resources in the assembly.
-    /// </summary>
-    /// <returns>An array of fully qualified resource names</returns>
-    public static string[] GetEmbeddedResourceNames()
-    {
-        return Assembly.GetExecutingAssembly().GetManifestResourceNames();
     }
 
     public static string FromRouteToPath(this string route)
