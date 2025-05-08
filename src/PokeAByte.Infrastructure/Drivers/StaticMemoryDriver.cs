@@ -52,15 +52,19 @@ namespace PokeAByte.Infrastructure.Drivers
             MemoryFragmentLayout = JsonSerializer.Deserialize<Dictionary<uint, byte[]>>(contents) ?? throw new Exception("Cannot deserialize memory fragment layout.");
         }
 
-        public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
+        public Task ReadBytes(BlockData[] transferBlocks)
         {
             if (BuildEnvironment.IsDebug == false)
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            return Task.FromResult(MemoryFragmentLayout.Select(x => new BlockData(x.Key, x.Value)).ToArray());
+            for(int i = 0; i < transferBlocks.Length; i++) {
+                transferBlocks[i].Data = MemoryFragmentLayout[transferBlocks[i].Start];
+            }
+            return Task.CompletedTask;
         }
+        
         public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)

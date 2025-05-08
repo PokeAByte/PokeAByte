@@ -49,25 +49,25 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         return Task.CompletedTask;
     }
 
-    private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
+    private async Task<bool> ReadMemoryAddress(BlockData transferBlock)
     {
         if (_udpClientWrapper == null)
         {
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
-            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        var command = $"READ_CORE_MEMORY";
-        byte[]? response = await _udpClientWrapper.SendCommandAsync(
-            command,
-            ToRetroArchHexdecimalString(memoryAddress),
-            length.ToString()
+        byte[]? result = await _udpClientWrapper.SendCommandAsync(
+            "READ_CORE_MEMORY",
+            ToRetroArchHexdecimalString(transferBlock.Start),
+            transferBlock.Data.Length.ToString()
         );
-        if (response == null)
+        if (result == null)
         {
-            Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
-            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
+            throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        return response;
+        result.AsSpan().CopyTo(transferBlock.Data.AsSpan());
+        return true;
     }
 
     /// <summary>
@@ -119,15 +119,11 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// Key is the start of each address block. <br/>
     /// Value is the byte array contained in that block.
     /// </returns>
-    public async Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
+    public async Task ReadBytes(BlockData[] transferBlocks)
     {
-        var result = new BlockData[blocks.Count];
-        var tasks = blocks.Select(async (block) =>
-        {
-            var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
-            return new BlockData(block.StartingAddress, data);
-        });
-        return await Task.WhenAll(tasks);
+        foreach(BlockData block in transferBlocks) {
+            await ReadMemoryAddress(block);
+        }
     }
 
     public static async Task<bool> Probe(AppSettings appSettings)

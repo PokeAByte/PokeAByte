@@ -43,7 +43,7 @@ public record PropertyAttributes
 {
     public required string Path { get; init; }
 
-    public required string Type { get; init; }
+    public required PropertyType Type { get; init; }
     public string? MemoryContainer { get; init; }
     public string? Address { get; init; }
     public int? Length { get; init; } = 1;
@@ -63,13 +63,38 @@ public record PropertyAttributes
     public EndianTypes EndianType { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<PropertyType>))]
+public enum PropertyType : byte
+{
+    [JsonStringEnumMemberName("binaryCodedDecimal")]
+    BinaryCodedDecimal,
+
+    [JsonStringEnumMemberName("bitArray")]
+    BitArray,
+
+    [JsonStringEnumMemberName("bool")]
+    Bool,
+
+    [JsonStringEnumMemberName("bit")]
+    Bit,
+
+    [JsonStringEnumMemberName("int")]
+    Int,
+
+    [JsonStringEnumMemberName("string")]
+    String,
+
+    [JsonStringEnumMemberName("uint")]
+    Uint
+}
+
 public interface IPokeAByteProperty
 {
     [JsonPropertyName("path")]
     string Path { get; }
 
     [JsonPropertyName("type")]
-    string Type { get; }
+    PropertyType Type { get; }
 
     [JsonPropertyName("memoryContainer")]
     string? MemoryContainer { get; }

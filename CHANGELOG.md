@@ -22,6 +22,10 @@
 * Fixed some minor memory leaks that occur when repeatedly loading and unloading mappers.
 * Serialize `IPokeAByteProperty` directly instead of using an intermediary anonymous object for the `PropertiesChanged` websocket event.
 * Use one contigous byte array for storing game memory, this skips a bunch of work to find the proper `ByteArray` based on address and length.
+* Reduced memory use and memory-churn.
+
+Overall, using the Pokemon Emerald mapper and Bizhawk on Linux, I see a reduction in CPU usage of ~30% and a reduction 
+of memory utilization of ~34%. 
 
 # 0.8.1 (2024-11-09)
 ## Bug Fix

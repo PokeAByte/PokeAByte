@@ -88,12 +88,20 @@ namespace PokeAByte.Application
                     {
                         if (instance == null) { throw new Exception("Instance is null."); }
 
-                        var type = x.GetAttributeValue("type");
+                        var type = x.GetAttributeValue("type") switch {
+                            "binaryCodedDecimal" => PropertyType.BinaryCodedDecimal,
+                            "bitArray" => PropertyType.BitArray,
+                            "bool" => PropertyType.Bool,
+                            "int" => PropertyType.Int,
+                            "string" => PropertyType.String,
+                            "uint" => PropertyType.Uint,
+                            _ => throw new Exception($"Unknown property type {x.GetAttributeValue("type")}."),
+                        };
 
                         var variables = new PropertyAttributes()
                         {
                             Path = x.GetElementPath(),
-                            Type = x.GetAttributeValue("type"),
+                            Type = type,
                             MemoryContainer = x.GetOptionalAttributeValue("memoryContainer"),
                             Address = x.GetOptionalAttributeValue("address"),
                             Length = x.GetOptionalAttributeValueAsInt("length") ?? 1,
@@ -110,13 +118,16 @@ namespace PokeAByte.Application
                             EndianType = endianType,
                         };
 
-                        if (type == "binaryCodedDecimal") return new BinaryCodedDecimalProperty(instance, variables);
-                        else if (type == "bitArray") return new BitFieldProperty(instance, variables);
-                        else if (type == "bool") return new BooleanProperty(instance, variables);
-                        else if (type == "int") return new IntegerProperty(instance, variables);
-                        else if (type == "string") return new StringProperty(instance, variables);
-                        else if (type == "uint") return new UnsignedIntegerProperty(instance, variables);
-                        else throw new Exception($"Unknown property type {type}.");
+                        return type switch
+                        {
+                            PropertyType.BinaryCodedDecimal => new BinaryCodedDecimalProperty(instance, variables),
+                            PropertyType.BitArray => new BitFieldProperty(instance, variables),
+                            PropertyType.Bool => new BooleanProperty(instance, variables),
+                            PropertyType.Int => new IntegerProperty(instance, variables),
+                            PropertyType.String => new StringProperty(instance, variables),
+                            PropertyType.Uint => new UnsignedIntegerProperty(instance, variables),
+                            _ => throw new Exception($"Unknown property type {type}."),
+                        };
                     }
                     catch (Exception ex)
                     {

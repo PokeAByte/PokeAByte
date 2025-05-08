@@ -28,6 +28,27 @@ namespace PokeAByte.Domain.Interfaces
         Dictionary<string, ReferenceItems> References { get; }
         public IPlatformOptions PlatformOptions { get; }
 
+        public IPokeAByteProperty? get_property(string path) {
+            if (Properties.TryGetValue(path, out var property)) {
+                return property;
+            }
+            return null;
+        }
+
+        public object? get_property_value(string path) {
+            if (Properties.TryGetValue(path, out var property)) {
+                return property.Value;
+            }
+            throw new Exception($"{path} is not defined in properties.");
+        }
+
+        public void set_property_value(string path, object? value) {
+            if (Properties.TryGetValue(path, out var property)) {
+                property.Value = value;
+            }
+            throw new Exception($"{path} is not defined in properties.");
+        }
+
         /// <summary>
         /// Copies all properties under the source path into the appopriate desitnation path properties. <br/>
         /// The source and destination are identified by their partial paths.

@@ -16,11 +16,13 @@ public class PokeAByteInstance : IPokeAByteInstance
     public event InstanceProcessingAbort? OnProcessingAbort;
     private ScriptConsole ScriptConsoleAdapter { get; }
     private CancellationTokenSource ReadLoopToken { get; set; }
-    private MemoryAddressBlock[] BlocksToRead { get; set; }
     public List<IClientNotifier> ClientNotifiers { get; }
     public IPokeAByteDriver Driver { get; private set; }
     public IPokeAByteMapper Mapper { get; private set; }
     public IMemoryManager MemoryContainerManager { get; private set; }
+
+    private BlockData[] _transferBlocks;
+
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
     private Engine JavascriptEngine { get; set; }
@@ -52,21 +54,27 @@ public class PokeAByteInstance : IPokeAByteInstance
 
         // Get the file path from the filesystem provider.
         Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
-        MemoryContainerManager = new MemoryManager(Mapper.PlatformOptions.MemorySize);
-
-        InitializeJSEngine(mapperContent);
-
         // Calculate the blocks to read from the mapper memory addresses.
-        BlocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
-        if (BlocksToRead.Any())
+        var blocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
+        if (blocksToRead.Any())
         {
-            _logger.LogInformation($"Using {BlocksToRead.Count()} memory read ranges from mapper.");
+            _logger.LogInformation($"Using {blocksToRead.Count()} memory read ranges from mapper.");
         }
         else
         {
             _logger.LogInformation("Using default driver memory read ranges.");
-            BlocksToRead = Mapper.PlatformOptions.Ranges;
+            blocksToRead = Mapper.PlatformOptions.Ranges;
         }
+        var lastBlock = blocksToRead.OrderByDescending(x => x.EndingAddress).First();
+        MemoryContainerManager = new MemoryManager(lastBlock.EndingAddress);
+        _transferBlocks = new BlockData[blocksToRead.Length];
+        int i = 0;
+        foreach(var block in blocksToRead) {
+            _transferBlocks[i] = new BlockData(block.StartingAddress, new byte[block.EndingAddress-block.StartingAddress]);
+            i++;
+        }       
+
+        InitializeJSEngine(mapperContent);
     }
 
     [MemberNotNull(nameof(JavascriptEngine))]
@@ -133,9 +141,9 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     private async Task Read()
     {
-        var driverResult = await Driver.ReadBytes(BlocksToRead);
+        await Driver.ReadBytes(_transferBlocks);
 
-        foreach (var result in driverResult)
+        foreach (var result in _transferBlocks)
         {
             MemoryContainerManager.DefaultNamespace.Fill(result.Start, result.Data);
         }
@@ -145,7 +153,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             var memoryContainerPath = Path.GetFullPath(Path.Combine(BuildEnvironment.BinaryDirectoryPokeAByteFilePath, "..", "..", "..", "..", "..", "..", "PokeAByte.IntegrationTests", "Data", $"{Mapper.Metadata.Id}-0.json"));
 
-            File.WriteAllText(memoryContainerPath, JsonSerializer.Serialize(driverResult));
+            File.WriteAllText(memoryContainerPath, JsonSerializer.Serialize(_transferBlocks));
             DebugOutputMemoryLayoutToFilesystem = false;
         }
 #endif

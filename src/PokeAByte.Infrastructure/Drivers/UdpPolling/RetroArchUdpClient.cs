@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
@@ -131,8 +132,7 @@ public class RetroArchUdpClient : IDisposable
                 bytes = bytes.Slice(17);
                 int space = bytes.IndexOf((byte)' ');
                 string address = Encoding.ASCII.GetString(bytes[..space]);
-                var data = ParseReadMemoryResponse(bytes.Slice(space + 1));
-                _responses[string.Concat(address, "-", data.Length.ToString())] = data;
+                _responses[address] = ParseReadMemoryResponse(bytes.Slice(space + 1));
             }
             return true;
         }
@@ -176,16 +176,14 @@ public class RetroArchUdpClient : IDisposable
         }
         byte[]? response = null;
         _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument1} {argument2}"));
-        string key = string.Concat(argument1, "-", argument2);
         SpinWait.SpinUntil(() =>
             {
-                return _responses.TryGetValue(key, out response);
+                return _responses.TryGetValue(argument1, out response);
             },
             TimeSpan.FromMilliseconds(_timeout)
         );
         return response;
     }
-
     public void Dispose()
     {
         if (!_isDisposed)

@@ -8,7 +8,6 @@ namespace PokeAByte.Domain.PokeAByteProperties;
 public abstract partial class PokeAByteProperty : IPokeAByteProperty
 {
     private static SearchValues<char> _plainAddressSearch = SearchValues.Create("1234567890 -+");
-    private readonly string _originalAddressString;
     private Expression? _addressExpression;
     private bool _hasAddressParameter;
     protected EndianTypes _endian;
@@ -16,7 +15,14 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     private bool ShouldRunReferenceTransformer
     {
-        get { return (Type == "bit" || Type == "bool" || Type == "int" || Type == "uint") && Reference != null; }
+        get { 
+            return Reference != null && (
+                Type == PropertyType.Bool 
+                || Type == PropertyType.Bit
+                || Type == PropertyType.Int
+                || Type == PropertyType.Uint
+            ); 
+        }
     }
 
     public PokeAByteProperty(IPokeAByteInstance instance, PropertyAttributes attributes)
@@ -28,8 +34,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
         MemoryContainer = attributes.MemoryContainer;
         AddressString = attributes.Address;
-        _originalAddressString = attributes.Address ?? "";
-        OriginalAddressString = _originalAddressString;
+        OriginalAddressString = attributes.Address ?? "";;
         Length = attributes.Length;
         Size = attributes.Size;
         Bits = attributes.Bits;
@@ -51,7 +56,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     protected IPokeAByteInstance Instance { get; }
     public string Path { get; }
-    public string Type { get; }
+    public PropertyType Type { get; }
 
     public string? StaticValue { get; }
 
@@ -80,7 +85,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
     {
-        if (Type is "string" && Length is 1 && Value is not null)
+        if (Type ==  PropertyType.String && Length is 1 && Value is not null)
         {
             var valString = Value.ToString();
             if (!string.IsNullOrWhiteSpace(valString))

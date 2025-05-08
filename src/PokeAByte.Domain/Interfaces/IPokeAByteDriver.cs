@@ -2,7 +2,17 @@ using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Domain.Interfaces
 {
-    public record BlockData(MemoryAddress Start, byte[] Data);
+    public class BlockData
+    {
+        public MemoryAddress Start { get; set; }
+        public byte[] Data { get; set; }
+
+        public BlockData(uint start, byte[] data)
+        {
+            Start = start;
+            Data = data;
+        }
+    }
 
     /// <summary>
     /// Driver interface for interacting with a emulator.
@@ -19,7 +29,7 @@ namespace PokeAByte.Domain.Interfaces
         Task EstablishConnection();
         Task Disconnect();
 
-        Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks);
+        Task ReadBytes(BlockData[] transferBlocks);
 
         Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
 

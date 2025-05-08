@@ -1,6 +1,6 @@
 ﻿namespace PokeAByte.Domain;
 
-public enum EndianTypes
+public enum EndianTypes : byte
 {
     BigEndian,
     LittleEndian

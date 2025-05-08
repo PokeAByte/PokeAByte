@@ -95,24 +95,25 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
         return Task.CompletedTask;
     }
 
-    public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> _)
+    public Task ReadBytes(BlockData[] transferBlocks)
     {
         if (_platform == null)
         {
             throw new Exception($"System {SystemName} is not yet supported.");
         }
-        var result = new BlockData[_platform.MemoryLayout.Length];
-        for (int i = 0; i < result.Length; i++)
+        for (int i = 0; i < transferBlocks.Length; i++)
         {
-            var block = _platform.MemoryLayout[i];
-            var data = new byte[block.Length];
-            ReadBizhawkData(block.CustomPacketTransmitPosition, data.AsSpan());
-            result[i] = new BlockData(
-                block.PhysicalStartingAddress,
-                data
-            );
+            var transferBlock = transferBlocks[i];
+            var block = _platform.MemoryLayout
+                .Where( 
+                    x => transferBlock.Start >= x.PhysicalStartingAddress
+                        && transferBlock.Start + transferBlock.Data.Length <= x.PhysicalEndingAddress
+                )
+                .First();
+            var offset = transferBlock.Start - block.PhysicalStartingAddress;
+            ReadBizhawkData(block.CustomPacketTransmitPosition + (int)offset, transferBlock.Data.AsSpan());
         }
-        return Task.FromResult(result);
+        return Task.CompletedTask;
     }
 
     public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
