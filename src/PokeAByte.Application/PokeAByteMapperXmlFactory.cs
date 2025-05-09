@@ -118,16 +118,7 @@ namespace PokeAByte.Application
                             EndianType = endianType,
                         };
 
-                        return type switch
-                        {
-                            PropertyType.BinaryCodedDecimal => new BinaryCodedDecimalProperty(instance, variables),
-                            PropertyType.BitArray => new BitFieldProperty(instance, variables),
-                            PropertyType.Bool => new BooleanProperty(instance, variables),
-                            PropertyType.Int => new IntegerProperty(instance, variables),
-                            PropertyType.String => new StringProperty(instance, variables),
-                            PropertyType.Uint => new UnsignedIntegerProperty(instance, variables),
-                            _ => throw new Exception($"Unknown property type {type}."),
-                        };
+                        return new PokeAByteProperty(instance, variables);
                     }
                     catch (Exception ex)
                     {

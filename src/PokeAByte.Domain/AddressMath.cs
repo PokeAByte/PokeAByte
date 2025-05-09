@@ -4,13 +4,8 @@ namespace PokeAByte.Domain;
 
 public static class AddressMath
 {
-    public static bool TrySolve(Expression? addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
+    public static bool TrySolve(Expression addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
     {
-        if (addressExpression == null)
-        {
-            address = 0x00;
-            return false;
-        }
         try
         {
             foreach (var variable in variables)

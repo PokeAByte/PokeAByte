@@ -151,7 +151,6 @@ public interface IPokeAByteProperty
     Task FreezeProperty(byte[] bytesFrozen);
     Task UnfreezeProperty();
     //Exposing protected methods so we can maintian consistency
-    object? ObjectFromBytes(byte[] value);
     byte[] BytesFromValue(string value);
     byte[] BytesFromFullValue();
 }

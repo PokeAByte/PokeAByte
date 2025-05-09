@@ -3,7 +3,7 @@ using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
-public abstract partial class PokeAByteProperty : IPokeAByteProperty
+public partial class PokeAByteProperty : IPokeAByteProperty
 {
     private string? _memoryContainer;
     private uint? _address;

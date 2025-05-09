@@ -1,11 +1,12 @@
 ﻿using System.Buffers;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using NCalc;
 using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
-public abstract partial class PokeAByteProperty : IPokeAByteProperty
+public partial class PokeAByteProperty : IPokeAByteProperty
 {
     private static SearchValues<char> _plainAddressSearch = SearchValues.Create("1234567890 -+");
     private Expression? _addressExpression;
@@ -15,13 +16,14 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     private bool ShouldRunReferenceTransformer
     {
-        get { 
+        get
+        {
             return Reference != null && (
-                Type == PropertyType.Bool 
+                Type == PropertyType.Bool
                 || Type == PropertyType.Bit
                 || Type == PropertyType.Int
                 || Type == PropertyType.Uint
-            ); 
+            );
         }
     }
 
@@ -34,7 +36,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
         MemoryContainer = attributes.MemoryContainer;
         AddressString = attributes.Address;
-        OriginalAddressString = attributes.Address ?? "";;
+        OriginalAddressString = attributes.Address ?? ""; ;
         Length = attributes.Length;
         Size = attributes.Size;
         Bits = attributes.Bits;
@@ -52,6 +54,9 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         AfterReadValueFunction = attributes.AfterReadValueFunction;
 
         BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
+        if (Type == PropertyType.String && Reference == null) {
+            Reference = "defaultCharacterMap";
+        }
     }
 
     protected IPokeAByteInstance Instance { get; }
@@ -72,20 +77,90 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
     public bool IsFrozen => BytesFrozen != null;
     public bool IsReadOnly => AddressString == null;
 
-    protected abstract object? ToValue(byte[] bytes);
-    protected abstract byte[] FromValue(string value);
 
-    //Not sure why FromValue and ToValue are protected? I would like to be able to convert
-    //values to bytes without having to handle or copy/paste for each different property type,
-    //so I am going to expose it
-    public byte[] BytesFromValue(string value) => FromValue(value);
-    public object? ObjectFromBytes(byte[] bytes) => ToValue(bytes);
-    public byte[] BytesFromFullValue() => FromValue(FullValue?.ToString() ?? "");
+    protected object? ToValue(in byte[] data)
+    {
+        switch (Type)
+        {
+            case PropertyType.BinaryCodedDecimal:
+                return PropertyLogic.GetBCDValue(in data);
+            case PropertyType.BitArray:
+                return PropertyLogic.GetBitArrayValue(in data);
+            case PropertyType.Bool:
+            case PropertyType.Bit:
+                return data[0] != 0x00;
+            case PropertyType.Int:
+                return PropertyLogic.GetIntValue(in data, _endian);
+            case PropertyType.String:
+                return PropertyLogic.GetStringValue(in data, Size, ComputedReference, _endian);
+            case PropertyType.Uint:
+                return PropertyLogic.GetUIntValue(in data, _endian);
+        }
+        throw new NotImplementedException();
+    }
+    
+
+    public byte[] BytesFromValue(string value) {
+        switch (Type)
+        {
+            case PropertyType.BinaryCodedDecimal:
+                throw new NotImplementedException();
+            case PropertyType.BitArray:
+                throw new NotImplementedException();
+            case PropertyType.Bool:
+            case PropertyType.Bit:
+                return bool.Parse(value) ? [0x01] : [0x00];
+            case PropertyType.Int:
+                {
+                    if (Length == null) throw new Exception("Length is NULL.");
+                    var integerValue = int.Parse(value);
+                    var bytes = BitConverter.GetBytes(integerValue).Take(Length ?? 0).ToArray();
+                    return bytes.ReverseBytesIfLE(_endian);
+                }
+            case PropertyType.String:
+                {
+                    if (ComputedReference == null) throw new Exception("ReferenceObject is NULL.");
+                    if (Length == null) throw new Exception("Length is NULL.");
+
+                    var uints = value
+                        .Select(x => ComputedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
+                        .ToList();
+
+                    if (uints.Count + 1 > Length)
+                    {
+                        uints = uints.Take(Length ?? 0 - 1).ToList();
+                    }
+
+                    var nullTerminationKey = ComputedReference.Values.First(x => x.Value == null);
+                    uints.Add(nullTerminationKey);
+                    return uints
+                        .Select(x => x?.Value == null
+                            ? nullTerminationKey.Key
+                            : x.Key
+                        ).SelectMany(x => Size is null
+                            ? BitConverter.GetBytes(x).Take(new Range(0, 1))
+                            : BitConverter.GetBytes(x).Take(Size.Value)
+                        )
+                        .ToArray();
+                }
+            case PropertyType.Uint:
+                {
+                    if (Length == null) throw new Exception("Length is NULL.");
+
+                    int.TryParse(value, out var integerValue);
+                    byte[] bytes = BitConverter.GetBytes(integerValue)[..Length.Value];
+                    return bytes.ReverseBytesIfLE(_endian);
+                }
+        }
+        throw new NotImplementedException();
+    }
+
+    public byte[] BytesFromFullValue() => BytesFromValue(FullValue?.ToString() ?? "");
     public HashSet<string> FieldsChanged { get; } = [];
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
     {
-        if (Type ==  PropertyType.String && Length is 1 && Value is not null)
+        if (Type == PropertyType.String && Length is 1 && Value is not null)
         {
             var valString = Value.ToString();
             if (!string.IsNullOrWhiteSpace(valString))
@@ -135,7 +210,6 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         }
 
         byte[] bytes;
-        object? value;
         ReadOnlySpan<byte> readonlyBytes;
 
         if (address == null) { throw new Exception("address is NULL."); }
@@ -183,7 +257,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
             );
         }
         //Store the original, full value
-        FullValue = ToValue(bytes);
+        FullValue = ToValue(in bytes);
 
         bytes = BytesFromBits(bytes);
         if (address != null && BytesFrozen != null && bytes.SequenceEqual(BytesFrozen) == false)
@@ -194,8 +268,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
             return;
         }
 
-        value = CalculateObjectValue(instance, bytes);
-        Value = value;
+        Value = CalculateObjectValue(instance, bytes);
     }
 
     public byte[] BytesFromBits(byte[] bytes)
@@ -217,7 +290,9 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
 
     public object? CalculateObjectValue(IPokeAByteInstance instance, byte[] bytes)
     {
-        var value = ToValue(bytes);
+        var value = BitIndexes == null 
+            ? FullValue 
+            : ToValue(in bytes);
 
         if (value != null && AfterReadValueExpression != null)
         {
@@ -232,11 +307,11 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         // Reference lookup
         if (ShouldRunReferenceTransformer)
         {
-            if (ComputedReference == null) throw new Exception("ReferenceObject is NULL.");
+            var computedReference = ComputedReference;
+            if (computedReference == null) throw new Exception("ReferenceObject is NULL.");
 
-            value = ComputedReference.GetSingleOrDefaultByKey(Convert.ToUInt64(value))?.Value;
+            value = computedReference.GetSingleOrDefaultByKey(Convert.ToUInt64(value))?.Value;
         }
-
         return value;
     }
 
@@ -256,7 +331,7 @@ public abstract partial class PokeAByteProperty : IPokeAByteProperty
         }
         else
         {
-            bytes = FromValue(value);
+            bytes = BytesFromValue(value);
         }
 
         if (BitIndexes != null)
