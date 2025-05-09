@@ -6,7 +6,7 @@ namespace PokeAByte.Application;
 public class GB_PlatformOptions : IPlatformOptions
 {
     public EndianTypes EndianType { get; } = EndianTypes.LittleEndian;
-    public uint MemorySize {get;} = 0xFFFE;
+    public uint MemorySize { get; } = 0xFFFE;
 
     public MemoryAddressBlock[] Ranges { get; } =
     [

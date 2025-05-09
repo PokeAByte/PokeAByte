@@ -136,7 +136,7 @@ public interface IPokeAByteProperty
 
     [JsonPropertyName("isFrozen")]
     bool IsFrozen { get; }
-    
+
     [JsonPropertyName("isReadOnly")]
     bool IsReadOnly { get; }
 

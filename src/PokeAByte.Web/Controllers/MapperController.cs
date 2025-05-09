@@ -75,7 +75,8 @@ public class MapperController : ControllerBase
     public async Task<ActionResult> ChangeMapper(MapperReplaceModel model)
     {
         var mapperContent = await _mapperFilesystemProvider.LoadContentAsync(model.Id);
-        switch (model.Driver) {
+        switch (model.Driver)
+        {
             case DriverModels.Bizhawk:
                 await _instanceService.LoadMapper(mapperContent, await _driverService.GetBizhawkDriver());
                 break;
@@ -85,7 +86,7 @@ public class MapperController : ControllerBase
             case DriverModels.StaticMemory:
                 await _instanceService.LoadMapper(mapperContent, _driverService.StaticMemory);
                 break;
-            default: 
+            default:
                 return ApiHelper.BadRequestResult("A valid driver was not supplied.");
         }
         return Ok();

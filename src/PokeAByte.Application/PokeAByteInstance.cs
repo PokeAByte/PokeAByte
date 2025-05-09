@@ -13,18 +13,9 @@ namespace PokeAByte.Application;
 public class PokeAByteInstance : IPokeAByteInstance
 {
     private readonly ILogger<PokeAByteInstance> _logger;
-    public event InstanceProcessingAbort? OnProcessingAbort;
     private ScriptConsole ScriptConsoleAdapter { get; }
     private CancellationTokenSource ReadLoopToken { get; set; }
-    public List<IClientNotifier> ClientNotifiers { get; }
-    public IPokeAByteDriver Driver { get; private set; }
-    public IPokeAByteMapper Mapper { get; private set; }
-    public IMemoryManager MemoryContainerManager { get; private set; }
-
     private BlockData[] _transferBlocks;
-
-    public Dictionary<string, object?> State { get; private set; }
-    public Dictionary<string, object?> Variables { get; private set; }
     private Engine JavascriptEngine { get; set; }
     private ObjectInstance? JavascriptModuleInstance { get; set; }
 
@@ -33,6 +24,14 @@ public class PokeAByteInstance : IPokeAByteInstance
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPostprocessor { get; set; }
 
+    public event InstanceProcessingAbort? OnProcessingAbort;
+    public IClientNotifier ClientNotifier { get; }
+    public IPokeAByteDriver Driver { get; private set; }
+    public IPokeAByteMapper Mapper { get; private set; }
+    public IMemoryManager MemoryContainerManager { get; private set; }
+    public Dictionary<string, object?> State { get; private set; }
+    public Dictionary<string, object?> Variables { get; private set; }
+
 #if DEBUG
     private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
 #endif
@@ -40,7 +39,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     public PokeAByteInstance(
         ILogger<PokeAByteInstance> logger,
         ScriptConsole scriptConsoleAdapter,
-        IEnumerable<IClientNotifier> clientNotifiers,
+        IClientNotifier clientNotifier,
         MapperContent mapperContent,
         IPokeAByteDriver driver)
     {
@@ -49,7 +48,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         Driver = driver;
         State = [];
         Variables = [];
-        ClientNotifiers = clientNotifiers.ToList();
+        ClientNotifier = clientNotifier;
         ReadLoopToken = new CancellationTokenSource();
 
         // Get the file path from the filesystem provider.
@@ -69,16 +68,18 @@ public class PokeAByteInstance : IPokeAByteInstance
         MemoryContainerManager = new MemoryManager(lastBlock.EndingAddress);
         _transferBlocks = new BlockData[blocksToRead.Length];
         int i = 0;
-        foreach(var block in blocksToRead) {
-            _transferBlocks[i] = new BlockData(block.StartingAddress, new byte[block.EndingAddress-block.StartingAddress]);
+        foreach (var block in blocksToRead)
+        {
+            _transferBlocks[i] = new BlockData(block.StartingAddress, new byte[block.EndingAddress - block.StartingAddress]);
             i++;
-        }       
+        }
 
         InitializeJSEngine(mapperContent);
     }
 
     [MemberNotNull(nameof(JavascriptEngine))]
-    private void InitializeJSEngine(MapperContent mapperContent) {
+    private void InitializeJSEngine(MapperContent mapperContent)
+    {
         var engineOptions = new Options
         {
             Strict = true,
@@ -108,14 +109,15 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
     }
 
-    public async Task StartProcessing() {
+    public async Task StartProcessing()
+    {
         // Read twice
         await Read();
         await Read();
 
-        await ClientNotifiers.ForEachAsync(async x => await x.SendMapperLoaded(Mapper));
+        await ClientNotifier.SendMapperLoaded(Mapper);
         // Start the read loop once successfully running once.
-        
+
         _ = Task.Run(ReadLoop, ReadLoopToken.Token);
         _logger.LogInformation($"Loaded mapper for {Mapper.Metadata.GameName} ({Mapper.Metadata.Id}).");
     }
@@ -132,7 +134,8 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured when read looping the mapper.");
-                if (OnProcessingAbort != null) {
+                if (OnProcessingAbort != null)
+                {
                     await OnProcessingAbort.Invoke();
                 }
             }
@@ -175,18 +178,12 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
 
         // Processor
-        var propertiesChanged = new List<IPokeAByteProperty>();
-        object? reloadAddress;
-        Variables.TryGetValue("reload_addresses", out reloadAddress);
+        Variables.TryGetValue("reload_addresses", out object? reloadAddress);
         foreach (var property in Mapper.Properties.Values)
         {
             try
             {
                 property.ProcessLoop(this, MemoryContainerManager, reloadAddress is true);
-                if (property.FieldsChanged.Count > 0)
-                {
-                    propertiesChanged.Add(property);
-                }
             }
             catch (Exception ex)
             {
@@ -202,27 +199,21 @@ public class PokeAByteInstance : IPokeAByteInstance
                 // The function returned false, which means we do not want to continue.
                 return;
             }
-            propertiesChanged.AddRange(
-                this.Mapper.Properties.Values
-                    .Where(x => !propertiesChanged.Contains(x))
-                    .Where(x => x.FieldsChanged.Count > 0)
-            );
         }
 
         // Fields Changed
-        if (propertiesChanged.Count > 0)
-        {
+        var propertiesChanged = this.Mapper.Properties.Values
+            .Where(x => x.FieldsChanged.Count > 0)
+            .ToArray();
+        if (propertiesChanged.Length > 0) {
             try
             {
-                foreach (var notifier in ClientNotifiers)
-                {
-                    await notifier.SendPropertiesChanged(propertiesChanged);
-                }
+                await ClientNotifier.SendPropertiesChanged(propertiesChanged);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Could not send {propertiesChanged.Count} property change events.");
-                throw new PropertyProcessException($"Could not send {propertiesChanged.Count} property change events.", ex);
+                _logger.LogError(ex, $"Could not send property change events.");
+                throw new PropertyProcessException($"Could not send property change events.", ex);
             }
         }
     }
@@ -250,6 +241,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         Mapper.Dispose();
         JavascriptEngine?.Dispose();
         await Driver.Disconnect();
-        await ClientNotifiers.ForEachAsync(async x => await x.SendInstanceReset());
+        await ClientNotifier.SendInstanceReset();
     }
 }

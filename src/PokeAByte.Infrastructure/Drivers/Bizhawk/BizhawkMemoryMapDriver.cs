@@ -105,7 +105,7 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
         {
             var transferBlock = transferBlocks[i];
             var block = _platform.MemoryLayout
-                .Where( 
+                .Where(
                     x => transferBlock.Start >= x.PhysicalStartingAddress
                         && transferBlock.Start + transferBlock.Data.Length <= x.PhysicalEndingAddress
                 )

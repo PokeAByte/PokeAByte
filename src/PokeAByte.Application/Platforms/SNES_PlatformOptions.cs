@@ -6,7 +6,7 @@ namespace PokeAByte.Application;
 public class SNES_PlatformOptions : IPlatformOptions
 {
     public EndianTypes EndianType { get; } = EndianTypes.LittleEndian;
-    public uint MemorySize {get;} = 0x7FFFFF;
+    public uint MemorySize { get; } = 0x7FFFFF;
 
     // Implemented the full WRAM range for the SNES. Tested with my Super Mario RPG Mapper and the BS Zelda Mapper file. -Jesco
     public MemoryAddressBlock[] Ranges { get; } =

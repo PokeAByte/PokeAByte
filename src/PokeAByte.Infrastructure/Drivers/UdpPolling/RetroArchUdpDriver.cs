@@ -121,7 +121,8 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// </returns>
     public async Task ReadBytes(BlockData[] transferBlocks)
     {
-        foreach(BlockData block in transferBlocks) {
+        foreach (BlockData block in transferBlocks)
+        {
             await ReadMemoryAddress(block);
         }
     }

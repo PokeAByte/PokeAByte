@@ -23,7 +23,7 @@ public class Result
 
     public static Result Failure(Error error, string additionalErrorMessage = "") =>
         new Result(false, error, additionalErrorMessage: additionalErrorMessage);
-    
+
     public static Result<TValue> Failure<TValue>(Error error, string additionalErrorMessage = "") =>
         new(false, error, additionalErrorMessage: additionalErrorMessage);
 
@@ -58,13 +58,13 @@ public class Result<TValue> : Result
     public TValue? ResultValue => IsSuccess
         ? _value!
         : default;
-    
+
     public override string ToString()
     {
         if (!IsSuccess) return base.ToString();
         return _value?.ToString() ?? "";
     }
-    
+
     public static implicit operator Result<TValue>(TValue? value) =>
         value is not null ? Success(value) : Failure<TValue>(Error.NullValue);
 }

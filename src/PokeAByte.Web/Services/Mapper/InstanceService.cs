@@ -15,7 +15,7 @@ public class InstanceService(
     ILogger<IInstanceService> logger,
     ILogger<PokeAByteInstance> instanceLogger,
     ScriptConsole scriptConsoleAdapter,
-    IEnumerable<IClientNotifier> clientNotifiers
+    IClientNotifier clientNotifier
 ) : IInstanceService
 {
     private IPokeAByteInstance? _instance = null;
@@ -30,7 +30,7 @@ public class InstanceService(
         }
         try
         {
-            _instance = new PokeAByteInstance(instanceLogger, scriptConsoleAdapter, clientNotifiers, MapperContent, driver);
+            _instance = new PokeAByteInstance(instanceLogger, scriptConsoleAdapter, clientNotifier, MapperContent, driver);
             _instance.OnProcessingAbort += HandleProcessingAbort;
             await _instance.StartProcessing();
         }

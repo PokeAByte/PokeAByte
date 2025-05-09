@@ -5,7 +5,7 @@ namespace PokeAByte.Application;
 public class NES_PlatformOptions : IPlatformOptions
 {
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
-    public uint MemorySize {get;} = 0x07FF;
+    public uint MemorySize { get; } = 0x07FF;
     public MemoryAddressBlock[] Ranges { get; } = [
         new("Block 0", 0x0000, 0x00FF),
         new("Block 1", 0x0100, 0x01FF),

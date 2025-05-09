@@ -90,8 +90,8 @@ public class MapperArchiveManager : IMapperArchiveManager
     private DirectoryInfo? CreateArchiveDirectory(string relativeFilename, string filepath)
     {
         //Create a tmp dir to store old mappers
-        DirectoryInfo? archiveDirectory = !Directory.Exists(MapperEnvironment.MapperArchiveDirectory) 
-            ? Directory.CreateDirectory(MapperEnvironment.MapperArchiveDirectory) 
+        DirectoryInfo? archiveDirectory = !Directory.Exists(MapperEnvironment.MapperArchiveDirectory)
+            ? Directory.CreateDirectory(MapperEnvironment.MapperArchiveDirectory)
             : new DirectoryInfo(MapperEnvironment.MapperArchiveDirectory);
 
         if (!File.Exists(filepath))
@@ -154,7 +154,7 @@ public class MapperArchiveManager : IMapperArchiveManager
 
     public void ArchiveDirectory(string directoryPath)
     {
-        var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0 
+        var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0
             || Directory.GetFiles(directoryPath).Length != 0;
 
         var archiveDirectory = MapperEnvironment.MapperLocalArchiveDirectory;

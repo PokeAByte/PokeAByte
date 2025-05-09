@@ -59,12 +59,13 @@ namespace PokeAByte.Infrastructure.Drivers
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            for(int i = 0; i < transferBlocks.Length; i++) {
+            for (int i = 0; i < transferBlocks.Length; i++)
+            {
                 transferBlocks[i].Data = MemoryFragmentLayout[transferBlocks[i].Start];
             }
             return Task.CompletedTask;
         }
-        
+
         public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)

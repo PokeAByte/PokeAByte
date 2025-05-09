@@ -37,7 +37,7 @@ internal static class PropertyLogic
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static int GetBCDValue(in byte[] data) 
+    internal static int GetBCDValue(in byte[] data)
     {
         int result = 0;
         foreach (byte bcd in data)
@@ -50,17 +50,17 @@ internal static class PropertyLogic
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static bool[] GetBitArrayValue(in byte[] data) 
+    internal static bool[] GetBitArrayValue(in byte[] data)
     {
         var bitArray = new BitArray(data);
 
         var boolArray = new bool[bitArray.Length];
         bitArray.CopyTo(boolArray, 0);
-        return boolArray;                
+        return boolArray;
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static int GetIntValue(in byte[] data, EndianTypes endian) 
+    internal static int GetIntValue(in byte[] data, EndianTypes endian)
     {
         if (data.Length == 1) //  With one byte, we can just cast.
         {
@@ -77,7 +77,7 @@ internal static class PropertyLogic
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static uint GetUIntValue(in byte[] data, EndianTypes endian) 
+    internal static uint GetUIntValue(in byte[] data, EndianTypes endian)
     {
         // Shortcut: With one byte, we can just cast:
         if (data.Length == 1)
@@ -95,7 +95,7 @@ internal static class PropertyLogic
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static string GetStringValue(in byte[] data, int? Size, ReferenceItems? reference, EndianTypes _endian) 
+    internal static string GetStringValue(in byte[] data, int? Size, ReferenceItems? reference, EndianTypes _endian)
     {
         if (reference == null) { throw new Exception("ReferenceObject is NULL."); }
 

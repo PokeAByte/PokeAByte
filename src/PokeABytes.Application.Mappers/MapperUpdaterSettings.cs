@@ -8,7 +8,7 @@ public record MapperUpdaterSettings
 {
     [JsonPropertyName("always_ignore_updates")]
     public bool AlwaysIgnoreUpdates { get; set; }
-    
+
     [JsonPropertyName("ignore_updates_until")]
     public DateTimeOffset? IgnoreUpdatesUntil { get; set; }
 
@@ -38,7 +38,7 @@ public record MapperUpdaterSettings
         try
         {
             // Deserialize the data 
-            return JsonSerializer.Deserialize<MapperUpdaterSettings>(jsonData) 
+            return JsonSerializer.Deserialize<MapperUpdaterSettings>(jsonData)
                 ?? new MapperUpdaterSettings();
         }
         catch (Exception)

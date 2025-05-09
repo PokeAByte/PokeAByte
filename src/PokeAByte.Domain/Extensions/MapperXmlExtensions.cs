@@ -98,7 +98,7 @@ public static class MapperXmlExtensions
             .Reverse()
             .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)
             .ReplaceStart("mapper.properties.", string.Empty)
-            .ReplaceEnd(".property.", string.Empty) 
+            .ReplaceEnd(".property.", string.Empty)
             + $".{elementName}";
     }
 }

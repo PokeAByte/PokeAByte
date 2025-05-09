@@ -12,7 +12,7 @@ public static class ApiHelper
         public static Stream site_css => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.site.css");
         public static Stream dist_gameHookMapperClient_js => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");
     }
-    
+
     /// <summary>
     /// Takes the full name of a resource and loads it in to a stream.
     /// </summary>

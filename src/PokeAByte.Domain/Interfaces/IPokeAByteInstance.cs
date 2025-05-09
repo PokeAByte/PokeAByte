@@ -5,7 +5,7 @@ public interface IPokeAByteInstance : IAsyncDisposable
     Dictionary<string, object?> State { get; }
     Dictionary<string, object?> Variables { get; }
 
-    List<IClientNotifier> ClientNotifiers { get; }
+    IClientNotifier ClientNotifier { get; }
     IPokeAByteDriver Driver { get; }
     IPokeAByteMapper Mapper { get; }
     Task StartProcessing();

@@ -109,7 +109,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    internal int[]? BitIndexes {get; private set; }
+    internal int[]? BitIndexes { get; private set; }
 
     public string? Reference
     {

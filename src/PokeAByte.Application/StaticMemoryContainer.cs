@@ -8,7 +8,7 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     internal StaticMemoryContainer(uint size)
     {
-        Data = new byte[((int)size)+1];
+        Data = new byte[((int)size) + 1];
     }
 
     public IList<IByteArray> Fragments => [new ByteArray(0, this.Data.ToArray())];

@@ -54,7 +54,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         AfterReadValueFunction = attributes.AfterReadValueFunction;
 
         BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
-        if (Type == PropertyType.String && Reference == null) {
+        if (Type == PropertyType.String && Reference == null)
+        {
             Reference = "defaultCharacterMap";
         }
     }
@@ -98,9 +99,10 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
         throw new NotImplementedException();
     }
-    
 
-    public byte[] BytesFromValue(string value) {
+
+    public byte[] BytesFromValue(string value)
+    {
         switch (Type)
         {
             case PropertyType.BinaryCodedDecimal:
@@ -290,8 +292,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
     public object? CalculateObjectValue(IPokeAByteInstance instance, byte[] bytes)
     {
-        var value = BitIndexes == null 
-            ? FullValue 
+        var value = BitIndexes == null
+            ? FullValue
             : ToValue(in bytes);
 
         if (value != null && AfterReadValueExpression != null)
@@ -398,22 +400,12 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     public async Task FreezeProperty(byte[] bytesFrozen)
     {
         BytesFrozen = bytesFrozen;
-
-        var propertyArray = new IPokeAByteProperty[] { this };
-        foreach (var notifier in Instance.ClientNotifiers)
-        {
-            await notifier.SendPropertiesChanged(propertyArray);
-        }
+        await Instance.ClientNotifier.SendPropertiesChanged([this]);
     }
 
     public async Task UnfreezeProperty()
     {
         BytesFrozen = null;
-
-        var propertyArray = new IPokeAByteProperty[] { this };
-        foreach (var notifier in Instance.ClientNotifiers)
-        {
-            await notifier.SendPropertiesChanged(propertyArray);
-        }
+        await Instance.ClientNotifier.SendPropertiesChanged([this]);
     }
 }

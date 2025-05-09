@@ -9,7 +9,7 @@ namespace PokeAByte.Application;
 public class PSX_PlatformOptions : IPlatformOptions
 {
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
-    public uint MemorySize {get;} = 0xbfc7ffff;
+    public uint MemorySize { get; } = 0xbfc7ffff;
 
     public MemoryAddressBlock[] Ranges { get; } =
     [

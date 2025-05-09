@@ -88,7 +88,8 @@ namespace PokeAByte.Application
                     {
                         if (instance == null) { throw new Exception("Instance is null."); }
 
-                        var type = x.GetAttributeValue("type") switch {
+                        var type = x.GetAttributeValue("type") switch
+                        {
                             "binaryCodedDecimal" => PropertyType.BinaryCodedDecimal,
                             "bitArray" => PropertyType.BitArray,
                             "bool" => PropertyType.Bool,
