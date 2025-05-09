@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace PokeAByte.Application.Mappers;
 
-public record MapperUpdaterSettings
+public class MapperUpdaterSettings
 {
     [JsonPropertyName("always_ignore_updates")]
     public bool AlwaysIgnoreUpdates { get; set; }
@@ -15,7 +15,7 @@ public record MapperUpdaterSettings
     [JsonPropertyName("requires_update")]
     public bool RequiresUpdate { get; set; } = false;
 
-    public static MapperUpdaterSettings Load(ILogger logger)
+    public static MapperUpdaterSettings Load(ILogger<MapperUpdaterSettings> logger)
     {
         // Setting file does not exist, just continue like normal
         if (!File.Exists(MapperEnvironment.MapperUpdateSettingsFile))

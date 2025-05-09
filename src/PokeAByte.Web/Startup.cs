@@ -27,8 +27,6 @@ public static class Startup
         // Add Web API
         services
             .AddControllers()
-            .AddApplicationPart(typeof(Program).Assembly)
-            .AddControllersAsServices()
             .AddProblemDetailsConventions()
             .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
@@ -43,28 +41,30 @@ public static class Startup
             };
         });
         services.AddSingleton<AppSettings>();
-        services.AddSingleton<IMapperFilesystemProvider, MapperFilesystemProvider>();
-        services.AddSingleton<IGithubApiSettings>(x =>
+
+        services.AddSingleton<ScriptConsole>();
+        services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
+        services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
+        services.AddSingleton<IInstanceService, InstanceService>();
+        services.AddSingleton<IDriverService, DriverService>();
+
+        services.AddScoped<IGithubRestApi, GithubRestApi>();
+        services.AddScoped(x =>
+        {
+            var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
+            return MapperUpdaterSettings.Load(logger);
+        });
+        services.AddScoped<IMapperFilesystemProvider, MapperFilesystemProvider>();
+        services.AddScoped<IGithubApiSettings>(x =>
         {
             var logger = x.GetRequiredService<ILogger<GithubApiSettings>>();
             var config = x.GetRequiredService<IConfiguration>();
             var token = config["GITHUB_TOKEN"];
             return GithubApiSettings.Load(logger, token);
         });
-        services.AddSingleton<IMapperUpdateManager, MapperUpdateManager>();
-        services.AddSingleton(x =>
-        {
-            var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
-            return MapperUpdaterSettings.Load(logger);
-        });
-        services.AddSingleton<IMapperArchiveManager, MapperArchiveManager>();
-        services.AddSingleton<IGithubRestApi, GithubRestApi>();
-        services.AddSingleton<ScriptConsole>();
-        services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
-        services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
-        services.AddSingleton<IInstanceService, InstanceService>();
-        services.AddSingleton<IDriverService, DriverService>();
-        services.AddSingleton<MapperClientService>();
+        services.AddScoped<IMapperUpdateManager, MapperUpdateManager>();
+        services.AddScoped<IMapperArchiveManager, MapperArchiveManager>();
+        services.AddScoped<MapperClientService>();
     }
 
     public static void ConfigureApp(this WebApplication app)

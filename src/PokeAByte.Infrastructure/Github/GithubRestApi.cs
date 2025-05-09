@@ -17,21 +17,7 @@ public class GithubRestApi : IGithubRestApi
         _logger = logger;
         _apiSettings = apiSettings;
     }
-    /*private void UpdateRequestHeaders(HttpRequestHeaders headers)
-    {
-        if (string.IsNullOrWhiteSpace(_apiSettings.GetAcceptValue()) ||
-            string.IsNullOrWhiteSpace(_apiSettings.GetApiVersionValue()))
-        {
-            //Failed to get the accept or api version strings, return a blank header and hope 
-            //github rest api figures it out.
-            _logger?.LogWarning("Accept or ApiVersion for the Github Api are null.");
-            return;
-        }
-        headers.Add("Accept",_apiSettings.GetAcceptValue());
-        headers.Add("X-GitHub-Api-Version", _apiSettings.GetApiVersionValue());
-        if(!string.IsNullOrWhiteSpace(_apiSettings.GetTokenValue()))
-            headers.Add("Authorization", _apiSettings.GetFormattedToken());
-    }*/
+
     public async Task DownloadMapperFiles(List<MapperDto> mapperDtos,
         Func<List<UpdateMapperDto>, Task> postDownloadAction,
         Action<int>? currentProcessCountUpdate = null)
@@ -59,6 +45,7 @@ public class GithubRestApi : IGithubRestApi
         }
         await postDownloadAction(updatedMapperList);
     }
+
     private async Task<string?> ResponseMessageToJson(HttpResponseMessage? responseMessage)
     {
         if (responseMessage is null || !responseMessage.IsSuccessStatusCode)
@@ -76,6 +63,7 @@ public class GithubRestApi : IGithubRestApi
 
     public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
         await GetContentRequest(MapperEnvironment.MapperTreeJson, true);
+        
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
     {
         var url = _apiSettings.GetBaseRequestString();
