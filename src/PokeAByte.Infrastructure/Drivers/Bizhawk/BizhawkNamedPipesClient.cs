@@ -7,7 +7,7 @@ public static class BizhawkNamedPipesClient
 {
     public const string PipeName = "BizHawk_Named_Pipe";
 
-    public static void WriteToBizhawk(MemoryContract<byte[]> contract, int timeoutMs = 100)
+    public static void WriteToBizhawk(MemoryContract contract, int timeoutMs = 100)
     {
         try
         {

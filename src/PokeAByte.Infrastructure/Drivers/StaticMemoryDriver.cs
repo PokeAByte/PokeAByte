@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 
@@ -52,7 +51,7 @@ namespace PokeAByte.Infrastructure.Drivers
             MemoryFragmentLayout = JsonSerializer.Deserialize<Dictionary<uint, byte[]>>(contents) ?? throw new Exception("Cannot deserialize memory fragment layout.");
         }
 
-        public Task ReadBytes(BlockData[] transferBlocks)
+        public ValueTask ReadBytes(BlockData[] transferBlocks)
         {
             if (BuildEnvironment.IsDebug == false)
             {
@@ -63,17 +62,17 @@ namespace PokeAByte.Infrastructure.Drivers
             {
                 transferBlocks[i].Data = MemoryFragmentLayout[transferBlocks[i].Start];
             }
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
+        public ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         public static Task<bool> Probe(AppSettings _)

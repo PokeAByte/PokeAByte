@@ -29,9 +29,9 @@ namespace PokeAByte.Domain.Interfaces
         Task EstablishConnection();
         Task Disconnect();
 
-        Task ReadBytes(BlockData[] transferBlocks);
+        ValueTask ReadBytes(BlockData[] transferBlocks);
 
-        Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
+        ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null);
 
         static virtual Task<bool> Probe(AppSettings appSettings) => Task.FromResult(false);
     }

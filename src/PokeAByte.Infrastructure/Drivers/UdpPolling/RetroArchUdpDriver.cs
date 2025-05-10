@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 
     }
 
-    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
+    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? value.ToString() : $"{value:x2}";
 
     private Task ConnectAsync(CancellationToken cancellationToken)
     {
@@ -49,24 +48,19 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         return Task.CompletedTask;
     }
 
-    private async Task<bool> ReadMemoryAddress(BlockData transferBlock)
+    private async ValueTask<bool> ReadMemoryAddress(BlockData transferBlock)
     {
         if (_udpClientWrapper == null)
         {
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
             throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        byte[]? result = await _udpClientWrapper.SendCommandAsync(
-            "READ_CORE_MEMORY",
-            ToRetroArchHexdecimalString(transferBlock.Start),
-            transferBlock.Data.Length.ToString()
-        );
-        if (result == null)
+        bool result = await _udpClientWrapper.SendReadCommandAsync(transferBlock);
+        if (!result)
         {
             Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
             throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        result.AsSpan().CopyTo(transferBlock.Data.AsSpan());
         return true;
     }
 
@@ -79,7 +73,6 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         _connectionCts = new CancellationTokenSource();
         await ConnectAsync(_connectionCts.Token);
     }
-
 
     public async Task Disconnect()
     {
@@ -97,17 +90,14 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <param name="memoryAddress"> The address as which to start writing. </param>
     /// <param name="values"> The bytes to write to memory. </param>
     /// <returns> An awaitable task. </returns>
-    public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
+    public async ValueTask WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
         if (_udpClientWrapper == null)
         {
             return;
         }
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
-        await _udpClientWrapper.SendAsync(
-            "WRITE_CORE_MEMORY",
-            $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}"
-        );
+        await _udpClientWrapper.SendWriteCommand($"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}");
     }
 
     /// <summary>
@@ -119,7 +109,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// Key is the start of each address block. <br/>
     /// Value is the byte array contained in that block.
     /// </returns>
-    public async Task ReadBytes(BlockData[] transferBlocks)
+    public async ValueTask ReadBytes(BlockData[] transferBlocks)
     {
         foreach (BlockData block in transferBlocks)
         {

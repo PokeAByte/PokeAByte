@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -14,74 +13,25 @@ public class RetroArchUdpClient : IDisposable
 {
     private static byte[] _readResponseStart = Encoding.ASCII.GetBytes("READ_CORE_MEMORY");
     private UdpClient? _client;
-    private bool _isDisposed = false;
-    private bool _isConnected = false;
-    private Dictionary<string, byte[]> _responses = [];
+    private Dictionary<uint, byte[]> _responses = [];
     private readonly int _timeout;
-    private readonly IPAddress _ipAddress;
-    private readonly int _port;
 
     [MemberNotNullWhen(true, nameof(_client))]
-    public bool IsClientConnected =>
-        _isDisposed is false &&
-        _isConnected &&
-        _client is not null &&
-        _client.Client.Connected;
-
-    public UdpReceiveResult? _receivedData { get; private set; }
+    public bool IsClientConnected => _client != null && _client.Client.Connected;
 
     public RetroArchUdpClient(string host, int port, int timeout)
     {
         _timeout = timeout;
-        _ipAddress = IPAddress.Parse(host);
-        _port = port;
-        CreateClient();
-    }
-
-    private void CreateClient()
-    {
         _client = new UdpClient();
-        _client.Client.SetSocketOption(SocketOptionLevel.Socket,
+        _client.Client.SetSocketOption(
+            SocketOptionLevel.Socket,
             SocketOptionName.ReuseAddress,
-            true);
-        _isDisposed = false;
+            true
+        );
+        _client.Connect(new IPEndPoint(IPAddress.Parse(host), port));
     }
 
-    [MemberNotNullWhen(true, nameof(_client))]
-    private bool IsClientAlive()
-    {
-        if (!IsClientConnected)
-        {
-            Connect();
-        }
-        if (!IsClientConnected)
-        {
-            Dispose();
-            return false;
-        }
-        return true;
-    }
-
-    public void Connect()
-    {
-        if (IsClientConnected)
-        {
-            return;
-        }
-        if (_isDisposed || _client is null)
-        {
-            _isConnected = false;
-            CreateClient();
-        }
-
-        if (_isDisposed || _client is null)
-        {
-            Dispose();
-            throw new Exception("UdpClient is still NULL when connecting.");
-        }
-        _client.Connect(_ipAddress, _port);
-        _isConnected = true;
-    }
+    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? value.ToString() : $"{value:x2}";
 
     private static int GetDigitFromHex(byte input)
     {
@@ -97,7 +47,6 @@ public class RetroArchUdpClient : IDisposable
     {
         return (byte)((GetDigitFromHex(bytes[0]) << 4) | GetDigitFromHex(bytes[1]));
     }
-
 
     private static byte[] ParseReadMemoryResponse(ReadOnlySpan<byte> input)
     {
@@ -116,22 +65,21 @@ public class RetroArchUdpClient : IDisposable
         return value;
     }
 
-
-    public async Task<bool> ReceiveAsync(CancellationToken cancellationToken)
+    public async ValueTask<bool> ReceiveAsync(CancellationToken cancellationToken)
     {
-        if (!IsClientAlive())
+        if (!IsClientConnected)
         {
-            return false;
+            throw new Exception("Connection to emulator UDP server lost.");
         }
         try
         {
             var response = await _client.ReceiveAsync(cancellationToken);
-            Span<byte> bytes = response.Buffer;
+            ReadOnlySpan<byte> bytes = response.Buffer;
             if (bytes.StartsWith(_readResponseStart))
             {
                 bytes = bytes.Slice(17);
                 int space = bytes.IndexOf((byte)' ');
-                string address = Encoding.ASCII.GetString(bytes[..space]);
+                uint address = uint.Parse(bytes[..space], System.Globalization.NumberStyles.HexNumber);
                 _responses[address] = ParseReadMemoryResponse(bytes.Slice(space + 1));
             }
             return true;
@@ -143,20 +91,21 @@ public class RetroArchUdpClient : IDisposable
     }
 
     /// <summary>
-    /// Send a command to the emulator without waiting for a response.
+    /// Send a write command to the emulator without waiting for a response.
     /// </summary>
-    /// <param name="command"> The emulator command. </param>
-    /// <param name="argument"> Emulator command arguments. </param>
+    /// <param name="arguments"> Emulator command arguments. </param>
     /// <exception cref="Exception">
     /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
     /// </exception>
-    public async Task SendAsync(string command, string argument)
+    public ValueTask<int> SendWriteCommand(string arguments)
     {
-        if (!IsClientAlive())
+        if (!IsClientConnected)
         {
-            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument})");
+            throw new Exception(
+                $"Connection to emulator UDP server lost. Unable to send command \"WRITE_CORE_MEMORY {arguments}\""
+            );
         }
-        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument}"));
+        return _client.SendAsync(Encoding.UTF8.GetBytes($"WRITE_CORE_MEMORY {arguments}"));
     }
 
     /// <summary>
@@ -168,30 +117,37 @@ public class RetroArchUdpClient : IDisposable
     /// <exception cref="Exception">
     /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
     /// </exception>
-    public async Task<byte[]?> SendCommandAsync(string command, string argument1, string argument2)
+    public async ValueTask<bool> SendReadCommandAsync(BlockData block)
     {
-        if (!IsClientAlive())
+        if (!IsClientConnected)
         {
-            throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument1} {argument2})");
+            throw new Exception(
+                $"Connection to emulator UDP server lost. Unable to send command \"READ_CORE_MEMORY {block.Start} {block.Data.Length}\""
+            );
         }
-        byte[]? response = null;
-        _ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument1} {argument2}"));
+        bool success = false;
+        _ = await _client.SendAsync(
+            Encoding.UTF8.GetBytes($"READ_CORE_MEMORY {ToRetroArchHexdecimalString(block.Start)} {block.Data.Length}")
+        );
         SpinWait.SpinUntil(() =>
             {
-                return _responses.TryGetValue(argument1, out response);
+                if ( _responses.TryGetValue(block.Start, out var response)) {
+                    response.AsSpan().CopyTo(block.Data.AsSpan());
+                    success = true;
+                }
+                return success;
             },
             TimeSpan.FromMilliseconds(_timeout)
         );
-        return response;
+        return success;
     }
+
     public void Dispose()
     {
-        if (!_isDisposed)
+        if (_client != null)
         {
-            _client?.Dispose();
+            _client.Dispose();
+            _client = null;
         }
-        _isConnected = false;
-        _isDisposed = true;
-        _client = null;
     }
 }
