@@ -1,7 +1,7 @@
 dialog {
 	background-color: var(--color-surface-1);
 	box-shadow: var(--margin-0) var(--margin-0) var(--margin-0) 0px var(--color-surface-0);
-	border: 2px solid var(--color-red);
+	border: 2px solid var(--color-highlight);
 	padding: var(--margin-2);
 	color: var(--text-primary);
 	font-family: var(--default-font);

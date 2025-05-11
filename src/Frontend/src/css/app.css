@@ -224,6 +224,7 @@ a {
 	.property-bytes {
 		input {
 			margin-left: -2px;
+
 			&:focus-visible {
 				outline: none;
 				border-color: var(--color-highlight);
@@ -257,13 +258,16 @@ a {
 			tr:nth-child(even) {
 				background-color: var(--color-tone-0);
 			}
+
 			td {
-				padding: var(--margin-0) ;
+				padding: var(--margin-0);
 				min-height: 44px;
 			}
+
 			td:nth-child(2) {
 				width: 2rem;
 			}
+
 			td:nth-child(3) {
 				text-align: left;
 			}
@@ -283,7 +287,7 @@ a {
 
 	button .material-icons {
 		font-size: var(--font-size-1) !important;
-		
+
 	}
 
 	&:nth-child(odd) {
@@ -305,15 +309,19 @@ table {
 	margin-bottom: var(--margin-1);
 	border-collapse: collapse;
 	border: 2px solid var(--color-border-0);
+
 	&.striped {
 		thead {
 			background-color: var(--color-surface-2);
 		}
 	}
+
 	thead tr th {
 		border-bottom: 2px dashed var(--color-border-1);
 	}
-	td,th {
+
+	td,
+	th {
 		padding: var(--margin-0);
 	}
 }
@@ -339,10 +347,11 @@ table.striped {
 	&:has(> button:nth-child(3)) {
 		--count: 3;
 	}
+
 	&:has(> button:nth-child(4)) {
 		--count: 4;
 	}
-	
+
 	/* width: calc(max-content * var(--count) - (var(--margin-1) * var(--count))); */
 	button {
 		min-width: calc(100% / var(--count) - (var(--margin-1)));
@@ -350,4 +359,3 @@ table.striped {
 		text-align: left;
 	}
 }
-

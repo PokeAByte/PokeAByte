@@ -1,8 +1,6 @@
 import React, { FormEvent } from "react";
-import { Button } from "../../components/Button";
 import { Store } from "../../utility/propertyStore";
 import { useAPI } from "../../hooks/useAPI";
-
 
 export function GithubSettings() {
 	const filesClient = Store.client.files;
@@ -80,7 +78,7 @@ export function GithubSettings() {
 							Alternative Directory Name:
 						</label>
 						<input name="dir" type="text" defaultValue={githubSettings.result?.dir}></input>
-						<br/>
+						<br />
 					</div>
 					<small>
 						Note: This is only required if the mapper_tree.json is not in the root directory of the repository.
@@ -94,7 +92,7 @@ export function GithubSettings() {
 					<small>
 						Note: This is required if the repository is private or if you want to bypass the
 						GitHub REST Api rate limit. Once you have a token generated do not share it with anyone; for more
-						information please refer to this page:{" "} 
+						information please refer to this page:{" "}
 						<a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">
 							Managing your personal access tokens
 						</a>
@@ -105,10 +103,16 @@ export function GithubSettings() {
 					}
 					<br />
 					<div className="row wrap">
-						<Button color="blue" onClick={testGithubSettings}>TEST SETTINGS</Button>
-						<Button color="deep-purple" onClick={openGithubLink}>OPEN GITHUB LINK</Button>
-						<Button type="submit" color="success">SAVE SETTINGS</Button>
-						<Button color="error">CLEAR SETTINGS</Button>
+						<button className="border-blue margin-right" onClick={testGithubSettings} type="button">
+							TEST SETTINGS
+						</button>
+						<button className="border-purple margin-right" onClick={openGithubLink} type="button">
+							OPEN GITHUB LINK
+						</button>
+						<button className="border-green margin-right" type="submit">
+							SAVE SETTINGS
+						</button>
+						<button className="border-red">CLEAR SETTINGS</button>
 					</div>
 				</form>
 			</div>
