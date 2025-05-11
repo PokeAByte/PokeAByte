@@ -76,8 +76,7 @@ public record GithubApiSettings : IGithubApiSettings
     public void CopySettings(IGithubApiSettings settings)
     {
         if (settings is not GithubApiSettings apiSettings)
-            throw new InvalidCastException($"Failed to cast {settings.GetType()} to " +
-                                           $"{typeof(GithubApiSettings)}");
+            throw new InvalidCastException($"Failed to cast {settings.GetType()} to {typeof(GithubApiSettings)}");
         Token = apiSettings.Token;
         Owner = apiSettings.Owner;
         Repo = apiSettings.Repo;
@@ -99,8 +98,6 @@ public record GithubApiSettings : IGithubApiSettings
         //Blank json data, just return 
         if (string.IsNullOrWhiteSpace(jsonData))
         {
-            logger.LogWarning($"Failed to read data from {MapperEnvironment.GithubApiSettings}. " +
-                              $"Github Api settings failed to load.");
             return new GithubApiSettings(logger);
         }
         try
@@ -118,8 +115,6 @@ public record GithubApiSettings : IGithubApiSettings
         }
         catch (Exception)
         {
-            logger.LogWarning($"Failed to parse {MapperEnvironment.GithubApiSettings}. " +
-                              $"Github Api settings failed to load.");
             return new GithubApiSettings(logger);
         }
     }
