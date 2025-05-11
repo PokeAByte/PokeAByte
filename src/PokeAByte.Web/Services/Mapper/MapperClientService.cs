@@ -185,7 +185,12 @@ public class MapperClientService(
                 logger.LogDebug("Static memory driver loaded.");
                 break;
             default:
-                logger.LogError("A valid driver was not supplied.");
+                if (driver is IPokeAByteDriver) {
+                    await instanceService.LoadMapper(mapperContent, driver);
+                    logger.LogInformation($"Driver '{driver.ProperName}' loaded.");
+                } else {
+                    logger.LogError("A valid driver was not supplied.");
+                }
                 break;
         }
         return instanceService.Instance != null;

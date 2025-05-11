@@ -16,7 +16,7 @@ public class NamedPipeServer : IDisposable
     {
         _pipeName = pipeName;
         _pipeServer = new(pipeName,
-            PipeDirection.In,
+            PipeDirection.InOut,
             1,
             PipeTransmissionMode.Byte,
             PipeOptions.Asynchronous);

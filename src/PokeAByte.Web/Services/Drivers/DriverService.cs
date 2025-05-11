@@ -2,6 +2,7 @@
 using PokeAByte.Domain.Models;
 using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Infrastructure.Drivers.Bizhawk;
+using PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 using PokeAByte.Infrastructure.Drivers.UdpPolling;
 
 namespace PokeAByte.Web.Services.Drivers;
@@ -56,6 +57,12 @@ public class DriverService : IDriverService
         // Test the drivers
         while (_currentAttempt < MaxAttempts)
         {
+            if (await PokeAProtocolDriver.Probe(_appSettings))
+            {
+                var driver = new PokeAProtocolDriver(_appSettings);
+                await driver.EstablishConnection();
+                return driver;
+            }
             if (await BizhawkMemoryMapDriver.Probe(_appSettings))
             {
                 return await GetBizhawkDriver();
