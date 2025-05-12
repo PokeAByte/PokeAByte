@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace PokeAByte.Protocol.BizHawk;
+namespace PokeAByte.Protocol;
 
 public delegate void WriteHandler(WriteInstruction instruction);
 public delegate void SetupHandler(SetupInstruction instruction);

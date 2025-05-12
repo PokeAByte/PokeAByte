@@ -1,0 +1,19 @@
+dialog {
+	background-color: var(--color-surface-1);
+	box-shadow: var(--margin-0) var(--margin-0) var(--margin-0) 0px var(--color-surface-0);
+	border: 2px solid var(--color-red);
+	padding: var(--margin-2);
+	color: var(--text-primary);
+	font-family: var(--default-font);
+	& > *:nth-child(1) {
+		margin-top: 0;
+	}
+	& > *:nth-child(3) {
+		display: flex;
+		justify-content: end;
+	}
+	&::backdrop {
+		background-color: var(--color-surface-0);
+		opacity: 0.3;
+	}
+}

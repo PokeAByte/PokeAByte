@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<LangVersion>10.0</LangVersion>
+		<LangVersion>13.0</LangVersion>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<DebugType>embedded</DebugType>
 		<RootNamespace>PokeAByte.Protocol</RootNamespace>
+		<DebugSymbols>False</DebugSymbols>
+		<DebugType>None</DebugType>
 	</PropertyGroup>
 </Project>

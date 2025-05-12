@@ -28,26 +28,31 @@ export default function MapperPage() {
 			</button>
 			<br/>
 			<br/>
-			<details open className="panel">
-				<summary>Load mapper</summary>
+			<Panel title="Load mapper" >
 				<MapperSelection mapper={mapper} mapperData={mapperData} />
-			</details>
-			<details className="panel">
-				<summary>Download mappers</summary>
+			</Panel>
+			<Panel title="Download mappers" >
 				<MapperDownloadPage />
-			</details>
-			<details className="panel">
-				<summary>Update mappers</summary>
+			</Panel>
+			<Panel title="Update mappers" >
 				<MapperUpdatePage />
-			</details>
-			<details className="panel">
-				<summary>Backup mappers</summary>
+			</Panel>
+			<Panel title="Backup mappers" >
 				<MapperBackupPage />
-			</details>
-			<details className="panel">
-				<summary>Restore backup/archive</summary>
+			</Panel>
+			<Panel title="Restore backup/archive" >
 				<MapperRestorePage />
-			</details>
+			</Panel>
 		</article>
+	);
+}
+
+function Panel(props: {title: string, children: React.ReactNode}) {
+	const [isOpen, setOpen] = useState(false);
+	return (
+		<details className="panel" onToggle={event => setOpen(event.currentTarget.open)}>
+			<summary>{props.title}</summary>
+			{ isOpen ? props.children : null}
+		</details>
 	);
 }

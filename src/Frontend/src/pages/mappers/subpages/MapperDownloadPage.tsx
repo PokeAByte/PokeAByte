@@ -11,7 +11,6 @@ export function MapperDownloadPage() {
 	const [selectedMappers, setSelectedMappers] = React.useState<string[]>([]);
 	const updateMappers = useAPI(filesClient.getMapperUpdatesAsync);
 	const downloadMappers = useAPI(filesClient.downloadMapperUpdatesAsync, () => updateMappers.call);
-
 	useEffect(
 		() => updateMappers.call(),
 		// eslint-disable-next-line react-hooks/exhaustive-deps

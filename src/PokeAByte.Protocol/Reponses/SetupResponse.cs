@@ -1,5 +1,3 @@
-using System;
-
 namespace PokeAByte.Protocol;
 
 public struct SetupResponse

@@ -28,7 +28,7 @@ public class MapperArchiveManager : IMapperArchiveManager
     {
         if (!Directory.Exists(MapperEnvironment.MapperLocalArchiveDirectory))
         {
-            _logger.LogWarning($"Failed to find archived files, {MapperEnvironment.MapperLocalArchiveDirectory} does not exist.");
+            Directory.CreateDirectory(MapperEnvironment.MapperLocalArchiveDirectory);
             return [];
         }
 

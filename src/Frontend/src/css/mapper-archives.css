@@ -1,0 +1,35 @@
+.mapper-archives {
+	padding-left: 0;
+
+	& > li {
+		list-style: none;
+		padding: var(--margin-0);
+		border: 2px dotted var(--color-border-0);
+
+		summary {
+			display: flex;
+			gap: var(--margin-1);
+			align-items: center;
+			
+
+			*:nth-child(2) {
+				flex-grow: 1;
+			}
+		}
+
+		button {
+			margin-top: 0;
+		}
+	}
+	details[open] .material-icons {
+		color: var(--color-highlight)
+	}
+	details[open] summary {
+		margin-bottom: var(--margin-1);
+	}
+	details > summary {
+		list-style: none;
+		
+	}
+
+}

@@ -29,6 +29,8 @@ public class AppSettings
 
         BIZHAWK_DELAY_MS_BETWEEN_READS = int.Parse(configuration.GetRequiredValue("BIZHAWK_DELAY_MS_BETWEEN_READS"));
 
+        PROTOCOL_FRAMESKIP = int.Parse(configuration["PROTOCOL_FRAMESKIP"] ?? "-1");
+
         logger.LogInformation($"AppSettings initialized: RETROARCH_DELAY_MS_BETWEEN_READS: {RETROARCH_DELAY_MS_BETWEEN_READS} and BIZHAWK_DELAY_MS_BETWEEN_READS: {BIZHAWK_DELAY_MS_BETWEEN_READS}");
         if (BuildEnvironment.IsDebug && configuration["MAPPER_DIRECTORY"]?.Length > 0)
         {
@@ -61,7 +63,7 @@ public class AppSettings
     public int RETROARCH_DELAY_MS_BETWEEN_READS { get; }
 
     public int BIZHAWK_DELAY_MS_BETWEEN_READS { get; }
-
+    public int PROTOCOL_FRAMESKIP { get; }
     public string MAPPER_VERSION { get; }
 
     public string MAPPER_DIRECTORY { get; }

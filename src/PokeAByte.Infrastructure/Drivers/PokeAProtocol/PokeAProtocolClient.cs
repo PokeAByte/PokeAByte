@@ -27,7 +27,6 @@ public class PokeAProtocolClient : IDisposable
         _client.Connect(_endpoint);
     }
 
-
     public void WriteToBizhawk(WriteInstruction instruction, int timeoutMs = 100)
     {
         try
@@ -41,11 +40,11 @@ public class PokeAProtocolClient : IDisposable
         }
     }
 
-    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int timeoutMs = 64)
+    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int frameSkip, int timeoutMs = 64)
     {
         try
         {
-            var instruction = new SetupInstruction(blocks);
+            var instruction = new SetupInstruction(blocks, frameSkip);
             _client.Send(instruction.GetByteArray());
             var response = await _client.ReceiveAsync();
             if (response.Buffer[4] == Instructions.SETUP) 

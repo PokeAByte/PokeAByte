@@ -51,6 +51,7 @@ namespace PokeAByte.Web.Controllers
         [HttpGet("mapper/get_updates")]
         public ActionResult<IEnumerable<MapperDto>> GetMapperUpdatesAsync()
         {
+            updateManager.CheckForUpdates();
             if (!System.IO.File.Exists(MapperEnvironment.OutdatedMapperTreeJson))
             {
                 return ApiHelper.BadRequestResult($"{MapperEnvironment.OutdatedMapperTreeJson} does not exist locally.");
@@ -99,6 +100,35 @@ namespace PokeAByte.Web.Controllers
             catch (Exception e)
             {
                 return ApiHelper.BadRequestResult(e.ToString());
+            }
+        }
+
+        [HttpPost("mapper/archive_mappers")]
+        public ActionResult RestoreMapper(List<MapperDto> mappers)
+        {
+            try
+            {
+                foreach (var mapper in mappers)
+                {
+                    var relativeJsPath = mapper.Path
+                        [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
+                    var mapperPath = $"{MapperEnvironment.MapperLocalDirectory
+                        .Replace("\\", "/")}/{mapper.Path}";
+                    var jsPath = $"{MapperEnvironment.MapperLocalDirectory
+                        .Replace("\\", "/")}/{relativeJsPath}";
+                    archiveManager.ArchiveFile(mapper.Path, mapperPath);
+                    archiveManager.ArchiveFile(relativeJsPath, jsPath);
+                }
+                var archiveFolder = MapperEnvironment.MapperArchiveDirectory;
+                archiveManager.ArchiveDirectory(archiveFolder);
+                //Update the mapper list
+                var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
+                MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return ApiHelper.BadRequestResult($"Exception: {e}");
             }
         }
 

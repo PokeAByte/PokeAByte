@@ -10,12 +10,15 @@ public class PokeAProtocolDriver : IPokeAByteDriver
 {
     public string ProperName => "PokeAProtocol";
     public int DelayMsBetweenReads { get; }
+
+    private int _frameSkip;
     private PokeAProtocolClient? _client;
     private ReadBlock[]? _readBlocks;
 
     public PokeAProtocolDriver(AppSettings appSettings)
     {
         DelayMsBetweenReads = appSettings.BIZHAWK_DELAY_MS_BETWEEN_READS;
+        _frameSkip = appSettings.PROTOCOL_FRAMESKIP;
     }
 
     public Task EstablishConnection()
@@ -52,7 +55,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
                 if (fileSize == 0) {
                     throw new Exception("asdjad");
                 }
-                await _client.Setup(_readBlocks, fileSize);
+                await _client.Setup(_readBlocks, fileSize, _frameSkip);
             } catch (Exception ex) {
                 Console.WriteLine(ex);
                 return;
