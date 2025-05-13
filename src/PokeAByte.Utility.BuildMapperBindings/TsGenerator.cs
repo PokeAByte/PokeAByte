@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml.Linq;
-using PokeAByte.Application;
 using PokeAByte.Domain;
+using PokeAByte.Domain.Mapper;
 
 namespace PokeAByte.Utility.BuildMapperBindings;
 

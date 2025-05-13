@@ -1,11 +1,10 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using PokeAByte.Application.Mappers;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Services.Mapper;
 using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.Helper;

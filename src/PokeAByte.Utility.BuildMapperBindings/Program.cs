@@ -1,5 +1,5 @@
-﻿using PokeAByte.Application;
-using PokeAByte.Domain;
+﻿using PokeAByte.Domain;
+using PokeAByte.Domain.Mapper;
 using PokeAByte.Utility.BuildMapperBindings;
 
 // Load XML file paths.

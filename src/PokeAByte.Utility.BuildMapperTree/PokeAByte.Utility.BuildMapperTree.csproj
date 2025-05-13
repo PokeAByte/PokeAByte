@@ -8,10 +8,11 @@
         <PublishTrimmed>true</PublishTrimmed>
         <RootNamespace>PokeAByte.Utility.BuildMapperTree</RootNamespace>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
+      <ProjectReference Include="../PokeAByte.Domain/PokeAByte.Domain.csproj" />
     </ItemGroup>
 
 </Project>

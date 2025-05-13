@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using PokeAByte.Application.Mappers;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;

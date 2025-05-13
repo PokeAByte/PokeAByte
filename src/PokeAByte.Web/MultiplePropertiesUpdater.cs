@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Web;
@@ -16,7 +17,7 @@ public static class MultiplePropertiesUpdater
         var totalBitCount =
             properties.Aggregate(new int(), (prev, next) =>
             {
-                var bitRange = GetBitRange(next.Key.Bits);
+                var bitRange = PropertyLogic.ParseBits(next.Key.Bits);
                 return prev + bitRange.Length;
             });
         if (totalBitCount >= len)
@@ -28,7 +29,7 @@ public static class MultiplePropertiesUpdater
         //Construct the new bitarray using the data from the properties
         foreach (var prop in properties)
         {
-            var bitRange = GetBitRange(prop.Key.Bits);
+            var bitRange = PropertyLogic.ParseBits(prop.Key.Bits);
             var inputBits = new BitArray(prop.Key.BytesFromValue(prop.Value));
             for (var i = 0; i < bitRange.Length; i++)
             {
@@ -39,47 +40,5 @@ public static class MultiplePropertiesUpdater
         var outputBytes = new byte[desiredLength];
         outputBits.CopyTo(outputBytes, 0);
         return outputBytes;
-    }
-
-    private static int[] GetBitRange(string? bits)
-    {
-        if (string.IsNullOrEmpty(bits) != false) return [];
-        int[] indexes;
-
-        if (bits.Contains('-'))
-        {
-            var parts = bits.Split('-');
-
-            if (int.TryParse(parts[0], out int start) && int.TryParse(parts[1], out int end))
-            {
-                indexes = Enumerable.Range(start, end - start + 1).ToArray();
-            }
-            else
-            {
-                throw new ArgumentException($"Invalid format for attribute Bits ({bits}).");
-            }
-        }
-        else if (bits.Contains(','))
-        {
-            indexes = bits.Split(',')
-                .Select(x =>
-                    int.TryParse(x, out int num)
-                        ? num
-                        : throw new ArgumentException(
-                            $"Invalid format for attribute Bits ({bits})."))
-                .ToArray();
-        }
-        else
-        {
-            if (int.TryParse(bits, out var index))
-            {
-                indexes = [index];
-            }
-            else
-            {
-                throw new ArgumentException($"Invalid format for attribute Bits ({bits}).");
-            }
-        }
-        return indexes;
     }
 }

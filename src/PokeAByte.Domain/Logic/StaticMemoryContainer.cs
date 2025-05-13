@@ -1,6 +1,6 @@
 using PokeAByte.Domain.Interfaces;
 
-namespace PokeAByte.Application;
+namespace PokeAByte.Domain.Logic;
 
 public class StaticMemoryContainer : IMemoryNamespace
 {

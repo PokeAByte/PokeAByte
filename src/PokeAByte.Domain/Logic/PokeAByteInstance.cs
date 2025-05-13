@@ -4,11 +4,11 @@ using Jint;
 using Jint.Native;
 using Jint.Native.Object;
 using Microsoft.Extensions.Logging;
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Mapper;
 using PokeAByte.Domain.Models;
 
-namespace PokeAByte.Application;
+namespace PokeAByte.Domain.Logic;
 
 public class PokeAByteInstance : IPokeAByteInstance
 {

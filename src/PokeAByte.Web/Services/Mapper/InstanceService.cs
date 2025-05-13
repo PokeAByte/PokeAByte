@@ -1,5 +1,5 @@
-using PokeAByte.Application;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Logic;
 
 namespace PokeAByte.Web.Services.Mapper;
 

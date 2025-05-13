@@ -1,7 +1,6 @@
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 
-namespace PokeAByte.Application;
+namespace PokeAByte.Domain.Plantforms;
 
 /* ===== PlayStation ===== */
 /* http://www.raphnet.net/electronique/psx_adaptor/Playstation.txt */

@@ -3,9 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace PokeAByte.Domain;
 
-internal static class PropertyLogic
+public static class PropertyLogic
 {
-    internal static int[] ParseBits(ReadOnlySpan<char> bits)
+    public static int[] ParseBits(ReadOnlySpan<char> bits)
     {
         if (bits.Contains('-'))
         {

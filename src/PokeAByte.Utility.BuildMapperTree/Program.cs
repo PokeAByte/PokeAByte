@@ -1,4 +1,4 @@
-﻿using PokeAByte.Application.Mappers;
+﻿using PokeAByte.Domain.Services.Mapper;
 
 namespace PokeAByte.Utility.BuildMapperTree;
 

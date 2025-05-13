@@ -16,6 +16,8 @@ namespace PokeAByte.Utility.BuildMapperBindings
 
         public Dictionary<string, object?> Variables => throw new NotImplementedException();
 
+        public IClientNotifier ClientNotifier => throw new NotImplementedException();
+
         public event InstanceProcessingAbort? OnProcessingAbort;
 
         public Task ResetState()

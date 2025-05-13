@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using NCalc;
 using PokeAByte.Domain.Interfaces;
 

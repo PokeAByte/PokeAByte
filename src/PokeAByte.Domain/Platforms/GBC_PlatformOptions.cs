@@ -1,7 +1,7 @@
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 
-namespace PokeAByte.Application;
+namespace PokeAByte.Domain.Plantforms;
+
 public class GBC_PlatformOptions : IPlatformOptions
 {
     public EndianTypes EndianType { get; } = EndianTypes.LittleEndian;

@@ -6,7 +6,6 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>EDPS.Bizhawk</AssemblyName>
 		<RootNamespace>PokeAByte.Protocol.BizHawk</RootNamespace>
-		<PublishSingleFile>true</PublishSingleFile>
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>

@@ -3,7 +3,7 @@ using System.Xml;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
 
-namespace PokeAByte.Application.Mappers;
+namespace PokeAByte.Domain.Services.Mapper;
 
 public static class MapperTreeUtility
 {

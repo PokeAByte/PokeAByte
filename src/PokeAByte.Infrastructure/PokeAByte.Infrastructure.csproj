@@ -14,7 +14,6 @@
 	<ItemGroup>
 		<ProjectReference Include="../PokeAByte.Protocol/PokeAByte.Protocol.csproj" />
 		<ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
-		<ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
 	</ItemGroup>
 
 </Project>

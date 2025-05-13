@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Services.MapperFile;
 
-namespace PokeAByte.Application.Mappers;
+namespace PokeAByte.Domain.Services.Mapper;
 
 public class MapperArchiveManager : IMapperArchiveManager
 {
