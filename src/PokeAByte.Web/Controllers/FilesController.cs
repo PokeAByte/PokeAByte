@@ -1,10 +1,12 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.Helper;
 
@@ -14,22 +16,20 @@ namespace PokeAByte.Web.Controllers
     [Produces("application/json")]
     [Consumes("application/json")]
     [Route("files")]
-    public class FilesController(IMapperFilesystemProvider mapperFilesystemProvider,
+    public class FilesController(
         ILogger<FilesController> logger,
         IMapperUpdateManager updateManager,
         IGithubRestApi githubRest,
         IMapperArchiveManager archiveManager,
+        MapperFileService mapperFileService,
         IGithubApiSettings githubApiSettings) : ControllerBase
     {
         private static string MapperLocalDirectory => Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
-        public IMapperFilesystemProvider MapperFilesystemProvider { get; } = mapperFilesystemProvider;
 
         [HttpGet("mappers")]
         public ActionResult<IEnumerable<MapperFileModel>> GetMapperFiles()
         {
-            MapperFilesystemProvider.CacheMapperFiles();
-
-            return Ok(MapperFilesystemProvider.MapperFiles.Select(x => new MapperFileModel()
+            return Ok(mapperFileService.ListInstalled().Select(x => new MapperFileModel()
             {
                 Id = x.Id,
                 DisplayName = x.DisplayName
@@ -52,14 +52,14 @@ namespace PokeAByte.Web.Controllers
         public ActionResult<IEnumerable<MapperDto>> GetMapperUpdatesAsync()
         {
             updateManager.CheckForUpdates();
-            if (!System.IO.File.Exists(MapperEnvironment.OutdatedMapperTreeJson))
+            if (!System.IO.File.Exists(MapperPaths.OutdatedMapperTreeJson))
             {
-                return ApiHelper.BadRequestResult($"{MapperEnvironment.OutdatedMapperTreeJson} does not exist locally.");
+                return ApiHelper.BadRequestResult($"{MapperPaths.OutdatedMapperTreeJson} does not exist locally.");
             }
             //load the mapper list
-            var jsonStr = System.IO.File.ReadAllText(MapperEnvironment.OutdatedMapperTreeJson);
+            var jsonStr = System.IO.File.ReadAllText(MapperPaths.OutdatedMapperTreeJson);
             if (string.IsNullOrWhiteSpace(jsonStr))
-                return ApiHelper.BadRequestResult($"{MapperEnvironment.OutdatedMapperTreeJson} was empty.");
+                return ApiHelper.BadRequestResult($"{MapperPaths.OutdatedMapperTreeJson} was empty.");
             try
             {
                 return Ok(JsonSerializer.Deserialize<IEnumerable<MapperComparisonDto>>(jsonStr));
@@ -93,18 +93,18 @@ namespace PokeAByte.Web.Controllers
         [HttpGet("mapper/get_archived")]
         public ActionResult GetArchivedMappersAsync()
         {
-            try
-            {
-                return Ok(archiveManager.GetArchivedMappers());
-            }
-            catch (Exception e)
-            {
-                return ApiHelper.BadRequestResult(e.ToString());
-            }
+            return Ok(
+                mapperFileService.ListArchived()
+                    .GroupBy(x => x.FullPath)
+                    .Select(
+                        x => new KeyValuePair<string, IEnumerable<ArchivedMapperDto>>(x.Key, x)
+                    )
+                    .ToDictionary()
+            );
         }
 
         [HttpPost("mapper/archive_mappers")]
-        public ActionResult RestoreMapper(List<MapperDto> mappers)
+        public ActionResult ArchiveMappers(List<MapperDto> mappers)
         {
             try
             {
@@ -112,18 +112,17 @@ namespace PokeAByte.Web.Controllers
                 {
                     var relativeJsPath = mapper.Path
                         [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
-                    var mapperPath = $"{MapperEnvironment.MapperLocalDirectory
-                        .Replace("\\", "/")}/{mapper.Path}";
-                    var jsPath = $"{MapperEnvironment.MapperLocalDirectory
-                        .Replace("\\", "/")}/{relativeJsPath}";
+                    var mapperPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.Path}";
+                    var jsPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{relativeJsPath}";
                     archiveManager.ArchiveFile(mapper.Path, mapperPath);
                     archiveManager.ArchiveFile(relativeJsPath, jsPath);
                 }
-                var archiveFolder = MapperEnvironment.MapperArchiveDirectory;
+                var archiveFolder = MapperPaths.MapperArchiveDirectory;
                 archiveManager.ArchiveDirectory(archiveFolder);
                 //Update the mapper list
-                var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
-                MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
+                var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperPaths.MapperDirectory);
+                MapperTreeUtility.SaveChanges(MapperPaths.MapperDirectory, mapperTree);
+                mapperFileService.Refresh();
                 return Ok();
             }
             catch (Exception e)
@@ -149,36 +148,14 @@ namespace PokeAByte.Web.Controllers
         [HttpPost("mapper/delete_mappers")]
         public ActionResult DeleteMappers(IEnumerable<ArchivedMapperDto> archivedMappers)
         {
-            try
-            {
-                archiveManager.DeleteMappersFromArchive(archivedMappers.ToList());
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return ApiHelper.BadRequestResult($"Exception: {e}");
-            }
-        }
-
-        [HttpGet("mapper/refresh_archived_list")]
-        public ActionResult RefreshArchivedList()
-        {
-            archiveManager.GenerateArchivedList();
-            return Ok(archiveManager.GetArchivedMappers());
+            mapperFileService.DeleteMappersFromArchive(archivedMappers);
+            return Ok();
         }
 
         [HttpGet("get_github_settings")]
         public ActionResult GetGithubSettings()
         {
-            try
-            {
-                return Ok(JsonSerializer.Serialize((GithubApiSettings)githubApiSettings));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return Ok(JsonSerializer.Serialize((GithubApiSettings)githubApiSettings));
         }
 
         [HttpPost("save_github_settings")]
@@ -221,7 +198,7 @@ namespace PokeAByte.Web.Controllers
         {
             try
             {
-                XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalDirectory);
+                XPlatHelper.OpenFileManager(MapperPaths.MapperDirectory);
                 return Ok();
             }
             catch (Exception e)
@@ -234,16 +211,8 @@ namespace PokeAByte.Web.Controllers
         [HttpGet("open_mapper_archive_folder")]
         public ActionResult OpenMapperArchiveFolder()
         {
-            try
-            {
-                XPlatHelper.OpenFileManager(MapperEnvironment.MapperLocalArchiveDirectory);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to open directory.");
-                return ApiHelper.BadRequestResult(e.ToString());
-            }
+            XPlatHelper.OpenFileManager(MapperPaths.MapperLocalArchiveDirectory);
+            return Ok();
         }
 
         [HttpGet("get_github_link")]

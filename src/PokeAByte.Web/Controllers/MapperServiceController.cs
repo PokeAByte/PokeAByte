@@ -2,6 +2,7 @@
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
@@ -14,15 +15,18 @@ public class MapperServiceController : ControllerBase
 {
     private readonly ILogger<MapperServiceController> _logger;
     private readonly IInstanceService _instanceService;
+    private readonly MapperFileService _mapperFileService;
     private readonly MapperClientService _mapperClientService;
 
     public MapperServiceController(
         ILogger<MapperServiceController> logger,
         IInstanceService instanceService,
+        MapperFileService mapperFileService,
         MapperClientService mapperClientService)
     {
         _logger = logger;
         _instanceService = instanceService;
+        _mapperFileService = mapperFileService;
         _mapperClientService = mapperClientService;
     }
 
@@ -30,7 +34,11 @@ public class MapperServiceController : ControllerBase
     [Route("get-mappers")]
     public ActionResult<List<MapperFileModel>> GetMappers()
     {
-        return Ok(_mapperClientService.GetMappers().ToList());
+        return Ok(
+            _mapperFileService
+                .ListInstalled()
+                .Select(x => new MapperFileModel() { Id = x.Id, DisplayName = x.DisplayName})
+        );
     }
 
     [HttpGet]

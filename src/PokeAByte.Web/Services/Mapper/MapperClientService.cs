@@ -2,15 +2,15 @@
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Drivers;
 
 namespace PokeAByte.Web.Services.Mapper;
 
 public class MapperClientService(
-    IMapperFilesystemProvider mapperFs,
     ILogger<MapperClientService> logger,
     IInstanceService instanceService,
-    IMapperFilesystemProvider mapperFilesystemProvider,
+    MapperFileService mapperFileService,
     AppSettings appSettings,
     IDriverService driverService
 )
@@ -67,16 +67,6 @@ public class MapperClientService(
             logger.LogError(e, "Failed to load mapper.");
             return Result.Exception(e);
         }
-    }
-
-    public IEnumerable<MapperFileModel> GetMappers()
-    {
-        mapperFs.CacheMapperFiles();
-        return mapperFs.MapperFiles.Select(x => new MapperFileModel()
-        {
-            Id = x.Id,
-            DisplayName = x.DisplayName
-        });
     }
 
     public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
@@ -163,7 +153,7 @@ public class MapperClientService(
         }
 
         // Get the file path from the filesystem provider.
-        var mapperContent = await mapperFilesystemProvider.LoadContentAsync(mapperId);
+        var mapperContent = await mapperFileService.LoadContentAsync(mapperId);
         var instance = instanceService.Instance;
         if (instance == null)
         {

@@ -8,6 +8,7 @@ using PokeAByte.Application;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
@@ -43,6 +44,7 @@ public static class Startup
         services.AddSingleton<AppSettings>();
 
         services.AddSingleton<ScriptConsole>();
+        services.AddSingleton<MapperFileService>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         services.AddSingleton<IInstanceService, InstanceService>();
@@ -54,7 +56,6 @@ public static class Startup
             var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
             return MapperUpdaterSettings.Load(logger);
         });
-        services.AddScoped<IMapperFilesystemProvider, MapperFilesystemProvider>();
         services.AddScoped<IGithubApiSettings>(x =>
         {
             var logger = x.GetRequiredService<ILogger<GithubApiSettings>>();

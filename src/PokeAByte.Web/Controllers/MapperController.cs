@@ -5,6 +5,7 @@ using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
@@ -34,18 +35,18 @@ public class MapperController : ControllerBase
 {
     private readonly IDriverService _driverService;
     private readonly AppSettings _appSettings;
-    private readonly IMapperFilesystemProvider _mapperFilesystemProvider;
+    private readonly MapperFileService _mapperFileService;
     private readonly IInstanceService _instanceService;
 
     public MapperController(
         AppSettings appSettings,
         IDriverService driverService,
-        IMapperFilesystemProvider mapperFilesystemProvider,
+        MapperFileService mapperFileService,
         IInstanceService instanceService)
     {
         _driverService = driverService;
         _appSettings = appSettings;
-        _mapperFilesystemProvider = mapperFilesystemProvider;
+        _mapperFileService = mapperFileService;
         _instanceService = instanceService;
     }
 
@@ -74,7 +75,7 @@ public class MapperController : ControllerBase
     [HttpPut]
     public async Task<ActionResult> ChangeMapper(MapperReplaceModel model)
     {
-        var mapperContent = await _mapperFilesystemProvider.LoadContentAsync(model.Id);
+        var mapperContent = await _mapperFileService.LoadContentAsync(model.Id);
         switch (model.Driver)
         {
             case DriverModels.Bizhawk:

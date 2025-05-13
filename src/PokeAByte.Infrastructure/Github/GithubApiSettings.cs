@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Infrastructure.Github;
 
@@ -85,13 +86,13 @@ public record GithubApiSettings : IGithubApiSettings
     public static GithubApiSettings Load(ILogger<GithubApiSettings> logger, string? token = null)
     {
         //Setting file does not exist, just continue like normal
-        if (!File.Exists(MapperEnvironment.GithubApiSettings))
+        if (!File.Exists(MapperPaths.GithubApiSettings))
         {
             return new GithubApiSettings(logger, token);
         }
 
         //Load the json
-        var jsonData = File.ReadAllText(MapperEnvironment.GithubApiSettings);
+        var jsonData = File.ReadAllText(MapperPaths.GithubApiSettings);
         //Blank json data, just return 
         if (string.IsNullOrWhiteSpace(jsonData))
         {
@@ -127,7 +128,7 @@ public record GithubApiSettings : IGithubApiSettings
 
         try
         {
-            File.WriteAllText(MapperEnvironment.GithubApiSettings, jsonData);
+            File.WriteAllText(MapperPaths.GithubApiSettings, jsonData);
         }
         catch (Exception e)
         {

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Xml;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Application.Mappers;
 
@@ -46,10 +47,12 @@ public static class MapperTreeUtility
 
     public static List<MapperDto> Load(string baseDirectory)
     {
-        var path = Path.Combine(baseDirectory, "mapper_tree.json");
-        if (!File.Exists(path))
+        var path = Path.Combine(baseDirectory, MapperPaths.MapperTreeJson);
+        string? mapperJson = File.Exists(path)
+            ? File.ReadAllText(path)
+            : null;
+        if (string.IsNullOrEmpty(mapperJson))
         {
-            Console.WriteLine($"{path} does not exist.");
             var mapperTree = GenerateMapperDtoTree(baseDirectory);
             SaveChanges(baseDirectory, mapperTree);
             return mapperTree;
@@ -64,9 +67,8 @@ public static class MapperTreeUtility
             SaveChanges(baseDirectory, mapperTree);
             return mapperTree;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine(e);
             return GenerateMapperDtoTree(baseDirectory);
         }
     }

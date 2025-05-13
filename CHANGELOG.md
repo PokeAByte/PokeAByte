@@ -5,6 +5,8 @@
 * Replaced the previous frontend (UI) with a new one written in Preact.
 * Removed the internal performance measurements and the `SHOW_READ_LOOP_STATISTICS` setting.
 * Removed the intermediate `PropertyModel` type that is returned from some REST endpoints. The data given to clients may slightly differ now.
+* Removed the following REST endpoints:
+  * `files/mapper/refresh_archived_list`
 
 ## Features
 

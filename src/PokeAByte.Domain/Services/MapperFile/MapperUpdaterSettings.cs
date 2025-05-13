@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
-namespace PokeAByte.Application.Mappers;
+namespace PokeAByte.Domain.Services.MapperFile;
 
 public class MapperUpdaterSettings
 {
@@ -26,9 +26,9 @@ public class MapperUpdaterSettings
         return result;
     }
 
-    public static MapperUpdaterSettings Load(ILogger<MapperUpdaterSettings> logger)
+    public static MapperUpdaterSettings Load(ILogger logger)
     {
-        var settingsJson = ReadFileIfExists(MapperEnvironment.MapperUpdateSettingsFile);
+        var settingsJson = ReadFileIfExists(MapperPaths.MapperUpdateSettingsFile);
         MapperUpdaterSettings? result = null;
         if (settingsJson != null) {
             try
@@ -39,7 +39,7 @@ public class MapperUpdaterSettings
             catch (Exception) { }
         }
         if (result == null) {
-            logger.LogWarning($"Failed to read {MapperEnvironment.MapperUpdateSettingsFile}. Creating a new one. ");
+            logger.LogWarning($"Failed to read {MapperPaths.MapperUpdateSettingsFile}. Creating a new one. ");
             result = new MapperUpdaterSettings();
             result.SaveChanges(logger);
         }
@@ -56,7 +56,7 @@ public class MapperUpdaterSettings
         }
         try
         {
-            File.WriteAllText(MapperEnvironment.MapperUpdateSettingsFile, jsonData);
+            File.WriteAllText(MapperPaths.MapperUpdateSettingsFile, jsonData);
         }
         catch (Exception e)
         {

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Logging;
-using PokeAByte.Application.Mappers;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Infrastructure.Github;
 
@@ -62,7 +62,7 @@ public class GithubRestApi : IGithubRestApi
     }
 
     public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
-        await GetContentRequest(MapperEnvironment.MapperTreeJson, true);
+        await GetContentRequest(MapperPaths.MapperTreeJson, true);
         
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
     {

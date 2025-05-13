@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Application.Mappers;
 
@@ -58,7 +59,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             .ToList();
         //Get the current version the user has on their filesystem
         var mapperTree = MapperTreeUtility
-            .Load(MapperEnvironment.MapperLocalDirectory)
+            .Load(MapperPaths.MapperDirectory)
             .Select(m => m with { Path = m.Path.Trim('/').Trim('\\') })
             .ToList();
         //Compare the mapper trees and return a list of outdated mappers
@@ -99,7 +100,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             var outdatedMappers = await GetOutdatedMapperList();
             //Save the outdated mapper list
             var jsonData = JsonSerializer.Serialize(outdatedMappers);
-            await File.WriteAllTextAsync(MapperEnvironment.OutdatedMapperTreeJson, jsonData);
+            await File.WriteAllTextAsync(MapperPaths.OutdatedMapperTreeJson, jsonData);
             _mapperUpdaterSettings.RequiresUpdate = true;
             _mapperUpdaterSettings.SaveChanges(_logger);
             return true;
@@ -138,18 +139,18 @@ public class MapperUpdateManager : IMapperUpdateManager
     {
         foreach (var mapper in updatedMappers)
         {
-            var mapperPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
-            var jsPath = $"{MapperEnvironment.MapperLocalDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
+            var mapperPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
+            var jsPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
             _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath, mapperPath);
             _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath, jsPath);
             WriteTextToFile(mapperPath, mapper.XmlData, mapper.Created, mapper.Updated);
             WriteTextToFile(jsPath, mapper.JsData, mapper.Created, mapper.Updated);
         }
-        var archiveFolder = MapperEnvironment.MapperArchiveDirectory;
+        var archiveFolder = MapperPaths.MapperArchiveDirectory;
         _mapperArchiveManager.ArchiveDirectory(archiveFolder);
         //Update the mapper list
-        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperEnvironment.MapperLocalDirectory);
-        MapperTreeUtility.SaveChanges(MapperEnvironment.MapperLocalDirectory, mapperTree);
+        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperPaths.MapperDirectory);
+        MapperTreeUtility.SaveChanges(MapperPaths.MapperDirectory, mapperTree);
         //Finish off by checking for any changes
         await CheckForUpdates();
     }
