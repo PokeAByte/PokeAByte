@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Jint;
 using Jint.Native;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Mapper;
 using PokeAByte.Domain.Models;
+using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Domain.Logic;
 
@@ -52,7 +54,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         ReadLoopToken = new CancellationTokenSource();
 
         // Get the file path from the filesystem provider.
-        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(this, mapperContent.Xml);
+        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml);
         // Calculate the blocks to read from the mapper memory addresses.
         var blocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
         if (blocksToRead.Any())
@@ -243,4 +245,117 @@ public class PokeAByteInstance : IPokeAByteInstance
         await Driver.Disconnect();
         await ClientNotifier.SendInstanceReset();
     }
+
+    public async Task WriteValue(IPokeAByteProperty target, string value, bool? freeze)
+    {
+        if (target is not PokeAByteProperty property) {
+            return;
+        }
+        if (property.IsReadOnly) {
+            return;
+        }
+        if (property.Bytes == null)
+        {
+            throw new Exception("Bytes is NULL.");
+        }
+
+        byte[] bytes;
+
+        if (property.ShouldRunReferenceTransformer)
+        {
+            var reference = property.GetComputedReference(Mapper);
+            if (reference == null) throw new Exception("Glossary is NULL.");
+            bytes = BitConverter.GetBytes(reference.GetFirstByValue(value).Key);
+        }
+        else
+        {
+            bytes = property.BytesFromValue(value, Mapper);
+        }
+
+        if (property.BitIndexes != null)
+        {
+            var inputBits = new BitArray(bytes);
+            var outputBits = new BitArray(property.Bytes);
+
+            for (var i = 0; i < property.BitIndexes.Length; i++)
+            {
+                outputBits[property.BitIndexes[i]] = inputBits[i];
+            }
+            outputBits.CopyTo(bytes, 0);
+        }
+
+        if (property.BeforeWriteValueFunction != null && GetModuleFunctionResult(property.BeforeWriteValueFunction, property) == false)
+        {
+            // They want to do it themselves entirely in Javascript.
+            return;
+        }
+
+        await WriteBytes(property, bytes, freeze);
+    }
+
+    public async Task WriteBytes(IPokeAByteProperty target, byte[] bytesToWrite, bool? freeze)
+    {
+        if (target is not PokeAByteProperty property) {
+            return;
+        }
+        if (property.Address == null) throw new Exception($"{property.Path} does not have an address. Cannot write data to an empty address.");
+        if (property.Length == null) throw new Exception($"{property.Path}'s length is NULL, so we can't write bytes.");
+
+        var bytes = new byte[property.Length ?? 1];
+
+        // Overlay the bytes onto the buffer.
+        // This ensures that we can't overflow the property.
+        // It also ensures it can't underflow the property, it copies the remaining from Bytes.
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            if (i < bytesToWrite.Length)  {
+                bytes[i] = bytesToWrite[i];
+            } else if (property.Bytes != null) {
+                bytes[i] = property.Bytes[i];
+            }
+        }
+
+        if (property.WriteFunction != null && GetModuleFunctionResult(property.WriteFunction, property) == false)
+        {
+            // They want to do it themselves entirely in Javascript.
+            return;
+        }
+
+        if (freeze == true)
+        {
+            // The property is frozen, but we want to write bytes anyway.
+            // So this should replace the existing frozen bytes.
+            property.BytesFrozen = bytes;
+        }
+
+        if (bytes.Length != property.Length)
+        {
+            throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
+        }
+
+        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
+
+        if (freeze == true) {
+            await this.FreezeProperty(property, bytes);
+        } else if (freeze == false) {
+            await UnfreezeProperty(property);
+        }
+    }
+
+    public async Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen)
+    {
+        if (target is PokeAByteProperty property) {
+            property.BytesFrozen = bytesFrozen;
+            await ClientNotifier.SendPropertiesChanged([property]);
+        }
+    }
+
+    public async Task UnfreezeProperty(IPokeAByteProperty target)
+    {
+        if (target is PokeAByteProperty property) {
+            property.BytesFrozen = null;
+            await ClientNotifier.SendPropertiesChanged([property]);
+        }
+    }
+
 }

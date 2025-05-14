@@ -7,6 +7,11 @@
 * Removed the intermediate `PropertyModel` type that is returned from some REST endpoints. The data given to clients may slightly differ now.
 * Removed the following REST endpoints:
   * `files/mapper/refresh_archived_list`
+* Moved the following APIs from `IPokeAByteProperty` to `IPokeAByteInstance`:
+	* `FreezeProperty()` 
+	* `UnfreezeProperty()` 
+	* `WriteValue()` 
+	* `WriteBytes()` 
 
 ## Features
 

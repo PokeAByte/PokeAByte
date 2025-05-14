@@ -129,7 +129,7 @@ public class MapperClientService(
                 return Result.Failure(Error.FailedToUpdateProperty);
             }
 
-            await prop.WriteValue(value, isFrozen);
+            await instance.WriteValue(prop, value, isFrozen);
             return Result.Success();
         }
         catch (Exception e)

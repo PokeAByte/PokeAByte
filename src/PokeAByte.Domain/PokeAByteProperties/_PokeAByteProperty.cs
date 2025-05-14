@@ -13,7 +13,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     protected EndianTypes _endian;
     private bool _isMemoryAddressSolved;
 
-    private bool ShouldRunReferenceTransformer
+    internal bool ShouldRunReferenceTransformer
     {
         get
         {
@@ -26,9 +26,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    public PokeAByteProperty(IPokeAByteInstance instance, PropertyAttributes attributes)
+    public PokeAByteProperty(PropertyAttributes attributes)
     {
-        Instance = instance;
         Path = attributes.Path;
         Type = attributes.Type;
         _endian = attributes.EndianType;
@@ -59,26 +58,21 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    protected IPokeAByteInstance Instance { get; }
     public string Path { get; }
     public PropertyType Type { get; }
 
     public string? StaticValue { get; }
 
-    public ReferenceItems? ComputedReference
-    {
-        get
-        {
-            if (Reference == null) return null;
-            return Instance.Mapper.References[Reference];
-        }
-    }
+    internal ReferenceItems? GetComputedReference(IPokeAByteMapper mapper) 
+        => (Reference == null) 
+            ? null
+            : mapper.References[Reference];
 
     public bool IsFrozen => BytesFrozen != null;
     public bool IsReadOnly => AddressString == null;
 
 
-    protected object? ToValue(in byte[] data)
+    protected object? ToValue(in byte[] data, IPokeAByteMapper mapper)
     {
         switch (Type)
         {
@@ -92,7 +86,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             case PropertyType.Int:
                 return PropertyLogic.GetIntValue(in data, _endian);
             case PropertyType.String:
-                return PropertyLogic.GetStringValue(in data, Size, ComputedReference, _endian);
+                var computedReference = GetComputedReference(mapper);
+                return PropertyLogic.GetStringValue(in data, Size, computedReference, _endian);
             case PropertyType.Uint:
                 return PropertyLogic.GetUIntValue(in data, _endian);
         }
@@ -100,7 +95,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     }
 
 
-    public byte[] BytesFromValue(string value)
+    public byte[] BytesFromValue(string value, IPokeAByteMapper mapper)
     {
         switch (Type)
         {
@@ -120,11 +115,12 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 }
             case PropertyType.String:
                 {
-                    if (ComputedReference == null) throw new Exception("ReferenceObject is NULL.");
+                    var computedReference = GetComputedReference(mapper);
+                    if (computedReference == null) throw new Exception("ReferenceObject is NULL.");
                     if (Length == null) throw new Exception("Length is NULL.");
 
                     var uints = value
-                        .Select(x => ComputedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
+                        .Select(x => computedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
                         .ToList();
 
                     if (uints.Count + 1 > Length)
@@ -132,7 +128,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                         uints = uints.Take(Length ?? 0 - 1).ToList();
                     }
 
-                    var nullTerminationKey = ComputedReference.Values.First(x => x.Value == null);
+                    var nullTerminationKey = computedReference.Values.First(x => x.Value == null);
                     uints.Add(nullTerminationKey);
                     return uints
                         .Select(x => x?.Value == null
@@ -156,7 +152,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         throw new NotImplementedException();
     }
 
-    public byte[] BytesFromFullValue() => BytesFromValue(FullValue?.ToString() ?? "");
+    public byte[] BytesFromFullValue(IPokeAByteMapper mapper) => BytesFromValue(FullValue?.ToString() ?? "", mapper);
     public HashSet<string> FieldsChanged { get; } = [];
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
@@ -258,7 +254,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             );
         }
         //Store the original, full value
-        FullValue = ToValue(in bytes);
+        FullValue = ToValue(in bytes, instance.Mapper);
 
         bytes = BytesFromBits(bytes);
         if (address != null && BytesFrozen != null && bytes.SequenceEqual(BytesFrozen) == false)
@@ -293,7 +289,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     {
         var value = BitIndexes == null
             ? FullValue
-            : ToValue(in bytes);
+            : ToValue(in bytes, instance.Mapper);
 
         if (value != null && AfterReadValueExpression != null)
         {
@@ -308,103 +304,11 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         // Reference lookup
         if (ShouldRunReferenceTransformer)
         {
-            var computedReference = ComputedReference;
-            if (computedReference == null) throw new Exception("ReferenceObject is NULL.");
-
-            value = computedReference.GetSingleOrDefaultByKey(Convert.ToUInt64(value))?.Value;
+            var reference = GetComputedReference(instance.Mapper);
+            if (reference == null) throw new Exception("ReferenceObject is NULL.");
+            value = reference.GetSingleOrDefaultByKey(Convert.ToUInt64(value))?.Value;
         }
         return value;
     }
 
-    public async Task WriteValue(string value, bool? freeze)
-    {
-        if (Bytes == null)
-        {
-            throw new Exception("Bytes is NULL.");
-        }
-
-        byte[] bytes;
-
-        if (ShouldRunReferenceTransformer)
-        {
-            if (ComputedReference == null) throw new Exception("Glossary is NULL.");
-            bytes = BitConverter.GetBytes(ComputedReference.GetFirstByValue(value).Key);
-        }
-        else
-        {
-            bytes = BytesFromValue(value);
-        }
-
-        if (BitIndexes != null)
-        {
-            var inputBits = new BitArray(bytes);
-            var outputBits = new BitArray(Bytes);
-
-            for (var i = 0; i < BitIndexes.Length; i++)
-            {
-                outputBits[BitIndexes[i]] = inputBits[i];
-            }
-            outputBits.CopyTo(bytes, 0);
-        }
-
-        if (BeforeWriteValueFunction != null && Instance.GetModuleFunctionResult(BeforeWriteValueFunction, this) == false)
-        {
-            // They want to do it themselves entirely in Javascript.
-            return;
-        }
-
-        await WriteBytes(bytes, freeze);
-    }
-
-    public async Task WriteBytes(byte[] bytesToWrite, bool? freeze)
-    {
-        if (Address == null) throw new Exception($"{Path} does not have an address. Cannot write data to an empty address.");
-        if (Length == null) throw new Exception($"{Path}'s length is NULL, so we can't write bytes.");
-
-        var bytes = new byte[Length ?? 1];
-
-        // Overlay the bytes onto the buffer.
-        // This ensures that we can't overflow the property.
-        // It also ensures it can't underflow the property, it copies the remaining from Bytes.
-        for (int i = 0; i < bytes.Length; i++)
-        {
-            if (i < bytesToWrite.Length) bytes[i] = bytesToWrite[i];
-            else if (Bytes != null) bytes[i] = Bytes[i];
-        }
-
-        if (WriteFunction != null && Instance.GetModuleFunctionResult(WriteFunction, this) == false)
-        {
-            // They want to do it themselves entirely in Javascript.
-            return;
-        }
-
-        if (freeze == true)
-        {
-            // The property is frozen, but we want to write bytes anyway.
-            // So this should replace the existing frozen bytes.
-            BytesFrozen = bytes;
-        }
-
-        if (bytes.Length != Length)
-        {
-            throw new Exception($"Something went wrong with attempting to write bytes for {Path}. The bytes to write and the length of the property do not match. Will not proceed.");
-        }
-
-        await Instance.Driver.WriteBytes((MemoryAddress)Address, bytes);
-
-        if (freeze == true) await FreezeProperty(bytes);
-        else if (freeze == false) await UnfreezeProperty();
-    }
-
-    public async Task FreezeProperty(byte[] bytesFrozen)
-    {
-        BytesFrozen = bytesFrozen;
-        await Instance.ClientNotifier.SendPropertiesChanged([this]);
-    }
-
-    public async Task UnfreezeProperty()
-    {
-        BytesFrozen = null;
-        await Instance.ClientNotifier.SendPropertiesChanged([this]);
-    }
 }

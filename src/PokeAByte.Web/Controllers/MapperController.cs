@@ -185,7 +185,7 @@ public class MapperController : ControllerBase
             return ApiHelper.BadRequestResult("Property is read only.");
         }
 
-        await prop.WriteValue(model.Value?.ToString() ?? string.Empty, model.Freeze);
+        await instance.WriteValue(prop, model.Value?.ToString() ?? string.Empty, model.Freeze);
 
         return Ok();
     }
@@ -229,14 +229,11 @@ public class MapperController : ControllerBase
         {
             //Construct the updated byte array from value
             var outputByteArray = MultiplePropertiesUpdater
-                .ConstructUpdatedBytes(gameHookProperties);
+                .ConstructUpdatedBytes(gameHookProperties, instance.Mapper);
             //Update only the first property since WriteBytes will overwrite the entire address space 
             //of this property. We are maintaining the original set of bytes before overwriting only
             //the values 
-            await gameHookProperties
-                .First()
-                .Key
-                .WriteBytes(outputByteArray, false);
+            await instance.WriteBytes(gameHookProperties.First().Key, outputByteArray, false);
         }
         catch (Exception e)
         {
@@ -268,7 +265,7 @@ public class MapperController : ControllerBase
             return ApiHelper.BadRequestResult("Property is read only.");
         }
 
-        await prop.WriteBytes(actualBytes, model.Freeze);
+        await instance.WriteBytes(prop, actualBytes, model.Freeze);
 
         return Ok();
     }
@@ -296,11 +293,11 @@ public class MapperController : ControllerBase
 
         if (model.Freeze)
         {
-            await prop.FreezeProperty(prop.Bytes ?? Array.Empty<byte>());
+            await instance.FreezeProperty(prop, prop.Bytes ?? Array.Empty<byte>());
         }
         else
         {
-            await prop.UnfreezeProperty();
+            await instance.UnfreezeProperty(prop);
         }
 
         return Ok();

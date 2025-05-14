@@ -11,9 +11,8 @@ foreach (var xmlFilePath in filePaths)
 {
     try
     {
-        var instance = new PokeAByteFakeInstance();
         var contents = await File.ReadAllTextAsync(xmlFilePath);
-        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(instance, contents);
+        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(contents);
 
         // Create child directory if not exists.
         if (mapper.Metadata.GamePlatform.Any(x => char.IsLetter(x) == false && char.IsNumber(x) == false))

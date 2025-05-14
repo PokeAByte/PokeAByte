@@ -80,15 +80,13 @@ public static class PokeAByteMapperXmlFactory
         };
     }
 
-    static IEnumerable<IPokeAByteProperty> GetProperties(XDocument doc, IPokeAByteInstance? instance, EndianTypes endianType)
+    static IEnumerable<IPokeAByteProperty> GetProperties(XDocument doc, EndianTypes endianType)
     {
         return doc.Descendants("properties").Descendants("property")
             .Select<XElement, IPokeAByteProperty>(x =>
             {
                 try
                 {
-                    if (instance == null) { throw new Exception("Instance is null."); }
-
                     var type = x.GetAttributeValue("type") switch
                     {
                         "binaryCodedDecimal" => PropertyType.BinaryCodedDecimal,
@@ -120,7 +118,7 @@ public static class PokeAByteMapperXmlFactory
                         EndianType = endianType,
                     };
 
-                    return new PokeAByteProperty(instance, variables);
+                    return new PokeAByteProperty(variables);
                 }
                 catch (Exception ex)
                 {
@@ -160,7 +158,7 @@ public static class PokeAByteMapperXmlFactory
             });
     }
 
-    public static IPokeAByteMapper LoadMapperFromFile(IPokeAByteInstance? instance, string mapperContents)
+    public static IPokeAByteMapper LoadMapperFromFile(string mapperContents)
     {
         var doc = XDocument.Parse(mapperContents.Replace("{", string.Empty).Replace("}", string.Empty));
 
@@ -225,7 +223,7 @@ public static class PokeAByteMapperXmlFactory
             metaData,
             platformOptions,
             GetMemory(doc),
-            GetProperties(doc, instance, platformOptions.EndianType),
+            GetProperties(doc, platformOptions.EndianType),
             GetGlossary(doc)
         );
     }

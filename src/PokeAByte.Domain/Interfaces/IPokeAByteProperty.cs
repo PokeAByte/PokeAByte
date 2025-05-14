@@ -146,11 +146,7 @@ public interface IPokeAByteProperty
     void ProcessLoop(IPokeAByteInstance instance, IMemoryManager container, bool reloadAddresses);
     byte[] BytesFromBits(byte[] bytes);
     object? CalculateObjectValue(IPokeAByteInstance instance, byte[] bytes);
-    Task WriteValue(string value, bool? freeze);
-    Task WriteBytes(byte[] bytes, bool? freeze);
-    Task FreezeProperty(byte[] bytesFrozen);
-    Task UnfreezeProperty();
     //Exposing protected methods so we can maintian consistency
-    byte[] BytesFromValue(string value);
-    byte[] BytesFromFullValue();
+    byte[] BytesFromValue(string value, IPokeAByteMapper mapper);
+    byte[] BytesFromFullValue(IPokeAByteMapper mapper);
 }
