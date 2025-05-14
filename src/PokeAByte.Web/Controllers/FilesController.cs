@@ -80,6 +80,7 @@ namespace PokeAByte.Web.Controllers
                     )
                     .ToList();
                 await githubRest.DownloadMapperFiles(mapperDownloads, updateManager.SaveUpdatedMappersAsync);
+                mapperFileService.Refresh();
                 return Ok();
             }
             catch (Exception e)

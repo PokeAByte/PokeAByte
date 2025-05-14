@@ -2,7 +2,7 @@
 
 public interface IMapperArchiveManager
 {
-    public string ArchiveFile(string relativeFilename, string filepath);
+    public void ArchiveFile(string relativeFilename, string filepath);
 
     public void ArchiveDirectory(string directoryPath);
 

@@ -51,7 +51,7 @@ public class MapperFileService
         var scriptPath = xmlPath.Replace(".xml", ".js");
         DeleteFile(xmlPath);
         DeleteFile(scriptPath);
-        var archiveDir = archivedMapper.FullPath[..^archivedMapper.PathDisplayName.Length];
+        var archiveDir = Path.GetDirectoryName(archivedMapper.FullPath) ?? "";
         if (Directory.GetFiles(archiveDir, "*.*", SearchOption.AllDirectories).Length == 0)
         {
             Directory.Delete(archiveDir, true);

@@ -31,26 +31,24 @@ public class MapperArchiveManager : IMapperArchiveManager
     /// <param name="filepath">The path where the file is located</param>
     /// <param name="archivedPath">The optional archive path</param>
     /// <returns>The path where the file was archived</returns>
-    public string ArchiveFile(string relativeFilename, string filepath)
+    public void ArchiveFile(string relativeFilename, string filepath)
     {
         if (!File.Exists(filepath))
         {
             _logger.LogWarning($"Failed to move {relativeFilename} because it does not exist.\n\tPath: {filepath}");
-            return "";
+            return;
         }
         var archiveDirectory = CreateArchiveDirectory(relativeFilename);
-        if (archiveDirectory is null) return "";
+        if (archiveDirectory is null) return;
         try
         {
             var archiveFile = new FileInfo($"{archiveDirectory.FullName}/{relativeFilename}");
             archiveFile.Directory?.Create();
             File.Move(filepath, archiveFile.FullName);
-            return archiveDirectory.FullName;
         }
         catch (Exception e)
         {
             _logger.LogError(e, $"Failed to move {relativeFilename} because of an exception.");
-            return "";
         }
     }
 
@@ -79,6 +77,9 @@ public class MapperArchiveManager : IMapperArchiveManager
 
     public void ArchiveDirectory(string directoryPath)
     {
+        if (!Directory.Exists(directoryPath)) {
+            return;
+        }
         var archiveFiles = Directory.GetDirectories(directoryPath).Length != 0
             || Directory.GetFiles(directoryPath).Length != 0;
 
