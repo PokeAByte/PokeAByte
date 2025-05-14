@@ -6,12 +6,16 @@ article.license {
 			width: fit-content;
 		}
 	}
+	h3 {
+		margin-bottom:  var(--margin-1);
+	}
 	table {
 		border: 1px solid var(--color-border-0);
 		border-collapse: collapse;
+		margin-bottom:  var(--margin-1);
 		td, th {
 			text-align: left;
-			padding: 0 var(--margin-1);
+			padding: var(--margin-0) var(--margin-1);
 		}
 		tbody > tr {
 			border-top: 1px dashed var(--color-border-0);

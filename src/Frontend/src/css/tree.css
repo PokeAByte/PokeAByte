@@ -3,59 +3,80 @@
 	--tree-spacing: 24px;
 	--tree-radius: 10px;
 	padding-left: 0;
-	li {
-		display: block;
+}
+
+.tree li:has(details), .tree ul {
+	&:not(:last-child){
+		border-bottom: 1px solid var(--color-border-0);
+	}
+}
+
+table.tree {
+	width: 100%;
+	border: none;
+	margin: 0;
+	border-collapse: collapse;
+
+	&>tbody>tr>th {
+		width: 0;
+		white-space: nowrap;
+		text-align: left;
+	}
+
+	&>tbody>tr.leaf:not(:first-child) {
+		border-top: 1px solid var(--color-border-1);
+	}
+
+	.icon-button {
+		margin: 0 var(--margin-0) 0 0;
+		padding: 2px !important;
+		.material-icons {
+			font-size: 22px !important;
+		}
+	}
+	label,
+	input {
+		font-family: var(--monospace-font);
+	}
+
+	button:not(.icon-button),
+	input {
+		margin: 0 var(--margin-0) 0 0;
 		font-size: var(--font-size-0);
-		position: relative;
-		padding-left: calc(2 * var(--tree-spacing) - var(--tree-radius) - 2px);
+		padding: var(--margin-0);
+		padding: 3.375px !important;
 	}
-	
-	ul {
-		margin-left: calc(var(--tree-radius) - var(--tree-spacing));
-		padding-left: 0;
-		border-left: 2px solid white;
-		li::before {
-			content: '';
-			display: block;
-			position: absolute;
-			top: calc(var(--tree-spacing) * -1 + 5px);
-			left: -2px;
-			width: calc(var(--tree-spacing));
-			height: calc(var(--tree-spacing) * 1.5);
-			border: solid #ddd;
-			border-width: 0 0 2px 2px;
+	input[role="switch"] {
+		height: 29.25px;
+	}
+	input[role="switch"]::before {
+		height: 19.25px;
+	}
+}
+
+tr.leaf {
+	td, th {
+		height: 40px;
+		> * {
+			vertical-align: middle;
 		}
 	}
-	summary {
-		display: block;
-		cursor: pointer;
-		line-height: 36px;
-		&::marker {
-			display: none;
-		}
-		&:focus {
-			outline: none;
-		}
-		&:focus-visible {
-			outline: 1px dotted #000;
-		}
-		&::before {
-			z-index: 1;
-		}
-		&::before {
-			content: '';
-			position: absolute;
-			left: calc(var(--tree-spacing) - var(--tree-radius) - 1px);
-			width: calc(2 * var(--tree-radius));
-			height: calc(2 * var(--tree-radius));
-			clip-path: circle(35% at 50% 65%);
-			background: #ddd;
-			top: 5px;
+	th {
+		text-align: left;
+		width: 0;
+		white-space: nowrap;
+	}
+	td {
+		display: flex;
+		align-items: center;
+		.hide-icon {
+			margin-left: auto;
+			margin-right: var(--margin-0);
+			cursor: pointer;
 		}
 	}
-	details{
-		&[open]>summary::before {
-			background-position: calc(-2 * var(--tree-radius)) 0;
-		}
-	}
+}
+
+tr.hidden {
+	display: none;
 }

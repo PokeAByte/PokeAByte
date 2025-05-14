@@ -1,9 +1,11 @@
-.toast-container {
+.notifications {
 	bottom: var(--margin-2);
-	left: var(--margin-2);
+	right: var(--margin-2);
 	position: fixed;
 	z-index: 1000;
+	text-align: end;
 	.toast {
+		text-align: left;
 		margin-top: var(--margin-0);
 		padding: var(--margin-0) var(--margin-1) var(--margin-0) var(--margin-1);
 		min-width: 15rem;
@@ -20,7 +22,15 @@
 		> .material-icons {
 			font-size: var(--font-size-1) !important;
 		}
-
+		&.red {
+			border-color: var(--color-red);
+		}
+		&.green {
+			border-color: var(--color-green);
+		}
+		&.blue {
+			border-color: var(--color-highlight);
+		}
 	}
 	.toast-content {
 		display: flex;

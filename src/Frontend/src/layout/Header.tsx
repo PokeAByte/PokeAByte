@@ -1,31 +1,42 @@
 import { useLocation } from "wouter";
 import { HeaderNavigation } from "./HeaderNavigation";
-import { Mapper } from "pokeaclient";
+import { Store } from "../utility/propertyStore";
+import {  useSyncExternalStore } from "preact/compat";
+import { AdvancedToggle } from "../Contexts/AdvancedToggle";
 
-export function Header(props: { mapper: Mapper | null }) {
+export function Header() {
+	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
 	const [, setLocation] = useLocation();
-	const onPowerButtonClick = () => {
-		setLocation("");
+	const reloadMapper = () => {
+		// @ts-expect-error The upstream type definition is incomplete, accessing fileId works just fine.
+		Store.client.changeMapper(mapper.fileId).then(() => setLocation("/ui/properties"));
 	};
-
-	const textHighlightClass = props.mapper ? "text-green" : "text-red";
+	const textHighlightClass = mapper ? "text-green" : "text-red";
 	return (
 		<header className="layout-box">
-			<div>
-				<h1>
-					Poke-A-Byte
-				</h1>
-				<button
-					type="button"
-					onClick={onPowerButtonClick}
-					title={props.mapper ? "Status: Connected" : "Status: Disconnected"}
-				>
-					<i className={`material-icons ${textHighlightClass}`}> power_settings_new </i>
-				</button>
-			</div>
-			<nav className="tab">
-				<HeaderNavigation mapper={props.mapper} />
+			<h1 class={textHighlightClass}>
+				Poke-A-Byte
+			</h1>
+			<nav className={`tab`}>
+				<HeaderNavigation mapper={mapper} />
 			</nav>
+			<div class={"mapper-info"}>
+					{mapper 
+						?<>
+							<span class={`margin-right ${textHighlightClass}`}  title={"Current mapper: " + mapper.gameName}>Connected</span>
+							<i tabIndex={0} title="Unload Mapper" role={"button"} className={`icon-button-bare material-icons text-red`} onClick={Store.client.unloadMapper}> 
+								clear 
+							</i>
+							<i tabIndex={0}  title="Reload Mapper" role={"button"} className={`icon-button-bare material-icons text-purple`} onClick={reloadMapper}> 
+								refresh
+							</i>
+						</>
+						: <>
+							No Mapper loaded
+						</>
+					}
+					<AdvancedToggle />
+			</div>		
 		</header>
 	);
 }

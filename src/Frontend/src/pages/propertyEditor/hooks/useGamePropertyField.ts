@@ -1,4 +1,5 @@
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "preact/compat";
+import { useCallback, useRef } from "preact/hooks";
 import { Store } from "../../../utility/propertyStore";
 import { GameProperty } from "pokeaclient";
 
@@ -24,10 +25,10 @@ export function useGamePropertyField<K extends keyof GameProperty>(path: string,
 		return ref.current;
 	}, [path, field])
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+
 	const subscribe = useCallback(
 		Store.subscribeProperty(path),
-		[path] // No idea how to fix the warning properly.
+		[path]
 	);
 
 	return useSyncExternalStore(subscribe, getProperty);

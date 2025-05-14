@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
-import { Switch, Route, Redirect } from "wouter";
+import { useEffect, useSyncExternalStore } from "preact/compat";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { LoadProgress } from "../components/LoadProgress";
 import { PropertyEditor } from "../pages/propertyEditor/PropertyEditor";
 import MapperPage from "../pages/mappers/MapperPage";
@@ -9,6 +9,14 @@ import { LicensePage } from "../pages/LicensePage";
 
 export function MainView() {
 	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);
+	const [path, setLocation] = useLocation();
+	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);	
+
+	useEffect(() => {
+		if (path === "~/") {
+			setLocation(isConnected ? "/properties" : "/mapper/");
+		}
+	}, [path, isConnected, setLocation])
 	if (!isConnected) {
 		return (
 			<main className="loading">
@@ -32,7 +40,7 @@ export function MainView() {
 					<LicensePage />
 				</Route>
 				<Route>
-					<Redirect to="/mapper/" />
+					<Redirect to={mapper ? "/properties": "/mapper/"} />
 				</Route>
 			</Switch>
 		</main>

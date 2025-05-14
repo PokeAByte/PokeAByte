@@ -26,6 +26,7 @@ export async function archiveMappers(mappers: MapperVersion[]) {
 export async function backupMappers(mappers: MapperVersion[]) {
 	return await postWithoutResult("http://localhost:8085/files/mapper/backup_mappers", mappers);
 }
+
 export async function deleteMappers(mappers: ArchivedMapper[]) {
 	return await postWithoutResult("http://localhost:8085/files/mapper/delete_mappers", mappers);
 }

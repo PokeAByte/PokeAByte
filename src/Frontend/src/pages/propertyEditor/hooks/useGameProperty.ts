@@ -1,4 +1,5 @@
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "preact/compat";
+import { useCallback, useRef } from "preact/hooks";
 import { Store } from "../../../utility/propertyStore";
 import deepEqual from "fast-deep-equal";
 import { GameProperty } from "pokeaclient";

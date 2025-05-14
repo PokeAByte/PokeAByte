@@ -1,9 +1,11 @@
 import { Store } from "../../utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
 import { unique } from "./utils/unique";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "preact/hooks";
+import { useSyncExternalStore } from "preact/compat";
 import { useLocation } from "wouter";
-
+import { HidePropertyContextProvider, IfNotHidden, ToggleForceVisible } from "../../Contexts/HidePropertyContext";
+import { Advanced } from "../../Contexts/Advanced";
 
 export function PropertyEditor() {
 	const [, setLocation] = useLocation();
@@ -15,11 +17,11 @@ export function PropertyEditor() {
 	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);
 	useEffect(() => {
 		if (!mapper && isConnected) {
-			setLocation("../mappers/");
+			setLocation("/mappers/");
 		}
 	}, [mapper, isConnected, setLocation])
 
-	if (!isConnected) {
+	if (!isConnected || !mapper) {
 		return (
 			<div id="property-editor">
 				<h1>
@@ -30,30 +32,30 @@ export function PropertyEditor() {
 	}
 
 	return (
-		<div className="layout-box margin-top">
-			<span className="row">
-				<strong className="small margin-right">
-					Properties for {mapper?.gameName}
-				</strong>
-				<button type="button" className="border-red" onClick={Store.client.unloadMapper}>
-					UNLOAD MAPPER
-				</button>
-			</span>
-			{mapper?.gameName.toLowerCase().includes("deprecated") &&
-				<p className="text-red">
-					<small>
-					This mapper is deprecated! As such, it will not be updated with new features.
-					It will not have the same level of features or support as the latest mappers.
-					<br />
-					This one is provided so that users can continue to use software that was programmed using these property paths.
-					</small>
-				</p>
-			}
-			<ul className="tree">
-				{paths.map((x) => {
-					return <PropertyTree key={x} path={x} />
-				})}
-			</ul>
-		</div>
+		<HidePropertyContextProvider mapperId={mapper.id}>
+			<div className="layout-box margin-top">
+				<div class="title">
+					<div>
+						<strong>{mapper.gameName}</strong>
+					</div>
+					<div>
+						<Advanced>
+							<ToggleForceVisible/>
+						</Advanced>
+					</div>
+				</div>
+				<table className="tree">
+					<tbody>
+						{paths.map((x) => {
+							return (
+								<IfNotHidden key={x} path={x} >
+									<PropertyTree path={x} />
+								</IfNotHidden>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
+		</HidePropertyContextProvider>
 	)
 }

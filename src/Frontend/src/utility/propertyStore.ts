@@ -1,4 +1,5 @@
-import { ChangedField, GameProperty, Glossary, PokeAClient } from "pokeaclient";
+import { ChangedField, GameProperty, Glossary, PokeAClient, ProblemDetails } from "pokeaclient";
+import { Toasts } from "../notifications/ToastStore";
 
 type Callback = () => void;
 
@@ -17,7 +18,8 @@ export class PropertyStore {
 		this.client = new PokeAClient({
 			onMapperChange: this.onMapperChange,
 			onPropertiesChanged: this.onPropertiesChange,
-			onConnectionChange: this.onConnectionChange
+			onConnectionChange: this.onConnectionChange,
+			onError: this.onError,
 		}, {
 			updateOn: [ChangedField.bytes, ChangedField.value, ChangedField.frozen]
 		});
@@ -51,6 +53,10 @@ export class PropertyStore {
 
 	onConnectionChange = (connected: boolean) => {
 		this._connectionSubscriber.forEach(callback => callback(connected));
+	}
+
+	onError = (error: ProblemDetails) => {
+		Toasts.push(`${error.title}: ${error.detail}`, "", "error", false);
 	}
 
 	subscribeProperty = (path: string) => (onStoreChange: () => void) => {

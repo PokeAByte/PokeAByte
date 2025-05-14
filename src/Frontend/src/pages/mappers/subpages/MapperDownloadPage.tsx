@@ -1,63 +1,71 @@
 import { Store } from "../../../utility/propertyStore"
-import React, { useEffect } from "react";
+import { useState, useContext, useEffect } from "preact/hooks";
 import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
 import { MapperUpdate } from "pokeaclient";
+import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
+import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
+import { Toasts } from "../../../notifications/ToastStore";
+import { Advanced } from "../../../Contexts/Advanced";
 
 export function MapperDownloadPage() {
 	const filesClient = Store.client.files;
-	const [availableMappers, setAvailableMappers] = React.useState<MapperUpdate[]>([]);
-	const [selectedMappers, setSelectedMappers] = React.useState<string[]>([]);
-	const updateMappers = useAPI(filesClient.getMapperUpdatesAsync);
-	const downloadMappers = useAPI(filesClient.downloadMapperUpdatesAsync, () => updateMappers.call);
-	useEffect(
-		() => updateMappers.call(),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[]
-	);
-
-	useEffect(() => {
-		if (updateMappers.wasCalled && updateMappers.isLoading === false && updateMappers.result) {
-			setAvailableMappers(updateMappers.result?.filter(mapper => !mapper.currentVersion) ?? []);
-			setSelectedMappers([]);
+	const mapperFileContext = useContext(MapperFilesContext);
+	const [downloads, setDownloads] = useState<MapperUpdate[]>([]);
+	const [selectedDownloads, setSelectedDownloads] = useState<string[]>([]);
+	const downloadMappers = useAPI(
+		filesClient.downloadMapperUpdatesAsync, 
+		(success) => {
+			if (success) {
+				mapperFileContext.refresh();
+				Toasts.push(`Successfully downloaded mapper(s).`, "task_alt", "success");
+			} else {
+				Toasts.push(`An error occured while downloading (a) mapper(s).`, "", "error");
+			}
 		}
-	}, [updateMappers.wasCalled, updateMappers.isLoading, updateMappers.result])
+	);
+	useEffect(() => {
+		setDownloads(mapperFileContext.updates.filter(mapper => !mapper.currentVersion) ?? []);
+		setSelectedDownloads([]);		
+	}, [mapperFileContext.updates])
 
 	const handleDownload = () => {
-		const mappers = availableMappers.filter(x => selectedMappers.includes(x.latestVersion.path));
+		const mappers = downloads.filter(x => selectedDownloads.includes(x.latestVersion.path));
 		downloadMappers.call(mappers);
 	}
 
 	const handleDownloadAll = () => {
-		downloadMappers.call(availableMappers);
+		downloadMappers.call(downloads);
 	}
 
-	if (downloadMappers.isLoading || updateMappers.isLoading) {
+	if (downloadMappers.isLoading || mapperFileContext.isLoading) {
 		return <LoadProgress label="Downloading mapper(s)" />
 	}
 	return (
 		<article>
 			<span>
-				{selectedMappers.length} / {availableMappers.length} Mappers Selected
+				{selectedDownloads.length} / {downloads.length} Mappers Selected
 			</span>
 			<div className="margin-top">
-				<button className="border-green margin-right" disabled={!selectedMappers.length} onClick={handleDownload}>
-					DOWNLOAD SELECTED
+				<button className="green margin-right wide-button" disabled={!selectedDownloads.length} onClick={handleDownload}>
+					Download selected
 				</button>
-				<button className="border-green margin-right" disabled={!availableMappers.length} onClick={handleDownloadAll}>
-					DOWNLOAD ALL
+				<button className="green margin-right wide-button" disabled={!downloads.length} onClick={handleDownloadAll}>
+					Download all
 				</button>
-				<button className="border-blue margin-right">CHECK FOR MAPPERS</button>
-				<button className="border-purple" onClick={filesClient.openMapperFolder}>
-					OPEN MAPPER FOLDER
+				<button className="blue margin-right wide-button" disabled onClick={mapperFileContext.refresh}>
+					Reload mapper list
 				</button>
+				<Advanced>
+					<OpenMapperFolderButton />
+				</Advanced>
 			</div>
 			<div className="margin-top">
 				<MapperSelectionTable
-					availableMappers={availableMappers}
-					selectedMappers={selectedMappers}
-					onMapperSelection={setSelectedMappers}
+					availableMappers={downloads}
+					selectedMappers={selectedDownloads}
+					onMapperSelection={setSelectedDownloads}
 				/>
 			</div>
 		</article>

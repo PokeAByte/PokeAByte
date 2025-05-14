@@ -8,26 +8,18 @@
 	padding: 0;
 }
 
+.color-darker {
+	color: var(--color-tone-3);	
+}
+
 .text-red {
-	color: var(--color-red);
+	color: var(--color-red) !important;
 }
-
+.text-purple {
+	color: var(--color-purple) !important;
+}
 .text-green {
-	color: var(--color-green);
-}
-
-.border-red {
-	border-color: var(--color-red);
-}
-
-.border-blue {
-	border-color: var(--color-highlight) !important;
-}
-.border-green {
-	border-color: var(--color-green);
-}
-.border-purple {
-	border-color: var(--color-purple);
+	color: var(--color-green) !important;
 }
 
 .margin-top {
@@ -38,4 +30,30 @@
 }
 .margin-right {
 	margin-right: var(--margin-1);
+}
+
+button.blue,
+button.red,
+button.purple,
+button.green {
+	--button-background-default: var(--button-base-color);
+	--button-background-hover: var(--button-base-color);
+	--button-border-default: var(--button-base-color);
+	--button-border-hover: var(--button-base-color);
+	--button-border-disabled: var(--button-base-color);
+	&:hover:enabled {
+		background-color: color-mix(in oklab, var(--button-base-color) 90%, white 10%) !important;
+	}
+}
+button.blue {
+	--button-base-color: var(--color-highlight);
+}
+button.green {
+	--button-base-color: var(--color-green);
+}
+button.purple {
+	--button-base-color: var(--color-purple);
+}
+button.red {
+	--button-base-color: var(--color-red);
 }

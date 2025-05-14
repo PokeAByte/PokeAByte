@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect } from "preact/hooks";
 
 type ModalProps = {
 	display: boolean;
@@ -8,13 +8,15 @@ type ModalProps = {
 	onConfirm: () => void;
 	onCancel: () => void;
 };
+
 export function ConfirmationModal(props: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const hasCurrentDialog = !!dialogRef.current;
 	useEffect(() => {
 		if (!!dialogRef.current && props.display) {
 			dialogRef.current.showModal();
 		}
-	}, [!!dialogRef.current, props.display]);
+	}, [hasCurrentDialog, props.display]);
 	if (!props.display) {
 		return null;
 	}
@@ -26,11 +28,10 @@ export function ConfirmationModal(props: ModalProps) {
 				<button className="margin-right" onClick={props.onCancel}>
 					CANCEL
 				</button>
-				<button className="border-purple" onClick={props.onConfirm}>
+				<button className="purple" onClick={props.onConfirm}>
 					{props.confirmLabel}
 				</button>
 			</div>
 		</dialog>
-
 	);
 }

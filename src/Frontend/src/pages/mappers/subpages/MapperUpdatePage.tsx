@@ -1,79 +1,83 @@
 import { Store } from "../../../utility/propertyStore"
-import React, { useEffect } from "react";
 import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
 import { MapperUpdate } from "pokeaclient";
+import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
+import { useContext, useEffect, useState } from "preact/hooks";
+import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
+import { Toasts } from "../../../notifications/ToastStore";
+import { Advanced } from "../../../Contexts/Advanced";
 
 export function MapperUpdatePage() {
 	const filesClient = Store.client.files;
-	const [availableMappers, setAvailableMappers] = React.useState<MapperUpdate[]>([]);
-	const [selectedMappers, setSelectedMappers] = React.useState<string[]>([]);
-	const updateMappers = useAPI(filesClient.getMapperUpdatesAsync);
-	const downloadMappers = useAPI(filesClient.downloadMapperUpdatesAsync, () => updateMappers.call);
-
-	useEffect(
-		() => updateMappers.call(),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[]
-	);
-
-	useEffect(() => {
-		if (updateMappers.wasCalled && updateMappers.isLoading === false && updateMappers.result) {
-			if (updateMappers.result) {
-				setAvailableMappers(
-					updateMappers.result
-						.filter(mapper => !!mapper.currentVersion)
-						.filter(mapper => !!mapper.latestVersion)
-				);
+	const mapperFileContext = useContext(MapperFilesContext);
+	const [availableUpdates, setAvailableUpdates] = useState<MapperUpdate[]>([]);
+	const [selectedUpdates, sectSelectedUpdates] = useState<string[]>([]);
+	const downloadMappers = useAPI(
+		filesClient.downloadMapperUpdatesAsync, 
+		(success) => {
+			if (success) {
+				mapperFileContext.refresh();
+				Toasts.push(`Successfully update mapper(s).`, "task_alt", "success");
+			} else {
+				Toasts.push(`An error occured while updating.`, "", "error");
 			}
-			setSelectedMappers([]);
 		}
-	}, [updateMappers.wasCalled, updateMappers.isLoading, updateMappers.result])
+	);
+	
+	useEffect(() => {
+		setAvailableUpdates(
+			mapperFileContext.updates
+				.filter(mapper => !!mapper.currentVersion)
+				.filter(mapper => !!mapper.latestVersion)
+		);
+		sectSelectedUpdates([]);		
+	}, [mapperFileContext.updates])
 
 	useEffect(() => {
 		if (downloadMappers.wasCalled && !downloadMappers.isLoading) {
-			setSelectedMappers([]);
+			sectSelectedUpdates([]);
 			downloadMappers.reset();
 		}
 	}, [downloadMappers, downloadMappers.wasCalled, downloadMappers.isLoading])
 
 	const handleUpdate = () => {
-		const mappers = availableMappers.filter(x => selectedMappers.includes(x.latestVersion.path));
+		const mappers = availableUpdates.filter(x => selectedUpdates.includes(x.latestVersion.path));
 		downloadMappers.call(mappers);
 	}
 
 	const handleUpdateAll = () => {
-		downloadMappers.call(availableMappers);
+		downloadMappers.call(availableUpdates);
 	}
 
-	if (downloadMappers.isLoading || updateMappers.isLoading) {
+	if (downloadMappers.isLoading || mapperFileContext.isLoading) {
 		return <LoadProgress label="Downloading mapper(s)" />
 	}
 
 	return (
 		<article>
 			<span>
-				{selectedMappers.length} / {availableMappers.length} Mappers Selected
+				{selectedUpdates.length} / {availableUpdates.length} Mappers Selected
 			</span>
 			<div className="margin-top">
-				<button className="border-green margin-right" disabled={!selectedMappers.length} onClick={handleUpdate}>
-					UPDATE SELECTED
+				<button className="green margin-right wide-button" disabled={!selectedUpdates.length} onClick={handleUpdate}>
+					Update selected
 				</button>
-				<button className="border-green margin-right" disabled={!availableMappers.length} onClick={handleUpdateAll}>
-					UPDATE ALL
+				<button className="green margin-right wide-button" disabled={!availableUpdates.length} onClick={handleUpdateAll}>
+					Update all
 				</button>
-				<button className="border-blue margin-right">
-					CHECK FOR MAPPERS
+				<button className="blue margin-right wide-button" onClick={mapperFileContext.refresh}>
+					Reload mapper list
 				</button>
-				<button className="border-purple" onClick={filesClient.openMapperFolder}>
-					OPEN MAPPER FOLDER
-				</button>
+				<Advanced>
+					<OpenMapperFolderButton />
+				</Advanced>
 			</div>
 			<MapperSelectionTable
-				availableMappers={availableMappers}
-				selectedMappers={selectedMappers}
-				onMapperSelection={setSelectedMappers}
+				availableMappers={availableUpdates}
+				selectedMappers={selectedUpdates}
+				onMapperSelection={sectSelectedUpdates}				
 			/>
 		</article>
 	);

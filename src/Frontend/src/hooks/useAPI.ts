@@ -1,13 +1,12 @@
-import React from "react";
-
+import { useState } from "preact/hooks";
 
 export function useAPI<T extends (...args: any[]) => Promise<any>>(
 	api: T,
-	chain?: () => void,
+	chain?: (success: boolean) => void,
 ) {
-	const [isLoading, setLoading] = React.useState(false);
-	const [wasCalled, setCalled] = React.useState(false);
-	const [result, setResult] = React.useState<Awaited<ReturnType<T>> | null>(null)
+	const [isLoading, setLoading] = useState(false);
+	const [wasCalled, setCalled] = useState(false);
+	const [result, setResult] = useState<Awaited<ReturnType<T>> | null>(null)
 	const call = (...args: Parameters<T>) => {
 		setLoading(true);
 		setCalled(true)
@@ -16,12 +15,15 @@ export function useAPI<T extends (...args: any[]) => Promise<any>>(
 				setLoading(false);
 				setResult(result);
 				if (chain) {
-					chain();
+					chain(true);
 				}
 			})
 			.catch(() => {
 				setLoading(false)
 				setResult(null);
+				if (chain) {
+					chain(true);
+				}
 			});
 	}
 	const reset = () => {

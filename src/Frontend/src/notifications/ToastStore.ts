@@ -35,22 +35,37 @@ export class ToastStore {
 	}
 
 	remove = (id: number) => {
-		console.log(this.remove);
 		this._toasts = this._toasts.filter(x => x.id !== id);
 		this._notifySubscribers();
 	}
 
 	push = (message: string, icon: string = "", type: NotificationColor, autoclear: boolean = true) => {
 		const id = ++this._lastId;
-		this._toasts.push({
-			message,
-			icon,
-			type,
-			autoclear,
-			id,
-			close: () => this.remove(id),
-			clearAt: autoclear ? new Date().getTime() + 1500 : 0,
-		});
+		const existingNotification = this._toasts.find(
+				x => x.message.startsWith(message) 
+					&& x.icon === icon 
+					&& x.type === type
+					&& x.autoclear === false
+		);
+		if (existingNotification) {
+			const counter = existingNotification.message.match(/\(x\d+\)$/);
+			let count = 1;
+			if (counter) {
+				count = parseInt(counter[0].substring(2, counter[0].length-1));
+				count++;
+			}
+			existingNotification.message = message + ` (x${count})`;
+		} else {
+			this._toasts.push({
+				message,
+				icon,
+				type,
+				autoclear,
+				id,
+				close: () => this.remove(id),
+				clearAt: autoclear ? new Date().getTime() + 5000 : 0,
+			});
+		}
 		this._notifySubscribers();
 	}
 

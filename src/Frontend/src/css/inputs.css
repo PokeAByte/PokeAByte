@@ -1,4 +1,31 @@
-button,
+button {
+	margin-top: var(--margin-0);
+	font-size: var(--font-size-0);
+	padding: var(--margin-0);
+	border: 2px solid ;
+	color: var(--button-color-default);
+	background-color: var(--button-background-default);
+	border-color: var(--button-border-default);
+	
+	&:hover:enabled {
+		background-color: var(--button-background-hover);
+		border-color: var(--button-background-hover);
+	}
+	
+	&[disabled] {
+		border-color: var(--button-border-disabled);
+		background-color: var(--button-background-disabled);
+		color: var(--button-color-disabled);
+	}
+
+	&:focus-visible {
+		outline: 2px dashed var(--color-highlight);
+	}
+
+	&.highlight {
+		color: var(--color-highlight)
+	}
+}
 input,
 input[type="checkbox"] {
 	margin-top: var(--margin-0);
@@ -16,7 +43,7 @@ input[type="checkbox"] {
 	&[disabled] {
 		border: 2px solid var(--color-border-0);
 		background-color: var(--color-surface-0);
-		color: var(--color-tone-1);
+		color: var(--color-tone-3);
 	}
 
 	&:focus-visible {
@@ -34,12 +61,19 @@ input[type="checkbox"] {
 	width: 2rem;
 	display: grid;
 	place-content: center;
+	&[role="switch"] {
+		position: relative;
+		background-color: var(--color-red) !important;
+		&:checked {
+			background-color: var(--color-green) !important;
+		}
+	}
 	&:not([role="switch"])  {
 		&:checked:before {
 			content: "";
 			height: 1rem;
 			width: 1rem;
-			transition: 120ms transform ease-in-out;
+			transition: 80ms transform ease-in-out;
 			background-color: var(--color-tone-5);
 		}
 	}
@@ -47,15 +81,14 @@ input[type="checkbox"] {
 		width: 4rem;
 		&:before {
 			content: "";
-			height: 1rem;
-			width: 1rem;
-			transition: 120ms transform ease-in-out;
-			background-color: var(--color-red);
-			transform: translateX(+100%);
+			height: calc(2rem - 10px);
+			width: 1.2rem;
+			transition: transform 80ms ease-in-out;
+			background-color: white;
+			transform: translateX(1rem);
 		}
 		&:checked:before {
-			background-color: var(--color-green);
-			transform: translateX(-100%);
+			transform: translateX(calc(-1rem - 1px));
 		}
 	}
 }
@@ -64,29 +97,10 @@ form {
 	display: table;
 }
 
-.field {
-	display: table-row;
-	padding-bottom: var(--margin-2);
-
-	input {
-		width: 50%;
-		display: table-cell;
-	}
-
-	label {
-		width: 50%;
-		display: table-cell;
-	}
-
-	& ~ small {
-		margin-bottom: none;
-	}
-}
-
-.field ~ small {
-	display: block;
-}
-
 button {
 	border-style: outset;
+}
+
+.icon-button-bare:focus-visible {
+	outline: 2px dashed var(--color-highlight);
 }
