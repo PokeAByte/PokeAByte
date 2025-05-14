@@ -40,15 +40,13 @@ public class MapperUpdateManager : IMapperUpdateManager
     {
         //Get the latest version of the mapper tree from github
         var mapperListResponse = await _githubRestApi.GetMapperTreeFile();
-        if (mapperListResponse is null || !mapperListResponse.IsSuccessStatusCode)
+        if (mapperListResponse is null)
         {
             _logger.LogError("Failed to download the latest version of the mapper tree json from Github.");
             return [];
         }
         //Convert the remote data to a MapperDto
-        var remoteDeserialized = await mapperListResponse
-            .Content
-            .ReadFromJsonAsync<List<MapperDto>>();
+        var remoteDeserialized = await mapperListResponse.ReadFromJsonAsync<List<MapperDto>>();
         if (remoteDeserialized is null || remoteDeserialized.Count == 0)
         {
             _logger.LogError("Could not read the remote json file.");

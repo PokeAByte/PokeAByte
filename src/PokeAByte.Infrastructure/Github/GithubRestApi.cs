@@ -10,6 +10,8 @@ public class GithubRestApi : IGithubRestApi
 {
     private readonly IGithubApiSettings _apiSettings;
     private readonly ILogger<GithubRestApi> _logger;
+    private HttpContent? _cachedTreeFileResponse = null;
+    private DateTime _treeFileCacheTime = DateTime.MinValue;
 
     public GithubRestApi(ILogger<GithubRestApi> logger,
         IGithubApiSettings apiSettings)
@@ -19,8 +21,7 @@ public class GithubRestApi : IGithubRestApi
     }
 
     public async Task DownloadMapperFiles(List<MapperDto> mapperDtos,
-        Func<List<UpdateMapperDto>, Task> postDownloadAction,
-        Action<int>? currentProcessCountUpdate = null)
+        Func<List<UpdateMapperDto>, Task> postDownloadAction)
     {
         var count = 0;
         List<UpdateMapperDto> updatedMapperList = new();
@@ -41,7 +42,6 @@ public class GithubRestApi : IGithubRestApi
                 jsPath, jsData ?? "",
                 mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
             count++;
-            currentProcessCountUpdate?.Invoke(count);
         }
         await postDownloadAction(updatedMapperList);
     }
@@ -61,8 +61,19 @@ public class GithubRestApi : IGithubRestApi
         }
     }
 
-    public async Task<HttpResponseMessage?> GetMapperTreeFile() =>
-        await GetContentRequest(MapperPaths.MapperTreeJson, true);
+    public async Task<HttpContent?> GetMapperTreeFile() {
+        if (_cachedTreeFileResponse == null || _treeFileCacheTime > DateTime.Now + TimeSpan.FromMinutes(1)) {
+            var response = await GetContentRequest(MapperPaths.MapperTreeJson, true);
+            if (response is null || !response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to download the latest version of the mapper tree json from Github.");
+                return _cachedTreeFileResponse;
+            }
+            _cachedTreeFileResponse = response.Content;
+            _treeFileCacheTime = DateTime.Now;
+        }
+        return _cachedTreeFileResponse;
+    }
         
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
     {
@@ -88,7 +99,6 @@ public class GithubRestApi : IGithubRestApi
         {
             url += $"/contents/{path}";
         }
-
         var clientRequest = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
@@ -111,7 +121,7 @@ public class GithubRestApi : IGithubRestApi
 
     public async Task<string> TestSettings()
     {
-        var result = await GetMapperTreeFile();
+        var result = await GetContentRequest(MapperPaths.MapperTreeJson, true);
         if (result is null)
             return "Response from server was null.";
         return result.IsSuccessStatusCode ? "" :
