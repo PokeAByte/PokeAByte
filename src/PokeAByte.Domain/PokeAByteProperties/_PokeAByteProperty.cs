@@ -255,9 +255,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
         //Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
-
         bytes = BytesFromBits(bytes);
-        if (address != null && BytesFrozen != null && bytes.SequenceEqual(BytesFrozen) == false)
+        if (address != null && BytesFrozen != null)
         {
             // Bytes have changed, but property is frozen, so force the bytes back to the original value.
             // Pretend nothing has changed. :)
