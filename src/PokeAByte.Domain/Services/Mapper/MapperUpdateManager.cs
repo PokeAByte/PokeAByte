@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
@@ -7,6 +8,12 @@ using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Domain.Services.Mapper;
+
+[JsonSerializable(typeof(List<MapperDto>))]
+[JsonSerializable(typeof(List<MapperComparisonDto>))]
+public partial class ManagerJsonContext : JsonSerializerContext
+{
+}
 
 public class MapperUpdateManager : IMapperUpdateManager
 {
@@ -46,7 +53,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             return [];
         }
         //Convert the remote data to a MapperDto
-        var remoteDeserialized = await mapperListResponse.ReadFromJsonAsync<List<MapperDto>>();
+        var remoteDeserialized = await mapperListResponse.ReadFromJsonAsync(ManagerJsonContext.Default.ListMapperDto);
         if (remoteDeserialized is null || remoteDeserialized.Count == 0)
         {
             _logger.LogError("Could not read the remote json file.");
@@ -97,7 +104,7 @@ public class MapperUpdateManager : IMapperUpdateManager
             //Get the list of outdated mappers 
             var outdatedMappers = await GetOutdatedMapperList();
             //Save the outdated mapper list
-            var jsonData = JsonSerializer.Serialize(outdatedMappers);
+            var jsonData = JsonSerializer.Serialize(outdatedMappers, ManagerJsonContext.Default.ListMapperComparisonDto);
             await File.WriteAllTextAsync(MapperPaths.OutdatedMapperTreeJson, jsonData);
             _mapperUpdaterSettings.RequiresUpdate = true;
             _mapperUpdaterSettings.SaveChanges(_logger);

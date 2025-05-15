@@ -24,7 +24,18 @@ public static class Startup
         services.AddCors();
         // Add Web API
 
-        services.AddSignalR();
+        services.AddSignalR()
+            .AddJsonProtocol(
+                (options) => {
+                    options.PayloadSerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
+                }
+            );
+        services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
+        });
+
+
         services.AddSingleton<AppSettings>();
 
         services.AddSingleton<ScriptConsole>();

@@ -7,6 +7,8 @@ using PokeAByte.Domain.Services.Mapper;
 using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Helper;
 
+namespace PokeAByte.Web;
+
 public class RestAPI { }
 
 public static class FilesEndpoints
@@ -115,7 +117,7 @@ public static class FilesEndpoints
             return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} was empty.");
 
         return TypedResults.Ok(
-            JsonSerializer.Deserialize(jsonStr, PokeAByteJsonContext.Default.IEnumerableMapperComparisonDto)
+            JsonSerializer.Deserialize(jsonStr, ApiJsonContext.Default.IEnumerableMapperComparisonDto)
         );
     }
 }

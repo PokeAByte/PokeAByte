@@ -1,9 +1,13 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Domain.Services.Mapper;
+
+[JsonSerializable(typeof(List<MapperDto>))]
+public partial class MapperTreeUtilityContext : JsonSerializerContext;
 
 public static class MapperTreeUtility
 {
@@ -61,7 +65,7 @@ public static class MapperTreeUtility
         try
         {
             var jsonData = File.ReadAllText(path);
-            var mapperDtoList = JsonSerializer.Deserialize<List<MapperDto>>(jsonData);
+            var mapperDtoList = JsonSerializer.Deserialize(jsonData, MapperTreeUtilityContext.Default.ListMapperDto);
             if (mapperDtoList is not null) return mapperDtoList;
             var mapperTree = GenerateMapperDtoTree(baseDirectory);
             SaveChanges(baseDirectory, mapperTree);

@@ -6,6 +6,9 @@ using PokeAByte.Domain.Services.MapperFile;
 
 namespace PokeAByte.Infrastructure.Github;
 
+[JsonSerializable(typeof(GithubApiSettings))]
+public partial class GithubApiSettingsContext : JsonSerializerContext;
+
 public record GithubApiSettings : IGithubApiSettings
 {
     //Accept
@@ -100,8 +103,7 @@ public record GithubApiSettings : IGithubApiSettings
         try
         {
             //Deserialize the data 
-            var deserialized = JsonSerializer
-                .Deserialize<GithubApiSettings>(jsonData);
+            var deserialized = JsonSerializer.Deserialize(jsonData, GithubApiSettingsContext.Default.GithubApiSettings);
             if (deserialized is null)
                 return new GithubApiSettings(logger);
             deserialized.SetLogger(logger);
@@ -118,7 +120,7 @@ public record GithubApiSettings : IGithubApiSettings
 
     public void SaveChanges()
     {
-        var jsonData = JsonSerializer.Serialize(this);
+        var jsonData = JsonSerializer.Serialize(this, GithubApiSettingsContext.Default.GithubApiSettings);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
             _logger?.LogError("Failed to save changes to the Github Api settings file.");

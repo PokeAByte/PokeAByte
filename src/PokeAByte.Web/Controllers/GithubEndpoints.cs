@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Infrastructure.Github;
 
+namespace PokeAByte.Web;
+
 public static class GithubEndpoints
 {
     public static void MapGithubEndpoints(this WebApplication app)

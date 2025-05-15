@@ -3,6 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace PokeAByte.Domain.Interfaces;
 
+[JsonSerializable(typeof(byte))]
+public partial class ConverterCOntext : JsonSerializerContext;
+
 public class ByteArrayJsonConverter : JsonConverter<byte[]>
 {
     public override byte[] Read(
@@ -18,7 +21,7 @@ public class ByteArrayJsonConverter : JsonConverter<byte[]>
 
         while (reader.TokenType != JsonTokenType.EndArray)
         {
-            elements.Add(JsonSerializer.Deserialize<byte>(ref reader, options)!);
+            elements.Add(JsonSerializer.Deserialize(ref reader, ConverterCOntext.Default.Byte)!);
 
             reader.Read();
         }
@@ -32,7 +35,7 @@ public class ByteArrayJsonConverter : JsonConverter<byte[]>
 
         foreach (byte item in value)
         {
-            JsonSerializer.Serialize(writer, item, options);
+            JsonSerializer.Serialize(writer, item, ConverterCOntext.Default.Byte);
         }
 
         writer.WriteEndArray();

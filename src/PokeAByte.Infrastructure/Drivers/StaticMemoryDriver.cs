@@ -1,10 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers
 {
+    [JsonSerializable(typeof(Dictionary<uint, byte[]>))]
+    public partial class StaticMemoryDriverContext : JsonSerializerContext;
+
     public class StaticMemoryDriver : IStaticMemoryDriver
     {
         public string ProperName => "StaticMemory";
@@ -48,7 +52,8 @@ namespace PokeAByte.Infrastructure.Drivers
             if (File.Exists(path) == false) throw new Exception($"Unable to load memory container file '{filename}'.");
 
             var contents = await File.ReadAllTextAsync(path);
-            MemoryFragmentLayout = JsonSerializer.Deserialize<Dictionary<uint, byte[]>>(contents) ?? throw new Exception("Cannot deserialize memory fragment layout.");
+            MemoryFragmentLayout = JsonSerializer.Deserialize(contents, StaticMemoryDriverContext.Default.DictionaryUInt32ByteArray)
+                ?? throw new Exception("Cannot deserialize memory fragment layout.");
         }
 
         public ValueTask ReadBytes(BlockData[] transferBlocks)

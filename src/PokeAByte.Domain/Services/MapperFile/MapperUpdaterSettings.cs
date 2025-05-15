@@ -4,6 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace PokeAByte.Domain.Services.MapperFile;
 
+[JsonSerializable(typeof(bool))]
+[JsonSerializable(typeof(DateTimeOffset))]
+[JsonSerializable(typeof(MapperUpdaterSettings))]
+public partial class MapperUpdaterSettingsContext : JsonSerializerContext
+{
+}
+
 public class MapperUpdaterSettings
 {
     [JsonPropertyName("always_ignore_updates")]
@@ -15,12 +22,15 @@ public class MapperUpdaterSettings
     [JsonPropertyName("requires_update")]
     public bool RequiresUpdate { get; set; } = false;
 
-    private static string? ReadFileIfExists(string path) {
-        if (!File.Exists(path)) {
+    private static string? ReadFileIfExists(string path)
+    {
+        if (!File.Exists(path))
+        {
             return null;
         }
         string result = File.ReadAllText(path);
-        if (string.IsNullOrEmpty(result)) {
+        if (string.IsNullOrEmpty(result))
+        {
             return null;
         }
         return result;
@@ -30,15 +40,17 @@ public class MapperUpdaterSettings
     {
         var settingsJson = ReadFileIfExists(MapperPaths.MapperUpdateSettingsFile);
         MapperUpdaterSettings? result = null;
-        if (settingsJson != null) {
+        if (settingsJson != null)
+        {
             try
             {
                 // Deserialize the data 
-                result = JsonSerializer.Deserialize<MapperUpdaterSettings?>(settingsJson);       
+                result = JsonSerializer.Deserialize(settingsJson, MapperUpdaterSettingsContext.Default.MapperUpdaterSettings);
             }
             catch (Exception) { }
         }
-        if (result == null) {
+        if (result == null)
+        {
             logger.LogWarning($"Failed to read {MapperPaths.MapperUpdateSettingsFile}. Creating a new one. ");
             result = new MapperUpdaterSettings();
             result.SaveChanges(logger);
@@ -48,7 +60,7 @@ public class MapperUpdaterSettings
 
     public void SaveChanges(ILogger logger)
     {
-        var jsonData = JsonSerializer.Serialize(this);
+        var jsonData = JsonSerializer.Serialize(this, MapperUpdaterSettingsContext.Default.MapperUpdaterSettings);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
             logger.LogError("Failed to save changes to the mapper settings file.");

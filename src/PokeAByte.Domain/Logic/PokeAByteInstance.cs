@@ -25,7 +25,6 @@ public class PokeAByteInstance : IPokeAByteInstance
     private bool HasPreprocessor { get; set; }
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPostprocessor { get; set; }
-
     public event InstanceProcessingAbort? OnProcessingAbort;
     public IClientNotifier ClientNotifier { get; }
     public IPokeAByteDriver Driver { get; private set; }
@@ -79,6 +78,12 @@ public class PokeAByteInstance : IPokeAByteInstance
         InitializeJSEngine(mapperContent);
     }
 
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(IPokeAByteMapper))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(IMemoryNamespace))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(IByteArray))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(IPokeAByteProperty))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PokeAByteProperty))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Dynamic.ExpandoObject))]
     [MemberNotNull(nameof(JavascriptEngine))]
     private void InitializeJSEngine(MapperContent mapperContent)
     {
@@ -207,7 +212,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         var propertiesChanged = this.Mapper.Properties.Values
             .Where(x => x.FieldsChanged.Count > 0)
             .ToArray();
-        if (propertiesChanged.Length > 0) {
+        if (propertiesChanged.Length > 0)
+        {
             try
             {
                 await ClientNotifier.SendPropertiesChanged(propertiesChanged);
