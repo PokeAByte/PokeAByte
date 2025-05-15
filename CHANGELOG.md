@@ -12,6 +12,8 @@
 	* `UnfreezeProperty()` 
 	* `WriteValue()` 
 	* `WriteBytes()` 
+* In case of error, the REST APIs may return slightly different response bodies.
+* In some cases a 400 (Bad Request) is now a 500 (Internal Server Error).
 
 ## Features
 

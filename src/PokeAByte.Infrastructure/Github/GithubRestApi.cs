@@ -86,8 +86,7 @@ public class GithubRestApi : IGithubRestApi
 
         if (path is null && isFile is false)
         {
-            _logger.LogInformation($"The path for sending a GET request is null, " +
-                                    $"defaulting to {_apiSettings.GetDirectory()}.");
+            _logger.LogInformation($"The path for sending a GET request is null, defaulting to {_apiSettings.GetDirectory()}.");
             path = _apiSettings.GetDirectory();
         }
         else if (path is null && isFile)
@@ -114,7 +113,6 @@ public class GithubRestApi : IGithubRestApi
         {
             clientRequest.Headers.Add("Authorization", _apiSettings.GetFormattedToken());
         }
-        //UpdateRequestHeaders(clientRequest.Headers);
         using var client = new HttpClient();
         return await client.SendAsync(clientRequest);
     }

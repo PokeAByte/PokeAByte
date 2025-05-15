@@ -1,7 +1,4 @@
 ﻿using System.Reflection;
-using System.Text.Json.Serialization;
-using Hellang.Middleware.ProblemDetails;
-using Hellang.Middleware.ProblemDetails.Mvc;
 using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 using PokeAByte.Domain.Interfaces;
@@ -12,6 +9,7 @@ using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
+using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
@@ -23,24 +21,10 @@ public static class Startup
     public static void ConfigureServices(this IServiceCollection services)
     {
         //Inherited services from GameHook
-        services.AddHttpClient();
         services.AddCors();
         // Add Web API
-        services
-            .AddControllers()
-            .AddProblemDetailsConventions()
-            .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
         services.AddSignalR();
-
-        services.AddProblemDetails((options) =>
-        {
-            options.ShouldLogUnhandledException = (ctx, e, d) => true;
-            options.IncludeExceptionDetails = (ctx, ex) =>
-            {
-                return BuildEnvironment.IsDebug;
-            };
-        });
         services.AddSingleton<AppSettings>();
 
         services.AddSingleton<ScriptConsole>();
@@ -72,10 +56,6 @@ public static class Startup
     {
         Directory.CreateDirectory(BuildEnvironment.ConfigurationDirectory);
         // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Error");
-        }
         app.UseCors(x =>
         {
             x.SetIsOriginAllowed(x => true);
@@ -83,16 +63,9 @@ public static class Startup
             x.AllowAnyHeader();
             x.AllowCredentials();
         });
-        app.UseProblemDetails();
-        app.UseRouting();
-        app.UseStaticFiles();
-
+        
         var provider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
-        app.UseSpaStaticFiles(new StaticFileOptions
-        {
-            FileProvider = provider,
-            RequestPath = "",
-        });
+        app.UseSpaStaticFiles(new() { FileProvider = provider });
         app.UseSpa(configuration =>
         {
             configuration.Options.DefaultPageStaticFileOptions = new StaticFileOptions(new SharedOptions
@@ -102,15 +75,33 @@ public static class Startup
             configuration.Options.DefaultPage = "/index.html";
         });
 
-
-        if (!BuildEnvironment.IsDebug)
+        app.Use(async (context, next) =>
         {
-            app.MapGet("/favicon.ico", () => Results.File(ApiHelper.EmbededResources.favicon_ico, contentType: "image/x-icon"));
-            app.MapGet("/site.css", () => Results.File(ApiHelper.EmbededResources.site_css, contentType: "text/css"));
-            app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.dist_gameHookMapperClient_js, contentType: "application/javascript"));
-        }
+            try
+            {
+                await next();
+            }
+            catch (Exception ex)
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<RestAPI>>();
+                string endpointName = "";
+                var requestDelegate = context.GetEndpoint()?.RequestDelegate;
+                if (requestDelegate?.Method != null) {
+                    endpointName = (requestDelegate.Method.DeclaringType?.Name ?? "<anonymous>") + "."
+                        + requestDelegate.Method.Name;
+                }
+                logger.LogWarning($"Endpoint {context.GetEndpoint()?.DisplayName} encountered an exception: {ex}");
+                await Results.InternalServerError("Request failed due to an exception: " + ex.Message).ExecuteAsync(context);
+            }
+        });
+        app.MapFilesEndpoints();
+        app.MapGithubEndpoints();
+        app.MapDriverEndpoints();
+        app.MapMapperEndpoints();
+        app.MapMapperServiceEndpoints();
 
-        app.MapControllers();
+        app.MapGet("/favicon.png", () => Results.File(ApiHelper.EmbededResources.Favicon, contentType: "image/png"));
+        app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.ClientScript, contentType: "application/javascript"));
         app.MapHub<UpdateHub>("/updates");
     }
 }

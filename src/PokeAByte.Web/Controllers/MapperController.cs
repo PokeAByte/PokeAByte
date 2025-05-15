@@ -21,83 +21,77 @@ static class MapperHelper
         {
             dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel(x.Key, x.Value));
         }
-
         return dictionary;
     }
 }
 
-[ApiController]
-[Produces("application/json")]
-[Consumes("application/json")]
-[Route("mapper")]
-public class MapperController : ControllerBase
+public static class MapperEndpoints
 {
-    private readonly IDriverService _driverService;
-    private readonly AppSettings _appSettings;
-    private readonly MapperFileService _mapperFileService;
-    private readonly IInstanceService _instanceService;
-
-    public MapperController(
-        AppSettings appSettings,
-        IDriverService driverService,
-        MapperFileService mapperFileService,
-        IInstanceService instanceService)
+    public static void MapMapperEndpoints(this WebApplication app)
     {
-        _driverService = driverService;
-        _appSettings = appSettings;
-        _mapperFileService = mapperFileService;
-        _instanceService = instanceService;
+        app.MapGet("/mapper", GetMapper);
+        app.MapPut("/mapper", PutMapper);
+        app.MapGet("/mapper/meta", GetMeta);
+        app.MapGet("/mapper/properties", GetProperties);
+        app.MapGet("/mapper/properties/{**path}/", GetProperty);
+        app.MapGet("/mapper/glossary",GetGlossary);
+        app.MapGet("/mapper/glossary/{key}",GetGlossaryPage);
+        app.MapGet("/mapper/values/{**path}/", GetValueAsync);
+        app.MapPost("/mapper/set-property-frozen", FreezePropertyAsync);
+        app.MapPost("/mapper/set-property-bytes", UpdatePropertyBytesAsync);
+        app.MapPost("/mapper/set-properties-by-bits", UpdatePropertyByBitsAsync);
+        app.MapPost("/mapper/set-property-value", UpdatePropertyValueAsync);
     }
-
-    [HttpGet]
-    public ActionResult<MapperModel> GetMapper()
+    
+    public static IResult GetMapper(IInstanceService instanceService, AppSettings appSettings)
     {
-        if (_instanceService.Instance == null)
-            return ApiHelper.MapperNotLoaded();
+        if (instanceService.Instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var model = new MapperModel()
         {
             Meta = new MapperMetaModel()
             {
-                Id = _instanceService.Instance.Mapper.Metadata.Id,
-                GameName = _instanceService.Instance.Mapper.Metadata.GameName,
-                GamePlatform = _instanceService.Instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = _appSettings.MAPPER_VERSION
+                Id = instanceService.Instance.Mapper.Metadata.Id,
+                GameName = instanceService.Instance.Mapper.Metadata.GameName,
+                GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
+                MapperReleaseVersion = appSettings.MAPPER_VERSION
             },
-            Properties = _instanceService.Instance.Mapper.Properties.Values,
-            Glossary = _instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
+            Properties = instanceService.Instance.Mapper.Properties.Values,
+            Glossary = instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
         };
-
-        return Ok(model);
+        return TypedResults.Ok(model);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> ChangeMapper(MapperReplaceModel model)
+    public static async Task<IResult> PutMapper(
+        MapperFileService mapperFileService,
+        IDriverService driverService,
+        IInstanceService instanceService,
+        [FromBody] MapperReplaceModel model)
     {
-        var mapperContent = await _mapperFileService.LoadContentAsync(model.Id);
+        var mapperContent = await mapperFileService.LoadContentAsync(model.Id);
         switch (model.Driver)
         {
             case DriverModels.Bizhawk:
-                await _instanceService.LoadMapper(mapperContent, await _driverService.GetBizhawkDriver());
+                await instanceService.LoadMapper(mapperContent, await driverService.GetBizhawkDriver());
                 break;
             case DriverModels.RetroArch:
-                await _instanceService.LoadMapper(mapperContent, await _driverService.GetRetroArchDriver());
+                await instanceService.LoadMapper(mapperContent, await driverService.GetRetroArchDriver());
                 break;
             case DriverModels.StaticMemory:
-                await _instanceService.LoadMapper(mapperContent, _driverService.StaticMemory);
+                await instanceService.LoadMapper(mapperContent, driverService.StaticMemory);
                 break;
             default:
-                return ApiHelper.BadRequestResult("A valid driver was not supplied.");
+                return TypedResults.BadRequest("A valid driver was not supplied.");
         }
-        return Ok();
+        return TypedResults.Ok();
     }
 
-    [HttpGet("meta")]
-    public ActionResult<MapperMetaModel> GetMeta()
+    public static IResult GetMeta(IInstanceService instanceService, AppSettings appSettings)
     {
-        var instance = _instanceService.Instance;
+        var instance = instanceService.Instance;
         if (instance == null)
-            return ApiHelper.MapperNotLoaded();
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var meta = instance.Mapper.Metadata;
         var model = new MapperMetaModel
@@ -105,103 +99,151 @@ public class MapperController : ControllerBase
             Id = meta.Id,
             GameName = meta.GameName,
             GamePlatform = meta.GamePlatform,
-            MapperReleaseVersion = _appSettings.MAPPER_VERSION
+            MapperReleaseVersion = appSettings.MAPPER_VERSION
         };
-
-        return Ok(model);
+        return TypedResults.Ok(model);
     }
 
-    [HttpGet("values/{**path}/")]
-    [Produces("text/plain")]
-    public ActionResult GetValueAsync(string path)
+    public static IResult GetProperties(IInstanceService instanceService)
     {
-        var instance = _instanceService.Instance;
+        var instance = instanceService.Instance;
         if (instance == null)
-            return ApiHelper.MapperNotLoaded();
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
-        path = path.StripEndingRoute().FromRouteToPath();
+        return TypedResults.Ok(instance.Mapper.Properties.Values);
+    }
+    
+    public static IResult GetProperty(IInstanceService instanceService, [FromRoute] string path)
+    {
+        var instance = instanceService.Instance;
+        if (instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+        path = path.StripEndingRoute();
 
         var prop = instance.Mapper.Properties[path];
-
         if (prop == null)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
+        return TypedResults.Ok(prop);
+    }
 
+    public static IResult GetValueAsync(IInstanceService instanceService, string path)
+    {
+        var instance = instanceService.Instance;
+        if (instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+
+        path = path.StripEndingRoute();
+        var prop = instance.Mapper.Properties[path];
+        if (prop == null)
+        {
+            return TypedResults.NotFound();
+        }
         if (prop.Value != null && prop.Value is string == false && prop.Value is int == false)
         {
-            return BadRequest($"{prop.Path} is an object and cannot be converted to text.");
+            return TypedResults.BadRequest($"{prop.Path} is an object and cannot be converted to text.");
         }
-
-        return Ok(prop.Value?.ToString() ?? string.Empty);
+        return Results.Text(prop.Value?.ToString() ?? string.Empty);
     }
 
-    [HttpGet("properties")]
-    public ActionResult<IEnumerable<IPokeAByteProperty>> GetProperties()
+    public static async Task<IResult> FreezePropertyAsync(
+        IInstanceService instanceService, 
+        [FromBody] UpdatePropertyFreezeModel model)
     {
-        var instance = _instanceService.Instance;
+        var instance = instanceService.Instance;
         if (instance == null)
-            return ApiHelper.MapperNotLoaded();
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
-        return Ok(instance.Mapper.Properties.Values);
-    }
-
-    [HttpGet("properties/{**path}/")]
-    public ActionResult<IPokeAByteProperty?> GetProperty(string path)
-    {
-        var instance = _instanceService.Instance;
-        if (instance == null)
-            return ApiHelper.MapperNotLoaded();
-        path = path.StripEndingRoute().FromRouteToPath();
+        var path = model.Path.StripEndingRoute();
 
         var prop = instance.Mapper.Properties[path];
 
         if (prop == null)
         {
-            return NotFound();
-        }
-
-        return Ok(prop);
-    }
-
-    [HttpPost("set-property-value")]
-    public async Task<ActionResult> UpdatePropertyValueAsync(UpdatePropertyValueModel model)
-    {
-        var instance = _instanceService.Instance;
-        if (instance == null)
-            return ApiHelper.MapperNotLoaded();
-
-        var path = model.Path.StripEndingRoute().FromRouteToPath();
-
-        var prop = instance.Mapper.Properties[path];
-
-        if (prop == null)
-        {
-            return NotFound();
+            return TypedResults.NotFound();
         }
 
         if (prop.IsReadOnly)
         {
-            return ApiHelper.BadRequestResult("Property is read only.");
+            return TypedResults.BadRequest("Property is read only.");
+        }
+
+        if (model.Freeze)
+        {
+            await instance.FreezeProperty(prop, prop.Bytes ?? Array.Empty<byte>());
+        }
+        else
+        {
+            await instance.UnfreezeProperty(prop);
+        }
+        return TypedResults.Ok();
+    }
+
+    public static IResult GetGlossary(IInstanceService instanceService)
+    {
+        var instance = instanceService.Instance;
+        if (instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+
+        return TypedResults.Ok(instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel());
+    }
+
+    public static IResult GetGlossaryPage(IInstanceService instanceService, [FromRoute] string key)
+    {
+        var instance = instanceService.Instance;
+        if (instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+
+        key = key.StripEndingRoute();
+
+        var glossaryItem = instance.Mapper.References[key];
+        if (glossaryItem == null)
+        {
+            return TypedResults.NotFound();
+        }
+        else
+        {
+            return TypedResults.Ok(glossaryItem.Values.Select(x => new GlossaryItemModel(x.Key, x.Value)));
+        }
+    }
+
+    public static async Task<IResult> UpdatePropertyValueAsync(IInstanceService instanceService, [FromBody] UpdatePropertyValueModel model)
+    {
+        var instance = instanceService.Instance;
+        if (instance == null)
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+
+        var path = model.Path.StripEndingRoute();
+
+        var prop = instance.Mapper.Properties[path];
+
+        if (prop == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        if (prop.IsReadOnly)
+        {
+            return TypedResults.BadRequest("Property is read only.");
         }
 
         await instance.WriteValue(prop, model.Value?.ToString() ?? string.Empty, model.Freeze);
 
-        return Ok();
+        return TypedResults.Ok();
     }
 
-    [HttpPost("set-properties-by-bits")]
-    public async Task<ActionResult> UpdatePropertyByBitsAsync(List<UpdatePropertyValueModel> model)
+    public static async Task<IResult> UpdatePropertyByBitsAsync(IInstanceService instanceService, List<UpdatePropertyValueModel> model)
     {
-        var instance = _instanceService.Instance;
+        var instance = instanceService.Instance;
         if (instance == null)
-            return ApiHelper.MapperNotLoaded();
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         if (model.Count == 0)
-            return ApiHelper.BadRequestResult("Properties count is zero.");
+            return TypedResults.BadRequest("Properties count is zero.");
         //Make sure all values exist
         if (model.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
-            return ApiHelper.BadRequestResult("Values cannot be null.");
+            return TypedResults.BadRequest("Values cannot be null.");
         //Convert BitProperty to GameHookBitProperty
         var gameHookProperties = model
             .Select(x =>
@@ -218,12 +260,12 @@ public class MapperController : ControllerBase
         var baseType = gameHookProperties.First().Key.Type;
         var baseLength = gameHookProperties.First().Key.Length;
         if (baseAddress is null || baseLength is null)
-            return ApiHelper.BadRequestResult("Address or length for property is null.");
+            return TypedResults.BadRequest("Address or length for property is null.");
         if (gameHookProperties.Any(x =>
                     x.Key.Address != baseAddress.Value ||
                     x.Key.Type != baseType ||
                     x.Key.Length != baseLength))
-            return ApiHelper.BadRequestResult("Addresses or types for the properties are not the same.");
+            return TypedResults.BadRequest("Addresses or types for the properties are not the same.");
 
         try
         {
@@ -237,18 +279,16 @@ public class MapperController : ControllerBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            return ApiHelper.BadRequestResult(e.ToString());
+            return TypedResults.BadRequest(e.ToString());
         }
-        return Ok();
+        return TypedResults.Ok();
     }
 
-    [HttpPost("set-property-bytes")]
-    public async Task<ActionResult> UpdatePropertyBytesAsync(UpdatePropertyBytesModel model)
+    public static async Task<IResult> UpdatePropertyBytesAsync(IInstanceService instanceService, [FromBody]UpdatePropertyBytesModel model)
     {
-        var instance = _instanceService.Instance;
+        var instance = instanceService.Instance;
         if (instance == null)
-            return ApiHelper.MapperNotLoaded();
+            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var path = model.Path.StripEndingRoute().FromRouteToPath();
         var actualBytes = Array.ConvertAll(model.Bytes, x => (byte)x);
@@ -257,79 +297,16 @@ public class MapperController : ControllerBase
 
         if (prop == null)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
 
         if (prop.IsReadOnly)
         {
-            return ApiHelper.BadRequestResult("Property is read only.");
+            return TypedResults.BadRequest("Property is read only.");
         }
 
         await instance.WriteBytes(prop, actualBytes, model.Freeze);
 
-        return Ok();
-    }
-
-    [HttpPost("set-property-frozen")]
-    public async Task<ActionResult> FreezePropertyAsync(UpdatePropertyFreezeModel model)
-    {
-        var instance = _instanceService.Instance;
-        if (instance == null)
-            return ApiHelper.MapperNotLoaded();
-
-        var path = model.Path.StripEndingRoute().FromRouteToPath();
-
-        var prop = instance.Mapper.Properties[path];
-
-        if (prop == null)
-        {
-            return NotFound();
-        }
-
-        if (prop.IsReadOnly)
-        {
-            return ApiHelper.BadRequestResult("Property is read only.");
-        }
-
-        if (model.Freeze)
-        {
-            await instance.FreezeProperty(prop, prop.Bytes ?? Array.Empty<byte>());
-        }
-        else
-        {
-            await instance.UnfreezeProperty(prop);
-        }
-
-        return Ok();
-    }
-
-    [HttpGet("glossary")]
-    public ActionResult<Dictionary<string, Dictionary<string, GlossaryItemModel>>> GetGlossary()
-    {
-        var instance = _instanceService.Instance;
-        if (instance == null)
-            return ApiHelper.MapperNotLoaded();
-
-        return Ok(instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel());
-    }
-
-    [HttpGet("glossary/{key}")]
-    public ActionResult<IEnumerable<GlossaryItemModel>> GetGlossaryPage(string key)
-    {
-        var instance = _instanceService.Instance;
-        if (instance == null)
-            return ApiHelper.MapperNotLoaded();
-
-        key = key.StripEndingRoute();
-
-        var glossaryItem = instance.Mapper.References[key];
-        if (glossaryItem == null)
-        {
-            return NotFound();
-        }
-        else
-        {
-            return Ok(glossaryItem.Values.Select(x => new GlossaryItemModel(x.Key, x.Value)));
-        }
+        return TypedResults.Ok();
     }
 }

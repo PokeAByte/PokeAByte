@@ -3,14 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PokeAByte.Web;
 
-
 public static class ApiHelper
 {
     public static class EmbededResources
     {
-        public static Stream favicon_ico => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.favicon.ico");
-        public static Stream site_css => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.site.css");
-        public static Stream dist_gameHookMapperClient_js => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");
+        public static Stream Favicon => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.favicon.png");
+        public static Stream ClientScript => GetEmbeddedResourceStream("PokeAByte.Web.wwwroot.dist.gameHookMapperClient.js");
     }
 
     /// <summary>
@@ -41,35 +39,11 @@ public static class ApiHelper
         return route;
     }
 
-    public static ObjectResult BadRequestResult(string detail)
-    {
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "BAD_REQUEST",
-            Detail = detail
-        };
-
-        return new ObjectResult(problemDetails)
-        {
-            ContentTypes = { "application/problem+json" },
-            StatusCode = 400,
-        };
-    }
-
-    public static ObjectResult MapperNotLoaded()
-    {
-        var problemDetails = new ProblemDetails
+    public static ProblemDetails MapperNotLoadedProblem() => 
+        new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
             Title = "MAPPER_NOT_LOADED",
             Detail = "Please load a mapper file first."
         };
-
-        return new ObjectResult(problemDetails)
-        {
-            ContentTypes = { "application/problem+json" },
-            StatusCode = 400,
-        };
-    }
 }

@@ -6,12 +6,11 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>EDPS.Bizhawk</AssemblyName>
 		<RootNamespace>PokeAByte.Protocol.BizHawk</RootNamespace>
-		<DeterministicSourcePaths>true</DeterministicSourcePaths>
 	</PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
-	</PropertyGroup>
+    </PropertyGroup>
 	<PropertyGroup Condition=" '$(BIZHAWK_DLLS)' == '' ">
 		<BIZHAWK_HOME>$(ProjectDir)/third-party/dll</BIZHAWK_HOME><!-- if building EmuHawk from source, point to e.g. `$(ProjectDir)../BizHawk/output/` -->
 	</PropertyGroup>

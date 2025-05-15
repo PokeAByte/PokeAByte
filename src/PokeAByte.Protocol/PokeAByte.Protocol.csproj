@@ -5,7 +5,10 @@
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
 		<RootNamespace>PokeAByte.Protocol</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
-	</PropertyGroup>
+    </PropertyGroup>
 </Project>
