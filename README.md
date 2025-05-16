@@ -7,6 +7,10 @@ of populator video game systems. This information is made available
 in an easy-to-use JSON format that is human-readable. \
 Live updates to this data are provided through websockets.
 
+### How to use
+
+[Brief overview available here](./docs/HowTo.md).
+
 ### Troubleshooting
 
 See the [troubleshooting guide](./docs/Troubleshooting.md).
