@@ -26,7 +26,8 @@ public static class Startup
 
         services.AddSignalR()
             .AddJsonProtocol(
-                (options) => {
+                (options) =>
+                {
                     options.PayloadSerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
                 }
             );
@@ -35,9 +36,7 @@ public static class Startup
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
         });
 
-
         services.AddSingleton<AppSettings>();
-
         services.AddSingleton<ScriptConsole>();
         services.AddSingleton<MapperFileService>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();

@@ -13,7 +13,6 @@
 		<SelfContained>true</SelfContained>
 		<PublishTrimmed>true</PublishTrimmed>
 		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-		<DeterministicSourcePaths>true</DeterministicSourcePaths>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -21,7 +20,7 @@
 		<DebugType>None</DebugType>
     </PropertyGroup>
 
-	<Target Name="NpmInstall" Inputs="package.json" Outputs="../Frontend/node_modules/.install-stamp">
+	<Target Name="NpmInstall"  Outputs="../Frontend/node_modules/.install-stamp">
 		<Exec Command="npm ci" Condition="'$(RestorePackagesWithLockFile)' == 'true'" WorkingDirectory="../Frontend" />
 		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != 'true'" WorkingDirectory="../Frontend" />
 		<!-- Write the stamp file, so incremental builds work -->

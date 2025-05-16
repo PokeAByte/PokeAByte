@@ -101,7 +101,7 @@ public class EmulatorProtocolServer : IDisposable
         }
     }
 
-    internal void Start()
+    public void Start()
     {
         _thread = new Thread(Receive);
         _thread.Start();

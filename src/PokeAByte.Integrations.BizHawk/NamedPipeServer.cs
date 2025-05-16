@@ -39,22 +39,15 @@ public class NamedPipeServer : IDisposable
             Console.WriteLine("Reading 255 bytes of client data...");
             var buffer = new byte[255];
             var dataList = new List<byte>();
-            var count = _pipeServer
-                .Read(buffer,
-                    0,
-                    255);
+            var count = _pipeServer.Read(buffer, 0, 255);
             dataList.AddRange(buffer.Take(count));
             while (count == 255)
             {
                 Console.WriteLine("Reading 255 more bytes of client data...");
-                count = _pipeServer
-                    .Read(buffer,
-                        0,
-                        255);
+                count = _pipeServer.Read(buffer, 0, 255);
                 dataList.AddRange(buffer.Take(count));
             }
-            Console.WriteLine(
-                $"Finished reading client data... Length: {dataList.Count}");
+            Console.WriteLine($"Finished reading client data... Length: {dataList.Count}");
             ClientDataHandler?.Invoke(MemoryContract.Deserialize(dataList.ToArray()));
             Console.WriteLine("Invoked delegate complete, closing server");
             _pipeServer.Close();
@@ -67,9 +60,7 @@ public class NamedPipeServer : IDisposable
                 PipeOptions.Asynchronous
             );
             Console.WriteLine("Pipe server created, waiting for connections...");
-            _pipeServer.BeginWaitForConnection(
-                WaitForConnectionCallback,
-                _pipeServer);
+            _pipeServer.BeginWaitForConnection(WaitForConnectionCallback, _pipeServer);
         }
         catch (Exception e)
         {
