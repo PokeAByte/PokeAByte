@@ -45,6 +45,7 @@ public class AppSettings
         }
 
         LOG_HTTP_TRAFFIC = bool.Parse(configuration.GetRequiredValue("LOG_HTTP_TRAFFIC"));
+        GITHUB_TOKEN = configuration["LOG_HTTP_TRAFFIC"] ?? "";
 
         var processPath = Path.GetDirectoryName(Environment.ProcessPath) ??
                           throw new Exception("Unable to determine process path.");
@@ -70,6 +71,7 @@ public class AppSettings
     public bool MAPPER_DIRECTORY_OVERWRITTEN { get; } = false;
 
     public string? MAPPER_LOCAL_DIRECTORY { get; }
+    public string GITHUB_TOKEN { get; }
 
     public bool LOG_HTTP_TRAFFIC { get; }
 }

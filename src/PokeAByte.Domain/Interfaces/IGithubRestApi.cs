@@ -2,14 +2,11 @@
 
 namespace PokeAByte.Domain.Interfaces;
 
-public interface IGithubRestApi
+public interface IGithubService
 {
-    public Task DownloadMapperFiles(
-        List<MapperDto> mapperDtos,
-        Func<List<UpdateMapperDto>, Task> postDownloadAction
-    );
-
-    public Task<HttpContent?> GetMapperTreeFile();
-    public Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false);
-    public Task<string> TestSettings();
+    Task<List<UpdateMapperDto>> DownloadMappersAsync(List<MapperDto> mapperDtos);
+    Task<bool> TestSettings();
+    Task<HttpContent?> GetMapperTreeFile();
+    void ApplySettings(IGithubSettings settings);
+    public IGithubSettings Settings { get; }
 }

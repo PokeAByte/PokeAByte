@@ -45,18 +45,11 @@ public static class Startup
         services.AddSingleton<IInstanceService, InstanceService>();
         services.AddSingleton<IDriverService, DriverService>();
 
-        services.AddScoped<IGithubRestApi, GithubRestApi>();
+        services.AddScoped<IGithubService, GitHubService>();
         services.AddScoped(x =>
         {
             var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
             return MapperUpdaterSettings.Load(logger);
-        });
-        services.AddScoped<IGithubApiSettings>(x =>
-        {
-            var logger = x.GetRequiredService<ILogger<GithubApiSettings>>();
-            var config = x.GetRequiredService<IConfiguration>();
-            var token = config["GITHUB_TOKEN"];
-            return GithubApiSettings.Load(logger, token);
         });
         services.AddScoped<IMapperUpdateManager, MapperUpdateManager>();
         services.AddScoped<MapperClientService>();

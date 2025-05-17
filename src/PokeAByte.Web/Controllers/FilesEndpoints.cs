@@ -5,6 +5,7 @@ using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
+using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web;
@@ -85,7 +86,7 @@ public static class FilesEndpoints
 
     public static async Task<IResult> DownloadMapperUpdatesAsync(
         IMapperUpdateManager updateManager,
-        IGithubRestApi githubRest,
+        IGithubService githubService,
         IMapperFileService mapperFileService,
         [FromBody] IEnumerable<MapperComparisonDto> mappers)
     {
@@ -94,7 +95,8 @@ public static class FilesEndpoints
                 (m.CurrentVersion ?? throw new InvalidOperationException("Current Version and Latest version are both null."))
             )
             .ToList();
-        await githubRest.DownloadMapperFiles(mapperDownloads, updateManager.SaveUpdatedMappersAsync);
+        var downloadedMappers = await githubService.DownloadMappersAsync(mapperDownloads);
+        await updateManager.SaveUpdatedMappersAsync(downloadedMappers);
         mapperFileService.Refresh();
         return TypedResults.Ok();
     }

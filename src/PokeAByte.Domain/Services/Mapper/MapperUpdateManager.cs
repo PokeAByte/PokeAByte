@@ -21,19 +21,19 @@ public class MapperUpdateManager : IMapperUpdateManager
     private readonly AppSettings _appSettings;
     private readonly IMapperFileService _mapperFileService;
     private readonly MapperUpdaterSettings _mapperUpdaterSettings;
-    private readonly IGithubRestApi _githubRestApi;
+    private readonly IGithubService _githubService;
 
     public MapperUpdateManager(ILogger<MapperUpdateManager> logger,
         AppSettings appSettings,
         MapperUpdaterSettings mapperUpdaterSettingsManager,
         IMapperFileService mapperFileService,
-        IGithubRestApi githubRestApi)
+        IGithubService githubService)
     {
         _logger = logger;
         _appSettings = appSettings;
-        _mapperFileService = mapperFileService;
         _mapperUpdaterSettings = mapperUpdaterSettingsManager;
-        _githubRestApi = githubRestApi;
+        _mapperFileService = mapperFileService;
+        _githubService = githubService;
 
         if (Directory.Exists(BuildEnvironment.ConfigurationDirectory) == false)
         {
@@ -47,7 +47,7 @@ public class MapperUpdateManager : IMapperUpdateManager
     private async Task<List<MapperComparisonDto>> GetOutdatedMapperList()
     {
         //Get the latest version of the mapper tree from github
-        var mapperListResponse = await _githubRestApi.GetMapperTreeFile();
+        var mapperListResponse = await _githubService.GetMapperTreeFile();
         if (mapperListResponse is null)
         {
             _logger.LogError("Failed to download the latest version of the mapper tree json from Github.");
