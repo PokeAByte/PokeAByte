@@ -8,7 +8,7 @@ namespace PokeAByte.Web;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         Environment.SetEnvironmentVariable("SERILOG_LOG_FILE_PATH", BuildEnvironment.LogFilePath);
         Log.Logger = new LoggerConfiguration()
@@ -36,8 +36,9 @@ public class Program
 
             LogVersion(app);
             app.ConfigureApp();
+            var runTask = app.RunAsync();
             Process.Start(new ProcessStartInfo("http://localhost:8085/ui/mappers") { UseShellExecute = true });
-            app.Run();
+            await runTask;
         }
         catch (Exception ex)
         {
