@@ -27,7 +27,8 @@ public class PokeAProtocolDriver : IPokeAByteDriver
         return Task.CompletedTask;
     }
 
-    public Task Disconnect() {
+    public Task Disconnect()
+    {
         _client?.Dispose();
         _client = null;
         return Task.CompletedTask;
@@ -35,35 +36,44 @@ public class PokeAProtocolDriver : IPokeAByteDriver
 
     public async ValueTask ReadBytes(BlockData[] blocks)
     {
-        if (_client == null) {
+        if (_client == null)
+        {
             throw new Exception($"No connection to bizhawk");
         }
-        if (_readBlocks == null) {
+        if (_readBlocks == null)
+        {
             _readBlocks = new ReadBlock[blocks.Length];
             int position = 0;
             int fileSize = 0;
-            for (int i = 0; i < blocks.Length; i++) {
+            for (int i = 0; i < blocks.Length; i++)
+            {
                 _readBlocks[i].GameAddress = blocks[i].Start;
                 _readBlocks[i].Length = blocks[i].Data.Length;
                 _readBlocks[i].Position = (uint)position;
-                if (i > 0) {
+                if (i > 0)
+                {
                     position += _readBlocks[i].Length;
                 }
                 fileSize += _readBlocks[i].Length;
             }
-            try {
-                if (fileSize == 0) {
+            try
+            {
+                if (fileSize == 0)
+                {
                     throw new Exception("asdjad");
                 }
                 await _client.Setup(_readBlocks, fileSize, _frameSkip);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex);
                 return;
             }
         }
-        for(int i = 0; i < blocks.Length; i++) {
+        for (int i = 0; i < blocks.Length; i++)
+        {
             var position = _readBlocks.Where(x => x.GameAddress == blocks[i].Start).First().Position;
-            _client.Read(position,blocks[i]);
+            _client.Read(position, blocks[i]);
         }
     }
 

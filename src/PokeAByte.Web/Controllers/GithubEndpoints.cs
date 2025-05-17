@@ -17,10 +17,11 @@ public static class GithubEndpoints
     public static async Task<IResult> SaveGithubSettingsAsync(
         IMapperUpdateManager updateManager,
         IGithubApiSettings githubApiSettings,
+        IMapperFileService mapperFileService,
         ILogger<RestAPI> logger,
         [FromBody] GithubApiSettings settings)
     {
-        await FilesEndpoints.CheckForUpdatesAsync(updateManager);
+        await FilesEndpoints.CheckForUpdatesAsync(mapperFileService, updateManager);
         githubApiSettings.CopySettings(settings);
         githubApiSettings.SaveChanges();
         return TypedResults.Ok();

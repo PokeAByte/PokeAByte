@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 using PokeAByte.Domain.Interfaces;
@@ -38,7 +39,7 @@ public static class Startup
 
         services.AddSingleton<AppSettings>();
         services.AddSingleton<ScriptConsole>();
-        services.AddSingleton<MapperFileService>();
+        services.AddSingleton<IMapperFileService, MapperFileService>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         services.AddSingleton<IInstanceService, InstanceService>();
@@ -58,7 +59,6 @@ public static class Startup
             return GithubApiSettings.Load(logger, token);
         });
         services.AddScoped<IMapperUpdateManager, MapperUpdateManager>();
-        services.AddScoped<IMapperArchiveManager, MapperArchiveManager>();
         services.AddScoped<MapperClientService>();
     }
 
@@ -73,7 +73,7 @@ public static class Startup
             x.AllowAnyHeader();
             x.AllowCredentials();
         });
-        
+
         var provider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
         app.UseSpaStaticFiles(new() { FileProvider = provider });
         app.UseSpa(configuration =>
@@ -96,7 +96,8 @@ public static class Startup
                 var logger = context.RequestServices.GetRequiredService<ILogger<RestAPI>>();
                 string endpointName = "";
                 var requestDelegate = context.GetEndpoint()?.RequestDelegate;
-                if (requestDelegate?.Method != null) {
+                if (requestDelegate?.Method != null)
+                {
                     endpointName = (requestDelegate.Method.DeclaringType?.Name ?? "<anonymous>") + "."
                         + requestDelegate.Method.Name;
                 }

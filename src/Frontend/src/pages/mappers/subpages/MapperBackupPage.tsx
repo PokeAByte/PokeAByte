@@ -1,31 +1,27 @@
 import { Store } from "../../../utility/propertyStore"
-import React, { useEffect } from "react";
+import { useState, useContext, useEffect } from "preact/hooks";
 import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
-import { archiveMappers } from "../../../utility/fetch";
+import { archiveMappers, backupMappers } from "../../../utility/fetch";
 import { MapperUpdate } from "pokeaclient";
+import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
+import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
+import { Advanced } from "../../../Contexts/Advanced";
 
 export function MapperBackupPage() {
 	const filesClient = Store.client.files;
-	const [availableMappers, setAvailableMappers] = React.useState<MapperUpdate[]>([]);
-	const [selectedMappers, setSelectedMappers] = React.useState<string[]>([]);
-	const loadMappers = useAPI(filesClient.getMapperUpdatesAsync);
-	const archiveMappersApi = useAPI(archiveMappers, loadMappers.call);
-	const backupApi = useAPI(archiveMappers, loadMappers.call);
+	const mapperFileContext = useContext(MapperFilesContext);
+	const [availableMappers, setAvailableMappers] = useState<MapperUpdate[]>([]);
+	const [selectedMappers, setSelectedMappers] = useState<string[]>([]);
+	const archiveMappersApi = useAPI(archiveMappers, mapperFileContext.refresh);
+	const backupApi = useAPI(backupMappers, mapperFileContext.refresh);
 	// Load available mappers:
-	useEffect(
-		() => loadMappers.call(),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[]
-	);
 
 	// Process loaded mappers:
 	useEffect(() => {
-		if (loadMappers.isLoading === false && loadMappers.result) {
-			setAvailableMappers(loadMappers.result?.filter(mapper => !!mapper.currentVersion) ?? []);
-		}
-	}, [loadMappers.isLoading, loadMappers.result])
+		setAvailableMappers(mapperFileContext.updates.filter(mapper => !!mapper.currentVersion) ?? []);
+	}, [mapperFileContext.updates])
 
 	const handleArchiveSelected = () => {
 		const mappers = availableMappers
@@ -48,58 +44,59 @@ export function MapperBackupPage() {
 		backupApi.call(availableMappers.map(x => x.currentVersion));
 	}
 
-	if (loadMappers.isLoading) {
-		return <LoadProgress label="Downloading mapper(s)" />
+	if (mapperFileContext.isLoading) {
+		return <LoadProgress label="Processing mapper(s)" />
 	}
 	return (
 		<article>
 			<span>{selectedMappers.length} / {availableMappers.length} Mappers Selected</span>
 			<div className="margin-top">
-				<button className="border-green margin-right" disabled={!selectedMappers.length} onClick={handleBackupSelected}>
-					BACKUP SELECTED
+				<button className="green margin-right wide-button" disabled={!selectedMappers.length} onClick={handleBackupSelected}>
+					Backup selected
 				</button>
-				<button className="margin-right border-green" disabled={!availableMappers.length} onClick={handleBackupAll}>
-					BACKUP ALL
+				<button className="margin-right green wide-button" disabled={!availableMappers.length} onClick={handleBackupAll}>
+					Backup all
 				</button>
-				<button className="border-purple" onClick={filesClient.openMapperFolder}>
-					OPEN MAPPER FOLDER
-				</button>
+				<Advanced>
+					<OpenMapperFolderButton />
+				</Advanced>
 			</div>
 			<div className="margin-top">
 				<button 
 					role="button"
-					className="border-red margin-right" 
+					className="red margin-right wide-button" 
 					disabled={selectedMappers.length === 0} 
 					onClick={handleArchiveSelected}
 				>
-					ARCHIVE SELECTED
+					Archive selected
 				</button>
 				<button 
-					className="margin-right border-red" 
+					className="margin-right red wide-button" 
 					disabled={availableMappers.length === 0} 
 					onClick={handleArchiveAll}
 				>
-					ARCHIVE ALL
+					Archive all
 				</button>
-				<button 
-					className="border-blue" 
-					onClick={filesClient.openMapperArchiveFolder}
-				>
-					OPEN ARCHIVE FOLDER
-				</button>
+				<Advanced>
+					<button 
+						className="purple wide-button" 
+						onClick={filesClient.openMapperArchiveFolder}
+					>
+						Open archive folder
+					</button>
+				</Advanced>
 			</div>
 			<div className="margin-top">
-			{archiveMappersApi.isLoading
-				? <LoadProgress label="Archiving mapper(s)" />
-				: <MapperSelectionTable
-					availableMappers={availableMappers}
-					selectedMappers={selectedMappers}
-					onMapperSelection={setSelectedMappers}
-					onUpdateList={() => loadMappers.call}
-				/>
-			}
+				{archiveMappersApi.isLoading
+					? <LoadProgress label="Archiving mapper(s)" />
+					: <MapperSelectionTable
+						availableMappers={availableMappers}
+						selectedMappers={selectedMappers}
+						onMapperSelection={setSelectedMappers}
+						onUpdateList={mapperFileContext.refresh}
+					/>
+				}
 			</div>
 		</article>
 	);
 }
-

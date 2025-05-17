@@ -2,7 +2,6 @@
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Drivers;
 
 namespace PokeAByte.Web.Services.Mapper;
@@ -10,7 +9,7 @@ namespace PokeAByte.Web.Services.Mapper;
 public class MapperClientService(
     ILogger<MapperClientService> logger,
     IInstanceService instanceService,
-    MapperFileService mapperFileService,
+    IMapperFileService mapperFileService,
     AppSettings appSettings,
     IDriverService driverService
 )
@@ -175,10 +174,13 @@ public class MapperClientService(
                 logger.LogDebug("Static memory driver loaded.");
                 break;
             default:
-                if (driver is IPokeAByteDriver) {
+                if (driver is IPokeAByteDriver)
+                {
                     await instanceService.LoadMapper(mapperContent, driver);
                     logger.LogInformation($"Driver '{driver.ProperName}' loaded.");
-                } else {
+                }
+                else
+                {
                     logger.LogError("A valid driver was not supplied.");
                 }
                 break;

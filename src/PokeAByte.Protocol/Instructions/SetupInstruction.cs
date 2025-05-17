@@ -8,7 +8,7 @@ public struct SetupInstruction
 {
     [FieldOffset(0)]
     public Metadata Metadata = new Metadata(Instructions.SETUP, 0x00);
-    
+
     /// <summary>
     /// How many <see cref="ReadBlock"/>s there are.
     /// </summary>

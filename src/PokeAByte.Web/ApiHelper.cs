@@ -39,7 +39,7 @@ public static class ApiHelper
         return route;
     }
 
-    public static ProblemDetails MapperNotLoadedProblem() => 
+    public static ProblemDetails MapperNotLoadedProblem() =>
         new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,

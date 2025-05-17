@@ -2,6 +2,10 @@
 
 namespace PokeAByte.Domain.Logic;
 
+
+/// <summary>    
+/// Default implementation of the <see cref="IMemoryManager"/> interface.
+/// </summary>
 public class MemoryManager : IMemoryManager
 {
     public MemoryManager(uint gameMemorySize)
@@ -14,9 +18,13 @@ public class MemoryManager : IMemoryManager
         DefaultNamespace = Namespaces["default"];
     }
 
+    /// <inheritdoc />
     public Dictionary<string, IMemoryNamespace> Namespaces { get; private set; }
+
+    /// <inheritdoc />
     public IMemoryNamespace DefaultNamespace { get; }
 
+    /// <inheritdoc />
     public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
     {
         if (area == "default" || area == null)
@@ -26,6 +34,7 @@ public class MemoryManager : IMemoryManager
         return Namespaces[area].get_bytes(memoryAddress, length);
     }
 
+    /// <inheritdoc />
     public void Fill(string area, MemoryAddress memoryAddress, byte[] data)
     {
         if (Namespaces.ContainsKey(area) == false)
@@ -36,6 +45,7 @@ public class MemoryManager : IMemoryManager
         Namespaces[area].Fill(memoryAddress, data);
     }
 
+    /// <inheritdoc />
     public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
     {
         if (area == "default" || area == null)

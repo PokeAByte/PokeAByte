@@ -254,10 +254,12 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     public async Task WriteValue(IPokeAByteProperty target, string value, bool? freeze)
     {
-        if (target is not PokeAByteProperty property) {
+        if (target is not PokeAByteProperty property)
+        {
             return;
         }
-        if (property.IsReadOnly) {
+        if (property.IsReadOnly)
+        {
             return;
         }
         if (property.Bytes == null)
@@ -301,7 +303,8 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     public async Task WriteBytes(IPokeAByteProperty target, byte[] bytesToWrite, bool? freeze)
     {
-        if (target is not PokeAByteProperty property) {
+        if (target is not PokeAByteProperty property)
+        {
             return;
         }
         if (property.Address == null) throw new Exception($"{property.Path} does not have an address. Cannot write data to an empty address.");
@@ -314,9 +317,12 @@ public class PokeAByteInstance : IPokeAByteInstance
         // It also ensures it can't underflow the property, it copies the remaining from Bytes.
         for (int i = 0; i < bytes.Length; i++)
         {
-            if (i < bytesToWrite.Length)  {
+            if (i < bytesToWrite.Length)
+            {
                 bytes[i] = bytesToWrite[i];
-            } else if (property.Bytes != null) {
+            }
+            else if (property.Bytes != null)
+            {
                 bytes[i] = property.Bytes[i];
             }
         }
@@ -341,16 +347,20 @@ public class PokeAByteInstance : IPokeAByteInstance
 
         await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
 
-        if (freeze == true) {
+        if (freeze == true)
+        {
             await this.FreezeProperty(property, bytes);
-        } else if (freeze == false) {
+        }
+        else if (freeze == false)
+        {
             await UnfreezeProperty(property);
         }
     }
 
     public async Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen)
     {
-        if (target is PokeAByteProperty property) {
+        if (target is PokeAByteProperty property)
+        {
             property.BytesFrozen = bytesFrozen;
             await ClientNotifier.SendPropertiesChanged([property]);
         }
@@ -358,7 +368,8 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     public async Task UnfreezeProperty(IPokeAByteProperty target)
     {
-        if (target is PokeAByteProperty property) {
+        if (target is PokeAByteProperty property)
+        {
             property.BytesFrozen = null;
             await ClientNotifier.SendPropertiesChanged([property]);
         }

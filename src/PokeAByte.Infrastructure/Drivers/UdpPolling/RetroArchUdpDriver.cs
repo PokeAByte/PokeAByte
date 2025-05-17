@@ -7,6 +7,9 @@ using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
+/// <summary>
+/// Driver to communicate with RetroArch and compatible emulators.
+/// </summary>
 public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
     private CancellationTokenSource? _connectionCts;
@@ -64,16 +67,14 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         return true;
     }
 
-    /// <summary>
-    /// A no-op interface implementation.
-    /// </summary>
-    /// <returns> A completed task. </returns>
+    /// <inheritdoc/>
     public async Task EstablishConnection()
     {
         _connectionCts = new CancellationTokenSource();
         await ConnectAsync(_connectionCts.Token);
     }
 
+    /// <inheritdoc/>
     public async Task Disconnect()
     {
         if (_connectionCts != null)
@@ -84,12 +85,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         }
     }
 
-    /// <summary>
-    /// Tell retroarch to write target bytes into the game memory.
-    /// </summary>
-    /// <param name="memoryAddress"> The address as which to start writing. </param>
-    /// <param name="values"> The bytes to write to memory. </param>
-    /// <returns> An awaitable task. </returns>
+    /// <inheritdoc/>
     public async ValueTask WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
         if (_udpClientWrapper == null)
@@ -100,15 +96,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         await _udpClientWrapper.SendWriteCommand($"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}");
     }
 
-    /// <summary>
-    /// Read target memory blocks from retroarch.
-    /// </summary>
-    /// <param name="blocks"> Which blocks to read. </param>
-    /// <returns> 
-    /// The dictionary of read blocks. <br/>
-    /// Key is the start of each address block. <br/>
-    /// Value is the byte array contained in that block.
-    /// </returns>
+    /// <inheritdoc/>
     public async ValueTask ReadBytes(BlockData[] transferBlocks)
     {
         foreach (BlockData block in transferBlocks)
@@ -117,6 +105,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         }
     }
 
+    /// <inheritdoc/>
     public static async Task<bool> Probe(AppSettings appSettings)
     {
         using var client = new UdpClient();

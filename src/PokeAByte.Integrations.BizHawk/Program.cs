@@ -31,7 +31,7 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
     private MemoryMappedViewAccessor? Data_Accessor;
 
     private byte[] DataBuffer { get; } = new byte[SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE];
-    public bool IsActive => true; 
+    public bool IsActive => true;
     public bool IsLoaded => true;
 
     private string System = string.Empty;
@@ -63,19 +63,20 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
         };
     }
 
-    private MemoryMappedFile CreateMMF(string name, int size) {
+    private MemoryMappedFile CreateMMF(string name, int size)
+    {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return MemoryMappedFile.CreateOrOpen(name, size, MemoryMappedFileAccess.ReadWrite);
         }
         else
         {
-            if (File.Exists("/dev/shm/"+ name))
+            if (File.Exists("/dev/shm/" + name))
             {
-                File.Delete("/dev/shm/"+ name);
+                File.Delete("/dev/shm/" + name);
             }
             return MemoryMappedFile.CreateFromFile(
-                "/dev/shm/"+ name,
+                "/dev/shm/" + name,
                 FileMode.OpenOrCreate,
                 null,
                 size,
@@ -91,23 +92,23 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
             return;
         }
         MetaDataMMF = CreateMMF(
-            "POKEABYTE_BIZHAWK.bin", 
+            "POKEABYTE_BIZHAWK.bin",
             SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE
         );
         Metadata_Accessor = MetaDataMMF.CreateViewAccessor();
 
         Data_MMF = CreateMMF(
-            "POKEABYTE_BIZHAWK_DATA.bin", 
+            "POKEABYTE_BIZHAWK_DATA.bin",
             SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE
         );
-        Data_Accessor = Data_MMF.CreateViewAccessor();        
+        Data_Accessor = Data_MMF.CreateViewAccessor();
     }
 
     private void ReadFromClient(MemoryContract? clientData)
     {
         if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))
             return;
-        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier] 
+        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier]
             ?? throw new Exception($"Memory domain not found.");
         memoryDomain.Enter();
         for (int i = 0; i < clientData.Data.Length; i++)
@@ -166,10 +167,11 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
                 try
                 {
                     var memoryDomain = MemoryDomains?[entry.BizhawkIdentifier] ?? throw new Exception($"Memory domain not found.");
-                    for(long i = 0; i < entry.Length; i++) {
-                        DataBuffer[entry.CustomPacketTransmitPosition+i] = memoryDomain.PeekByte(i);
+                    for (long i = 0; i < entry.Length; i++)
+                    {
+                        DataBuffer[entry.CustomPacketTransmitPosition + i] = memoryDomain.PeekByte(i);
                     }
- 
+
                 }
                 catch (Exception ex)
                 {

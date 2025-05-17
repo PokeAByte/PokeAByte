@@ -4,9 +4,13 @@ namespace PokeAByte.Domain.Plantforms;
 
 public class GBA_PlatformOptions : IPlatformOptions
 {
+    /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
+
+    /// <inheritdoc/>
     public uint MemorySize { get; } = 0x03007FFF;
 
+    /// <inheritdoc/>
     public MemoryAddressBlock[] Ranges { get; } =
     [
         new("Partial EWRAM 1", 0x00000000, 0x00003FFF),

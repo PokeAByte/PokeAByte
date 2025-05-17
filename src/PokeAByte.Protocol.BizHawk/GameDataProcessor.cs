@@ -9,7 +9,8 @@ using PokeAByte.Protocol.BizHawk.PlatformData;
 
 namespace PokeAByte.Protocol.BizHawk;
 
-internal class GameDataProcessor : IDisposable {
+internal class GameDataProcessor : IDisposable
+{
     private IMemoryDomains _memoryDomains { get; set; } = null!;
 
     private Label _mainLabel;
@@ -25,7 +26,8 @@ internal class GameDataProcessor : IDisposable {
         PlatformEntry platform,
         SetupInstruction setup,
         Label mainLabel
-    ) {
+    )
+    {
         _mainLabel = mainLabel;
         _memoryDomains = memoryDomains;
         _platform = platform;
@@ -34,13 +36,14 @@ internal class GameDataProcessor : IDisposable {
         var blocks = new ReadBlock[setup.BlockCount];
         _readInstructions = new DomainReadInstruction[blocks.Length];
         _frameSkip = setup.FrameSkip == -1 ? _platform.FrameSkipDefault : setup.FrameSkip;
-        
+
         for (int i = 0; i < setup.BlockCount; i++)
         {
             var readBlock = setup.Data[i];
             var entry = _platform.Domains.First(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length);
             var address = readBlock.GameAddress - entry.Start;
-            _readInstructions[i] = new DomainReadInstruction {
+            _readInstructions[i] = new DomainReadInstruction
+            {
                 Domain = entry.DomainId,
                 TransferPosition = readBlock.Position,
                 RelativeStart = address,
@@ -89,10 +92,14 @@ internal class GameDataProcessor : IDisposable {
         return accessor;
     }
 
-    public void Update() {
-        if (_skippedFrames >= _frameSkip) {
+    public void Update()
+    {
+        if (_skippedFrames >= _frameSkip)
+        {
             _skippedFrames = 0;
-        } else {
+        }
+        else
+        {
             _skippedFrames++;
             return;
         }
@@ -101,9 +108,11 @@ internal class GameDataProcessor : IDisposable {
             try
             {
                 var domain = _memoryDomains[instruction.Domain];
-                if (domain != null) {
+                if (domain != null)
+                {
                     int blockPosition = (int)instruction.TransferPosition;
-                    for(long i = instruction.RelativeStart; i <= instruction.RelativeEnd; i++) {
+                    for (long i = instruction.RelativeStart; i <= instruction.RelativeEnd; i++)
+                    {
                         _writeBuffer[blockPosition++] = domain.PeekByte(i);
                     }
                 }

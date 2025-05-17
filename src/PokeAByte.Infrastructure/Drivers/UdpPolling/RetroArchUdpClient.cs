@@ -131,7 +131,8 @@ public class RetroArchUdpClient : IDisposable
         );
         SpinWait.SpinUntil(() =>
             {
-                if ( _responses.TryGetValue(block.Start, out var response)) {
+                if (_responses.TryGetValue(block.Start, out var response))
+                {
                     response.AsSpan().CopyTo(block.Data.AsSpan());
                     success = true;
                 }

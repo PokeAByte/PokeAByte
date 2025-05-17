@@ -9,10 +9,12 @@ public static class MapperPaths
     public static string MapperTreeJson { get; }
     public static string OutdatedMapperTreeJson { get; }
     public static string MapperDirectory { get; }
-    public static string? LocalMapperDirectory {
-        get {
-            var processPath = Path.GetDirectoryName(Environment.ProcessPath);           
-            return processPath != null 
+    public static string? LocalMapperDirectory
+    {
+        get
+        {
+            var processPath = Path.GetDirectoryName(Environment.ProcessPath);
+            return processPath != null
                 ? Path.Combine(processPath, "mappers")
                 : null;
         }
@@ -28,7 +30,7 @@ public static class MapperPaths
         MapperTreeJson = "mapper_tree.json";
         OutdatedMapperTreeJson = Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers/outdated_mapper_tree.json");
         MapperDirectory = Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
-        
+
         MapperLocalArchiveDirectory = Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
         MapperArchiveDirectory = Path.Combine(MapperDirectory, "Archive");
     }

@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
@@ -23,7 +24,7 @@ public static class MapperServiceEndpoints
         app.MapPut("mapper-service/unload-mapper", UnloadMapperAsync);
     }
 
-    public static IEnumerable<MapperFileModel> GetMappers(MapperFileService mapperFileService)
+    public static IEnumerable<MapperFileModel> GetMappers(IMapperFileService mapperFileService)
     {
         return mapperFileService
             .ListInstalled()
@@ -42,7 +43,7 @@ public static class MapperServiceEndpoints
         {
             return TypedResults.Ok();
         }
-        return TypedResults.NotFound();        
+        return TypedResults.NotFound();
     }
 
     public static IResult GetMetadata(MapperClientService mapperClientService)

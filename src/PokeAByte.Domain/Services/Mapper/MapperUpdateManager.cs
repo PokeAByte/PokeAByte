@@ -19,21 +19,22 @@ public class MapperUpdateManager : IMapperUpdateManager
 {
     private readonly ILogger<MapperUpdateManager> _logger;
     private readonly AppSettings _appSettings;
+    private readonly IMapperFileService _mapperFileService;
     private readonly MapperUpdaterSettings _mapperUpdaterSettings;
-    private readonly IMapperArchiveManager _mapperArchiveManager;
     private readonly IGithubRestApi _githubRestApi;
 
     public MapperUpdateManager(ILogger<MapperUpdateManager> logger,
         AppSettings appSettings,
         MapperUpdaterSettings mapperUpdaterSettingsManager,
-        IGithubRestApi githubRestApi,
-        IMapperArchiveManager mapperArchiveManager)
+        IMapperFileService mapperFileService,
+        IGithubRestApi githubRestApi)
     {
         _logger = logger;
         _appSettings = appSettings;
+        _mapperFileService = mapperFileService;
         _mapperUpdaterSettings = mapperUpdaterSettingsManager;
         _githubRestApi = githubRestApi;
-        _mapperArchiveManager = mapperArchiveManager;
+
         if (Directory.Exists(BuildEnvironment.ConfigurationDirectory) == false)
         {
             _logger.LogInformation("Creating configuration directory for Poke-A-Byte.");
@@ -146,17 +147,15 @@ public class MapperUpdateManager : IMapperUpdateManager
         {
             var mapperPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.RelativeXmlPath}";
             var jsPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.RelativeJsPath}";
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeXmlPath, mapperPath);
-            _mapperArchiveManager.ArchiveFile(mapper.RelativeJsPath, jsPath);
+            _mapperFileService.ArchiveFile(mapper.RelativeXmlPath, mapperPath);
+            _mapperFileService.ArchiveFile(mapper.RelativeJsPath, jsPath);
             WriteTextToFile(mapperPath, mapper.XmlData, mapper.Created, mapper.Updated);
             WriteTextToFile(jsPath, mapper.JsData, mapper.Created, mapper.Updated);
         }
         var archiveFolder = MapperPaths.MapperArchiveDirectory;
-        _mapperArchiveManager.ArchiveDirectory(archiveFolder);
-        //Update the mapper list
-        var mapperTree = MapperTreeUtility.GenerateMapperDtoTree(MapperPaths.MapperDirectory);
-        MapperTreeUtility.SaveChanges(MapperPaths.MapperDirectory, mapperTree);
-        //Finish off by checking for any changes
+        _mapperFileService.ArchiveDirectory(archiveFolder);
+        _mapperFileService.Refresh();
+        // Finish off by checking for any changes
         await CheckForUpdates();
     }
 }

@@ -4,8 +4,13 @@ namespace PokeAByte.Domain.Plantforms;
 
 public class GBC_PlatformOptions : IPlatformOptions
 {
+    /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.LittleEndian;
+    
+    /// <inheritdoc/>
     public uint MemorySize { get; } = 0x15FFF;
+
+    /// <inheritdoc/>
     public MemoryAddressBlock[] Ranges { get; } =
     [
         new("Header", 0x0000, 0x00FF),

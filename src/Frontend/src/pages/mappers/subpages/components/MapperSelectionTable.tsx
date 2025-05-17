@@ -50,7 +50,7 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 		}
 	}
 
-	if (mappers.length === 0) {
+	if (allMappers.length === 0) {
 		return (
 			<>
 				<br/>

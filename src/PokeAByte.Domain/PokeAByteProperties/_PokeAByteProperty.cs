@@ -58,26 +58,34 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
+    /// <inheritdoc />
     public string Path { get; }
+
+    /// <inheritdoc />
     public PropertyType Type { get; }
 
     public string? StaticValue { get; }
 
-    internal ReferenceItems? GetComputedReference(IPokeAByteMapper mapper) 
-        => (Reference == null) 
+    internal ReferenceItems? GetComputedReference(IPokeAByteMapper mapper)
+        => (Reference == null)
             ? null
             : mapper.References[Reference];
 
+    /// <inheritdoc />
     public bool IsFrozen => BytesFrozen != null;
+
+    /// <inheritdoc />
     public bool IsReadOnly => AddressString == null;
 
+    /// <inheritdoc />
+    public HashSet<string> FieldsChanged { get; } = [];
 
     protected object? ToValue(in byte[] data, IPokeAByteMapper mapper)
     {
         switch (Type)
         {
             case PropertyType.BinaryCodedDecimal:
-                return PropertyLogic.GetBCDValue(in data);
+                return PropertyLogic.GetBCDValue(data);
             case PropertyType.BitArray:
                 return PropertyLogic.GetBitArrayValue(in data);
             case PropertyType.Bool:
@@ -93,7 +101,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
         throw new NotImplementedException();
     }
-
 
     public byte[] BytesFromValue(string value, IPokeAByteMapper mapper)
     {
@@ -153,7 +160,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     }
 
     public byte[] BytesFromFullValue(IPokeAByteMapper mapper) => BytesFromValue(FullValue?.ToString() ?? "", mapper);
-    public HashSet<string> FieldsChanged { get; } = [];
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
     {
@@ -175,7 +181,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         if (StaticValue != null)
         {
             Value = StaticValue;
-
             return;
         }
 
@@ -309,5 +314,4 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
         return value;
     }
-
 }

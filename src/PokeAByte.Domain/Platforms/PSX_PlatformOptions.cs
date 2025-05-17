@@ -7,9 +7,13 @@ namespace PokeAByte.Domain.Plantforms;
 /* https://problemkaputt.de/psx-spx.htm */
 public class PSX_PlatformOptions : IPlatformOptions
 {
+    /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
+
+    /// <inheritdoc/>
     public uint MemorySize { get; } = 0xbfc7ffff;
 
+    /// <inheritdoc/>
     public MemoryAddressBlock[] Ranges { get; } =
     [
         new("Kernel", 0x00000000, 0x0000ffff),

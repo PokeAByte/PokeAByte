@@ -61,8 +61,10 @@ public class GithubRestApi : IGithubRestApi
         }
     }
 
-    public async Task<HttpContent?> GetMapperTreeFile() {
-        if (_cachedTreeFileResponse == null || _treeFileCacheTime > DateTime.Now + TimeSpan.FromMinutes(1)) {
+    public async Task<HttpContent?> GetMapperTreeFile()
+    {
+        if (_cachedTreeFileResponse == null || _treeFileCacheTime > DateTime.Now + TimeSpan.FromMinutes(1))
+        {
             var response = await GetContentRequest(MapperPaths.MapperTreeJson, true);
             if (response is null || !response.IsSuccessStatusCode)
             {
@@ -74,7 +76,7 @@ public class GithubRestApi : IGithubRestApi
         }
         return _cachedTreeFileResponse;
     }
-        
+
     public async Task<HttpResponseMessage?> GetContentRequest(string? path = null, bool isFile = false)
     {
         var url = _apiSettings.GetBaseRequestString();

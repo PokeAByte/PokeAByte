@@ -15,13 +15,14 @@ public class PokeAProtocolClient : IDisposable
     private CancellationTokenSource _connectionCts;
     private MemoryMappedViewAccessor? _memoryAccessor;
 
-    public PokeAProtocolClient() {
+    public PokeAProtocolClient()
+    {
         _endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 55356);
         _client = new UdpClient();
-		_client.Client.SetSocketOption(
+        _client.Client.SetSocketOption(
             SocketOptionLevel.Socket,
-			SocketOptionName.ReuseAddress,
-			true
+            SocketOptionName.ReuseAddress,
+            true
         );
         _connectionCts = new();
         _client.Connect(_endpoint);
@@ -47,7 +48,7 @@ public class PokeAProtocolClient : IDisposable
             var instruction = new SetupInstruction(blocks, frameSkip);
             _client.Send(instruction.GetByteArray());
             var response = await _client.ReceiveAsync();
-            if (response.Buffer[4] == Instructions.SETUP) 
+            if (response.Buffer[4] == Instructions.SETUP)
             {
                 using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                     ? MemoryMappedFile.OpenExisting("EDPS_MemoryData.bin", MemoryMappedFileRights.Read)
@@ -65,7 +66,8 @@ public class PokeAProtocolClient : IDisposable
 
     public void Read(ulong position, BlockData block, int timeoutMs = 64)
     {
-        if (_memoryAccessor == null) {
+        if (_memoryAccessor == null)
+        {
             throw new VisibleException("Poke-A-Protocol communication timed out");
         }
         try

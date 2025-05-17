@@ -67,11 +67,13 @@ public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
     {
         var system = APIs?.Emulation.GetGameInfo()?.System ?? string.Empty;
         var platform = PlatformConstants.Platforms.SingleOrDefault(x => x.SystemId == system);
-        if (platform == null) {
+        if (platform == null)
+        {
             MainLabel.Text = $"Waiting for game to load";
             return;
         }
-        if (_server == null) {
+        if (_server == null)
+        {
             MainLabel.Text = $"Failed to initialize properly.";
             return;
         }

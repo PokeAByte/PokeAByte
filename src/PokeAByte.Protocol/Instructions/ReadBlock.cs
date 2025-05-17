@@ -17,7 +17,7 @@ public struct ReadBlock
     /// The address of the blocks first byte in the game memory. 
     /// </summary>
     public uint GameAddress;
-    
+
     /// <summary>
     /// The number of bytes to read from the <see cref="GameAdress"/> (inclusive).
     /// </summary>

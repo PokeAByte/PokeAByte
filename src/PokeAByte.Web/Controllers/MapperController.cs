@@ -1,10 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
@@ -34,15 +34,15 @@ public static class MapperEndpoints
         app.MapGet("/mapper/meta", GetMeta);
         app.MapGet("/mapper/properties", GetProperties);
         app.MapGet("/mapper/properties/{**path}/", GetProperty);
-        app.MapGet("/mapper/glossary",GetGlossary);
-        app.MapGet("/mapper/glossary/{key}",GetGlossaryPage);
+        app.MapGet("/mapper/glossary", GetGlossary);
+        app.MapGet("/mapper/glossary/{key}", GetGlossaryPage);
         app.MapGet("/mapper/values/{**path}/", GetValueAsync);
         app.MapPost("/mapper/set-property-frozen", FreezePropertyAsync);
         app.MapPost("/mapper/set-property-bytes", UpdatePropertyBytesAsync);
         app.MapPost("/mapper/set-properties-by-bits", UpdatePropertyByBitsAsync);
         app.MapPost("/mapper/set-property-value", UpdatePropertyValueAsync);
     }
-    
+
     public static IResult GetMapper(IInstanceService instanceService, AppSettings appSettings)
     {
         if (instanceService.Instance == null)
@@ -64,7 +64,7 @@ public static class MapperEndpoints
     }
 
     public static async Task<IResult> PutMapper(
-        MapperFileService mapperFileService,
+        IMapperFileService mapperFileService,
         IDriverService driverService,
         IInstanceService instanceService,
         [FromBody] MapperReplaceModel model)
@@ -112,7 +112,7 @@ public static class MapperEndpoints
 
         return TypedResults.Ok(instance.Mapper.Properties.Values);
     }
-    
+
     public static IResult GetProperty(IInstanceService instanceService, [FromRoute] string path)
     {
         var instance = instanceService.Instance;
@@ -148,7 +148,7 @@ public static class MapperEndpoints
     }
 
     public static async Task<IResult> FreezePropertyAsync(
-        IInstanceService instanceService, 
+        IInstanceService instanceService,
         [FromBody] UpdatePropertyFreezeModel model)
     {
         var instance = instanceService.Instance;
@@ -284,7 +284,7 @@ public static class MapperEndpoints
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> UpdatePropertyBytesAsync(IInstanceService instanceService, [FromBody]UpdatePropertyBytesModel model)
+    public static async Task<IResult> UpdatePropertyBytesAsync(IInstanceService instanceService, [FromBody] UpdatePropertyBytesModel model)
     {
         var instance = instanceService.Instance;
         if (instance == null)

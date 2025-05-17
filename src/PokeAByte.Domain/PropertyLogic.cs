@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Runtime.CompilerServices;
 
 namespace PokeAByte.Domain;
 
@@ -36,7 +35,6 @@ public static class PropertyLogic
             : throw new ArgumentException($"Invalid format for attribute Bits ({bits}).");
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static int GetBCDValue(in byte[] data)
     {
         int result = 0;
@@ -49,7 +47,6 @@ public static class PropertyLogic
         return result;
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static bool[] GetBitArrayValue(in byte[] data)
     {
         var bitArray = new BitArray(data);
@@ -59,7 +56,6 @@ public static class PropertyLogic
         return boolArray;
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static int GetIntValue(in byte[] data, EndianTypes endian)
     {
         if (data.Length == 1) //  With one byte, we can just cast.
@@ -76,7 +72,6 @@ public static class PropertyLogic
         return BitConverter.ToInt32(padded);
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static uint GetUIntValue(in byte[] data, EndianTypes endian)
     {
         // Shortcut: With one byte, we can just cast:
@@ -94,7 +89,6 @@ public static class PropertyLogic
         return BitConverter.ToUInt32(value);
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static string GetStringValue(in byte[] data, int? Size, ReferenceItems? reference, EndianTypes _endian)
     {
         if (reference == null) { throw new Exception("ReferenceObject is NULL."); }
