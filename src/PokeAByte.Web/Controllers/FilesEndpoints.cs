@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
-using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web;
