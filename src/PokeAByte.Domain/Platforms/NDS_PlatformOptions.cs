@@ -11,5 +11,7 @@ public class NDS_PlatformOptions : IPlatformOptions
     public uint MemorySize => 0x2400000;
 
     /// <inheritdoc/>
-    public MemoryAddressBlock[] Ranges { get; } = [];
+    public MemoryAddressBlock[] Ranges { get; } = [
+        new MemoryAddressBlock("Main RAM", 0x2000000, 0x400000),
+    ];
 }
