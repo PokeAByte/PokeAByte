@@ -30,8 +30,8 @@ public class NamedPipeServer : IDisposable
     {
         Console.WriteLine("Client connected");
         if (iar.AsyncState is null || _pipeServer is null)
-            throw new InvalidOperationException(
-                "The pipe server is null.");
+            return;
+            
         try
         {
             //var pipeServer = (NamedPipeServerStream)iar.AsyncState;
@@ -71,5 +71,6 @@ public class NamedPipeServer : IDisposable
     public void Dispose()
     {
         _pipeServer?.Dispose();
+        _pipeServer = null;
     }
 }

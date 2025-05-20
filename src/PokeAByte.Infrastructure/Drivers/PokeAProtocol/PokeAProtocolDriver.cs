@@ -60,7 +60,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
             {
                 if (fileSize == 0)
                 {
-                    throw new Exception("asdjad");
+                    throw new Exception("Invalid filesize for the MMF. Can not connect to EDPS.");
                 }
                 await _client.Setup(_readBlocks, fileSize, _frameSkip);
             }
@@ -72,7 +72,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
         }
         for (int i = 0; i < blocks.Length; i++)
         {
-            var position = _readBlocks.Where(x => x.GameAddress == blocks[i].Start).First().Position;
+            var position = _readBlocks[i].Position;
             _client.Read(position, blocks[i]);
         }
     }

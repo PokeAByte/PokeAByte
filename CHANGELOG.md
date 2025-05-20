@@ -20,6 +20,9 @@
 * Added linux support for the Bizhawk integration tool.
 * Added linux support for the Bizhawk driver.
 
+## Bugfixes
+* The Poke-A-Byte Integration Tool for bizhawk no longer crashes if it is closed and then re-opened in the emulator.
+
 ## Performance
 
 * Improved the performance of the bizhawk driver by being smarter with the work done per read and reducing the memory overhead.

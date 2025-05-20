@@ -13,7 +13,7 @@ public class EmulatorProtocolServer : IDisposable
     private const int PORT = 55356;
     private byte[] _buffer = new byte[65_535];
     private object _state = new();
-    private bool disposed;
+    private bool _disposed;
     private Socket _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     private EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
     private Thread? _thread;
@@ -29,7 +29,7 @@ public class EmulatorProtocolServer : IDisposable
 
     private void Receive()
     {
-        if (disposed)
+        if (_disposed)
         {
             return;
         }
@@ -38,7 +38,7 @@ public class EmulatorProtocolServer : IDisposable
 
     private void OnData(IAsyncResult ar)
     {
-        if (disposed)
+        if (_disposed)
         {
             return;
         }
@@ -51,7 +51,7 @@ public class EmulatorProtocolServer : IDisposable
 
     private void HandleMessage(byte[] message)
     {
-        if (disposed)
+        if (_disposed)
         {
             return;
         }
@@ -93,9 +93,9 @@ public class EmulatorProtocolServer : IDisposable
 
     public void Dispose()
     {
-        if (!disposed)
+        if (!_disposed)
         {
-            disposed = true;
+            _disposed = true;
             _thread?.Abort();
             _socket?.Dispose();
         }

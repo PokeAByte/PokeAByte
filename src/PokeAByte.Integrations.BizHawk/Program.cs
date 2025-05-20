@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using BizHawk.Client.Common;
+using BizHawk.Common;
 using BizHawk.Emulation.Common;
 
 namespace PokeAByte.Integrations.BizHawk;
@@ -31,7 +32,7 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
     private MemoryMappedViewAccessor? Data_Accessor;
 
     private byte[] DataBuffer { get; } = new byte[SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE];
-    public bool IsActive => true;
+    public bool IsActive { get; private set; } = true;
     public bool IsLoaded => true;
 
     private string System = string.Empty;
@@ -58,7 +59,8 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
         _namedPipeServer.StartServer("BizHawk_Named_Pipe");
         Closing += (sender, args) =>
         {
-            _namedPipeServer.Dispose();
+            IsActive = false;
+            _namedPipeServer?.Dispose();
             _namedPipeServer = null;
         };
     }
@@ -167,23 +169,14 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
                 try
                 {
                     var memoryDomain = MemoryDomains?[entry.BizhawkIdentifier] ?? throw new Exception($"Memory domain not found.");
-                    for (long i = 0; i < entry.Length; i++)
-                    {
-                        DataBuffer[entry.CustomPacketTransmitPosition + i] = memoryDomain.PeekByte(i);
-                    }
-
+                    memoryDomain.BulkPeekByte(0x00L.RangeToExclusive(entry.Length), DataBuffer);
+                    Data_Accessor?.WriteArray(entry.CustomPacketTransmitPosition, DataBuffer, 0, entry.Length);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception($"Unable to read memory domain {entry.BizhawkIdentifier}. {ex.Message}", ex);
                 }
             }
-            Data_Accessor?.WriteArray(
-                0,
-                DataBuffer,
-                0,
-                DataBuffer.Length
-            );
             if (FrameSkip == 0)
             {
                 FrameSkip = Platform.FrameSkipDefault;

@@ -4,6 +4,7 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using BizHawk.Common;
 using BizHawk.Emulation.Common;
 using PokeAByte.Protocol.BizHawk.PlatformData;
 
@@ -20,6 +21,10 @@ internal class GameDataProcessor : IDisposable
     private DomainReadInstruction[] _readInstructions;
     private int _frameSkip;
     private int _skippedFrames;
+    private MemoryMappedFile _memoryMappedFile;
+
+    private byte[] DataBuffer { get; } = new byte[4 * 1024 * 1024];
+
 
     internal GameDataProcessor(
         IMemoryDomains memoryDomains,
@@ -40,14 +45,18 @@ internal class GameDataProcessor : IDisposable
         for (int i = 0; i < setup.BlockCount; i++)
         {
             var readBlock = setup.Data[i];
-            var entry = _platform.Domains.First(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length);
-            var address = readBlock.GameAddress - entry.Start;
+            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length);
+            if (entry == null)
+            {
+                continue;
+            }
+            var address = readBlock.GameAddress - entry.Value.Start;
             _readInstructions[i] = new DomainReadInstruction
             {
-                Domain = entry.DomainId,
+                Domain = entry.Value.DomainId,
                 TransferPosition = readBlock.Position,
                 RelativeStart = address,
-                RelativeEnd = address + readBlock.Length,
+                RelativeEnd = address + readBlock.Length - 1,
             };
         }
         for (int i = 0; i < setup.BlockCount; i++)
@@ -59,42 +68,49 @@ internal class GameDataProcessor : IDisposable
         {
             throw new InvalidDataException("Setup instruction came with invalid block sizes. ");
         }
-        _dataAccessor = this.GetMMFAccessor(totalSize);
+        GetMMFAccessor(totalSize);
+        if (_memoryMappedFile == null)
+        {
+            _memoryMappedFile = null!;
+        }
+        if (_dataAccessor == null)
+        {
+            _dataAccessor = null!;
+        }
         _writeBuffer = new byte[totalSize];
         mainLabel.Text = $"Providing memory data ({totalSize} bytes) to client...";
     }
 
-
-    private MemoryMappedViewAccessor GetMMFAccessor(int size)
+    private void GetMMFAccessor(int size)
     {
-        MemoryMappedViewAccessor accessor;
-        MemoryMappedFile memoryMappedFile;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            memoryMappedFile = MemoryMappedFile.CreateOrOpen("EDPS_MemoryData.bin", size, MemoryMappedFileAccess.ReadWrite);
+            _memoryMappedFile = MemoryMappedFile.CreateOrOpen(
+                SharedConstants.MemoryMappedFileName,
+                size,
+                MemoryMappedFileAccess.ReadWrite
+            );
         }
         else
         {
-            if (File.Exists("/dev/shm/EDPS_MemoryData.bin"))
+            if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
             {
-                File.Delete("/dev/shm/EDPS_MemoryData.bin");
+                File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
             }
-            memoryMappedFile = MemoryMappedFile.CreateFromFile(
-                "/dev/shm/EDPS_MemoryData.bin",
+            _memoryMappedFile = MemoryMappedFile.CreateFromFile(
+                $"/dev/shm/{SharedConstants.MemoryMappedFileName}",
                 FileMode.OpenOrCreate,
                 null,
                 size,
                 MemoryMappedFileAccess.ReadWrite
             );
         }
-        accessor = memoryMappedFile.CreateViewAccessor();
-        memoryMappedFile.Dispose();
-        return accessor;
+        _dataAccessor = _memoryMappedFile.CreateViewAccessor();
     }
 
     public void Update()
     {
-        if (_skippedFrames >= _frameSkip)
+        if (_skippedFrames > _frameSkip)
         {
             _skippedFrames = 0;
         }
@@ -103,24 +119,28 @@ internal class GameDataProcessor : IDisposable
             _skippedFrames++;
             return;
         }
-        foreach (var instruction in _readInstructions)
+        DomainReadInstruction instruction = _readInstructions[0];
+        try
         {
-            try
+            for (int i = 0; i < _readInstructions.Length; i++)
             {
+                instruction = _readInstructions[i];
+                if (instruction.RelativeStart == instruction.RelativeEnd)
+                {
+                    continue;
+                }
                 var domain = _memoryDomains[instruction.Domain];
                 if (domain != null)
                 {
-                    int blockPosition = (int)instruction.TransferPosition;
-                    for (long i = instruction.RelativeStart; i <= instruction.RelativeEnd; i++)
-                    {
-                        _writeBuffer[blockPosition++] = domain.PeekByte(i);
-                    }
+                    var length = instruction.RelativeEnd - instruction.RelativeStart;
+                    domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), DataBuffer);
+                    Buffer.BlockCopy(DataBuffer, 0, _writeBuffer, (int)instruction.TransferPosition, (int)length);
                 }
             }
-            catch (Exception ex)
-            {
-                _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
-            }
+        }
+        catch (Exception ex)
+        {
+            _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
         }
         _dataAccessor.WriteArray(0, _writeBuffer, 0, _writeBuffer.Length);
     }
@@ -128,9 +148,10 @@ internal class GameDataProcessor : IDisposable
     public void Dispose()
     {
         this._dataAccessor.Dispose();
-        if (File.Exists("/dev/shm/EDPS_MemoryData.bin"))
+        this._memoryMappedFile.Dispose();
+        if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
         {
-            File.Delete("/dev/shm/EDPS_MemoryData.bin");
+            File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
         }
     }
 }

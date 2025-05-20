@@ -21,6 +21,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.Windows.Forms" />
+		<Reference Include="BizHawk.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Common.dll" Private="false" />
 		<Reference Include="BizHawk.Client.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Client.Common.dll" Private="false" />
 		<Reference Include="BizHawk.Emulation.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Emulation.Common.dll" Private="false" />
 	</ItemGroup>

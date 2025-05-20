@@ -9,7 +9,7 @@ using PokeAByte.Protocol.BizHawk.PlatformData;
 namespace PokeAByte.Protocol.BizHawk;
 
 [ExternalTool("Emulator Data Protocol Server")]
-public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
+public sealed class EDPSForm : Form, IExternalToolForm
 {
     public ApiContainer? APIs { get; set; }
 
@@ -24,26 +24,29 @@ public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
         Dock = DockStyle.Top
     };
 
-    public bool IsActive => true;
+    public bool IsActive { get;  private set; } = true;
     public bool IsLoaded => true;
     private EmulatorProtocolServer? _server;
     private GameDataProcessor? _processor;
 
     public EDPSForm()
     {
+        SuspendLayout();
+
         base.Text = "Emulator Data Protocol Server";
         ShowInTaskbar = false;
 
         ClientSize = new(300, 60);
-        SuspendLayout();
 
+        Closing += (_, _) =>
+        {
+            Cleanup();
+            IsActive = false;
+        };
         Controls.Add(MainLabel);
 
-        ResumeLayout(performLayout: false);
-        PerformLayout();
+        ResumeLayout(performLayout: true);
         StartServer();
-
-        Closing += (sender, args) => Cleanup();
     }
 
     private void StartServer()
@@ -93,7 +96,7 @@ public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
             {
                 APIs.Memory.WriteByteRange(instruction.Address, instruction.Data);
             }
-            catch (Exception) { }
+            catch (Exception) { } // Nothing to do, fail silently.
         }
     }
 
@@ -101,14 +104,9 @@ public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
     {
         Cleanup();
         StartServer();
-        if (APIs?.Emulation.GetGameInfo() == null)
-        {
-            MainLabel.Text = "No game is loaded, doing nothing.";
-        }
-        else
-        {
-            MainLabel.Text = $"Waiting for client...";
-        }
+        MainLabel.Text = APIs?.Emulation.GetGameInfo() == null
+            ? "No game is loaded, doing nothing." 
+            : $"Waiting for client...";
     }
 
     public bool AskSaveChanges() => true;
@@ -119,14 +117,5 @@ public sealed class EDPSForm : Form, IExternalToolForm, IDisposable
         {
             this._processor?.Update();
         }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            this.Cleanup();
-        }
-        base.Dispose(disposing);
     }
 }

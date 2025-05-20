@@ -11,6 +11,11 @@ public static class Instructions
     public const byte WRITE = 0x03;
 }
 
+public static class SharedConstants
+{
+    public const string MemoryMappedFileName = "EDPS_MemoryData.bin";
+}
+
 /// <summary>
 /// Packet metadata. The first 8 byte of the 32 byte header.
 /// </summary>
