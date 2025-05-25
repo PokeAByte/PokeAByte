@@ -15,7 +15,13 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     public ReadOnlySpan<byte> GetReadonlyBytes(uint address, int length)
     {
-        return Data.Span.Slice((int)address, length);
+        try
+        {
+            return Data.Span.Slice((int)address, length);
+        } catch (ArgumentOutOfRangeException)
+        {
+            throw new Exception($"Cannot retrieve bytes starting at {address:X2} because getting {length} bytes would overflow the memory container.");
+        }
     }
 
     public byte get_byte(uint address)
@@ -27,11 +33,12 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     public IByteArray get_bytes(uint address, int length)
     {
-        return new ByteArray(address, Data.Slice((int)address, length).ToArray());
+        return new ByteArray(address, GetReadonlyBytes(address, length).ToArray());
     }
 
     public void Fill(uint address, byte[] data)
     {
+        // _accessedRegions.Add((address, data.Length));
         data.AsSpan().CopyTo(Data.Span.Slice((int)address, data.Length));
     }
 }
