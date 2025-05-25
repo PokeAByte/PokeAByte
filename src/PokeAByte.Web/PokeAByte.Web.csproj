@@ -20,7 +20,7 @@
 		<DebugType>None</DebugType>
     </PropertyGroup>
 
-	<Target Name="NpmInstall"  Outputs="../Frontend/node_modules/.install-stamp">
+	<Target Name="NpmInstall" Outputs="../Frontend/node_modules/.install-stamp">
 		<Exec Command="npm ci" Condition="'$(RestorePackagesWithLockFile)' == 'true'" WorkingDirectory="../Frontend" />
 		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != 'true'" WorkingDirectory="../Frontend" />
 		<!-- Write the stamp file, so incremental builds work -->
@@ -32,7 +32,7 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.5" />
 	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.5" />
-      <PackageReference Include="Serilog" Version="4.2.0" />
+      <PackageReference Include="Serilog" Version="4.3.0" />
       <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
       <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
