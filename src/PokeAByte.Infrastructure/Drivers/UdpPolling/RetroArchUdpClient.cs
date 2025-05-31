@@ -51,14 +51,10 @@ public class RetroArchUdpClient : IDisposable
     private static byte[] ParseReadMemoryResponse(ReadOnlySpan<byte> input)
     {
         var byteCount = input.Count((byte)' ') + 1;
-        // Then we can skip over the remaining span 3 characters at a time, slicing out each character-pair for the
-        // byte.Parse().
         int offset = 0;
         byte[] value = new byte[byteCount];
         for (int i = 0; i < value.Length - 1; i++)
         {
-            // While we do technically get ASCII and byte.Parse(ROS<byte>) parses utf8, we can still use it because
-            // UTF8 is backwards compatible with ASCII:
             value[i] = ParseHexByte(input.Slice(offset, 2));
             offset += 3;
         }
@@ -84,8 +80,9 @@ public class RetroArchUdpClient : IDisposable
             }
             return true;
         }
-        catch
+        catch(Exception ex)
         {
+            Console.WriteLine(ex);
             return false;
         }
     }
@@ -127,7 +124,7 @@ public class RetroArchUdpClient : IDisposable
         }
         bool success = false;
         _ = await _client.SendAsync(
-            Encoding.UTF8.GetBytes($"READ_CORE_MEMORY {ToRetroArchHexdecimalString(block.Start)} {block.Data.Length}")
+            Encoding.UTF8.GetBytes(string.Concat("READ_CORE_MEMORY ", ToRetroArchHexdecimalString(block.Start), " ", block.Data.Length.ToString()))
         );
         SpinWait.SpinUntil(() =>
             {
