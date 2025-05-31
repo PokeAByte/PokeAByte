@@ -107,7 +107,10 @@ public interface IPokeAByteMapper : IDisposable
         {
             property.Value = value;
         }
-        throw new Exception($"{path} is not defined in properties.");
+        else
+        {
+            throw new Exception($"{path} is not defined in properties.");
+        }
     }
 
     /// <summary>
