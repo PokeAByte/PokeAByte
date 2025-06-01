@@ -196,6 +196,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 if (AddressMath.TrySolve(_addressExpression, instance.Variables, out var solvedAddress))
                 {
                     address = solvedAddress;
+                    _isMemoryAddressSolved = true;
                 }
             }
             catch (Exception e)
@@ -212,22 +213,18 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
 
         byte[] bytes;
-        ReadOnlySpan<byte> readonlyBytes;
-
-        if (address == null) { throw new Exception("address is NULL."); }
         if (Length == null) { throw new Exception("Length is NULL."); }
 
         try
         {
-            readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length ?? 0);
-            if (readonlyBytes.SequenceEqual(Bytes))
+            var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length.Value);
+            if (_bytes != null && readonlyBytes.SequenceEqual(_bytes))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
                 // updated since last poll.
 
                 // Do nothing, we don't need to calculate the new value as
                 // the bytes are the same.
-                Address = address;
                 return;
             }
             bytes = readonlyBytes.ToArray();
@@ -236,36 +233,21 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             Console.WriteLine(e);
             Address = null;
-            bytes = [0];
-            readonlyBytes = bytes.AsSpan();
-        }
-
-        Address = address;
-
-        if (_bytes?.Length == bytes.Length)
-        {
-            readonlyBytes.CopyTo(_bytes);
-            FieldsChanged.Add("bytes");
-        }
-        else
-        {
-            Bytes = bytes.ToArray();
-        }
-
-        if (bytes.Length == 0)
-        {
             throw new Exception(
                 $"Unable to retrieve bytes for property '{Path}' at address {Address?.ToHexdecimalString()}. A byte array length of zero was returned?"
             );
         }
-        //Store the original, full value
+
+        Bytes = bytes.ToArray();
+        
+        // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
         bytes = BytesFromBits(bytes);
         if (address != null && BytesFrozen != null)
         {
             // Bytes have changed, but property is frozen, so force the bytes back to the original value.
             // Pretend nothing has changed. :)
-            _ = instance.Driver.WriteBytes((MemoryAddress)address, BytesFrozen);
+            _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
             return;
         }
 

@@ -41,12 +41,9 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         set
         {
             if (value == _address) { return; }
-
             _address = value;
             _addressString = value.ToString();
-
             _isMemoryAddressSolved = true;
-
             FieldsChanged.Add("address");
         }
     }
