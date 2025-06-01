@@ -217,7 +217,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         try
         {
             var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length.Value);
-            if (_bytes != null && readonlyBytes.SequenceEqual(_bytes))
+            if (_bytes != null && readonlyBytes.SequenceEqual(_bytes.AsSpan()))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
                 // updated since last poll.
@@ -237,7 +237,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             );
         }
         Address = address;
-        Bytes = bytes;
+        _bytes = bytes.ToArray();
+        FieldsChanged.Add("bytes");
         
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);

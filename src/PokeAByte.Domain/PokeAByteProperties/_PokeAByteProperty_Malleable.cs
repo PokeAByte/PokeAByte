@@ -163,6 +163,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         set
         {
             if (_bytes == null && value == null) return;
+            if (_bytes != null && value != null && _bytes.SequenceEqual(value)) return;
             FieldsChanged.Add("bytes");
             _bytes = value;
         }
