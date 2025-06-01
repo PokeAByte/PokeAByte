@@ -214,7 +214,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
         byte[] bytes;
         if (Length == null) { throw new Exception("Length is NULL."); }
-
         try
         {
             var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length.Value);
@@ -225,6 +224,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
                 // Do nothing, we don't need to calculate the new value as
                 // the bytes are the same.
+                Address = address;
                 return;
             }
             bytes = readonlyBytes.ToArray();
@@ -232,13 +232,12 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         catch (Exception e)
         {
             Console.WriteLine(e);
-            Address = null;
             throw new Exception(
                 $"Unable to retrieve bytes for property '{Path}' at address {Address?.ToHexdecimalString()}. A byte array length of zero was returned?"
             );
         }
-
-        Bytes = bytes.ToArray();
+        Address = address;
+        Bytes = bytes;
         
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
