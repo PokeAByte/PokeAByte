@@ -5,6 +5,7 @@ using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
+
 public partial class PokeAByteProperty : IPokeAByteProperty
 {
     private static SearchValues<char> _plainAddressSearch = SearchValues.Create("1234567890 -+");
@@ -77,8 +78,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     /// <inheritdoc />
     public bool IsReadOnly => AddressString == null;
 
-    /// <inheritdoc />
-    public HashSet<string> FieldsChanged { get; } = [];
+    public FieldChanges FieldsChanged { get; set; } = FieldChanges.None;
 
     protected object? ToValue(in byte[] data, IPokeAByteMapper mapper)
     {
@@ -238,8 +238,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
         Address = address;
         _bytes = bytes.ToArray();
-        FieldsChanged.Add("bytes");
-        
+        FieldsChanged |= FieldChanges.Bytes;
+
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
         bytes = BytesFromBits(bytes);

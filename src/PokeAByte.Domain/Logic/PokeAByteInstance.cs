@@ -87,11 +87,9 @@ public class PokeAByteInstance : IPokeAByteInstance
     [MemberNotNull(nameof(JavascriptEngine))]
     private void InitializeJSEngine(MapperContent mapperContent)
     {
-        var engineOptions = new Options
-        {
-            Strict = true,
-            StringCompilationAllowed = false
-        };
+        var engineOptions = new Options { Strict = true };
+
+        engineOptions.Host.StringCompilationAllowed = false;
 
         if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
         {
@@ -149,6 +147,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
     }
 
+    List<IPokeAByteProperty> _propertiesChanged = [];
+
     private async Task Read()
     {
         await Driver.ReadBytes(_transferBlocks);
@@ -169,9 +169,10 @@ public class PokeAByteInstance : IPokeAByteInstance
 #endif
 
         // Setup at start of loop
+        _propertiesChanged.Clear();
         foreach (var property in Mapper.Properties.Values)
         {
-            property.FieldsChanged.Clear();
+            property.FieldsChanged = FieldChanges.None;
         }
 
         // Preprocessor
@@ -209,14 +210,18 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
 
         // Fields Changed
-        var propertiesChanged = this.Mapper.Properties.Values
-            .Where(x => x.FieldsChanged.Count > 0)
-            .ToList();
-        if (propertiesChanged.Count > 0)
+        foreach (var property in Mapper.Properties.Values)
+        {
+            if (property.FieldsChanged != FieldChanges.None)
+            {
+                _propertiesChanged.Add(property);
+            }
+        }
+        if (_propertiesChanged.Count > 0)
         {
             try
             {
-                await ClientNotifier.SendPropertiesChanged(propertiesChanged);
+                await ClientNotifier.SendPropertiesChanged(_propertiesChanged);
             }
             catch (Exception ex)
             {

@@ -198,7 +198,8 @@ public interface IPokeAByteProperty
     /// This also applies to property changes caused by the mapper JavaScript.
     /// </summary>
     [JsonPropertyName("fieldsChanged")]
-    HashSet<string> FieldsChanged { get; }
+    [JsonConverter(typeof(FieldChangesJsonConverter))]
+    FieldChanges FieldsChanged { get; internal set; }
 
     void ProcessLoop(IPokeAByteInstance instance, IMemoryManager container, bool reloadAddresses);
     byte[] BytesFromBits(byte[] bytes);

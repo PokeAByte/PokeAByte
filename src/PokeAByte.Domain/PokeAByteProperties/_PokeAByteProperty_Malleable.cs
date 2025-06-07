@@ -14,14 +14,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     private string? _reference;
     private string? _description;
     private object? _value;
-    private object? _fullValue;
     private byte[]? _bytes;
     private byte[]? _bytesFrozen;
-    private string? _readFunction;
-    private string? _writeFunction;
-    private string? _afterReadValueExpression;
-    private string? _afterReadValueFunction;
-    private string? _beforeWriteValueFunction;
 
     public string? MemoryContainer
     {
@@ -30,7 +24,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (value == _memoryContainer) { return; }
 
-            FieldsChanged.Add("memoryContainer");
+            FieldsChanged |= FieldChanges.MemoryContainer;
             _memoryContainer = value;
         }
     }
@@ -44,7 +38,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             _address = value;
             _addressString = value.ToString();
             _isMemoryAddressSolved = true;
-            FieldsChanged.Add("address");
+            FieldsChanged |= FieldChanges.Address;
         }
     }
 
@@ -73,7 +67,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_length == value) return;
 
-            FieldsChanged.Add("length");
+            FieldsChanged |= FieldChanges.Length;
             _length = value;
         }
     }
@@ -85,7 +79,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_size == value) return;
 
-            FieldsChanged.Add("size");
+            FieldsChanged |= FieldChanges.Size;
             _size = value;
         }
     }
@@ -101,7 +95,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 BitIndexes = value != null
                     ? PropertyLogic.ParseBits(value)
                     : null;
-                FieldsChanged.Add("bits");
+                FieldsChanged |= FieldChanges.Bits;
             }
         }
     }
@@ -115,7 +109,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_reference == value) return;
 
-            FieldsChanged.Add("reference");
+            FieldsChanged |= FieldChanges.Reference;
             _reference = value;
         }
     }
@@ -127,7 +121,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_description == value) return;
 
-            FieldsChanged.Add("description");
+            FieldsChanged |= FieldChanges.Description;
             _description = value;
         }
     }
@@ -140,22 +134,12 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             if (_value == null && value == null) return;
             if (_value != null && _value.Equals(value)) return;
 
-            FieldsChanged.Add("value");
+            FieldsChanged |= FieldChanges.Value;
             _value = value;
         }
     }
 
-    public object? FullValue
-    {
-        get => _fullValue;
-        set
-        {
-            if (_fullValue != null && _fullValue.Equals(value)) return;
-
-            //FieldsChanged.Add("value");
-            _fullValue = value;
-        }
-    }
+    public object? FullValue { get; set; }
 
     public byte[]? Bytes
     {
@@ -164,7 +148,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_bytes == null && value == null) return;
             if (_bytes != null && value != null && _bytes.SequenceEqual(value)) return;
-            FieldsChanged.Add("bytes");
+            FieldsChanged |= FieldChanges.Bytes;
             _bytes = value;
         }
     }
@@ -176,68 +160,18 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             if (_bytesFrozen != null && value != null && _bytesFrozen.SequenceEqual(value)) return;
 
-            FieldsChanged.Add("frozen");
+            FieldsChanged |= FieldChanges.IsFrozen;
             _bytesFrozen = value;
         }
     }
 
-    public string? ReadFunction
-    {
-        get => _readFunction;
-        set
-        {
-            if (_readFunction == value) return;
+    public string? ReadFunction { get; set; }
 
-            FieldsChanged.Add("readFunction");
-            _readFunction = value;
-        }
-    }
+    public string? WriteFunction { get; set; }
 
-    public string? WriteFunction
-    {
-        get => _writeFunction;
-        set
-        {
-            if (_writeFunction == value) return;
+    public string? AfterReadValueExpression { get; set; }
 
-            FieldsChanged.Add("writeFunction");
-            _writeFunction = value;
-        }
-    }
+    public string? AfterReadValueFunction { get; set; }
 
-    public string? AfterReadValueExpression
-    {
-        get => _afterReadValueExpression;
-        set
-        {
-            if (_afterReadValueExpression == value) return;
-
-            FieldsChanged.Add("afterReadValueExpression");
-            _afterReadValueExpression = value;
-        }
-    }
-
-    public string? AfterReadValueFunction
-    {
-        get => _afterReadValueFunction;
-        set
-        {
-            if (_afterReadValueFunction == value) return;
-
-            FieldsChanged.Add("afterReadValueFunction");
-            _afterReadValueFunction = value;
-        }
-    }
-
-    public string? BeforeWriteValueFunction
-    {
-        get => _beforeWriteValueFunction;
-        set
-        {
-            if (_beforeWriteValueFunction == value) return;
-
-            FieldsChanged.Add("beforeWriteValueFunction");
-            _beforeWriteValueFunction = value;
-        }
-    }
+    public string? BeforeWriteValueFunction { get; set; }
 }
