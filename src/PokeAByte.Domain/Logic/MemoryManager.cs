@@ -10,24 +10,23 @@ public class MemoryManager : IMemoryManager
 {
     public MemoryManager(uint gameMemorySize)
     {
+        DefaultNamespace = new StaticMemoryContainer(gameMemorySize);
         Namespaces = new Dictionary<string, IMemoryNamespace>()
-            {
-                { "default", new StaticMemoryContainer(gameMemorySize) }
-            };
-
-        DefaultNamespace = Namespaces["default"];
+        {
+            { "default", DefaultNamespace }
+        };
     }
 
     /// <inheritdoc />
     public Dictionary<string, IMemoryNamespace> Namespaces { get; private set; }
 
     /// <inheritdoc />
-    public IMemoryNamespace DefaultNamespace { get; }
+    public IMemoryNamespace DefaultNamespace { get; private set; }
 
     /// <inheritdoc />
     public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
     {
-        if (area == "default" || area == null)
+        if (area == null || area == "default" )
         {
             return DefaultNamespace.get_bytes(memoryAddress, length);
         }
@@ -37,18 +36,19 @@ public class MemoryManager : IMemoryManager
     /// <inheritdoc />
     public void Fill(string area, MemoryAddress memoryAddress, byte[] data)
     {
-        if (Namespaces.ContainsKey(area) == false)
+        Namespaces.TryGetValue(area, out IMemoryNamespace? namespaceArea);
+        if (namespaceArea == null)
         {
-            Namespaces[area] = new MemoryNamespace();
+            namespaceArea = new MemoryNamespace();
+            Namespaces[area] = namespaceArea;
         }
-
-        Namespaces[area].Fill(memoryAddress, data);
+        namespaceArea.Fill(memoryAddress, data);
     }
 
     /// <inheritdoc />
     public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
     {
-        if (area == "default" || area == null)
+        if (area == null || area == "default")
         {
             return DefaultNamespace.GetReadonlyBytes(memoryAddress, length);
         }
