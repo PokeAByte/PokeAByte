@@ -45,19 +45,15 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
         }
     }
 
-    private bool ReadBizhawkData(int start, Span<byte> span)
+    private void ReadBizhawkData(int start, Span<byte> span)
     {
         try
         {
-            if (_memoryAccessor == null)
-            {
-                using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK_DATA.bin", MemoryMappedFileRights.Read)
-                    : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_LENGTH, MemoryMappedFileAccess.Read);
-                _memoryAccessor = mmfData.CreateViewAccessor(0, DATA_LENGTH, MemoryMappedFileAccess.Read);
-            }
-            _memoryAccessor.SafeMemoryMappedViewHandle.ReadSpan((ulong)start, span);
-            return true;
+            using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK_DATA.bin", MemoryMappedFileRights.Read)
+                : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_LENGTH, MemoryMappedFileAccess.Read);
+            using var memoryAccessor = mmfData.CreateViewAccessor(0, DATA_LENGTH, MemoryMappedFileAccess.Read);
+            memoryAccessor.SafeMemoryMappedViewHandle.ReadSpan((ulong)start, span);
         }
         catch (FileNotFoundException ex)
         {
