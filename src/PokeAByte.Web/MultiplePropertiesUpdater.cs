@@ -8,10 +8,10 @@ public static class MultiplePropertiesUpdater
 {
     public static byte[] ConstructUpdatedBytes(Dictionary<IPokeAByteProperty, string> properties, IPokeAByteMapper mapper)
     {
-        if (properties.First().Key.Length is null || properties.First().Key.Length < 0)
+        if (properties.First().Key.Length <= 0)
             throw new ArgumentException("Property length cannot be null or zero.");
         //Desired length in bytes * 8 bit = total bit length
-        var desiredLength = properties.First().Key.Length!.Value;
+        var desiredLength = properties.First().Key.Length;
         var len = desiredLength * 8;
         //Make sure we do not go over the maximum allowed bytes!
         var totalBitCount =

@@ -170,7 +170,7 @@ public static class MapperEndpoints
 
         if (model.Freeze)
         {
-            await instance.FreezeProperty(prop, prop.Bytes ?? Array.Empty<byte>());
+            await instance.FreezeProperty(prop, prop.Bytes);
         }
         else
         {
@@ -258,7 +258,7 @@ public static class MapperEndpoints
         var baseAddress = gameHookProperties.First().Key.Address;
         var baseType = gameHookProperties.First().Key.Type;
         var baseLength = gameHookProperties.First().Key.Length;
-        if (baseAddress is null || baseLength is null)
+        if (baseAddress is null || baseLength == 0)
             return TypedResults.BadRequest("Address or length for property is null.");
         if (gameHookProperties.Any(x =>
                     x.Key.Address != baseAddress.Value ||

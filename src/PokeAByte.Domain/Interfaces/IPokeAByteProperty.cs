@@ -48,7 +48,7 @@ public record PropertyAttributes
     public required PropertyType Type { get; init; }
     public string? MemoryContainer { get; init; }
     public string? Address { get; init; }
-    public int? Length { get; init; } = 1;
+    public int Length { get; init; } = 1;
     public int? Size { get; init; }
     public string? Bits { get; set; }
     public string? Reference { get; set; }
@@ -125,7 +125,7 @@ public interface IPokeAByteProperty
     /// The mapper XML parser defaults to <c>1</c> if the length attribute is omitted.
     /// </summary>
     [JsonPropertyName("length")]
-    int? Length { get; }
+    int Length { get; }
 
     /// <summary>
     /// The logical size of the property value. This currently only applies to strings and is optional.
@@ -166,14 +166,14 @@ public interface IPokeAByteProperty
     /// </summary>
     [JsonPropertyName("bytes")]
     [JsonConverter(typeof(ByteArrayJsonConverter))]
-    byte[]? Bytes { get; }
+    byte[] Bytes { get; }
 
     /// <summary>
     /// For frozen properties: Which bytes to write back into the game memory when changes are detected. See also
     /// <see cref="IsFrozen"/>.
     /// </summary>
     [JsonIgnore]
-    byte[]? BytesFrozen { get; }
+    byte[] BytesFrozen { get; }
 
     /// <summary>
     /// Whether the property value is frozen. Whenever PokeAByte detects a change in <see cref="Bytes"/> from the 
@@ -181,7 +181,7 @@ public interface IPokeAByteProperty
     /// at the properties <see cref="Address"/>.
     /// </summary>
     /// <remarks>
-    /// This is a derived property and will be true if <see cref="BytesFrozen"/> is not null. 
+    /// This is a derived property and will be true if <see cref="BytesFrozen"/> is not empty. 
     /// </remarks>
     [JsonPropertyName("isFrozen")]
     bool IsFrozen { get; }

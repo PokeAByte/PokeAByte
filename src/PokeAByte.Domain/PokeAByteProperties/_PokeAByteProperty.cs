@@ -5,13 +5,12 @@ using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
-
 public partial class PokeAByteProperty : IPokeAByteProperty
 {
     private static SearchValues<char> _plainAddressSearch = SearchValues.Create("1234567890 -+");
     private Expression? _addressExpression;
     private bool _hasAddressParameter;
-    protected EndianTypes _endian;
+    private EndianTypes _endian;
     private bool _isMemoryAddressSolved;
 
     internal bool ShouldRunReferenceTransformer
@@ -43,8 +42,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         Description = attributes.Description;
         Value = attributes.Value;
         StaticValue = attributes.Value;
-        Bytes = null;
-        BytesFrozen = null;
+        Bytes = [];
 
         ReadFunction = attributes.ReadFunction;
         WriteFunction = attributes.WriteFunction;
@@ -73,7 +71,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             : mapper.References[Reference];
 
     /// <inheritdoc />
-    public bool IsFrozen => BytesFrozen != null;
+    public bool IsFrozen => BytesFrozen.Length != 0;
 
     /// <inheritdoc />
     public bool IsReadOnly => AddressString == null;
@@ -115,16 +113,14 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 return bool.Parse(value) ? [0x01] : [0x00];
             case PropertyType.Int:
                 {
-                    if (Length == null) throw new Exception("Length is NULL.");
                     var integerValue = int.Parse(value);
-                    var bytes = BitConverter.GetBytes(integerValue).Take(Length ?? 0).ToArray();
+                    var bytes = BitConverter.GetBytes(integerValue).Take(Length).ToArray();
                     return bytes.ReverseBytesIfLE(_endian);
                 }
             case PropertyType.String:
                 {
                     var computedReference = GetComputedReference(mapper);
                     if (computedReference == null) throw new Exception("ReferenceObject is NULL.");
-                    if (Length == null) throw new Exception("Length is NULL.");
 
                     var uints = value
                         .Select(x => computedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
@@ -132,7 +128,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
                     if (uints.Count + 1 > Length)
                     {
-                        uints = uints.Take(Length ?? 0 - 1).ToList();
+                        uints = uints.Take(Length).ToList();
                     }
 
                     var nullTerminationKey = computedReference.Values.First(x => x.Value == null);
@@ -149,10 +145,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 }
             case PropertyType.Uint:
                 {
-                    if (Length == null) throw new Exception("Length is NULL.");
-
                     int.TryParse(value, out var integerValue);
-                    byte[] bytes = BitConverter.GetBytes(integerValue)[..Length.Value];
+                    byte[] bytes = BitConverter.GetBytes(integerValue)[..Length];
                     return bytes.ReverseBytesIfLE(_endian);
                 }
         }
@@ -163,7 +157,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
     {
-        if (Type == PropertyType.String && Length is 1 && Value is not null)
+        if (Type == PropertyType.String && Length == 1 && Value is not null)
         {
             var valString = Value.ToString();
             if (!string.IsNullOrWhiteSpace(valString))
@@ -216,8 +210,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         if (Length == null) { throw new Exception("Length is NULL."); }
         try
         {
-            var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length.Value);
-            if (_bytes != null && readonlyBytes.SequenceEqual(_bytes.AsSpan()))
+            var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length);
+            if (readonlyBytes.SequenceEqual(_bytes.AsSpan()))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
                 // updated since last poll.
@@ -237,13 +231,13 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             );
         }
         Address = address;
-        _bytes = bytes.ToArray();
+        _bytes = [.. bytes];
         FieldsChanged |= FieldChanges.Bytes;
 
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
         bytes = BytesFromBits(bytes);
-        if (address != null && BytesFrozen != null)
+        if (address != null && BytesFrozen.Length != 0)
         {
             // Bytes have changed, but property is frozen, so force the bytes back to the original value.
             // Pretend nothing has changed. :)

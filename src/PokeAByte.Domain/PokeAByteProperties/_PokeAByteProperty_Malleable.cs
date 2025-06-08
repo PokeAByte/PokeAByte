@@ -8,14 +8,14 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     private string? _memoryContainer;
     private uint? _address;
     private string? _addressString;
-    private int? _length;
+    private int _length;
     private int? _size;
     private string? _bits;
     private string? _reference;
     private string? _description;
     private object? _value;
-    private byte[]? _bytes;
-    private byte[]? _bytesFrozen;
+    private byte[] _bytes = [];
+    private byte[] _bytesFrozen = [];
 
     public string? MemoryContainer
     {
@@ -60,7 +60,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    public int? Length
+    public int Length
     {
         get => _length;
         set
@@ -141,24 +141,23 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
     public object? FullValue { get; set; }
 
-    public byte[]? Bytes
+    public byte[] Bytes
     {
         get => _bytes;
         set
         {
-            if (_bytes == null && value == null) return;
-            if (_bytes != null && value != null && _bytes.SequenceEqual(value)) return;
+            if (_bytes.SequenceEqual(value)) return;
             FieldsChanged |= FieldChanges.Bytes;
             _bytes = value;
         }
     }
 
-    public byte[]? BytesFrozen
+    public byte[] BytesFrozen
     {
         get => _bytesFrozen;
         set
         {
-            if (_bytesFrozen != null && value != null && _bytesFrozen.SequenceEqual(value)) return;
+            if (_bytesFrozen.SequenceEqual(value)) return;
 
             FieldsChanged |= FieldChanges.IsFrozen;
             _bytesFrozen = value;

@@ -267,9 +267,9 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             return;
         }
-        if (property.Bytes == null)
+        if (property.Bytes.Length == 0)
         {
-            throw new Exception("Bytes is NULL.");
+            throw new Exception("Bytes array is empty.");
         }
 
         byte[] bytes;
@@ -313,9 +313,8 @@ public class PokeAByteInstance : IPokeAByteInstance
             return;
         }
         if (property.Address == null) throw new Exception($"{property.Path} does not have an address. Cannot write data to an empty address.");
-        if (property.Length == null) throw new Exception($"{property.Path}'s length is NULL, so we can't write bytes.");
 
-        var bytes = new byte[property.Length ?? 1];
+        byte[] bytes = new byte[property.Length];
 
         // Overlay the bytes onto the buffer.
         // This ensures that we can't overflow the property.
@@ -326,7 +325,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 bytes[i] = bytesToWrite[i];
             }
-            else if (property.Bytes != null)
+            else if (property.Bytes.Length > 0)
             {
                 bytes[i] = property.Bytes[i];
             }
@@ -375,7 +374,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     {
         if (target is PokeAByteProperty property)
         {
-            property.BytesFrozen = null;
+            property.BytesFrozen = [];
             await ClientNotifier.SendPropertiesChanged([property]);
         }
     }
