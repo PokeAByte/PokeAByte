@@ -214,6 +214,10 @@ public static class MapperEndpoints
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var path = model.Path.StripEndingRoute();
+        if (path.Contains('/'))
+        {
+            path = path.Replace('/', '.');
+        }
 
         var prop = instance.Mapper.Properties[path];
 
