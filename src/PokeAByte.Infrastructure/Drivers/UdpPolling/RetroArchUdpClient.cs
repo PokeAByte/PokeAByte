@@ -24,8 +24,7 @@ public class RetroArchUdpClient : IDisposable
 	public bool IsClientConnected =>
 		_isDisposed is false &&
 		_isConnected &&
-		_client is not null &&
-		_client.Client.Connected;
+		_client is not null;
 
 	public UdpReceiveResult? _receivedData { get; private set; }
 
@@ -105,12 +104,12 @@ public class RetroArchUdpClient : IDisposable
 		// byte.Parse().
 		int offset = 0;
 		byte[] value = new byte[byteCount];
-		for (int i = 0; i < value.Length - 1; i++)
+		for (int i = 0; i < value.Length; i++)
 		{
 			// While we do technically get ASCII and byte.Parse(ROS<byte>) parses utf8, we can still use it because
 			// UTF8 is backwards compatible with ASCII:
 			value[i] = ParseHexByte(input.Slice(offset, 2));
-			offset += 3;
+			offset += (i == value.Length - 1) ? 2 : 3; // Last byte has no trailing space
 		}
 		return value;
 	}
@@ -126,13 +125,32 @@ public class RetroArchUdpClient : IDisposable
 		{
 			var response = await _client.ReceiveAsync(cancellationToken);
 			Span<byte> bytes = response.Buffer;
+
+			// Trim any trailing whitespace (including newlines)
+			while (bytes.Length > 0 && (bytes[^1] == '\n' || bytes[^1] == '\r' || bytes[^1] == ' '))
+			{
+				bytes = bytes[..^1];
+			}
+
 			if (bytes.StartsWith(_readResponseStart))
 			{
-				bytes = bytes.Slice(17);
+				// Skip "READ_CORE_MEMORY " (note the space)
+				bytes = bytes.Slice(_readResponseStart.Length + 1);
 				int space = bytes.IndexOf((byte)' ');
-				string address = Encoding.ASCII.GetString(bytes[..space]);
-				var data = ParseReadMemoryResponse(bytes.Slice(space + 1));
-				_responses[string.Concat(address, "-", data.Length.ToString())] = data;
+				if (space > 0)
+				{
+					string address = Encoding.ASCII.GetString(bytes[..space]);
+					var dataSpan = bytes.Slice(space + 1);
+					var data = ParseReadMemoryResponse(dataSpan);
+
+					// Store using the actual data length for the key
+					string key = string.Concat(address, "-", data.Length.ToString());
+					_responses[key] = data;
+				}
+				else
+				{
+					return false;
+				}
 			}
 			return true;
 		}
@@ -175,8 +193,9 @@ public class RetroArchUdpClient : IDisposable
 			throw new Exception($"Unable to create UdpClient to SendPacket({command} {argument1} {argument2})");
 		}
 		byte[]? response = null;
-		_ = await _client.SendAsync(Encoding.ASCII.GetBytes($"{command} {argument1} {argument2}"));
+		string message = $"{command} {argument1} {argument2}";
 		string key = string.Concat(argument1, "-", argument2);
+		_ = await _client.SendAsync(Encoding.ASCII.GetBytes(message));
 		SpinWait.SpinUntil(() =>
 			{
 				return _responses.TryGetValue(key, out response);

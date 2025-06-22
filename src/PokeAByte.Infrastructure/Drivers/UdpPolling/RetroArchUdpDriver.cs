@@ -1,4 +1,4 @@
-using System.Globalization;
+using System.Net.NetworkInformation;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -8,6 +8,21 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
 public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
+    private static uint GetLoopbackMtu()
+    {
+        var loopbackDevice = NetworkInterface.GetAllNetworkInterfaces()
+            .FirstOrDefault(x => x.NetworkInterfaceType == NetworkInterfaceType.Loopback);
+        if (loopbackDevice == null)
+        {
+            // fallback to what seems to be the macOS default, which is smaller than on all other platforms.
+            return 16384u;
+        }
+        var result = (uint)loopbackDevice.GetIPProperties().GetIPv4Properties().Mtu;
+        return result;
+    }
+
+    // MTU minus some overhead, divided by 3 because we get 3 characters per byte requested:
+    private static uint _maxChunkSize = (uint)Math.Floor((GetLoopbackMtu() - 128) / 3d);
     private CancellationTokenSource? _connectionCts;
     public string ProperName { get; } = "RetroArch";
     public int DelayMsBetweenReads { get; }
@@ -23,7 +38,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         
     }
 
-    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
+    private static string ToHexadecimal(uint value) => $"{value:X}".ToLower();
 
     private Task ConnectAsync(CancellationToken cancellationToken)
     {
@@ -38,7 +53,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             {
                 if (!await _udpClientWrapper.ReceiveAsync(cancellationToken))
                 {
-                    _udpClientWrapper.Dispose();
+					break;
                 }
             }
             _udpClientWrapper.Dispose();
@@ -54,18 +69,55 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
             throw new DriverTimeoutException(memoryAddress, ProperName, null);
         }
-        var command = $"READ_CORE_MEMORY";
-        byte[]? response = await _udpClientWrapper.SendCommandAsync(
-            command, 
-            ToRetroArchHexdecimalString(memoryAddress), 
-            length.ToString()
-        );
-        if (response == null)
+        
+        // There is a limit to how much data we can receive in one UDP datagram.
+        // Break large reads into smaller chunks if necessary:    
+        if (length <= _maxChunkSize)
         {
-            Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
-            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            // Small read - do it directly
+            var command = $"READ_CORE_MEMORY";
+            byte[]? response = await _udpClientWrapper.SendCommandAsync(
+                command, 
+                ToHexadecimal(memoryAddress), 
+                length.ToString()
+            );
+            if (response == null)
+            {
+                Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
+                throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            }
+            return response;
         }
-        return response;
+        else
+        {
+            // Large read - break into chunks
+            var result = new byte[length];
+            uint offset = 0;
+            
+            while (offset < length)
+            {
+                uint chunkSize = Math.Min(_maxChunkSize, length - offset);
+                uint currentAddress = memoryAddress + offset;
+                
+                var command = $"READ_CORE_MEMORY";
+                byte[]? chunk = await _udpClientWrapper.SendCommandAsync(
+                    command, 
+                    ToHexadecimal(currentAddress), 
+                    chunkSize.ToString()
+                );
+                
+                if (chunk == null)
+                {
+                    Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
+                    throw new DriverTimeoutException(currentAddress, ProperName, null);
+                }
+                
+                Array.Copy(chunk, 0, result, offset, chunk.Length);
+                offset += (uint)chunk.Length;
+            }
+            
+            return result;
+        }
     }
 
     /// <summary>
@@ -74,7 +126,6 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
     /// <returns> A completed task. </returns>
     public Task EstablishConnection() => Task.CompletedTask;
     
-
     public async Task Disconnect() {
         if (_connectionCts != null)
         {
@@ -121,7 +172,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
         await _udpClientWrapper.SendAsync(
             "WRITE_CORE_MEMORY",
-            $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}"
+            $"{ToHexadecimal(memoryAddress)} {bytes}"
         );
     }
 
