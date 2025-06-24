@@ -55,16 +55,25 @@ public class PokeAByteInstance : IPokeAByteInstance
 
         // Get the file path from the filesystem provider.
         Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.FileId);
+        MemoryAddressBlock[]? blocksToRead = Mapper.PlatformOptions.Ranges;
         // Calculate the blocks to read from the mapper memory addresses.
-        var blocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
-        if (blocksToRead.Any())
+        if (Driver is not IBizhawkMemoryMapDriver)
         {
-            _logger.LogInformation($"Using {blocksToRead.Count()} memory read ranges from mapper.");
+            if (Mapper.Memory.ReadRanges.Any())
+            {
+                blocksToRead = Mapper.Memory.ReadRanges
+                    .Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End))
+                    .ToArray();
+                _logger.LogInformation($"Using {Mapper.Memory.ReadRanges.Count()} memory read ranges from mapper.");
+            }
+            else
+            {
+                _logger.LogInformation("Using default driver memory read ranges.");
+            }
         }
         else
         {
-            _logger.LogInformation("Using default driver memory read ranges.");
-            blocksToRead = Mapper.PlatformOptions.Ranges;
+            _logger.LogInformation("Bizhawk integration tool does not support custom read ranges. Using defaults.");
         }
         var lastBlock = blocksToRead.OrderByDescending(x => x.EndingAddress).First();
         MemoryContainerManager = new MemoryManager(lastBlock.EndingAddress);
@@ -116,10 +125,10 @@ public class PokeAByteInstance : IPokeAByteInstance
     }
 
     public async Task StartProcessing()
-    {
-        // Read twice
-        await Read();
-        await Read();
+        {
+            // Read twice
+            await Read();
+            await Read();
 
         await ClientNotifier.SendMapperLoaded(Mapper);
         // Start the read loop once successfully running once.
@@ -136,15 +145,15 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 await Read();
                 await Task.Delay(Driver.DelayMsBetweenReads);
-            }
-            catch (Exception ex)
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occured when read looping the mapper.");
+            if (OnProcessingAbort != null)
             {
-                _logger.LogError(ex, "An error occured when read looping the mapper.");
-                if (OnProcessingAbort != null)
-                {
-                    await OnProcessingAbort.Invoke();
-                }
+                await OnProcessingAbort.Invoke();
             }
+        }
         }
         _readLoopFinished.Set();
     }
@@ -176,7 +185,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             property.FieldsChanged = FieldChanges.None;
         }
- 
+
         // Preprocessor
         if (HasPreprocessor)
         {
@@ -359,6 +368,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             await UnfreezeProperty(property);
         }
+
+        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
 
     public async Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen)

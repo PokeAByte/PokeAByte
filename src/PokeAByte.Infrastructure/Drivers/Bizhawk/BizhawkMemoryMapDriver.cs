@@ -105,7 +105,11 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
                     x => transferBlock.Start >= x.PhysicalStartingAddress
                         && transferBlock.Start + transferBlock.Data.Length <= x.PhysicalEndingAddress
                 )
-                .First();
+                .FirstOrDefault();
+            if (block == null)
+            {
+                continue;
+            }
             var offset = transferBlock.Start - block.PhysicalStartingAddress;
             ReadBizhawkData(block.CustomPacketTransmitPosition + (int)offset, transferBlock.Data.AsSpan());
         }
