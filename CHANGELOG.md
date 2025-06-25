@@ -1,10 +1,11 @@
-# Future
+# 0.9.0
 
 ## Breaking
 
 * Replaced the previous frontend (UI) with a new one written in Preact.
 * Removed the internal performance measurements and the `SHOW_READ_LOOP_STATISTICS` setting.
-* Removed the intermediate `PropertyModel` type that is returned from some REST endpoints. The data given to clients may slightly differ now.
+* Removed the intermediate `PropertyModel` type that is returned from some REST endpoints. 
+  * The data given to clients may slightly differ now, but is now consistent between the REST endpoints and the WebSocket.
 * Removed the following REST endpoints:
   * `files/mapper/refresh_archived_list`
 * Moved the following APIs from `IPokeAByteProperty` to `IPokeAByteInstance`:
@@ -17,27 +18,35 @@
 
 ## Features
 
-* Added linux support for the Bizhawk integration tool.
-* Added linux support for the Bizhawk driver.
+* Added Linux support for the BizHawk integration tool.
+* Added Linux support for the BizHawk driver.
+* Added a "Reload mapper" button to the property editor.
+* Reduced the download size from roughly 40mb to 10mb (zipped, exact numbers depend on platform).
 
 ## Bugfixes
-* The Poke-A-Byte Integration Tool for bizhawk no longer crashes if it is closed and then re-opened in the emulator.
+* The Poke-A-Byte Integration Tool for BizHawk no longer crashes if it is closed and then re-opened in the emulator.
+* Fixed compatibility of the RetroArch driver with macOS (with a lot of help from MVF).
 
 ## Performance
 
-* Improved the performance of the bizhawk driver by being smarter with the work done per read and reducing the memory overhead.
+* The UI should be more responsive. Having the UI open should also be less of a strain on Poke-A-Byte.
+* Improved the performance of the BizHawk driver by being smarter with the work done per read and reducing memory overhead.
 * Some minor performance improvements by not repeatedly parsing the `Bits` string.
-* Reduced memory footprint by getting rid of blazor/mudblazor.
-  * This also improved performance somewhat because the update mechanism for the blazor UI no longer exists.
-* Minor memory usage improvement by only instantiating the Bizhawk and Retroarch drivers when a connection to the respective
+* Reduced memory footprint by getting rid of Blazor/MudBlazor.
+  * This also improved performance somewhat because the update mechanism for the Blazor UI no longer exists.
+* Minor memory usage improvement by only instantiating the BizHawk and RetroArch drivers when a connection to the respective
   emulator can be established.
 * Fixed some minor memory leaks that occur when repeatedly loading and unloading mappers.
-* Serialize `IPokeAByteProperty` directly instead of using an intermediary anonymous object for the `PropertiesChanged` websocket event.
-* Use one contigous byte array for storing game memory, this skips a bunch of work to find the proper `ByteArray` based on address and length.
+* Serialize `IPokeAByteProperty` directly instead of using an intermediary anonymous object for the `PropertiesChanged` Websocket event.
+* Use one contiguous byte array for storing game memory, this skips a bunch of work to find the proper `ByteArray` based on address and length.
 * Reduced memory use and memory-churn.
 
-Overall, using the Pokemon Emerald mapper and Bizhawk on Linux, I see a reduction in CPU usage of ~30% and a reduction 
-of memory utilization of ~34%. 
+Overall, using the Pokemon Emerald mapper (the one for an unpatched game) and BizHawk on Linux, I see a reduction in CPU 
+usage of ~30% and a reduction of memory utilization of ~34%. 
+
+# Other changes
+- The frontend no longer references public CDNs for fonts or images. This should mean Poke-A-Byte can be used offline with less problems.
+- Some calls to the GitHub API are now being cached for 60 seconds.
 
 # 0.8.1 (2024-11-09)
 ## Bug Fix
@@ -62,8 +71,8 @@ of memory utilization of ~34%.
 ## Bugfixes
 
 * Fixed the "Open Mapper Folder" button on Linux (and hopefully macOS)
-* Fixed downloading of mappers on linux caused by case mismatch of the target download folder.
-* Fixed a failure to reconnect to RetroArch after restarting the emulator. Bugreport
+* Fixed downloading of mappers on Linux caused by case mismatch of the target download folder.
+* Fixed a failure to reconnect to RetroArch after restarting the emulator. 
 * Fixed some values not updating in the Poke-A-Byte web UI properly (caused by failing to length-validate a glossary string).
 
 ## Performance
