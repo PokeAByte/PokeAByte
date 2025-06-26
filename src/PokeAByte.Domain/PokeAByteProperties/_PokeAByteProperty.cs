@@ -207,7 +207,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
 
         byte[] bytes;
-        if (Length == null) { throw new Exception("Length is NULL."); }
         try
         {
             var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length);

@@ -1,0 +1,9 @@
+<Project>
+   <PropertyGroup>
+	<DeterministicSourcePaths>true</DeterministicSourcePaths>
+	<Deterministic>true</Deterministic>
+	<PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=src/</PathMap>
+	<UseArtifactsOutput>true</UseArtifactsOutput>
+	<ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+   </PropertyGroup>
+</Project>

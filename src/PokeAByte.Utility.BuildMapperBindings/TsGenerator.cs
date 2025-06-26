@@ -260,7 +260,7 @@ public static class TsGenerator
         result.AppendLine(string.Empty);
 
         // Properties
-        var meta = PokeAByteMapperXmlFactory.GetMetadata(doc);
+        var meta = PokeAByteMapperXmlFactory.GetMetadata(doc, "");
         result.AppendLine("export class MapperClient extends AbstractMapperClient {");
 
         result.AppendLine("properties = {");

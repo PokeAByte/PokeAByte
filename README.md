@@ -20,7 +20,7 @@ See the [troubleshooting guide](./docs/Troubleshooting.md).
 2) Open VSCode and click `File > Open Folder`, find where you cloned the repo and select the `src` folder
 3) Open a new terminal in VSCode: this can be done by clicking `Terminal` on the top of the window and then `New Terminal`
 4) Click into the terminal and type `dotnet publish`. This will publish all projects into their respective directories
- - BizHawk External Tool: `\src\PokeAByte.Integrations.BizHawk\bin\Release\net48\publish`
- - PokeAByte WebAPI/Frontend: `\src\PokeAByte.Web\bin\Release\net9.0\win-x64\publish`
- - Mapper Tree Builder: `\src\PokeAByte.Utility.BuildMapperTree\bin\Release\net9.0\publish`
+ - BizHawk External Tool: `src/artifacts/publish/PokeAByte.Integrations.BizHawk/release`
+ - PokeAByte WebAPI/Frontend: `src/artifacts/publish/PokeAByte.Web/release/`
+ - Mapper Tree Builder: `src/artifacts/publish/PokeAByte.Utility.BuildMapperTree/release`
 5) To run Poke-A-Byte go to the published folder and run `PokeAByte.Web.exe`
