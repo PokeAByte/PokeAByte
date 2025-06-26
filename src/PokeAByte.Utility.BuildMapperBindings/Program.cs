@@ -29,6 +29,7 @@ foreach (var xmlFilePath in filePaths)
 
         // Generate typescript bindings.
         var tsResult = TsGenerator.FromMapper(contents);
+        Console.WriteLine($"Wrote ts file: {tsFilePath}");
         await File.WriteAllTextAsync(tsFilePath, tsResult);
     }
     catch (Exception ex)

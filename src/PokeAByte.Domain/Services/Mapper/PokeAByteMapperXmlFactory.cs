@@ -93,6 +93,7 @@ public static class PokeAByteMapperXmlFactory
                         "binaryCodedDecimal" => PropertyType.BinaryCodedDecimal,
                         "bitArray" => PropertyType.BitArray,
                         "bool" => PropertyType.Bool,
+                        "bit" => PropertyType.Bool,
                         "int" => PropertyType.Int,
                         "string" => PropertyType.String,
                         "uint" => PropertyType.Uint,

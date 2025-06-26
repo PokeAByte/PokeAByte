@@ -9,7 +9,7 @@ public static class TsGenerator
 {
     static string GetTypescriptInterface(string name)
     {
-        return $"I" + name.First().ToString().ToUpper() + name.Substring(1, name.Length - 1);
+        return $"I" + name.CapitalizeFirstLetter();
     }
 
     static string GetTypescriptEnumName(string name)
@@ -24,9 +24,9 @@ public static class TsGenerator
             return "NONE";
         }
 
-        var strippedString = new String(name
-                                .Where(x => char.IsLetterOrDigit(x) || char.IsWhiteSpace(x))
-                                .ToArray());
+        var strippedString = string.Concat(
+            name.Where(x => char.IsLetterOrDigit(x) || char.IsWhiteSpace(x))
+        );
 
         if (strippedString.Length > 0 && char.IsNumber(strippedString[0]))
         {
@@ -45,8 +45,17 @@ public static class TsGenerator
                     var referenceType = el.GetOptionalAttributeValue("reference");
                     if (string.IsNullOrEmpty(referenceType) == false)
                     {
-                        var referenceNode = el?.Document?.Descendants("references")?.Descendants(referenceType)?.Single() ??
+                        XElement referenceNode;
+                        try
+                        {
+                            referenceNode = el?.Document?.Descendants("references")?.Descendants(referenceType)?.Single() ??
                                             throw new Exception($"Unable to determine reference type {referenceType}.");
+                        }
+                        catch (Exception)
+                        {
+                                            throw new Exception($"Unable to determine reference type {referenceType}.");
+                            
+                        }
 
                         var referenceNodeType = referenceNode.GetOptionalAttributeValue("type") ?? "string";
                         if (referenceNodeType == "string")
