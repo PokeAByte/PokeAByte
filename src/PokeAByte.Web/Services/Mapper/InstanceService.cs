@@ -44,13 +44,18 @@ public class InstanceService(
         }
     }
 
-    private async Task HandleProcessingAbort()
+    private Task HandleProcessingAbort()
     {
         if (_instance != null)
         {
-            await _instance.DisposeAsync();
-            _instance = null;
+            _ = Task.Run(async () =>
+            {
+
+                await _instance.DisposeAsync();
+                _instance = null;
+            });
         }
+        return Task.CompletedTask;
     }
 
     public async Task StopProcessing()
