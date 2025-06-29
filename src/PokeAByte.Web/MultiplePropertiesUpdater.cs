@@ -20,7 +20,7 @@ public static class MultiplePropertiesUpdater
                 var bitRange = PropertyLogic.ParseBits(next.Key.Bits);
                 return prev + bitRange.Length;
             });
-        if (totalBitCount >= len)
+        if (totalBitCount > len)
             throw new InvalidOperationException("Total bit count exceeds the maximum size of the bit array.");
 
         //We want to fill this new output array with the original value to maintain consistency 
