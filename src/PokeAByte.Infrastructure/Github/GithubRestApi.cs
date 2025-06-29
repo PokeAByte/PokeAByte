@@ -14,7 +14,18 @@ public record GithubSettings : IGithubSettings
     [JsonPropertyName("api_version")]
     public string ApiVersion { get; set; } = "2022-11-28";
     [JsonPropertyName("token")]
-    public string Token { get; set; } = "";
+    public string Token
+    {
+        get
+        {
+            return token;
+        }
+
+        set
+        {
+            token = value;
+        }
+    }
     [JsonPropertyName("owner")]
     public string Owner { get; set; } = "PokeAByte";
     [JsonPropertyName("repo")]
@@ -27,6 +38,7 @@ public record GithubSettings : IGithubSettings
 
     [JsonIgnore]
     public static string GithubUrl = "https://github.com";
+    private string token = "";
 
     public string GetGithubUrl() => $"{GithubUrl}/{Owner}/{Repo}/{Directory}";
 
@@ -49,5 +61,5 @@ public record GithubSettings : IGithubSettings
         Directory = apiSettings.Directory;
     }
 
-    public string GetFormattedToken() => string.IsNullOrWhiteSpace(Token) ? $"Bearer {Token}" : "";
+    public string GetFormattedToken() => !string.IsNullOrWhiteSpace(Token) ? $"Bearer {Token}" : "";
 }

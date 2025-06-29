@@ -163,7 +163,7 @@ public class GitHubService : IGithubService
     public void ApplySettings(IGithubSettings settings)
     {
         this.Settings.CopySettings(settings);
-        var jsonData = JsonSerializer.Serialize(this, GithubSettingsContext.Default.GithubSettings);
+        var jsonData = JsonSerializer.Serialize(settings, GithubSettingsContext.Default.GithubSettings);
         if (string.IsNullOrWhiteSpace(jsonData))
         {
             _logger.LogError("Failed to save changes to the Github settings file.");

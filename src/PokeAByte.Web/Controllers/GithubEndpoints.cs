@@ -9,19 +9,19 @@ public static class GithubEndpoints
     public static void MapGithubEndpoints(this WebApplication app)
     {
         app.MapPost("/files/save_github_settings", SaveGithubSettingsAsync);
-        app.MapGet("/files/get_github_settings", (IGithubService githubService) => githubService.Settings);
+        app.MapGet("/files/get_github_settings", (IGithubService githubService) =>
+        {
+            return githubService.Settings;
+        });
         app.MapGet("/files/test_github_settings", TestGithubSettingsAsync);
         app.MapGet("/files/get_github_link", (IGithubService githubService) => githubService.Settings.GetGithubUrl());
     }
 
-    public static async Task<IResult> SaveGithubSettingsAsync(
-        IMapperUpdateManager updateManager,
-        IGithubService githubService,
-        IMapperFileService mapperFileService,
-        ILogger<RestAPI> logger,
+    public static IResult SaveGithubSettingsAsync(
+        [FromServices] IGithubService githubService,
         [FromBody] GithubSettings settings)
     {
-        await FilesEndpoints.CheckForUpdatesAsync(mapperFileService, updateManager);
+        // await FilesEndpoints.CheckForUpdatesAsync(mapperFileService, updateManager);
         githubService.ApplySettings(settings);
         return TypedResults.Ok();
     }
