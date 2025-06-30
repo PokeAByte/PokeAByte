@@ -11,12 +11,12 @@ public interface IDriverService
 {
     IStaticMemoryDriver StaticMemory { get; }
 
-    Task<IBizhawkMemoryMapDriver> GetBizhawkDriver();
-    Task<IRetroArchUdpPollingDriver> GetRetroArchDriver();
+    Task<IPokeAByteDriver> GetBizhawkDriver();
+    Task<IPokeAByteDriver> GetRetroArchDriver();
     Task<IPokeAByteDriver?> TestDrivers();
 }
 
-public class DriverService : IDriverService
+public class DriverService : IDriverService, IAsyncDisposable
 {
     public static readonly int MaxAttempts = 25;
     private const int MaxPauseMs = 50;
@@ -24,6 +24,7 @@ public class DriverService : IDriverService
     private readonly AppSettings _appSettings;
     private readonly ILogger<RetroArchUdpDriver> _driverLogger;
     private readonly IStaticMemoryDriver _staticMemory;
+    private IPokeAByteDriver? _currentDriver;
 
     public DriverService(
         AppSettings appSettings,
@@ -37,18 +38,37 @@ public class DriverService : IDriverService
 
     public IStaticMemoryDriver StaticMemory => _staticMemory;
 
-    public async Task<IBizhawkMemoryMapDriver> GetBizhawkDriver()
+    private async Task Cleanup()
     {
-        var driver = new BizhawkMemoryMapDriver(_appSettings);
-        await driver.EstablishConnection();
-        return driver;
+        if (_currentDriver != null)
+        {
+            await _currentDriver.Disconnect();
+            _currentDriver = null;
+        }
     }
 
-    public async Task<IRetroArchUdpPollingDriver> GetRetroArchDriver()
+    public async Task<IPokeAByteDriver> GetBizhawkDriver()
     {
-        var driver = new RetroArchUdpDriver(_driverLogger, _appSettings);
-        await driver.EstablishConnection();
-        return driver;
+        await Cleanup();
+        _currentDriver = new BizhawkMemoryMapDriver(_appSettings);
+        await _currentDriver.EstablishConnection();
+        return _currentDriver;
+    }
+
+    public async Task<IPokeAByteDriver> GetRetroArchDriver()
+    {
+        await Cleanup();
+        _currentDriver = new RetroArchUdpDriver(_driverLogger, _appSettings);
+        await _currentDriver.EstablishConnection();
+        return _currentDriver;
+    }
+
+    public async Task<IPokeAByteDriver> GetPokeAProtocolDriver()
+    {
+        await Cleanup();
+        _currentDriver = new PokeAProtocolDriver(_appSettings);
+        await _currentDriver.EstablishConnection();
+        return _currentDriver;
     }
 
     public async Task<IPokeAByteDriver?> TestDrivers()
@@ -59,9 +79,7 @@ public class DriverService : IDriverService
         {
             if (await PokeAProtocolDriver.Probe(_appSettings))
             {
-                var driver = new PokeAProtocolDriver(_appSettings);
-                await driver.EstablishConnection();
-                return driver;
+                return await GetPokeAProtocolDriver();
             }
             if (await BizhawkMemoryMapDriver.Probe(_appSettings))
             {
@@ -79,5 +97,11 @@ public class DriverService : IDriverService
             await Task.Delay(MaxPauseMs);
         }
         return null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await this.Cleanup();
+        return;
     }
 }

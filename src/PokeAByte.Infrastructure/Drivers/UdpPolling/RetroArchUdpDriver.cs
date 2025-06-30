@@ -11,7 +11,7 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 /// <summary>
 /// Driver to communicate with RetroArch and compatible emulators.
 /// </summary>
-public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
+public class RetroArchUdpDriver : IPokeAByteDriver
 {
     private static uint GetLoopbackMtu()		
     {

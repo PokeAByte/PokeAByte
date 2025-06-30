@@ -73,7 +73,7 @@ public interface IPokeAByteDriver
 }
 
 public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
-public interface IRetroArchUdpPollingDriver : IPokeAByteDriver { }
+
 public interface IStaticMemoryDriver : IPokeAByteDriver
 {
     Task SetMemoryFragment(string filename);

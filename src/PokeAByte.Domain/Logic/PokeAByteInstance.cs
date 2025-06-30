@@ -32,6 +32,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     public IMemoryManager MemoryContainerManager { get; private set; }
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
+    private ManualResetEventSlim _readLoopFinished = new ManualResetEventSlim(false);
 
 #if DEBUG
     private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
@@ -145,6 +146,7 @@ public class PokeAByteInstance : IPokeAByteInstance
                 }
             }
         }
+        _readLoopFinished.Set();
     }
 
     List<IPokeAByteProperty> _propertiesChanged = [];
@@ -174,7 +176,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             property.FieldsChanged = FieldChanges.None;
         }
-
+ 
         // Preprocessor
         if (HasPreprocessor)
         {
@@ -247,10 +249,8 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     public async ValueTask DisposeAsync()
     {
-        if (ReadLoopToken.Token.CanBeCanceled)
-        {
-            ReadLoopToken.Cancel();
-        }
+        await ReadLoopToken.CancelAsync();
+        _readLoopFinished.Wait();
         Mapper.Dispose();
         JavascriptEngine?.Dispose();
         await Driver.Disconnect();
