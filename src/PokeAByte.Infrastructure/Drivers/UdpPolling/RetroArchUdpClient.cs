@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using PokeAByte.Domain.Interfaces;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
@@ -17,7 +17,7 @@ public class RetroArchUdpClient : IDisposable
     private readonly int _timeout;
 
     [MemberNotNullWhen(true, nameof(_client))]
-    public bool IsClientConnected => _client != null && _client.Client.Connected;
+    public bool IsClientConnected => _client is not null;
 
     public RetroArchUdpClient(string host, int port, int timeout)
     {
@@ -31,7 +31,7 @@ public class RetroArchUdpClient : IDisposable
         _client.Connect(new IPEndPoint(IPAddress.Parse(host), port));
     }
 
-    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? value.ToString() : $"{value:x2}";
+    private static string ToHexadecimal(uint value) => $"{value:X}".ToLower();
 
     private static int GetDigitFromHex(byte input)
     {
@@ -51,38 +51,56 @@ public class RetroArchUdpClient : IDisposable
     private static byte[] ParseReadMemoryResponse(ReadOnlySpan<byte> input)
     {
         var byteCount = input.Count((byte)' ') + 1;
+        // Then we can skip over the remaining span 3 characters at a time, slicing out each character-pair for the
+        // byte.Parse().
         int offset = 0;
         byte[] value = new byte[byteCount];
-        for (int i = 0; i < value.Length - 1; i++)
+        for (int i = 0; i < value.Length; i++)
         {
+            // While we do technically get ASCII and byte.Parse(ROS<byte>) parses utf8, we can still use it because
+            // UTF8 is backwards compatible with ASCII:
             value[i] = ParseHexByte(input.Slice(offset, 2));
-            offset += 3;
+            offset += (i == value.Length - 1) ? 2 : 3; // Last byte has no trailing space
         }
         return value;
     }
 
-    public async ValueTask<bool> ReceiveAsync(CancellationToken cancellationToken)
+
+    public async Task<bool> ReceiveAsync(CancellationToken cancellationToken)
     {
         if (!IsClientConnected)
         {
-            throw new Exception("Connection to emulator UDP server lost.");
+            Console.WriteLine("not connected to client");
+            return false;
         }
         try
         {
             var response = await _client.ReceiveAsync(cancellationToken);
-            ReadOnlySpan<byte> bytes = response.Buffer;
+            Span<byte> bytes = response.Buffer;
+
+            // Trim any trailing whitespace (including newlines)
+            while (bytes.Length > 0 && (bytes[^1] == '\n' || bytes[^1] == '\r' || bytes[^1] == ' '))
+            {
+                bytes = bytes[..^1];
+            }
+
             if (bytes.StartsWith(_readResponseStart))
             {
-                bytes = bytes.Slice(17);
+                // Skip "READ_CORE_MEMORY " (note the space)
+                bytes = bytes.Slice(_readResponseStart.Length + 1);
                 int space = bytes.IndexOf((byte)' ');
-                uint address = uint.Parse(bytes[..space], System.Globalization.NumberStyles.HexNumber);
-                _responses[address] = ParseReadMemoryResponse(bytes.Slice(space + 1));
+                if (space > 0)
+                {
+                    uint address = uint.Parse(bytes[..space], NumberStyles.HexNumber);
+                    var dataSpan = bytes.Slice(space + 1);
+                    var data = ParseReadMemoryResponse(dataSpan);
+                    _responses[address] = data;
+                }
             }
             return true;
         }
-        catch(Exception ex)
+        catch
         {
-            Console.WriteLine(ex);
             return false;
         }
     }
@@ -102,7 +120,7 @@ public class RetroArchUdpClient : IDisposable
                 $"Connection to emulator UDP server lost. Unable to send command \"WRITE_CORE_MEMORY {arguments}\""
             );
         }
-        return _client.SendAsync(Encoding.UTF8.GetBytes($"WRITE_CORE_MEMORY {arguments}"));
+        return _client.SendAsync(Encoding.ASCII.GetBytes($"WRITE_CORE_MEMORY {arguments}"));
     }
 
     /// <summary>
@@ -114,30 +132,25 @@ public class RetroArchUdpClient : IDisposable
     /// <exception cref="Exception">
     /// The UDP client is unitiliazed, disconnected, has been disposed, or is in an otherwise unusable state.
     /// </exception>
-    public async ValueTask<bool> SendReadCommandAsync(BlockData block)
+    public async ValueTask<byte[]?> SendReadCommandAsync(uint start, uint length)
     {
         if (!IsClientConnected)
         {
             throw new Exception(
-                $"Connection to emulator UDP server lost. Unable to send command \"READ_CORE_MEMORY {block.Start} {block.Data.Length}\""
+                $"Connection to emulator UDP server lost. Unable to send command \"READ_CORE_MEMORY {start} {length}\""
             );
         }
-        bool success = false;
+        byte[]? response = null;
         _ = await _client.SendAsync(
-            Encoding.UTF8.GetBytes(string.Concat("READ_CORE_MEMORY ", ToRetroArchHexdecimalString(block.Start), " ", block.Data.Length.ToString()))
+            Encoding.UTF8.GetBytes(string.Concat("READ_CORE_MEMORY ", ToHexadecimal(start), " ", length.ToString()))
         );
         SpinWait.SpinUntil(() =>
             {
-                if (_responses.TryGetValue(block.Start, out var response))
-                {
-                    response.AsSpan().CopyTo(block.Data.AsSpan());
-                    success = true;
-                }
-                return success;
+                return _responses.TryGetValue(start, out response);
             },
             TimeSpan.FromMilliseconds(_timeout)
         );
-        return success;
+        return response;
     }
 
     public void Dispose()

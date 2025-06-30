@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
@@ -12,6 +13,23 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 /// </summary>
 public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
 {
+    private static uint GetLoopbackMtu()		
+    {
+        var loopbackDevice = NetworkInterface.GetAllNetworkInterfaces()		
+            .FirstOrDefault(x => x.NetworkInterfaceType == NetworkInterfaceType.Loopback);
+		
+        if (loopbackDevice == null)		
+        {		
+            // fallback to what seems to be the macOS default, which is smaller than on all other platforms.		
+            return 16384u;		
+        }		
+        var result = (uint)loopbackDevice.GetIPProperties().GetIPv4Properties().Mtu;		
+        return result;		
+    }
+
+    // MTU minus some overhead, divided by 3 because we get 3 characters per byte requested:		
+    private static uint _maxChunkSize = (uint)Math.Floor((GetLoopbackMtu() - 128) / 3d);
+
     private CancellationTokenSource? _connectionCts;
     public string ProperName { get; } = "RetroArch";
     public int DelayMsBetweenReads { get; }
@@ -42,7 +60,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             {
                 if (!await _udpClientWrapper.ReceiveAsync(cancellationToken))
                 {
-                    _udpClientWrapper.Dispose();
+                    break;
                 }
             }
             _udpClientWrapper.Dispose();
@@ -58,11 +76,35 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
             throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        bool result = await _udpClientWrapper.SendReadCommandAsync(transferBlock);
-        if (!result)
+        uint length = (uint)transferBlock.Data.Length;
+        if (length <= _maxChunkSize)
         {
-            Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
-            throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
+            byte[]? response = await _udpClientWrapper.SendReadCommandAsync(transferBlock.Start, length);
+            if (response == null)
+            {
+                Logger.LogDebug($"(unchunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
+                throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
+            }
+            response.AsSpan().CopyTo(transferBlock.Data);
+        }
+        else
+        {
+            // Large read - break into chunks		
+            uint offset = 0;
+            while (offset < length)
+            {
+                uint chunkSize = Math.Min(_maxChunkSize, length - offset);
+                uint currentAddress = transferBlock.Start + offset;
+                var command = $"READ_CORE_MEMORY";
+                byte[]? chunk = await _udpClientWrapper.SendReadCommandAsync(currentAddress, chunkSize);
+                if (chunk == null)
+                {
+                    Logger.LogDebug($"(chunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
+                    throw new DriverTimeoutException(currentAddress, ProperName, null);
+                }
+                Array.Copy(chunk, 0, transferBlock.Data, offset, chunk.Length);
+                offset += (uint)chunk.Length;
+            }
         }
         return true;
     }
