@@ -78,7 +78,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
     public FieldChanges FieldsChanged { get; set; } = FieldChanges.None;
 
-    protected object? ToValue(in byte[] data, IPokeAByteMapper mapper)
+    internal object? ToValue(in byte[] data, IPokeAByteMapper mapper)
     {
         switch (Type)
         {
@@ -226,7 +226,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             Console.WriteLine(e);
             throw new Exception(
-                $"Unable to retrieve bytes for property '{Path}' at address {Address?.ToHexdecimalString()}. A byte array length of zero was returned?"
+                $"Unable to retrieve bytes for property '{Path}': {e.Message}"
             );
         }
         Address = address;

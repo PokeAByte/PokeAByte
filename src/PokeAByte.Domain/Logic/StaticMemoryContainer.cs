@@ -36,7 +36,7 @@ public class StaticMemoryContainer : IMemoryNamespace
         if (!CheckRange(address, length))
         {
             throw new Exception(
-                $"Invalid memory read: {address:X2} - {address + length:X2} is outside of mapped memory regions."
+                $"Invalid memory read: {address:X2} - {address + length:X2} is outside of available memory regions. Check mapper."
             );
         }
         try

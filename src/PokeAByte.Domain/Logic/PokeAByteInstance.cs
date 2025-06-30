@@ -12,6 +12,18 @@ using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Domain.Logic;
 
+public class MapperProblem : IProblemDetails
+{
+    public MapperProblem(string title, string detail)
+    {
+        Title = title;
+        Detail = detail;
+    }
+
+    public string Title { get; }
+    public string Detail { get; }
+}
+
 public class PokeAByteInstance : IPokeAByteInstance
 {
     private readonly ILogger<PokeAByteInstance> _logger;
@@ -75,8 +87,9 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             _logger.LogInformation("Bizhawk integration tool does not support custom read ranges. Using defaults.");
         }
-        var lastBlock = blocksToRead.OrderByDescending(x => x.EndingAddress).First();
-        MemoryContainerManager = new MemoryManager(lastBlock.EndingAddress);
+
+
+        MemoryContainerManager = new MemoryManager(blocksToRead);
         _transferBlocks = new BlockData[blocksToRead.Length];
         int i = 0;
         foreach (var block in blocksToRead)
@@ -125,10 +138,24 @@ public class PokeAByteInstance : IPokeAByteInstance
     }
 
     public async Task StartProcessing()
+    {
+        try
         {
             // Read twice
             await Read();
             await Read();
+        }
+        catch (Exception ex)
+        {
+            this._readLoopFinished.Set();
+            _logger.LogError(ex, "An error occured when read looping the mapper.");
+            await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+            if (OnProcessingAbort != null)
+            {
+                await OnProcessingAbort.Invoke();
+            }
+            throw;
+        }
 
         await ClientNotifier.SendMapperLoaded(Mapper);
         // Start the read loop once successfully running once.
@@ -139,23 +166,27 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     private async Task ReadLoop()
     {
-        while (ReadLoopToken.IsCancellationRequested == false)
+        try
         {
-            try
+            while (ReadLoopToken.IsCancellationRequested == false)
             {
                 await Read();
                 await Task.Delay(Driver.DelayMsBetweenReads);
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occured when read looping the mapper.");
+            await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
             if (OnProcessingAbort != null)
             {
                 await OnProcessingAbort.Invoke();
             }
         }
+        finally
+        {
+            _readLoopFinished.Set();
         }
-        _readLoopFinished.Set();
     }
 
     List<IPokeAByteProperty> _propertiesChanged = [];
@@ -207,6 +238,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError($"Property {property.Path} failed to run processor. {ex.Message}");
+                await ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
             }
         }
 
@@ -311,7 +343,6 @@ public class PokeAByteInstance : IPokeAByteInstance
             // They want to do it themselves entirely in Javascript.
             return;
         }
-
         await WriteBytes(property, bytes, freeze);
     }
 
@@ -357,9 +388,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
         }
-
-        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
-
+        property.Bytes = bytes;
+        property.Value = property.CalculateObjectValue(this, bytes);
         if (freeze == true)
         {
             await this.FreezeProperty(property, bytes);
@@ -368,7 +398,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             await UnfreezeProperty(property);
         }
-
         await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
 

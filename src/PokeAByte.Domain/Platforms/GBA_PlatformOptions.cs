@@ -13,7 +13,8 @@ public class GBA_PlatformOptions : IPlatformOptions
     /// <inheritdoc/>
     public MemoryAddressBlock[] Ranges { get; } =
     [
-        new ("Partial EWRAM 1", 0x00000000, 0x00003FFF),
+        new ("ROM HEADER", 0x00000000, 0x00003FFF),
+        new ("Partial EWRAM 1", 0x2020000, 0x2021FFF),
         new ("Partial EWRAM 2", 0x2022000, 0x2023FFF),
         new ("Partial EWRAM 3", 0x2024000, 0x2025FFF),
         new ("Partial EWRAM 4", 0x2026000, 0x2027FFF),

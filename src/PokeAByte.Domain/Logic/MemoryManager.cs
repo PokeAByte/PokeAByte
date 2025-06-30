@@ -8,9 +8,10 @@ namespace PokeAByte.Domain.Logic;
 /// </summary>
 public class MemoryManager : IMemoryManager
 {
-    public MemoryManager(uint gameMemorySize)
+    public MemoryManager(MemoryAddressBlock[] blocksToRead)
     {
-        DefaultNamespace = new StaticMemoryContainer(gameMemorySize);
+        DefaultNamespace = new StaticMemoryContainer(blocksToRead);
+        // DefaultNamespace = new MemoryNamespace();
         Namespaces = new Dictionary<string, IMemoryNamespace>()
         {
             { "default", DefaultNamespace }
