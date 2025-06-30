@@ -52,6 +52,7 @@ public static class MapperEndpoints
             Meta = new MapperMetaModel()
             {
                 Id = instanceService.Instance.Mapper.Metadata.Id,
+                FileId = instanceService.Instance.Mapper.Metadata.FileId,
                 GameName = instanceService.Instance.Mapper.Metadata.GameName,
                 GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
                 MapperReleaseVersion = appSettings.MAPPER_VERSION
@@ -97,6 +98,7 @@ public static class MapperEndpoints
         {
             Id = meta.Id,
             GameName = meta.GameName,
+            FileId = meta.FileId,
             GamePlatform = meta.GamePlatform,
             MapperReleaseVersion = appSettings.MAPPER_VERSION
         };

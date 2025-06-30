@@ -17,6 +17,7 @@ public class UpdateHub(IInstanceService instanceService, Domain.Models.AppSettin
                 Meta = new MapperMetaModel
                 {
                     Id = mapper.Metadata.Id,
+                    FileId = mapper.Metadata.FileId,
                     GameName = mapper.Metadata.GameName,
                     GamePlatform = mapper.Metadata.GamePlatform,
                     MapperReleaseVersion = appSettings.MAPPER_VERSION

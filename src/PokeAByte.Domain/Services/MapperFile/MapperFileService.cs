@@ -155,7 +155,7 @@ public class MapperFileService : IMapperFileService
             scriptRoot = MapperPaths.MapperDirectory;
             scriptPath = "./" + Path.GetRelativePath(MapperPaths.MapperDirectory, javascriptAbsolutePath);
         }
-        return new MapperContent(mapperContents, scriptPath, scriptRoot);
+        return new MapperContent(mapperId, mapperContents, scriptPath, scriptRoot);
     }
 
     /// <summary>

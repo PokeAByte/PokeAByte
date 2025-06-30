@@ -53,7 +53,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         ReadLoopToken = new CancellationTokenSource();
 
         // Get the file path from the filesystem provider.
-        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml);
+        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.FileId);
         // Calculate the blocks to read from the mapper memory addresses.
         var blocksToRead = Mapper.Memory.ReadRanges.Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End)).ToArray();
         if (blocksToRead.Any())

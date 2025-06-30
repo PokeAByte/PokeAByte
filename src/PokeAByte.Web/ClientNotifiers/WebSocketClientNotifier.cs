@@ -24,6 +24,7 @@ public class WebSocketClientNotifier(AppSettings _appSettings, IHubContext<Updat
                     Id = mapper.Metadata.Id,
                     GameName = mapper.Metadata.GameName,
                     GamePlatform = mapper.Metadata.GamePlatform,
+                    FileId = mapper.Metadata.FileId,
                     MapperReleaseVersion = _appSettings.MAPPER_VERSION
                 },
                 Properties = mapper.Properties.Values,

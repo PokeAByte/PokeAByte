@@ -52,13 +52,14 @@ public static class PokeAByteMapperXmlFactory
         }
     }
 
-    public static MetadataSection GetMetadata(XDocument doc)
+    public static MetadataSection GetMetadata(XDocument doc, string fileId)
     {
         var root = doc.Element("mapper") ?? throw new Exception($"Unable to find <mapper> root element.");
 
         return new MetadataSection()
         {
             Id = Guid.Parse(root.GetAttributeValue("id")),
+            FileId = fileId,
             GameName = root.GetAttributeValue("name"),
             GamePlatform = root.GetAttributeValue("platform")
         };
@@ -158,7 +159,7 @@ public static class PokeAByteMapperXmlFactory
             });
     }
 
-    public static IPokeAByteMapper LoadMapperFromFile(string mapperContents)
+    public static IPokeAByteMapper LoadMapperFromFile(string mapperContents, string fileId)
     {
         var doc = XDocument.Parse(mapperContents.Replace("{", string.Empty).Replace("}", string.Empty));
 
@@ -207,7 +208,7 @@ public static class PokeAByteMapperXmlFactory
         {
             attr.Value = attr.Value.NormalizeMemoryAddresses();
         }
-        var metaData = GetMetadata(doc);
+        var metaData = GetMetadata(doc, fileId);
         IPlatformOptions platformOptions = metaData.GamePlatform switch
         {
             "NES" => new NES_PlatformOptions(),

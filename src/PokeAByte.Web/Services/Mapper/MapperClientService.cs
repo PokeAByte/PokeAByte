@@ -99,6 +99,7 @@ public class MapperClientService(
             new MapperMetaModel()
             {
                 Id = instance.Mapper.Metadata.Id,
+                FileId = instance.Mapper.Metadata.FileId,
                 GameName = instance.Mapper.Metadata.GameName,
                 GamePlatform = instance.Mapper.Metadata.GamePlatform,
                 MapperReleaseVersion = appSettings.MAPPER_VERSION
