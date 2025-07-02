@@ -388,17 +388,17 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
         }
-        property.Bytes = bytes;
-        property.Value = property.CalculateObjectValue(this, bytes);
+        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
         if (freeze == true)
         {
+            property.Bytes = bytes;
+            property.Value = property.CalculateObjectValue(this, bytes);
             await this.FreezeProperty(property, bytes);
         }
         else if (freeze == false)
         {
             await UnfreezeProperty(property);
         }
-        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
 
     public async Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen)
