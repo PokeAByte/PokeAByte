@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using BizHawk.Common;
 using BizHawk.Emulation.Common;
@@ -12,8 +13,6 @@ namespace PokeAByte.Protocol.BizHawk;
 
 internal class GameDataProcessor : IDisposable
 {
-    private IMemoryDomains _memoryDomains { get; set; } = null!;
-
     private Label _mainLabel;
     private PlatformEntry _platform;
     private MemoryMappedViewAccessor _dataAccessor;
@@ -24,17 +23,17 @@ internal class GameDataProcessor : IDisposable
     private MemoryMappedFile _memoryMappedFile;
 
     private byte[] DataBuffer { get; } = new byte[4 * 1024 * 1024];
-
+    private Thread _backgroundCopy;
+    private bool _copyReady;
+    private object _copyLock = new();
 
     internal GameDataProcessor(
-        IMemoryDomains memoryDomains,
         PlatformEntry platform,
         SetupInstruction setup,
         Label mainLabel
     )
     {
         _mainLabel = mainLabel;
-        _memoryDomains = memoryDomains;
         _platform = platform;
 
         int totalSize = 0;
@@ -79,6 +78,22 @@ internal class GameDataProcessor : IDisposable
         }
         _writeBuffer = new byte[totalSize];
         mainLabel.Text = $"Providing memory data ({totalSize} bytes) to client...";
+        _backgroundCopy = new Thread(this.CopyData);
+        _backgroundCopy.Start();
+    }
+
+    private void CopyData()
+    {
+        while (true)
+        {
+
+            SpinWait.SpinUntil(() => _copyReady);
+            lock (_copyLock)
+            {
+                _dataAccessor.WriteArray(0, _writeBuffer, 0, _writeBuffer.Length);
+                _copyReady = false;
+            }
+        }
     }
 
     private void GetMMFAccessor(int size)
@@ -108,7 +123,7 @@ internal class GameDataProcessor : IDisposable
         _dataAccessor = _memoryMappedFile.CreateViewAccessor();
     }
 
-    public void Update()
+    public void Update(IMemoryDomains memoryDomains)
     {
         if (_skippedFrames > _frameSkip)
         {
@@ -119,6 +134,7 @@ internal class GameDataProcessor : IDisposable
             _skippedFrames++;
             return;
         }
+        SpinWait.SpinUntil(() => !_copyReady);
         DomainReadInstruction instruction = _readInstructions[0];
         try
         {
@@ -129,12 +145,18 @@ internal class GameDataProcessor : IDisposable
                 {
                     continue;
                 }
-                var domain = _memoryDomains[instruction.Domain];
+                var domain = memoryDomains[instruction.Domain];
                 if (domain != null)
                 {
                     var length = instruction.RelativeEnd - instruction.RelativeStart;
                     domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), DataBuffer);
-                    Buffer.BlockCopy(DataBuffer, 0, _writeBuffer, (int)instruction.TransferPosition, (int)length);
+                    Buffer.BlockCopy(
+                        DataBuffer,
+                        0,
+                        _writeBuffer,
+                        (int)instruction.TransferPosition,
+                        (int)length
+                    );
                 }
             }
         }
@@ -142,11 +164,17 @@ internal class GameDataProcessor : IDisposable
         {
             _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
         }
-        _dataAccessor.WriteArray(0, _writeBuffer, 0, _writeBuffer.Length);
+
+        // signal the other thread that copying can be done:
+        lock (_copyLock)
+        {
+            _copyReady = true;
+        }
     }
 
     public void Dispose()
     {
+        _backgroundCopy.Abort();
         this._dataAccessor.Dispose();
         this._memoryMappedFile.Dispose();
         if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))

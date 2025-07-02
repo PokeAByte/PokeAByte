@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -15,8 +16,9 @@ public class EmulatorProtocolServer : IDisposable
     private object _state = new();
     private bool _disposed;
     private Socket _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-    private EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
+    private EndPoint _endpoint = new IPEndPoint(IPAddress.Any, 0);
     private Thread? _thread;
+    private List<int> _clientPorts = [];
 
     public WriteHandler? OnWrite { get; set; }
     public SetupHandler? OnSetup { get; set; }
@@ -33,7 +35,7 @@ public class EmulatorProtocolServer : IDisposable
         {
             return;
         }
-        _socket.BeginReceiveFrom(_buffer, 0, _buffer.Length, SocketFlags.None, ref endpoint, OnData, _state);
+        _socket.BeginReceiveFrom(_buffer, 0, _buffer.Length, SocketFlags.None, ref _endpoint, OnData, _state);
     }
 
     private void OnData(IAsyncResult ar)
@@ -42,9 +44,13 @@ public class EmulatorProtocolServer : IDisposable
         {
             return;
         }
-        int length = _socket.EndReceiveFrom(ar, ref endpoint);
+        int length = _socket.EndReceiveFrom(ar, ref _endpoint);
         var message = new byte[length];
         Buffer.BlockCopy(_buffer, 0, message, 0, length);
+        var clientPort =(_endpoint as IPEndPoint)?.Port ?? 0;
+        if (clientPort != 0 && !_clientPorts.Contains(clientPort)) {
+            _clientPorts.Add(clientPort);
+        }
         HandleMessage(_buffer);
         Receive();
     }
@@ -62,7 +68,7 @@ public class EmulatorProtocolServer : IDisposable
             case Instructions.PING:
                 try
                 {
-                    _socket.SendTo(new PingResponse().GetByteArray(), endpoint);
+                    _socket.SendTo(new PingResponse().GetByteArray(), _endpoint);
                 }
                 catch (Exception ex)
                 {
@@ -79,7 +85,7 @@ public class EmulatorProtocolServer : IDisposable
                 try
                 {
                     OnSetup?.Invoke(SetupInstruction.FromByteArray(message));
-                    _socket.SendTo(new SetupResponse().GetByteArray(), endpoint);
+                    _socket.SendTo(new SetupResponse().GetByteArray(), _endpoint);
                 }
                 catch (Exception ex)
                 {
@@ -95,6 +101,14 @@ public class EmulatorProtocolServer : IDisposable
     {
         if (!_disposed)
         {
+            if (_socket != null)
+            {
+                var close = new CloseInstruction().GetByteArray();
+                foreach (var clientPort in _clientPorts)
+                {
+                    _socket.SendTo(close, new IPEndPoint(IPAddress.Parse("127.0.0.1"), clientPort));
+                }
+            }
             _disposed = true;
             _thread?.Abort();
             _socket?.Dispose();

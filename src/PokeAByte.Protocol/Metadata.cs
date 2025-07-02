@@ -9,6 +9,7 @@ public static class Instructions
     public const byte PING = 0x01;
     public const byte SETUP = 0x02;
     public const byte WRITE = 0x03;
+    public const byte CLOSE = 0xFF;
 }
 
 public static class SharedConstants

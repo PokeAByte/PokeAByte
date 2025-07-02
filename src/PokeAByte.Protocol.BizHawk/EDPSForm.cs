@@ -24,9 +24,10 @@ public sealed class EDPSForm : Form, IExternalToolForm
         Dock = DockStyle.Top
     };
 
-    public bool IsActive { get;  private set; } = true;
+    public bool IsActive { get; private set; } = true;
     public bool IsLoaded => true;
     private EmulatorProtocolServer? _server;
+    private string _initializedGame = "";
     private GameDataProcessor? _processor;
 
     public EDPSForm()
@@ -68,9 +69,10 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     private void Setup(SetupInstruction instruction)
     {
-        var system = APIs?.Emulation.GetGameInfo()?.System ?? string.Empty;
+        var gameInfo = APIs?.Emulation.GetGameInfo();
+        var system = gameInfo?.System ?? string.Empty;
         var platform = PlatformConstants.Platforms.SingleOrDefault(x => x.SystemId == system);
-        if (platform == null)
+        if (platform == null || gameInfo == null)
         {
             MainLabel.Text = $"Waiting for game to load";
             return;
@@ -80,8 +82,8 @@ public sealed class EDPSForm : Form, IExternalToolForm
             MainLabel.Text = $"Failed to initialize properly.";
             return;
         }
+        this._initializedGame = gameInfo.Name + gameInfo.Hash;
         this._processor = new GameDataProcessor(
-            MemoryDomains,
             platform,
             instruction,
             MainLabel
@@ -102,11 +104,18 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     public void Restart()
     {
-        Cleanup();
-        StartServer();
-        MainLabel.Text = APIs?.Emulation.GetGameInfo() == null
-            ? "No game is loaded, doing nothing." 
-            : $"Waiting for client...";
+        var gameInfo = APIs?.Emulation.GetGameInfo();
+        var gameIdentifier = gameInfo != null
+            ? gameInfo.Name + gameInfo.Hash
+            : null;
+        if (gameIdentifier != this._initializedGame)
+        {
+            Cleanup();
+            StartServer();
+            MainLabel.Text = gameInfo == null
+                ? "No game is loaded, doing nothing."
+                : $"Waiting for client...";
+        }
     }
 
     public bool AskSaveChanges() => true;
@@ -115,7 +124,10 @@ public sealed class EDPSForm : Form, IExternalToolForm
     {
         if (type == ToolFormUpdateType.PostFrame)
         {
-            this._processor?.Update();
+            if (this.MemoryDomains != null)
+            {   
+                this._processor?.Update(this.MemoryDomains);
+            }
         }
     }
 }

@@ -106,7 +106,7 @@ public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposa
         Data_Accessor = Data_MMF.CreateViewAccessor();
     }
 
-    private void ReadFromClient(MemoryContract? clientData)
+    private void ReadFromClient(MemoryContract<byte[]>? clientData)
     {
         if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))
             return;

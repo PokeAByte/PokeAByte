@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PokeAByte.Integrations.BizHawk;
 
-public delegate void ClientDataHandler(MemoryContract? memoryContract);
+public delegate void ClientDataHandler(MemoryContract<byte[]>? memoryContract);
 
 public class NamedPipeServer : IDisposable
 {
@@ -48,7 +48,7 @@ public class NamedPipeServer : IDisposable
                 dataList.AddRange(buffer.Take(count));
             }
             Console.WriteLine($"Finished reading client data... Length: {dataList.Count}");
-            ClientDataHandler?.Invoke(MemoryContract.Deserialize(dataList.ToArray()));
+            ClientDataHandler?.Invoke(MemoryContract<byte[]>.Deserialize(dataList.ToArray()));
             Console.WriteLine("Invoked delegate complete, closing server");
             _pipeServer.Close();
             _pipeServer = null;
