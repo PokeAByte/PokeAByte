@@ -75,6 +75,12 @@ public static class Startup
                 FileProvider = provider,
             });
             configuration.Options.DefaultPage = "/index.html";
+            configuration.Options.DefaultPageStaticFileOptions.OnPrepareResponse = (context) =>
+            {
+                context.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+                context.Context.Response.Headers.Append("X-Clacks-Overhead", "GNU Terry Pratchett");
+                context.Context.Response.Headers.Append("Expires", "-1");
+            };
         });
 
         app.Use(async (context, next) =>

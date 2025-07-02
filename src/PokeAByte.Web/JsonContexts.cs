@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Domain.Services.MapperFile;
@@ -31,6 +32,8 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(IEnumerable<MapperFileModel>))]
 [JsonSerializable(typeof(IEnumerable<MapperFileData>))]
 [JsonSerializable(typeof(IPokeAByteProperty), GenerationMode = JsonSourceGenerationMode.Metadata)]
+[JsonSerializable(typeof(IProblemDetails), GenerationMode = JsonSourceGenerationMode.Metadata)]
+[JsonSerializable(typeof(MapperProblem), GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(IList<IPokeAByteProperty>), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(List<MapperComparisonDto>))]
 [JsonSerializable(typeof(IEnumerable<MapperComparisonDto>))]
