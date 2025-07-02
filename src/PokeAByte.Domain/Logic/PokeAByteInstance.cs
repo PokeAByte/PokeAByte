@@ -211,8 +211,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Fields Changed
         var propertiesChanged = this.Mapper.Properties.Values
             .Where(x => x.FieldsChanged.Count > 0)
-            .ToArray();
-        if (propertiesChanged.Length > 0)
+            .ToList();
+        if (propertiesChanged.Count > 0)
         {
             try
             {
