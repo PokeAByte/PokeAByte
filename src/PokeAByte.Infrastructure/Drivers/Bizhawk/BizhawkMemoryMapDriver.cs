@@ -53,7 +53,7 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
                 ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK_DATA.bin", MemoryMappedFileRights.Read)
                 : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_LENGTH, MemoryMappedFileAccess.Read);
             using var memoryAccessor = mmfData.CreateViewAccessor(0, DATA_LENGTH, MemoryMappedFileAccess.Read);
-            memoryAccessor.SafeMemoryMappedViewHandle.ReadSpan((ulong)start, span);
+            memoryAccessor.CopyBytesToSpan((ulong)start, span);
         }
         catch (FileNotFoundException ex)
         {
@@ -111,12 +111,12 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
                 continue;
             }
             var offset = transferBlock.Start - block.PhysicalStartingAddress;
-            ReadBizhawkData(block.CustomPacketTransmitPosition + (int)offset, transferBlock.Data.AsSpan());
+            ReadBizhawkData(block.CustomPacketTransmitPosition + (int)offset, transferBlock.Data.Span);
         }
         return ValueTask.CompletedTask;
     }
 
-    public async ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
+    public ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
     {
         if (_platform == null)
         {
@@ -142,6 +142,7 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
             MemoryAddressStart = (long)startingMemoryAddress - bizhawkMemory.PhysicalStartingAddress
         };
         BizhawkNamedPipesClient.WriteToBizhawk(memoryContract);
+        return ValueTask.CompletedTask;
     }
 
     public static Task<bool> Probe(AppSettings appSettings)

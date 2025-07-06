@@ -18,6 +18,11 @@ public class MemoryManager : IMemoryManager
         };
     }
 
+    public Memory<byte> GetDefaultMemory(uint firstAdress, uint lastAdress)
+    {
+        return ((StaticMemoryContainer)DefaultNamespace).GetMemory(firstAdress, lastAdress);
+    }
+
     /// <inheritdoc />
     public Dictionary<string, IMemoryNamespace> Namespaces { get; private set; }
 

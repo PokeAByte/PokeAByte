@@ -121,7 +121,8 @@ public class PokeAProtocolClient : IDisposable
         if (!_connected) {
             throw new VisibleException("Poke-A-Protocol server closed the connection.");
         }
-        memoryAccessor.SafeMemoryMappedViewHandle.ReadSpan((ulong)position, block.Data.AsSpan());
+        
+        memoryAccessor.CopyBytesToSpan(position, block.Data.Span);
     }
 
     public void Dispose()

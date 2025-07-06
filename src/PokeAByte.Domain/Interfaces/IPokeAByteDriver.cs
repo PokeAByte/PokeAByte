@@ -5,9 +5,9 @@ namespace PokeAByte.Domain.Interfaces;
 public class BlockData
 {
     public MemoryAddress Start { get; set; }
-    public byte[] Data { get; set; }
+    public Memory<byte> Data { get; set; }
 
-    public BlockData(uint start, byte[] data)
+    public BlockData(uint start, Memory<byte> data)
     {
         Start = start;
         Data = data;

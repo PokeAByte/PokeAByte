@@ -16,6 +16,15 @@ public class StaticMemoryContainer : IMemoryNamespace
         Data = new byte[((int)size) + 1];
     }
 
+    internal Memory<byte> GetMemory(uint firstAddress, uint lastAddress)
+    {
+        int length = (int)(lastAddress - firstAddress);
+        // if (this.CheckRange(firstAddress, length)) {
+        //     throw new ArgumentException($"Address range ({firstAddress:X} - {firstAddress+length:X}) not within the memory boundaries.");
+        // }
+        return Data.Slice((int)firstAddress, length);
+    }
+
     public IList<IByteArray> Fragments => [new ByteArray(0, this.Data.ToArray())];
 
     private bool CheckRange(uint start, int length)

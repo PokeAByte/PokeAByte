@@ -89,12 +89,16 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
 
 
-        MemoryContainerManager = new MemoryManager(blocksToRead);
+        var memory =  new MemoryManager(blocksToRead);
+        MemoryContainerManager = memory;
         _transferBlocks = new BlockData[blocksToRead.Length];
         int i = 0;
         foreach (var block in blocksToRead)
         {
-            _transferBlocks[i] = new BlockData(block.StartingAddress, new byte[block.EndingAddress - block.StartingAddress]);
+            _transferBlocks[i] = new BlockData(
+                block.StartingAddress,
+                memory.GetDefaultMemory(block.StartingAddress, block.EndingAddress)
+            );
             i++;
         }
 
@@ -194,11 +198,6 @@ public class PokeAByteInstance : IPokeAByteInstance
     private async Task Read()
     {
         await Driver.ReadBytes(_transferBlocks);
-
-        foreach (var result in _transferBlocks)
-        {
-            MemoryContainerManager.DefaultNamespace.Fill(result.Start, result.Data);
-        }
 
 #if DEBUG
         if (MemoryContainerManager is not IStaticMemoryDriver && DebugOutputMemoryLayoutToFilesystem)

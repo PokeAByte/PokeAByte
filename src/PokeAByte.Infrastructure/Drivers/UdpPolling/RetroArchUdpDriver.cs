@@ -85,7 +85,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver
                 Logger.LogDebug($"(unchunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
                 throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
             }
-            response.AsSpan().CopyTo(transferBlock.Data);
+            response.AsSpan().CopyTo(transferBlock.Data.Span);
         }
         else
         {
@@ -102,7 +102,8 @@ public class RetroArchUdpDriver : IPokeAByteDriver
                     Logger.LogDebug($"(chunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
                     throw new DriverTimeoutException(currentAddress, ProperName, null);
                 }
-                Array.Copy(chunk, 0, transferBlock.Data, offset, chunk.Length);
+                chunk.AsSpan().CopyTo(transferBlock.Data.Span);
+                // Buffer.BlockCopy(chunk, 0, transferBlock.Data.Span, offset, chunk.Length);
                 offset += (uint)chunk.Length;
             }
         }
