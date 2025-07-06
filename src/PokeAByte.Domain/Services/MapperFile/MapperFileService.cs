@@ -105,7 +105,7 @@ public class MapperFileService
             {
                 result.Add(new ArchivedMapperDto()
                 {
-                    PathDisplayName = Path.GetRelativePath(archivePath, mapperPath),
+                    PathDisplayName = Path.GetRelativePath(archivePath, Path.GetDirectoryName(mapperPath) ?? ""),
                     FullPath = Path.GetDirectoryName(mapperPath) ?? "",
                     Mapper = MapperDto.Create(
                         Path.GetRelativePath(archivePath, mapperPath),

@@ -126,8 +126,7 @@ public class MapperArchiveManager : IMapperArchiveManager
         var mapperJsPath = mapperPath.Replace(".xml", ".js");
         var archivedPath = $"{archivedMapper.FullPath}/{archivedMapper.Mapper.DisplayName}";
         var archivedJsPath = archivedPath.Replace(".xml", ".js");
-        var archiveBasePath =
-            archivedMapper.FullPath[..^archivedMapper.PathDisplayName.Length];
+        var archiveBasePath = archivedMapper.FullPath[..^archivedMapper.PathDisplayName.Length];
         //If the original file exists, back it up
         if (File.Exists(mapperPath))
         {
@@ -145,12 +144,14 @@ public class MapperArchiveManager : IMapperArchiveManager
 
     private void RestoreFile(string sourceFile, string destinationFile, string sourcePath)
     {
-        if (!File.Exists(sourceFile)) return;
+        var destiniationFolder = Path.GetDirectoryName(destinationFile);
+        if (!File.Exists(sourceFile) || destiniationFolder == null) return;
         if (File.Exists(destinationFile))
         {
             _logger.LogWarning($"{destinationFile} already exists.");
             return;
         }
+        Directory.CreateDirectory(destiniationFolder);
         File.Move(sourceFile, destinationFile);
         if (Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories).Length == 0)
         {

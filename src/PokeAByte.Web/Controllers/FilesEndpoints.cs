@@ -34,9 +34,13 @@ public static class FilesEndpoints
         mapperFileService.DeleteMappersFromArchive(archivedMappers);
     }
 
-    public static void RestoreMapper(IMapperArchiveManager archive, IEnumerable<ArchivedMapperDto> archivedMappers)
+    public static void RestoreMapper(
+        IMapperArchiveManager archive,
+        MapperFileService mapperFileService,
+        List<ArchivedMapperDto> archivedMappers)
     {
-        archive.RestoreMappersFromArchive(archivedMappers.ToList());
+        archive.RestoreMappersFromArchive(archivedMappers);
+        mapperFileService.Refresh();
     }
 
     public static IResult ArchiveMappers(
