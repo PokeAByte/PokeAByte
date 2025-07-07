@@ -90,8 +90,28 @@ internal class GameDataProcessor : IDisposable
             SpinWait.SpinUntil(() => _copyReady);
             lock (_copyLock)
             {
-                _dataAccessor.WriteArray(0, _writeBuffer, 0, _writeBuffer.Length);
-                _copyReady = false;
+                if (_dataAccessor.SafeMemoryMappedViewHandle.ByteLength < (ulong)_writeBuffer.Length)
+                {
+                    _copyReady = false;
+                    continue;
+                }
+                unsafe
+                {
+                    try
+                    {
+                        byte* destination = null;
+                        _dataAccessor.SafeMemoryMappedViewHandle.AcquirePointer(ref destination);
+                        fixed (byte* source = _writeBuffer)
+                        {
+                            Buffer.MemoryCopy(source, destination, _writeBuffer.Length, _writeBuffer.Length);
+                        }
+                    }
+                    finally
+                    {
+                        _dataAccessor.SafeMemoryMappedViewHandle.ReleasePointer();                        
+                        _copyReady = false;
+                    }
+                }
             }
         }
     }
