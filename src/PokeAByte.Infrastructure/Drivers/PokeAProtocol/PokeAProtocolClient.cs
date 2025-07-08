@@ -10,7 +10,7 @@ namespace PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 
 public class PokeAProtocolClient : IDisposable
 {
-    private IPEndPoint _endpoint;
+    private IPEndPoint _remoteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 55356);
     private UdpClient _client;
     private CancellationTokenSource _connectionCts;
     private int _fileSize;
@@ -21,15 +21,8 @@ public class PokeAProtocolClient : IDisposable
 
     public PokeAProtocolClient()
     {
-        _endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 55356);
-        _client = new UdpClient();
-        _client.Client.SetSocketOption(
-            SocketOptionLevel.Socket,
-            SocketOptionName.ReuseAddress,
-            true
-        );
+        _client = new UdpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0));
         _connectionCts = new();
-        _client.Connect(_endpoint);
     }
 
     private void WaitForClose()
@@ -60,7 +53,7 @@ public class PokeAProtocolClient : IDisposable
         if (!_connected) {
             throw new VisibleException("Poke-A-Protocol server closed the connection.");
         }
-        _client.Send(instruction.GetByteArray());
+        _client.Send(instruction.GetByteArray(), _remoteEndpoint);
     }
 
     private MemoryMappedViewAccessor GetMemoryAccessor()
@@ -92,13 +85,13 @@ public class PokeAProtocolClient : IDisposable
         }
     }
 
-    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int frameSkip, int timeoutMs = 64)
+    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int frameSkip, int timeoutMs = 128)
     {
         try
         {
             var instruction = new SetupInstruction(blocks, frameSkip);
             _fileSize = fileSize;
-            await _client!.SendAsync(instruction.GetByteArray());
+            await _client!.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
             using var tokenSource = new CancellationTokenSource();
             tokenSource.CancelAfter(timeoutMs);
             var response = await _client.ReceiveAsync(tokenSource.Token);

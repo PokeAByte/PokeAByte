@@ -56,19 +56,11 @@ public class PokeAProtocolDriver : IPokeAByteDriver
                 }
                 fileSize += _readBlocks[i].Length;
             }
-            try
+            if (fileSize == 0)
             {
-                if (fileSize == 0)
-                {
-                    throw new Exception("Invalid filesize for the MMF. Can not connect to EDPS.");
-                }
-                await _client.Setup(_readBlocks, fileSize, _frameSkip);
+                throw new Exception("Invalid filesize for the MMF. Can not connect to EDPS.");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return;
-            }
+            await _client.Setup(_readBlocks, fileSize, _frameSkip);
         }
         for (int i = 0; i < blocks.Length; i++)
         {
@@ -96,19 +88,13 @@ public class PokeAProtocolDriver : IPokeAByteDriver
     public static async Task<bool> Probe(AppSettings appSettings)
     {
         using var client = new UdpClient();
-        var endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 55356);
-        client.Client.SetSocketOption(
-            SocketOptionLevel.Socket,
-            SocketOptionName.ReuseAddress,
-            true
-        );
+        var remote = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 55356);
         try
         {
-            client.Connect(endpoint);
             using CancellationTokenSource cancellationTokenSource = new();
             cancellationTokenSource.CancelAfter(32);
 
-            await client.SendAsync(new PingInstruction().GetByteArray());
+            await client.SendAsync(new PingInstruction().GetByteArray(), remote);
             var result = await client.ReceiveAsync(cancellationTokenSource.Token);
             return result.Buffer[4] == Instructions.PING && result.Buffer[5] == 0x01;
         }
