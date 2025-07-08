@@ -47,7 +47,6 @@ public sealed class EDPSForm : Form, IExternalToolForm
         Controls.Add(MainLabel);
 
         ResumeLayout(performLayout: true);
-        StartServer();
     }
 
     private void StartServer()
@@ -69,6 +68,11 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     private void Setup(SetupInstruction instruction)
     {
+        if (_processor != null)
+        {
+            _processor.Dispose();
+            _processor = null;
+        }
         var gameInfo = APIs?.Emulation.GetGameInfo();
         var system = gameInfo?.System ?? string.Empty;
         var platform = PlatformConstants.Platforms.SingleOrDefault(x => x.SystemId == system);
