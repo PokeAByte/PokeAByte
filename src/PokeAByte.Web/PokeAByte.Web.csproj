@@ -30,8 +30,8 @@
 		<Exec Command="npm run build" WorkingDirectory="../Frontend" />
 	</Target>
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.6" />
-	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
+	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.7" />
+	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.7" />
       <PackageReference Include="Serilog" Version="4.3.0" />
       <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
