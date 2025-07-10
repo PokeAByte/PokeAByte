@@ -1,4 +1,3 @@
-using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -59,11 +58,11 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     private void Cleanup()
     {
-        MainLabel.Text = $"Waiting for Client...";
         _server?.Dispose();
         _server = null;
         _processor?.Dispose();
         _processor = null;
+        MainLabel.Text = $"Waiting for Client...";
     }
 
     private void Setup(SetupInstruction instruction)
@@ -96,14 +95,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     private void WriteToMemory(WriteInstruction instruction)
     {
-        if (instruction.Data.Length != 0 && APIs != null)
-        {
-            try
-            {
-                APIs.Memory.WriteByteRange(instruction.Address, instruction.Data);
-            }
-            catch (Exception) { } // Nothing to do, fail silently.
-        }
+        this._processor?.WriteToMemory(instruction, this.MemoryDomains);
     }
 
     public void Restart()
@@ -126,12 +118,9 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     public void UpdateValues(ToolFormUpdateType type)
     {
-        if (type == ToolFormUpdateType.PostFrame)
+        if (type == ToolFormUpdateType.PostFrame && this.MemoryDomains != null)
         {
-            if (this.MemoryDomains != null)
-            {   
-                this._processor?.Update(this.MemoryDomains);
-            }
+            this._processor?.Update(this.MemoryDomains);
         }
     }
 }

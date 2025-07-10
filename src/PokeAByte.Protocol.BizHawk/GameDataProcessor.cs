@@ -192,6 +192,32 @@ internal class GameDataProcessor : IDisposable
         }
     }
 
+    internal void WriteToMemory(WriteInstruction instruction, IMemoryDomains domains)
+    {
+        DomainLayout? layout = _platform.Domains.FirstOrDefault(
+            x => x.Start <= instruction.Address && x.End >= instruction.Address + instruction.Data.Length
+        );
+        if (layout == null)
+        {
+            return;
+        }
+        var domain = domains[layout.Value.DomainId];
+        if (domain == null)
+        {
+            return;
+        }
+        if (instruction.Data.Length != 0 && layout != null)
+        {
+            domain.Enter();
+            for (int i = 0; i < instruction.Data.Length; i++)
+            {
+                domain.PokeByte(instruction.Address + i - layout.Value.Start, instruction.Data[i]);
+            }
+            domain.Exit();
+        }
+    }
+
+
     public void Dispose()
     {
         _backgroundCopy.Abort();
