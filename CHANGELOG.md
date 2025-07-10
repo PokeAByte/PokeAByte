@@ -89,15 +89,19 @@ Some UI elements are now only shown when the "advanced mode" is active. This mod
 * Avoid some work and memory use by only initializing drivers if and when they are used.
 
 ### Performance comparison
+
 Mapper: "(GEN3) pokemon emerald deprecated ne:"
-- CPU: 1 core @ **7 %** -> **3,38 %**
-- RAM: **220 MB**  -> **196 MB**
+- CPU: 1 core @ **10.75  %** -> **5.43 %**
+- RAM: **203 MB**  -> **163 MB**
 
 Mapper: "(GEN3) pokemon emerald":
-- CPU: 1 core @ **19.55 %** -> **5,88 %**
-- RAM: **280 MB** -> **180 MB**
+- CPU: 1 core @ **20.96 %** -> **6.07 %**
+- RAM: **212 MB** -> **166 MB**
 
-(Performance gains may vary by platform. They definitely vary by mapper and target emulator)
+Performance gains may vary by platform. They definitely vary by mapper and target emulator. 
+Tested by starting Poke-A-Byte fresh, loading the mapper, closing the Poke-A-Byte UI tab, connect a WebSocket client, 
+then taking the average CPU load over 60 seconds and noting memory usage after those 60 seconds. 
+All tests used the BizHawk driver available to both versions.
 
 ### EDPS Bizhawk integration performance
 

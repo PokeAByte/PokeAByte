@@ -5,6 +5,7 @@ namespace PokeAByte.Domain.Logic;
 public class StaticMemoryContainer : IMemoryNamespace
 {
     private MemoryAddressBlock[] _blocks;
+    private uint _offset;
 
     internal Memory<byte> Data { get; init; }
 
@@ -12,17 +13,19 @@ public class StaticMemoryContainer : IMemoryNamespace
     {
         this._blocks = blocksToRead;
         var lastBlock = blocksToRead.OrderByDescending(x => x.EndingAddress).First();
-        var size = lastBlock.EndingAddress;
-        Data = new byte[((int)size) + 1];
+        var firstBlock = blocksToRead.OrderBy(x => x.StartingAddress).First();
+        _offset = firstBlock.StartingAddress;
+        var size = lastBlock.EndingAddress - _offset;
+        Data = new byte[size + 1];
     }
 
     internal Memory<byte> GetMemory(uint firstAddress, uint lastAddress)
     {
         int length = (int)(lastAddress - firstAddress);
-        // if (this.CheckRange(firstAddress, length)) {
-        //     throw new ArgumentException($"Address range ({firstAddress:X} - {firstAddress+length:X}) not within the memory boundaries.");
-        // }
-        return Data.Slice((int)firstAddress, length);
+        if (!this.CheckRange(firstAddress, length)) {
+            throw new ArgumentException($"Address range ({firstAddress:X} - {firstAddress+length:X}) not within the memory boundaries.");
+        }
+        return Data.Slice((int)(firstAddress-_offset), length);
     }
 
     public IList<IByteArray> Fragments => [new ByteArray(0, this.Data.ToArray())];
@@ -50,7 +53,7 @@ public class StaticMemoryContainer : IMemoryNamespace
         }
         try
         {
-            return Data.Span.Slice((int)address, length);
+            return Data.Span.Slice((int)(address-_offset), length);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -72,6 +75,6 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     public void Fill(uint address, byte[] data)
     {
-        data.AsSpan().CopyTo(Data.Span.Slice((int)address, data.Length));
+        data.AsSpan().CopyTo(Data.Span.Slice((int)(address-_offset), data.Length));
     }
 }
