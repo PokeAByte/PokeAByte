@@ -64,6 +64,7 @@ export function PropertyEdit({ path }: { path: string }) {
 	useEffect(() => {
 		if (saved) {
 			setSaved(false);
+			setValue(null);
 			setMadeEdit(false);
 		}
 	}, [property, saved, madeEdit, setSaved, setMadeEdit]);

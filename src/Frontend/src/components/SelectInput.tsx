@@ -19,6 +19,7 @@ function matchDisplayValue<T>(search: string) {
 		if (!search) {
 			return true;
 		}
+		search = search.toLowerCase();
 		return option.display.toString().toLowerCase().includes(search);
 	}
 }
