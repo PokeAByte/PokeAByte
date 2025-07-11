@@ -19,6 +19,22 @@ export async function postWithoutResult<T>(
 	}
 }
 
+export async function changeMapper(mapperId: string | null) {
+	try {
+		const response = await fetch(
+			"http://localhost:8085/mapper-service/change-mapper",
+			{
+				method: "PUT",
+				body: JSON.stringify(mapperId),
+				headers: { "Content-Type": "application/json" }
+			}
+		);
+		return response.ok || response.json();
+	} catch {
+		return false;
+	}
+}
+
 export async function archiveMappers(mappers: MapperVersion[]) {
 	return await postWithoutResult("http://localhost:8085/files/mapper/archive_mappers", mappers);
 }

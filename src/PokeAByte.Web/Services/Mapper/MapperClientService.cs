@@ -1,4 +1,5 @@
-﻿using PokeAByte.Domain.Interfaces;
+﻿using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
@@ -39,6 +40,10 @@ public class MapperClientService(
                     );
                 var result = await ReplaceMapper(mapperId, driver);
                 connected = result.IsSuccess;
+                if (result.ExceptionValue is MapperException mapperException)
+                {
+                    return Result.Failure(Error.FailedToLoadMapper, mapperException.Message);
+                }
             }
             catch (Exception e)
             {

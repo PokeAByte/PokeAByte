@@ -35,6 +35,8 @@ static class PokeAByteMapperXmlHelpers
 
 public static class PokeAByteMapperXmlFactory
 {
+    private const int CURRENT_SYNTAX = 1;
+
     static ulong ToULong(string value)
     {
         try
@@ -61,7 +63,8 @@ public static class PokeAByteMapperXmlFactory
             Id = Guid.Parse(root.GetAttributeValue("id")),
             FileId = fileId,
             GameName = root.GetAttributeValue("name"),
-            GamePlatform = root.GetAttributeValue("platform")
+            GamePlatform = root.GetAttributeValue("platform"),
+            MapperSyntax = root.GetOptionalAttributeValueAsInt("syntax") ?? 1,
         };
     }
 
@@ -210,6 +213,10 @@ public static class PokeAByteMapperXmlFactory
             attr.Value = attr.Value.NormalizeMemoryAddresses();
         }
         var metaData = GetMetadata(doc, fileId);
+        if (metaData.MapperSyntax > CURRENT_SYNTAX)
+        {
+            throw new MapperException($"The mapper {metaData.FileId} is too new. Please update Poke-A-Byte.");
+        }
         IPlatformOptions platformOptions = metaData.GamePlatform switch
         {
             "NES" => new NES_PlatformOptions(),
@@ -219,7 +226,7 @@ public static class PokeAByteMapperXmlFactory
             "GBA" => new GBA_PlatformOptions(),
             "PSX" => new PSX_PlatformOptions(),
             "NDS" => new NDS_PlatformOptions(),
-            _ => throw new Exception($"Unknown game platform {metaData.GamePlatform}.")
+            _ => throw new MapperException($"Unknown game platform {metaData.GamePlatform}.")
         };
         return new PokeAByteMapper(
             metaData,

@@ -1,4 +1,3 @@
-import { Store } from "../../../utility/propertyStore"
 import { SelectInput } from "../../../components/SelectInput";
 import { Dropdown } from "../../../components/Dropdown";
 import { Toasts } from "../../../notifications/ToastStore";
@@ -12,6 +11,7 @@ import { unique } from "../../propertyEditor/utils/unique";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Advanced } from "../../../Contexts/Advanced";
 import { useStorageState } from "../../../hooks/useStorageState";
+import { changeMapper } from "../../../utility/fetch";
 
 type MapperSelectProps = {
 	mapper: Mapper | null
@@ -25,7 +25,7 @@ export function MapperSelection(props: MapperSelectProps) {
 	const fileId = mapper?.fileId;
 	const loadButtonRef = useRef<HTMLButtonElement>(null)
 	const [, setLocation] = useLocation();
-	const changeMapper = useAPI(Store.client.changeMapper);
+	const changeMapperApi = useAPI(changeMapper);
 	const [currentMapper, setCurrentMapper] = useState<string|null>(null);
 	useEffect(() => {
 		if (currentMapper) {
@@ -35,7 +35,7 @@ export function MapperSelection(props: MapperSelectProps) {
 	const [filter, setFilter] = useStorageState("mapper-category", "");
 	const onLoadMapper = () => {
 		if (currentMapper) {
-			changeMapper.call(currentMapper);
+			changeMapperApi.call(currentMapper);
 		}
 	}
 
@@ -44,15 +44,18 @@ export function MapperSelection(props: MapperSelectProps) {
 	}, [fileId, mapper,mapperFileContext.availableMappers])
 
 	useEffect(() => {
-		if (changeMapper.wasCalled) {
-			if (!changeMapper.isLoading && changeMapper.result) {
+		if (changeMapperApi.wasCalled && !changeMapperApi.isLoading) {
+			if (changeMapperApi.result === true) {
 				Toasts.push("Loaded mapper", "task_alt", "success");
 				setLocation("../../properties");
-			} else if (!changeMapper.isLoading && !changeMapper.result) {
-				Toasts.push("Failed to load mapper", "", "error");
+			} else if (changeMapperApi.result) {
+				Toasts.push("Failed to load mapper:\n " + changeMapperApi.result, "", "error", false);
+			} else {
+				Toasts.push("Failed to load mapper.\n Check Poke-A-Byte log for more information.", "", "error");
 			}
+			console.log(changeMapperApi.result);
 		}
-	}, [setLocation, changeMapper.wasCalled, changeMapper.isLoading, changeMapper.result])
+	}, [setLocation, changeMapperApi.wasCalled, changeMapperApi.isLoading, changeMapperApi.result])
 
 	const onCategorySelect = (category: string|null ) => {
 		let filter = category ?? "";
@@ -61,7 +64,7 @@ export function MapperSelection(props: MapperSelectProps) {
 		}
 		setFilter(filter);
 	}
-	if (changeMapper.isLoading) {
+	if (changeMapperApi.isLoading) {
 		return <LoadProgress label="Loading mapper" />
 	}
 	const allMappers = mapperFileContext.availableMappers;

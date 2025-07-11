@@ -1,3 +1,4 @@
+using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 

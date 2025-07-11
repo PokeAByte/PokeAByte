@@ -4,6 +4,7 @@ using System.Text.Json;
 using Jint;
 using Jint.Native;
 using Jint.Native.Object;
+using Jint.Runtime;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Mapper;
@@ -153,7 +154,17 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             this._readLoopFinished.Set();
             _logger.LogError(ex, "An error occured when read looping the mapper.");
-            await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+            if (ex is JavaScriptException jsException)
+            {
+                var location = jsException.Location;
+                throw new MapperException(
+                    $"{jsException.Message}\n at {location}"
+                );
+            }
+            else
+            {
+                await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+            }
             if (OnProcessingAbort != null)
             {
                 await OnProcessingAbort.Invoke();

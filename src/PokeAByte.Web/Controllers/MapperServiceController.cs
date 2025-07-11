@@ -42,7 +42,7 @@ public static class MapperServiceEndpoints
         {
             return TypedResults.Ok();
         }
-        return TypedResults.NotFound();
+        return TypedResults.InternalServerError(mapperResult.AdditionalErrorMessage);
     }
 
     public static IResult GetMetadata(MapperClientService mapperClientService)

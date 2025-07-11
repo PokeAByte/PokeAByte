@@ -15,7 +15,7 @@ export function Toast(props: ToastNotification) {
 			<div className="toast-content margin-right">
 				<div className="material-icons"> {props.icon} </div>
 				<span className="max">
-					{props.message}
+					{props.message.split("\n").map((x, i) => [<span key={i}>{x}</span>, <br/>])}
 				</span>
 			</div>
 			<button type="button" onClick={props.close}>

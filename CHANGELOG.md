@@ -74,6 +74,7 @@ Some UI elements are now only shown when the "advanced mode" is active. This mod
 - If more than 5 notifications are active at the same time, a "Delete all" button is shown.
 - Added a link to a newly added license page in the footer. Click on the underlined "AGPL" to get there.
 - Various tweaks to the wording of confirmation notifications.
+- Various errors are now communicated via notification instead of just via the error log.
 
 ## Bug fixes
 * The Poke-A-Byte Integration Tool for BizHawk no longer crashes if it is closed and then re-opened in the emulator.

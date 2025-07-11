@@ -8,6 +8,7 @@ public class MetadataSection
     public required string GameName { get; init; }
     public required string GamePlatform { get; init; }
     public required string FileId { get; init; }
+    public required int MapperSyntax { get; set; }
 }
 
 public class MemorySection
