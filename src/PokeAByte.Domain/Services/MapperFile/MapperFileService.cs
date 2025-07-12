@@ -9,12 +9,10 @@ public class MapperFileService : IMapperFileService
 {
     private readonly ILogger<IMapperFileService> _logger;
     private List<MapperFileData> _installedMappers;
-    // private readonly MapperUpdaterSettings _updateSettings;
 
     public MapperFileService(ILogger<IMapperFileService> logger)
     {
         _logger = logger;
-        // _updateSettings = MapperUpdaterSettings.Load(_logger);
         _installedMappers = FindInstalled();
     }
 

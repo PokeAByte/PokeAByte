@@ -18,8 +18,6 @@ public class AppSettings
 {
     public AppSettings(IConfiguration configuration, ILogger<AppSettings> logger)
     {
-        Urls = configuration["Urls"] ?? string.Empty;
-
         RETROARCH_LISTEN_IP_ADDRESS = configuration.GetRequiredValue("RETROARCH_LISTEN_IP_ADDRESS");
         RETROARCH_LISTEN_PORT = int.Parse(configuration.GetRequiredValue("RETROARCH_LISTEN_PORT"));
         RETROARCH_READ_PACKET_TIMEOUT_MS = int.Parse(configuration.GetRequiredValue("RETROARCH_READ_PACKET_TIMEOUT_MS"));
@@ -31,32 +29,12 @@ public class AppSettings
 
         PROTOCOL_FRAMESKIP = int.Parse(configuration["PROTOCOL_FRAMESKIP"] ?? "-1");
 
-        logger.LogInformation($"AppSettings initialized: RETROARCH_DELAY_MS_BETWEEN_READS: {RETROARCH_DELAY_MS_BETWEEN_READS} and BIZHAWK_DELAY_MS_BETWEEN_READS: {BIZHAWK_DELAY_MS_BETWEEN_READS}");
-        if (BuildEnvironment.IsDebug && configuration["MAPPER_DIRECTORY"]?.Length > 0)
-        {
-            MAPPER_DIRECTORY = configuration.GetRequiredValue("MAPPER_DIRECTORY");
-            MAPPER_VERSION = "LOCAL FILESYTEM";
-            MAPPER_DIRECTORY_OVERWRITTEN = true;
-        }
-        else
-        {
-            MAPPER_DIRECTORY = Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
-            MAPPER_VERSION = configuration.GetRequiredValue("MAPPER_VERSION");
-        }
+        MAPPER_VERSION = configuration.GetRequiredValue("MAPPER_VERSION");
 
-        LOG_HTTP_TRAFFIC = bool.Parse(configuration.GetRequiredValue("LOG_HTTP_TRAFFIC"));
         GITHUB_TOKEN = configuration["GITHUB_TOKEN"] ?? "";
 
-        var processPath = Path.GetDirectoryName(Environment.ProcessPath) ??
-                          throw new Exception("Unable to determine process path.");
-        var localMapperDirectory = Path.Combine(processPath, "mappers");
-        if (Directory.Exists(localMapperDirectory))
-        {
-            MAPPER_LOCAL_DIRECTORY = localMapperDirectory;
-        }
+        logger.LogInformation($"AppSettings initialized: RETROARCH_DELAY_MS_BETWEEN_READS: {RETROARCH_DELAY_MS_BETWEEN_READS} and BIZHAWK_DELAY_MS_BETWEEN_READS: {BIZHAWK_DELAY_MS_BETWEEN_READS}");
     }
-
-    public string Urls { get; }
 
     public string RETROARCH_LISTEN_IP_ADDRESS { get; }
     public int RETROARCH_LISTEN_PORT { get; }
@@ -64,14 +42,9 @@ public class AppSettings
     public int RETROARCH_DELAY_MS_BETWEEN_READS { get; }
 
     public int BIZHAWK_DELAY_MS_BETWEEN_READS { get; }
+
     public int PROTOCOL_FRAMESKIP { get; }
+
     public string MAPPER_VERSION { get; }
-
-    public string MAPPER_DIRECTORY { get; }
-    public bool MAPPER_DIRECTORY_OVERWRITTEN { get; } = false;
-
-    public string? MAPPER_LOCAL_DIRECTORY { get; }
     public string GITHUB_TOKEN { get; }
-
-    public bool LOG_HTTP_TRAFFIC { get; }
 }

@@ -77,14 +77,6 @@ public class MapperUpdateManager : IMapperUpdateManager
     {
         try
         {
-            if (BuildEnvironment.IsDebug && _appSettings.MAPPER_DIRECTORY_OVERWRITTEN)
-            {
-                _logger.LogWarning("Mapper directory is overwritten, will not perform any updates.");
-                _mapperUpdaterSettings.RequiresUpdate = false;
-                _mapperUpdaterSettings.SaveChanges(_logger);
-                return false;
-            }
-
             if (_mapperUpdaterSettings.AlwaysIgnoreUpdates)
             {
                 _logger.LogInformation("User requested to ignore updates.");
