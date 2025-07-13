@@ -39,8 +39,8 @@
 				}
 
 				&:focus-visible {
-					color: var(--color-highlight);
-					border-color: var(--color-highlight);
+					color: var(--color-blue);
+					border-color: var(--color-blue);
 				}
 			}
 		}

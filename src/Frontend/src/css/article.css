@@ -12,7 +12,7 @@ details.panel {
 		border-color: var(--color-border-0);
 	}
 	&:has(summary:focus-visible) {
-		border-color: var(--color-highlight);
+		border-color: var(--color-blue);
 	}
 	&[open]>summary {
 		margin-left: var(--margin-0);

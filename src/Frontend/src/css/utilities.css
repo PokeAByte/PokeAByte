@@ -37,16 +37,13 @@ button.red,
 button.purple,
 button.green {
 	--button-background-default: var(--button-base-color);
-	--button-background-hover: var(--button-base-color);
+	--button-background-hover: color-mix(in oklab, var(--button-base-color) 90%, white 10%);
 	--button-border-default: var(--button-base-color);
 	--button-border-hover: var(--button-base-color);
 	--button-border-disabled: var(--button-base-color);
-	&:hover:enabled {
-		background-color: color-mix(in oklab, var(--button-base-color) 90%, white 10%) !important;
-	}
 }
 button.blue {
-	--button-base-color: var(--color-highlight);
+	--button-base-color: var(--color-blue);
 }
 button.green {
 	--button-base-color: var(--color-green);

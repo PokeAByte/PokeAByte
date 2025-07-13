@@ -4,7 +4,6 @@ import { Toasts } from "../../../notifications/ToastStore";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { useAPI } from "../../../hooks/useAPI";
 import { LoadProgress } from "../../../components/LoadProgress";
-import { useLocation } from "wouter";
 import { AvailableMapper, Mapper } from "pokeaclient";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { unique } from "../../propertyEditor/utils/unique";
@@ -24,7 +23,6 @@ export function MapperSelection(props: MapperSelectProps) {
 	// @ts-expect-error The upstream type definition is incomplete, accessing fileId works just fine.
 	const fileId = mapper?.fileId;
 	const loadButtonRef = useRef<HTMLButtonElement>(null)
-	const [, setLocation] = useLocation();
 	const changeMapperApi = useAPI(changeMapper);
 	const [currentMapper, setCurrentMapper] = useState<string|null>(null);
 	useEffect(() => {
@@ -47,7 +45,6 @@ export function MapperSelection(props: MapperSelectProps) {
 		if (changeMapperApi.wasCalled && !changeMapperApi.isLoading) {
 			if (changeMapperApi.result === true) {
 				Toasts.push("Loaded mapper", "task_alt", "success");
-				setLocation("../../properties");
 			} else if (changeMapperApi.result) {
 				Toasts.push("Failed to load mapper:\n " + changeMapperApi.result, "", "error", false);
 			} else {
@@ -55,7 +52,7 @@ export function MapperSelection(props: MapperSelectProps) {
 			}
 			console.log(changeMapperApi.result);
 		}
-	}, [setLocation, changeMapperApi.wasCalled, changeMapperApi.isLoading, changeMapperApi.result])
+	}, [changeMapperApi.wasCalled, changeMapperApi.isLoading, changeMapperApi.result])
 
 	const onCategorySelect = (category: string|null ) => {
 		let filter = category ?? "";

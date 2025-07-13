@@ -6,17 +6,26 @@ import MapperPage from "../pages/mappers/MapperPage";
 import { Store } from "../utility/propertyStore";
 import { Settings } from "../pages/settings/Settings";
 import { LicensePage } from "../pages/LicensePage";
+import { usePrevious } from "../hooks/useAPI";
 
 export function MainView() {
 	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);
 	const [path, setLocation] = useLocation();
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);	
+	const previousMapper = usePrevious(mapper);
 
 	useEffect(() => {
 		if (path === "~/") {
-			setLocation(isConnected ? "/properties" : "/mapper/");
+			setLocation(mapper ? "/properties" : "/mapper/", { replace: false});
 		}
-	}, [path, isConnected, setLocation])
+	}, [path, mapper, setLocation]);
+
+	useEffect(() => {
+		if (mapper && !previousMapper) {
+			setLocation("/properties", { replace: false});
+		}
+	}, [mapper, previousMapper, setLocation]);
+
 	if (!isConnected) {
 		return (
 			<main className="loading">

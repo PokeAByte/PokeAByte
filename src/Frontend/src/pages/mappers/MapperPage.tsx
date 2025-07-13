@@ -10,7 +10,6 @@ import { useStorageState } from "../../hooks/useStorageState";
 
 export default function MapperPage() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
-
 	return (
 		<MapperFilesContextProvider>
 			<article className="layout-box margin-top">

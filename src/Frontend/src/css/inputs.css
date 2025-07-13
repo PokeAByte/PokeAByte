@@ -1,29 +1,29 @@
 button {
+	--button-background: var(--button-background-default);
 	margin-top: var(--margin-0);
 	font-size: var(--font-size-0);
 	padding: var(--margin-0);
 	border: 2px solid ;
 	color: var(--button-color-default);
-	background-color: var(--button-background-default);
+	background-color: var(--button-background);
 	border-color: var(--button-border-default);
 	
 	&:hover:enabled {
-		background-color: var(--button-background-hover);
-		border-color: var(--button-background-hover);
+		--button-background: var(--button-background-hover);
 	}
 	
 	&[disabled] {
+		--button-background: var(--button-background-disabled);
 		border-color: var(--button-border-disabled);
-		background-color: var(--button-background-disabled);
 		color: var(--button-color-disabled);
 	}
 
 	&:focus-visible {
-		outline: 2px dashed var(--color-highlight);
+		outline: 2px dashed var(--color-blue);
 	}
 
 	&.highlight {
-		color: var(--color-highlight)
+		color: var(--color-blue)
 	}
 }
 input,
@@ -47,11 +47,11 @@ input[type="checkbox"] {
 	}
 
 	&:focus-visible {
-		outline: 2px dashed var(--color-highlight);
+		outline: 2px dashed var(--color-blue);
 	}
 
 	&.highlight {
-		color: var(--color-highlight)
+		color: var(--color-blue)
 	}
 }
 
@@ -102,5 +102,5 @@ button {
 }
 
 .icon-button-bare:focus-visible {
-	outline: 2px dashed var(--color-highlight);
+	outline: 2px dashed var(--color-blue);
 }

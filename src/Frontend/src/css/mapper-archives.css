@@ -20,7 +20,7 @@
 		}
 	}
 	details[open] .material-icons {
-		color: var(--color-highlight)
+		color: var(--color-blue)
 	}
 	details[open] summary {
 		margin-bottom: var(--margin-1);

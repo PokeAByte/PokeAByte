@@ -1,4 +1,3 @@
-import { useLocation } from "wouter";
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
 import {  useSyncExternalStore } from "preact/compat";
@@ -6,10 +5,9 @@ import { AdvancedToggle } from "../Contexts/AdvancedToggle";
 
 export function Header() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
-	const [, setLocation] = useLocation();
 	const reloadMapper = () => {
 		// @ts-expect-error The upstream type definition is incomplete, accessing fileId works just fine.
-		Store.client.changeMapper(mapper.fileId).then(() => setLocation("/ui/properties"));
+		Store.client.changeMapper(mapper.fileId);
 	};
 	const textHighlightClass = mapper ? "text-green" : "text-red";
 	return (

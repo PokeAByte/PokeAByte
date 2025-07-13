@@ -29,7 +29,7 @@
 			border-color: var(--color-green);
 		}
 		&.blue {
-			border-color: var(--color-highlight);
+			border-color: var(--color-blue);
 		}
 	}
 	.toast-content {

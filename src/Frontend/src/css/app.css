@@ -33,7 +33,7 @@
 	--color-tone-3: #666666;
 	--color-tone-5: #969696;
 
-	--color-highlight: #026ec1;
+	--color-blue: #026ec1;
 	--color-green: #2ea043;
 	--color-red: #f85149;
 	--color-purple: #776be7;
@@ -126,27 +126,25 @@ header {
 nav.tab {
 	justify-content: center;
 	align-self: end;
-
+	
 	button {
+		--button-background-hover: var(--color-surface-2);
+		--button-background-disabled: var(--color-surface-0);
 		position: relative;
 		clip-path: polygon(0 13px, 13px 0, 100% 0, 100% 100%, 0 100%);
 		color: var(--font-color-main);
-		border-color: var(--color-border-0);
-		border-style: solid;
+		border: 2px solid var(--color-border-0);
 		background-color: var(--color-border-0) !important;
 		padding: 6px 12px 6px 12px;
 		margin-bottom: -2px;
 		align-content: center;
-		&:hover {
-			text-decoration: none;
-		}
 		&.active {
-			border-bottom: 1px solid var(--color-surface-1);
+			border-bottom: 1px solid var(--color-surface-1) !important;
 			padding-bottom: 7px;
 		}
 		&:focus-visible {
-			border-color: var(--color-highlight);
-			background-color: var(--color-highlight) !important;
+			border-color: var(--color-blue);
+			background-color: var(--color-blue) !important;
 			border-bottom-color: var(--color-border-0) !important;
 		}
 		&::before {
@@ -154,20 +152,10 @@ nav.tab {
 			height: 100%;
 			width: 100%;
 			position: absolute;
-			top: 0;
 			left: 0;
 			z-index: -1;
 			clip-path: polygon(0 12px, 12px 0, 100% 0, 100% 100%, 0 100%);
-			background-color: var(--color-surface-1);
-		}
-
-		&:not([disabled]):hover::before {
-			background-color: var(--color-surface-2) !important;
-		}
-
-		&[disabled]::before {
-			/* background-color: var(--color-tone-1); */
-			background-color: var(--color-surface-0);
+			background-color: var(--button-background);
 		}
 
 		&>.material-icons {
@@ -215,7 +203,7 @@ main.loading {
 }
 
 a {
-	color: var(--color-highlight);
+	color: var(--color-blue);
 }
 
 .title {
@@ -389,7 +377,7 @@ form>table {
 
 			&:focus-visible {
 				outline: none;
-				border-color: var(--color-highlight);
+				border-color: var(--color-blue);
 				z-index: 5;
 			}
 		}
