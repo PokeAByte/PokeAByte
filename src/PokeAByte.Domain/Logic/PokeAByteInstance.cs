@@ -98,7 +98,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             _transferBlocks[i] = new BlockData(
                 block.StartingAddress,
-                memory.GetDefaultMemory(block.StartingAddress, block.EndingAddress)
+                memory.GetDefaultMemory(block.StartingAddress, block.EndingAddress+1)
             );
             i++;
         }
