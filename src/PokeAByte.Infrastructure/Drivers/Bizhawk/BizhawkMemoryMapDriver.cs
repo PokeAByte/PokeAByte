@@ -1,140 +1,165 @@
 ﻿using System.IO.MemoryMappedFiles;
+using System.Runtime.InteropServices;
 using System.Text;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using SharedPlatformConstants = PokeAByte.Domain.Models.SharedPlatformConstants;
 
-#pragma warning disable CA1416 // Validate platform compatibility
-namespace PokeAByte.Infrastructure.Drivers.Bizhawk
+namespace PokeAByte.Infrastructure.Drivers.Bizhawk;
+
+public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
 {
-    public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
+    public string ProperName => "Bizhawk";
+    public int DelayMsBetweenReads { get; }
+    private int IntegrationVersion;
+    private string SystemName = string.Empty;
+    private const int METADATA_LENGTH = SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE;
+    private const int DATA_LENGTH = SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE;
+    MemoryMappedViewAccessor? _memoryAccessor;
+    private SharedPlatformConstants.PlatformEntry? _platform;
+
+    public BizhawkMemoryMapDriver(AppSettings appSettings)
     {
-        public string ProperName => "Bizhawk";
-        public int DelayMsBetweenReads { get; }
+        DelayMsBetweenReads = appSettings.BIZHAWK_DELAY_MS_BETWEEN_READS;
+    }
 
-        private int IntegrationVersion;
-        private string SystemName = string.Empty;
+    string GetStringFromBytes(ReadOnlySpan<byte> data)
+    {
+        return Encoding.UTF8.GetString(data.TrimEnd((byte)'\0'));
+    }
 
-        private const int METADATA_LENGTH = 32;
-        private const int DATA_Length = 4 * 1024 * 1024;
-
-        public BizhawkMemoryMapDriver(AppSettings appSettings)
+    private void ReadMetaData(byte[] output)
+    {
+        try
         {
-            DelayMsBetweenReads = appSettings.BIZHAWK_DELAY_MS_BETWEEN_READS;
+            using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK.bin", MemoryMappedFileRights.Read)
+                : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK.bin", FileMode.Open, null, METADATA_LENGTH, MemoryMappedFileAccess.Read);
+            using var accessor = mmfData.CreateViewAccessor(0, METADATA_LENGTH, MemoryMappedFileAccess.Read);
+            accessor.ReadArray(0, output, 0, METADATA_LENGTH);
+        }
+        catch (FileNotFoundException ex)
+        {
+            throw new VisibleException("Can't establish a communication with BizHawk. Is Bizhawk open? Is the PokeAByte integration tool running?", ex);
+        }
+    }
+
+    private void ReadBizhawkData(int start, Span<byte> span)
+    {
+        try
+        {
+            using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK_DATA.bin", MemoryMappedFileRights.Read)
+                : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK_DATA.bin", FileMode.Open, null, DATA_LENGTH, MemoryMappedFileAccess.Read);
+            using var memoryAccessor = mmfData.CreateViewAccessor(0, DATA_LENGTH, MemoryMappedFileAccess.Read);
+            memoryAccessor.CopyBytesToSpan((ulong)start, span);
+        }
+        catch (FileNotFoundException ex)
+        {
+            throw new Exception("Can't establish a communication with BizHawk. Is Bizhawk open? Is the PokeAByte integration tool running?", ex);
+        }
+    }
+
+    public Task EstablishConnection()
+    {
+        byte[] metadata = new byte[METADATA_LENGTH];
+        ReadMetaData(metadata);
+
+        IntegrationVersion = metadata[1];
+
+        if (IntegrationVersion != SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION)
+        {
+            throw new VisibleException("BizHawk's PokeAByte integration is out of date! Please update it.");
         }
 
-        string GetStringFromBytes(byte[] data)
+        SystemName = GetStringFromBytes(metadata.AsSpan()[2..30]);
+        if (string.IsNullOrEmpty(SystemName))
         {
-            return Encoding.UTF8.GetString(data).TrimEnd('\0');
+            throw new VisibleException("BizHawk connection is established, but does not have a game running.");
         }
+        _platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName)
+            ?? throw new Exception($"System {SystemName} is not yet supported.");
+        return Task.CompletedTask;
+    }
 
-        byte[] GetFromMemoryMappedFile(string filename, int fileSize)
+    public Task Disconnect()
+    {
+        // Dispose of previously used accessor:
+        _memoryAccessor?.Dispose();
+        _memoryAccessor = null;
+        return Task.CompletedTask;
+    }
+
+    public ValueTask ReadBytes(BlockData[] transferBlocks)
+    {
+        if (_platform == null)
         {
-            try
-            {
-                using var mmfData = MemoryMappedFile.OpenExisting(filename, MemoryMappedFileRights.Read);
-                using var mmfAccessor = mmfData.CreateViewAccessor(0, fileSize, MemoryMappedFileAccess.Read);
-
-                byte[] data = new byte[fileSize];
-                mmfAccessor.ReadArray(0, data, 0, fileSize);
-
-                return data;
-            }
-            catch (FileNotFoundException ex)
-            {
-                throw new VisibleException("Can't establish a communication with BizHawk. Is Bizhawk open? Is the PokeAByte integration tool running?", ex);
-            }
-            catch
-            {
-                throw;
-            }
+            throw new Exception($"System {SystemName} is not yet supported.");
         }
-
-        public Task EstablishConnection()
+        for (int i = 0; i < transferBlocks.Length; i++)
         {
-            var metadata = GetFromMemoryMappedFile("POKEABYTE_BIZHAWK.bin", METADATA_LENGTH);
-
-            IntegrationVersion = metadata[1];
-
-            if (IntegrationVersion != SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION)
+            var transferBlock = transferBlocks[i];
+            var block = _platform.MemoryLayout
+                .Where(
+                    x => transferBlock.Start >= x.PhysicalStartingAddress
+                        && transferBlock.Start + transferBlock.Data.Length <= x.PhysicalEndingAddress
+                )
+                .FirstOrDefault();
+            if (block == null)
             {
-                throw new VisibleException("BizHawk's PokeAByte integration is out of date! Please update it.");
+                continue;
             }
-
-            SystemName = GetStringFromBytes(metadata[2..31]);
-
-            if (string.IsNullOrEmpty(SystemName))
-            {
-                throw new VisibleException("BizHawk connection is established, but does not have a game running.");
-            }
-
-            return Task.CompletedTask;
+            var offset = transferBlock.Start - block.PhysicalStartingAddress;
+            ReadBizhawkData(block.CustomPacketTransmitPosition + (int)offset, transferBlock.Data.Span);
         }
+        return ValueTask.CompletedTask;
+    }
 
-        public Task Disconnect() => Task.CompletedTask;
-
-        public Task<bool> TestConnection()
+    public ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
+    {
+        if (_platform == null)
         {
-            try
-            {
-                EstablishConnection();
-                var platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");
-
-                var data = GetFromMemoryMappedFile("POKEABYTE_BIZHAWK_DATA.bin", DATA_Length);
-
-                return Task.FromResult(data.Length > 0);
-            }
-            catch (Exception e)
-            {
-                return Task.FromResult(false);
-            }
+            throw new Exception($"System {SystemName} is not yet supported.");
         }
+        //Get memory location
+        //var memoryLocation = startingMemoryAddress & 0xF000000;
+        var bizhawkMemory = _platform
+            .MemoryLayout
+            .FirstOrDefault(x =>
+                x.PhysicalStartingAddress <= startingMemoryAddress &&
+                startingMemoryAddress <= x.PhysicalStartingAddress + (uint)x.Length);
+        if (bizhawkMemory is null || string.IsNullOrEmpty(bizhawkMemory.BizhawkIdentifier))
+            throw new InvalidOperationException(
+                $"Could not find the BizHawk identifier for memory address {startingMemoryAddress}");
 
-        public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> _)
+
+        var memoryContract = new MemoryContract<byte[]>
         {
-            var platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? throw new Exception($"System {SystemName} is not yet supported.");
+            BizHawkIdentifier = bizhawkMemory.BizhawkIdentifier,
+            Data = values,
+            DataLength = values.Length,
+            MemoryAddressStart = (long)startingMemoryAddress - bizhawkMemory.PhysicalStartingAddress
+        };
+        BizhawkNamedPipesClient.WriteToBizhawk(memoryContract);
+        return ValueTask.CompletedTask;
+    }
 
-            var data = GetFromMemoryMappedFile("POKEABYTE_BIZHAWK_DATA.bin", DATA_Length);
-            var result = new BlockData[platform.MemoryLayout.Length];
-            for(int i = 0; i < result.Length; i++) {
-                var block = platform.MemoryLayout[i];
-                result[i] = new BlockData(
-                    block.PhysicalStartingAddress, 
-                    data[block.CustomPacketTransmitPosition..(block.CustomPacketTransmitPosition + block.Length)]
-                );
-            }
-            return  Task.FromResult(result);
+    public static Task<bool> Probe(AppSettings appSettings)
+    {
+        try
+        {
+            using MemoryMappedFile mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? MemoryMappedFile.OpenExisting("POKEABYTE_BIZHAWK.bin", MemoryMappedFileRights.Read)
+                : MemoryMappedFile.CreateFromFile("/dev/shm/POKEABYTE_BIZHAWK.bin", FileMode.Open, null, METADATA_LENGTH, MemoryMappedFileAccess.Read);
+            using var accessor = mmfData.CreateViewAccessor(0, METADATA_LENGTH, MemoryMappedFileAccess.Read);
+            byte[] metaData = new byte[METADATA_LENGTH];
+            accessor.ReadArray(0, metaData, 0, METADATA_LENGTH);
+            return Task.FromResult(metaData[1] == SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION);
         }
-
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
-        {           
-            var platform = SharedPlatformConstants
-                .Information
-                .SingleOrDefault(x => x.BizhawkIdentifier == SystemName) ?? 
-                           throw new Exception($"System {SystemName} is not yet supported.");
-            //Get memory location
-            //var memoryLocation = startingMemoryAddress & 0xF000000;
-            var bizhawkMemory = platform
-                .MemoryLayout
-                .FirstOrDefault(x => 
-                    x.PhysicalStartingAddress <= startingMemoryAddress && 
-                    startingMemoryAddress <= x.PhysicalStartingAddress + (uint)x.Length);
-            if (bizhawkMemory is null || string.IsNullOrEmpty(bizhawkMemory.BizhawkIdentifier))
-                throw new InvalidOperationException(
-                    $"Could not find the BizHawk identifier for memory address {startingMemoryAddress}");
-
-            
-            var memoryContract = new MemoryContract<byte[]>
-            {
-                BizHawkIdentifier = bizhawkMemory.BizhawkIdentifier,
-                Data = values,
-                DataLength = values.Length,
-                MemoryAddressStart = (long)startingMemoryAddress - bizhawkMemory.PhysicalStartingAddress
-            };
-            BizhawkNamedPipesClient.WriteToBizhawk(memoryContract);
-            return Task.CompletedTask;
+        catch (Exception)
+        {
+            return Task.FromResult(false);
         }
     }
 }
-#pragma warning restore CA1416 // Validate platform compatibility

@@ -1,44 +1,49 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using BizHawk.Client.Common;
-using BizHawk.Client.EmuHawk;
 using BizHawk.Common;
 using BizHawk.Emulation.Common;
 
 namespace PokeAByte.Integrations.BizHawk;
 
 [ExternalTool("Poke-A-Byte Integration")]
-public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, IDisposable
+public sealed class PokeAByteIntegrationForm : Form, IExternalToolForm, IDisposable
 {
+    private static string LINUX_METADATA_FILE = "/dev/shm/POKEABYTE_BIZHAWK.bin";
+    private static string LINUX_DATA_FILE = "/dev/shm/POKEABYTE_BIZHAWK_DATA.bin";
     public ApiContainer? APIs { get; set; }
 
     [RequiredService]
     public IMemoryDomains? MemoryDomains { get; set; }
 
-    protected override string WindowTitleStatic => "Poke-A-Byte Integration";
-
     private readonly Label MainLabel = new() { Text = "Loading...", Height = 50, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top };
 
-    private readonly MemoryMappedFile PokeAByteMetadata_MemoryMappedFile;
-    private readonly MemoryMappedViewAccessor PokeAByteMetadata_Accessor;
+    private MemoryMappedFile? MetaDataMMF;
+    private MemoryMappedViewAccessor? Metadata_Accessor;
 
-    private readonly MemoryMappedFile? PokeAByteData_MemoryMappedFile;
-    private readonly MemoryMappedViewAccessor? PokeAByteData_Accessor;
+    private MemoryMappedFile? Data_MMF;
+    private MemoryMappedViewAccessor? Data_Accessor;
 
     private byte[] DataBuffer { get; } = new byte[SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE];
+    public bool IsActive { get; private set; } = true;
+    public bool IsLoaded => true;
 
     private string System = string.Empty;
 
     private SharedPlatformConstants.PlatformEntry? Platform = null;
     private int? FrameSkip = null;
     private NamedPipeServer? _namedPipeServer = null;
+
     public PokeAByteIntegrationForm()
     {
+        base.Text = "Poke-A-Byte Integration";
         ShowInTaskbar = false;
 
         ClientSize = new(300, 60);
@@ -49,27 +54,64 @@ public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, 
         ResumeLayout(performLayout: false);
         PerformLayout();
 
-        PokeAByteMetadata_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("POKEABYTE_BIZHAWK.bin", SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
-        PokeAByteMetadata_Accessor = PokeAByteMetadata_MemoryMappedFile.CreateViewAccessor();
-
-        PokeAByteData_MemoryMappedFile = MemoryMappedFile.CreateOrOpen("POKEABYTE_BIZHAWK_DATA.bin", SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE, MemoryMappedFileAccess.ReadWrite);
-        PokeAByteData_Accessor = PokeAByteData_MemoryMappedFile.CreateViewAccessor();
-
         _namedPipeServer = new NamedPipeServer();
         _namedPipeServer.ClientDataHandler += ReadFromClient;
         _namedPipeServer.StartServer("BizHawk_Named_Pipe");
         Closing += (sender, args) =>
         {
-            _namedPipeServer.Dispose();
+            IsActive = false;
+            _namedPipeServer?.Dispose();
             _namedPipeServer = null;
         };
     }
+
+    private MemoryMappedFile CreateMMF(string name, int size)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return MemoryMappedFile.CreateOrOpen(name, size, MemoryMappedFileAccess.ReadWrite);
+        }
+        else
+        {
+            if (File.Exists("/dev/shm/" + name))
+            {
+                File.Delete("/dev/shm/" + name);
+            }
+            return MemoryMappedFile.CreateFromFile(
+                "/dev/shm/" + name,
+                FileMode.OpenOrCreate,
+                null,
+                size,
+                MemoryMappedFileAccess.ReadWrite
+            );
+        }
+    }
+
+    private void CreateMemoryMappedFiles()
+    {
+        if (this.Platform == null)
+        {
+            return;
+        }
+        MetaDataMMF = CreateMMF(
+            "POKEABYTE_BIZHAWK.bin",
+            SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE
+        );
+        Metadata_Accessor = MetaDataMMF.CreateViewAccessor();
+
+        Data_MMF = CreateMMF(
+            "POKEABYTE_BIZHAWK_DATA.bin",
+            SharedPlatformConstants.BIZHAWK_DATA_PACKET_SIZE
+        );
+        Data_Accessor = Data_MMF.CreateViewAccessor();
+    }
+
     private void ReadFromClient(MemoryContract<byte[]>? clientData)
     {
         if (clientData?.Data is null || string.IsNullOrWhiteSpace(clientData.BizHawkIdentifier))
             return;
-        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier] ?? 
-                           throw new Exception($"Memory domain not found.");
+        var memoryDomain = MemoryDomains?[clientData.BizHawkIdentifier]
+            ?? throw new Exception($"Memory domain not found.");
         memoryDomain.Enter();
         for (int i = 0; i < clientData.Data.Length; i++)
         {
@@ -78,19 +120,20 @@ public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, 
         }
         memoryDomain.Exit();
     }
-    public override void Restart()
+
+    public void Restart()
     {
+        System = APIs?.Emulation.GetGameInfo()?.System ?? string.Empty;
+        Platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == System);
+        CreateMemoryMappedFiles();
         var data = new byte[SharedPlatformConstants.BIZHAWK_METADATA_PACKET_SIZE];
 
         data[0] = 0x00;
         data[1] = SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION;
 
-        System = APIs?.Emulation.GetGameInfo()?.System ?? string.Empty;
         Array.Copy(Encoding.UTF8.GetBytes(System), 0, data, 2, System.Length);
 
-        PokeAByteMetadata_Accessor.WriteArray(0, data, 0, data.Length);
-
-        Platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == System);
+        Metadata_Accessor?.WriteArray(0, data, 0, data.Length);
 
         if (string.IsNullOrWhiteSpace(System))
         {
@@ -107,8 +150,8 @@ public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, 
             MainLabel.Text = $"Sending {System} data to PokeAByte...";
         }
     }
-    
-    protected override void UpdateAfter()
+
+    private void UpdateAfter()
     {
         try
         {
@@ -126,17 +169,14 @@ public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, 
                 try
                 {
                     var memoryDomain = MemoryDomains?[entry.BizhawkIdentifier] ?? throw new Exception($"Memory domain not found.");
-
                     memoryDomain.BulkPeekByte(0x00L.RangeToExclusive(entry.Length), DataBuffer);
-
-                    PokeAByteData_Accessor?.WriteArray(entry.CustomPacketTransmitPosition, DataBuffer, 0, entry.Length);
+                    Data_Accessor?.WriteArray(entry.CustomPacketTransmitPosition, DataBuffer, 0, entry.Length);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception($"Unable to read memory domain {entry.BizhawkIdentifier}. {ex.Message}", ex);
                 }
             }
-
             if (FrameSkip == 0)
             {
                 FrameSkip = Platform.FrameSkipDefault;
@@ -146,6 +186,42 @@ public sealed class PokeAByteIntegrationForm : ToolFormBase, IExternalToolForm, 
         {
             MainLabel.Text = $"Error: {ex.Message}";
         }
+    }
+
+    public void UpdateValues(ToolFormUpdateType type)
+    {
+        if (type == ToolFormUpdateType.PostFrame)
+        {
+            UpdateAfter();
+        }
+    }
+
+    public bool AskSaveChanges() => true;
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Data_MMF?.Dispose();
+            Data_MMF = null;
+            Data_Accessor?.Dispose();
+            Data_Accessor = null;
+
+            MetaDataMMF?.Dispose();
+            MetaDataMMF = null;
+            Metadata_Accessor?.Dispose();
+            Metadata_Accessor = null;
+
+            if (File.Exists(LINUX_METADATA_FILE))
+            {
+                File.Delete(LINUX_METADATA_FILE);
+            }
+            if (File.Exists(LINUX_DATA_FILE))
+            {
+                File.Delete(LINUX_DATA_FILE);
+            }
+        }
+        base.Dispose(disposing);
     }
 }
 

@@ -37,33 +37,6 @@ public static class MapperXmlExtensions
     public static int? GetOptionalAttributeValueAsInt(this XElement el, string name) =>
         el.Attribute(name) != null ? int.Parse(el.GetAttributeValue(name)) : null;
 
-    public static bool IsArray(this XElement el)
-    {
-        var childElements = el.Elements().Select(x => x.GetOptionalAttributeValue("name") ?? string.Empty).ToArray();
-
-        // Check if all child elements are numbers
-        if (childElements.Any(e => int.TryParse(e, out _)) == false) {
-            return false;
-        }
-
-        // Check if numbers are in sequence
-        var sortedElements = childElements.OrderBy(e => int.Parse(e)).ToList();
-        for (var i = 1; i < sortedElements.Count; i++)
-        {
-            var current = int.Parse(sortedElements[i]);
-            var previous = int.Parse(sortedElements[i - 1]);
-
-            if (current != previous + 1) return false;
-        }
-
-        return true;
-    }
-
-    public static bool IsParentAnArray(this XElement el)
-    {
-        return el.Parent?.IsArray() ?? false;
-    }
-    
     public static string? GetElementActualName(this XElement el)
     {
         if (el.Name.LocalName is "property" || el.Name.LocalName is "class")
@@ -88,14 +61,16 @@ public static class MapperXmlExtensions
         }
     }
 
-    public static string GetElementPath(this XElement el)
+    public static string GetElementPath(this XElement element)
     {
-        var elementName = el.Attribute("name")?.Value;
-        
-        return el
-                   .AncestorsAndSelf().InDocumentOrder().Reverse()
-                   .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)
-                   .ReplaceStart("mapper.properties.", string.Empty).ReplaceEnd(".property.", string.Empty) +
-               $".{elementName}";
+        var elementName = element.Attribute("name")?.Value;
+        return element
+            .AncestorsAndSelf()
+            .InDocumentOrder()
+            .Reverse()
+            .Aggregate("", (s, xe) => xe.GetElementPathName() + "." + s)
+            .ReplaceStart("mapper.properties.", string.Empty)
+            .ReplaceEnd(".property.", string.Empty)
+            + $".{elementName}";
     }
 }

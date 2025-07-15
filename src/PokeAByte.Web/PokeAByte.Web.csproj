@@ -6,85 +6,56 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <PublicSign>false</PublicSign>
         <Company>Scott's Thoughts</Company>
-        <AssemblyVersion>0.8.2</AssemblyVersion>
-        <FileVersion>0.8.2</FileVersion>
+        <AssemblyVersion>0.9.0</AssemblyVersion>
+        <FileVersion>0.9.0</FileVersion>
+		<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<PublishTrimmed>true</PublishTrimmed>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugSymbols>false</DebugSymbols>
+		<DebugSymbols>False</DebugSymbols>
+		<DebugType>None</DebugType>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
-      <PackageReference Include="MudBlazor" Version="7.5.0" />
-      <PackageReference Include="Serilog" Version="4.0.2-dev-02220" />
-      <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
-      <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
+	<Target Name="NpmInstall" Outputs="../Frontend/node_modules/.install-stamp">
+		<Exec Command="npm ci" Condition="'$(RestorePackagesWithLockFile)' == 'true'" WorkingDirectory="../Frontend" />
+		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != 'true'" WorkingDirectory="../Frontend" />
+		<!-- Write the stamp file, so incremental builds work -->
+		<Touch Files="../Frontend/node_modules/.install-stamp" AlwaysCreate="true" />
+	</Target>
+	<Target Name="NpmRunBuild" DependsOnTargets="NpmInstall" BeforeTargets="BeforeBuild">
+		<Exec Command="npm run build" WorkingDirectory="../Frontend" />
+	</Target>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.7" />
+	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.7" />
+      <PackageReference Include="Serilog" Version="4.3.0" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+      <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-      <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Components\MapperManager\LoadMapper.razor" />
-      <AdditionalFiles Include="Layout\MainLayout.razor" />
-      <AdditionalFiles Include="Layout\NavigationMenu.razor" />
-      <AdditionalFiles Include="Pages\AppSettings.razor" />
-      <AdditionalFiles Include="Pages\Error.razor" />
-      <AdditionalFiles Include="Pages\Home.razor" />
-      <AdditionalFiles Include="Pages\MapperConnectionStatus.razor" />
-      <AdditionalFiles Include="Pages\MapperManager.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Components\Pages\AppSettings.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\DataProperties.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\MapperConnectionStatus.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\MapperManager.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyExpansionPanel.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyTreeView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertiesOld\PropertyValueEditor.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyExpansionPanel.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\Properties\PropertyValueEditor.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyExpansionView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTableView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyTreeView.razor" />
-      <_ContentIncludedByDefault Remove="Components\PropertyOld\PropertyValueEditor.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\PokeABytes.Application.Mappers\PokeABytes.Application.Mappers.csproj" />
-      <ProjectReference Include="..\PokeAByte.Application\PokeAByte.Application.csproj" />
       <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
       <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
-      <EmbeddedResource Remove="Components\PropertiesOld\**" />
-      <EmbeddedResource Include="wwwroot\favicon.ico" />
-      <EmbeddedResource Include="wwwroot\site.css" />
+      <EmbeddedResource Include="wwwroot\favicon.png" />
+      <EmbeddedResource Include="..\Frontend\dist\**" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Resource Include="wwwroot\dist\gameHookMapperClient.js" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Components\PropertiesOld\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="Components\PropertiesOld\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Components\PropertiesOld\**" />
-      <None Remove="wwwroot.zip" />
-    </ItemGroup>
-
+	<ItemGroup>
+		<Content Update="package-lock.json">
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</Content>
+		<Content Update="wwwroot/**/*">
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 </Project>

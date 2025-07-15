@@ -1,4 +1,6 @@
-using System.Globalization;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
@@ -6,8 +8,28 @@ using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 
-public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
+/// <summary>
+/// Driver to communicate with RetroArch and compatible emulators.
+/// </summary>
+public class RetroArchUdpDriver : IPokeAByteDriver
 {
+    private static uint GetLoopbackMtu()		
+    {
+        var loopbackDevice = NetworkInterface.GetAllNetworkInterfaces()		
+            .FirstOrDefault(x => x.NetworkInterfaceType == NetworkInterfaceType.Loopback);
+		
+        if (loopbackDevice == null)		
+        {		
+            // fallback to what seems to be the macOS default, which is smaller than on all other platforms.		
+            return 16384u;		
+        }		
+        var result = (uint)loopbackDevice.GetIPProperties().GetIPv4Properties().Mtu;		
+        return result;		
+    }
+
+    // MTU minus some overhead, divided by 3 because we get 3 characters per byte requested:		
+    private static uint _maxChunkSize = (uint)Math.Floor((GetLoopbackMtu() - 128) / 3d);
+
     private CancellationTokenSource? _connectionCts;
     public string ProperName { get; } = "RetroArch";
     public int DelayMsBetweenReads { get; }
@@ -20,10 +42,10 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         Logger = logger;
         DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
         _appSettings = appSettings;
-        
+
     }
 
-    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? $"{value}" : $"{value:X2}".ToLower();
+    private static string ToRetroArchHexdecimalString(uint value) => value <= 9 ? value.ToString() : $"{value:x2}";
 
     private Task ConnectAsync(CancellationToken cancellationToken)
     {
@@ -38,7 +60,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
             {
                 if (!await _udpClientWrapper.ReceiveAsync(cancellationToken))
                 {
-                    _udpClientWrapper.Dispose();
+                    break;
                 }
             }
             _udpClientWrapper.Dispose();
@@ -47,35 +69,57 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         return Task.CompletedTask;
     }
 
-    private async Task<byte[]> ReadMemoryAddress(uint memoryAddress, uint length)
+    private async ValueTask<bool> ReadMemoryAddress(BlockData transferBlock)
     {
-        if (_udpClientWrapper == null) 
+        if (_udpClientWrapper == null)
         {
             Logger.LogDebug("Can not read memory, UDP client is unitialized.");
-            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
         }
-        var command = $"READ_CORE_MEMORY";
-        byte[]? response = await _udpClientWrapper.SendCommandAsync(
-            command, 
-            ToRetroArchHexdecimalString(memoryAddress), 
-            length.ToString()
-        );
-        if (response == null)
+        uint length = (uint)transferBlock.Data.Length;
+        if (length <= _maxChunkSize)
         {
-            Logger.LogDebug($"A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
-            throw new DriverTimeoutException(memoryAddress, ProperName, null);
+            byte[]? response = await _udpClientWrapper.SendReadCommandAsync(transferBlock.Start, length);
+            if (response == null)
+            {
+                Logger.LogDebug($"(unchunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. (READ_CORE_MEMORY)");
+                throw new DriverTimeoutException(transferBlock.Start, ProperName, null);
+            }
+            response.AsSpan().CopyTo(transferBlock.Data.Span);
         }
-        return response;
+        else
+        {
+            // Large read - break into chunks		
+            uint offset = 0;
+            while (offset < length)
+            {
+                uint chunkSize = Math.Min(_maxChunkSize, length - offset);
+                uint currentAddress = transferBlock.Start + offset;
+                var command = $"READ_CORE_MEMORY";
+                byte[]? chunk = await _udpClientWrapper.SendReadCommandAsync(currentAddress, chunkSize);
+                if (chunk == null)
+                {
+                    Logger.LogDebug($"(chunked) A timeout occurred when waiting for ReadMemoryAddress reply from RetroArch. ({command})");
+                    throw new DriverTimeoutException(currentAddress, ProperName, null);
+                }
+                chunk.AsSpan().CopyTo(transferBlock.Data.Span);
+                // Buffer.BlockCopy(chunk, 0, transferBlock.Data.Span, offset, chunk.Length);
+                offset += (uint)chunk.Length;
+            }
+        }
+        return true;
     }
 
-    /// <summary>
-    /// A no-op interface implementation.
-    /// </summary>
-    /// <returns> A completed task. </returns>
-    public Task EstablishConnection() => Task.CompletedTask;
-    
+    /// <inheritdoc/>
+    public async Task EstablishConnection()
+    {
+        _connectionCts = new CancellationTokenSource();
+        await ConnectAsync(_connectionCts.Token);
+    }
 
-    public async Task Disconnect() {
+    /// <inheritdoc/>
+    public async Task Disconnect()
+    {
         if (_connectionCts != null)
         {
             await _connectionCts.CancelAsync();
@@ -84,63 +128,49 @@ public class RetroArchUdpDriver : IPokeAByteDriver, IRetroArchUdpPollingDriver
         }
     }
 
-    /// <summary>
-    /// Tests the connect to retroarch by reading the very first byte of game memory.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> if the connection works. <see langword="false"/> if it does not.
-    /// </returns>
-    public async Task<bool> TestConnection()
+    /// <inheritdoc/>
+    public async ValueTask WriteBytes(uint memoryAddress, byte[] values, string? path = null)
     {
-        _connectionCts = new CancellationTokenSource();
-        await ConnectAsync(_connectionCts.Token);
-        
-        try
+        if (_udpClientWrapper == null)
         {
-            _ = await ReadMemoryAddress(0, 1);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "TestConnection");
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Tell retroarch to write target bytes into the game memory.
-    /// </summary>
-    /// <param name="memoryAddress"> The address as which to start writing. </param>
-    /// <param name="values"> The bytes to write to memory. </param>
-    /// <returns> An awaitable task. </returns>
-    public async Task WriteBytes(uint memoryAddress, byte[] values, string? path = null)
-    {
-        if (_udpClientWrapper == null) {
             return;
         }
         var bytes = string.Join(' ', values.Select(x => x.ToHexdecimalString()));
-        await _udpClientWrapper.SendAsync(
-            "WRITE_CORE_MEMORY",
-            $"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}"
-        );
+        await _udpClientWrapper.SendWriteCommand($"{ToRetroArchHexdecimalString(memoryAddress)} {bytes}");
     }
 
-    /// <summary>
-    /// Read target memory blocks from retroarch.
-    /// </summary>
-    /// <param name="blocks"> Which blocks to read. </param>
-    /// <returns> 
-    /// The dictionary of read blocks. <br/>
-    /// Key is the start of each address block. <br/>
-    /// Value is the byte array contained in that block.
-    /// </returns>
-    public async Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
+    /// <inheritdoc/>
+    public async ValueTask ReadBytes(BlockData[] transferBlocks)
     {
-        var result = new BlockData[blocks.Count];
-        var tasks =  blocks.Select(async (block) => {
-            var data = await ReadMemoryAddress(block.StartingAddress, block.EndingAddress - block.StartingAddress + 1);
-            return new BlockData(block.StartingAddress, data);
-        });
-        return await Task.WhenAll(tasks);
+        foreach (BlockData block in transferBlocks)
+        {
+            await ReadMemoryAddress(block);
+        }
+    }
+
+    /// <inheritdoc/>
+    public static async Task<bool> Probe(AppSettings appSettings)
+    {
+        using var client = new UdpClient();
+        IPEndPoint endpoint = new IPEndPoint(
+            IPAddress.Parse(appSettings.RETROARCH_LISTEN_IP_ADDRESS),
+            appSettings.RETROARCH_LISTEN_PORT
+        );
+        client.Client.SetSocketOption(
+            SocketOptionLevel.Socket,
+            SocketOptionName.ReuseAddress,
+            true
+        );
+        try
+        {
+            client.Connect(endpoint);
+            await client.SendAsync("READ_CORE_MEMORY 0 1"u8.ToArray());
+            var result = await client.ReceiveAsync();
+            return result.Buffer.AsSpan().StartsWith("READ_CORE_MEMORY 0"u8);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

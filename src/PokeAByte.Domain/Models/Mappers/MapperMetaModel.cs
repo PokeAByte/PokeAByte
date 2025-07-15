@@ -2,8 +2,9 @@
 
 public record MapperMetaModel
 {
-    public Guid Id { get; init; }
-    public string GameName { get; init; } = string.Empty;
-    public string GamePlatform { get; init; } = string.Empty;
-    public string MapperReleaseVersion { get; init; } = string.Empty;
+    public required Guid Id { get; init; }
+    public required string GameName { get; init; }
+    public required string FileId { get; init; }
+    public required string GamePlatform { get; init; }
+    public required string MapperReleaseVersion { get; init; }
 }

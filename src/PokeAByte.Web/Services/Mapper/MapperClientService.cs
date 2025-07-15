@@ -1,73 +1,30 @@
-﻿using MudBlazor;
-using PokeAByte.Domain;
+﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
-using PokeAByte.Web.Services.Notifiers;
 
 namespace PokeAByte.Web.Services.Mapper;
 
-public class MapperClientService
+public class MapperClientService(
+    ILogger<MapperClientService> logger,
+    IInstanceService instanceService,
+    IMapperFileService mapperFileService,
+    AppSettings appSettings,
+    IDriverService driverService
+)
 {
-    private static readonly long _batchTicks = TimeSpan.FromMilliseconds(15).Ticks;
-    private readonly IMapperFilesystemProvider _mapperFs;
-    private readonly ILogger<MapperClientService> _logger;
-    public readonly MapperClient Client;
-    private readonly PropertyUpdateService _propertyUpdateService;
-    private readonly DriverService _driverService;
     private int _currentAttempt = 0;
     public static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
-    public string LoadedMapperName { get; private set; }
-    private long _lastUpdate;
-    private HashSet<string> _pendingUpdates = new();
-
-    public MapperClientService(IMapperFilesystemProvider mapperFs,
-        ILogger<MapperClientService> logger,
-        MapperClient client,
-        IClientNotifier clientNotifier,
-        PropertyUpdateService propertyUpdateService,
-        DriverService driverService)
-    {
-        _mapperFs = mapperFs;
-        _logger = logger;
-        Client = client;
-        _propertyUpdateService = propertyUpdateService;
-        _driverService = driverService;
-        clientNotifier.PropertyChangedEvent += HandlePropertyChangedEvent;
-    }
-
-    private const Color DisconnectedColor = Color.Secondary;
-    private const Color ConnectedColor = Color.Success;
 
     //Todo: change this in settings
     public string LoadedDriver { get; set; } = DriverModels.Bizhawk;
-    public event Action? OnMapperIsUnloaded;
-    public bool IsCurrentlyConnected
-    {
-        get
-        {
-            if (Client.IsMapperLoaded is false)
-            {
-                OnMapperIsUnloaded?.Invoke();
-            }
-            return Client.IsMapperLoaded;
-        }
-    }
-    public Color GetCurrentConnectionColor() => Client.IsMapperLoaded ? 
-        ConnectedColor : DisconnectedColor;
-    public string GetCurrentConnectionName() => Client.IsMapperLoaded ?
-        "Connected" : "Disconnected";
-    public string ConnectionStatus => Client.IsMapperLoaded ?
-        "Status: Connected" : "Status: Disconnected";
-    public List<PropertyModel> Properties { get; set; } = [];
 
-    public async Task<Result> ChangeMapper(string mapperId,
-        Action<int>? driverTestActionHandler,
-        Action<int>? mapperTestActionHandler)
+    public bool IsCurrentlyConnected => instanceService.Instance != null;
+
+    public async Task<Result> ChangeMapper(string mapperId)
     {
         _currentAttempt = 0;
         var connected = false;
@@ -75,145 +32,149 @@ public class MapperClientService
         {
             try
             {
-                var driverResult = await _driverService.TestDrivers(driverTestActionHandler);
-                if (string.IsNullOrWhiteSpace(driverResult))
-                    return Result.Failure(Error.FailedToLoadMapper, 
-                        "No driver could connect to an emulator. Check your emulator settings.");
-                LoadedDriver = driverResult;
-                var result = await ReplaceMapper(mapperId);
+                var driver = await driverService.TestDrivers();
+                if (driver == null)
+                    return Result.Failure(
+                        Error.FailedToLoadMapper,
+                        "No driver could connect to an emulator. Check your emulator settings."
+                    );
+                var result = await ReplaceMapper(mapperId, driver);
                 connected = result.IsSuccess;
-                LoadedMapperName = mapperId;
+                if (result.ExceptionValue is MapperException mapperException)
+                {
+                    return Result.Failure(Error.FailedToLoadMapper, mapperException.Message);
+                }
             }
             catch (Exception e)
             {
-                _logger.LogError(e, e.Message);
+                logger.LogError(e, e.Message);
                 connected = false;
             }
             _currentAttempt += 1;
-            mapperTestActionHandler?.Invoke(_currentAttempt);
             await Task.Delay(MaxWaitMs);
         }
         return connected ? Result.Success() : Result.Failure(Error.FailedToLoadMapper, "Max attempts reached.");
     }
 
-    private async Task<Result> ReplaceMapper(string mapperId)
+    private async Task<Result> ReplaceMapper(string mapperId, IPokeAByteDriver driver)
     {
-        await Client.UnloadMapper();
-        var mapper = new MapperReplaceModel(mapperId, LoadedDriver);
+        await UnloadMapper();
         try
         {
-            var result = await Client.LoadMapper(mapper);
-            if (result)
-            {
-                Properties = Client.GetProperties()?.ToList() ?? [];
-            }
-            return result ? Result.Success() : 
-                Result.Failure(Error.FailedToLoadMapper,
-                    "Please see logs for more info.");
+            var result = await LoadMapper(mapperId, driver);
+            return result
+                ? Result.Success()
+                : Result.Failure(Error.FailedToLoadMapper, "Please see logs for more info.");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to load mapper.");
+            logger.LogError(e, "Failed to load mapper.");
             return Result.Exception(e);
         }
     }
-    public IEnumerable<MapperFileModel> GetMappers()
-    {
-        _mapperFs.CacheMapperFiles();
-        return _mapperFs.MapperFiles.Select(x => new MapperFileModel()
-        {
-            Id = x.Id,
-            DisplayName = x.DisplayName
-        });
-    }
-
-    /*public Result<List<PropertyModel>> GetProperties()
-    {
-        var mapperProps = _client.GetProperties();
-        var propertyModels = mapperProps?.ToList();
-        if (propertyModels is null || propertyModels.Count == 0)
-            return Result.Failure<List<PropertyModel>>(Error.NoMapperPropertiesFound);
-        return Result.Success(propertyModels);
-    }*/
 
     public Result<List<GlossaryItemModel>> GetGlossaryByReferenceKey(string key)
     {
-        var glossaryItems = Client.GetGlossaryByKey(key);
-        var glossaryList = glossaryItems?.ToList();
-        if(glossaryList is null || glossaryList.Count == 0)
+        var instance = instanceService.Instance;
+        if (instance == null)
+        {
             return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
-        return Result.Success(glossaryList);
+        }
+        var gotVal = instance.Mapper.References.TryGetValue(key, out var referenceItems);
+        if (gotVal && referenceItems != null)
+        {
+            return Result.Success(
+                referenceItems.Values
+                    .Select(x => new GlossaryItemModel(x.Key, x.Value))
+                    .ToList()
+            );
+        }
+        return Result.Failure<List<GlossaryItemModel>>(Error.NoGlossaryItemsFound);
     }
 
     public Result<MapperMetaModel> GetMetaData()
     {
-        if (!Client.IsMapperLoaded)
+        var instance = instanceService.Instance;
+        if (instance == null)
+        {
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
-        var meta = Client.GetMetaData();
-        return meta is null ? 
-            Result.Failure<MapperMetaModel>(Error.FailedToLoadMetaData) :
-            Result.Success(meta);
+        }
+
+        return Result.Success(
+            new MapperMetaModel()
+            {
+                Id = instance.Mapper.Metadata.Id,
+                FileId = instance.Mapper.Metadata.FileId,
+                GameName = instance.Mapper.Metadata.GameName,
+                GamePlatform = instance.Mapper.Metadata.GamePlatform,
+                MapperReleaseVersion = appSettings.MAPPER_VERSION
+            }
+        );
     }
 
     public async Task<Result> WritePropertyData(string propertyPath, string value, bool isFrozen)
     {
-        if (string.IsNullOrEmpty(propertyPath) ||
-            string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(propertyPath) || string.IsNullOrEmpty(value))
+        {
             return Result.Failure(Error.StringIsNullOrEmpty);
-        if (!Client.IsMapperLoaded)
+        }
+        var instance = instanceService.Instance;
+        if (instance == null)
+        {
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
+        }
+
         var path = propertyPath.StripEndingRoute().FromRouteToPath();
-        //Console.WriteLine($"{path}: {value}");
-        if (await Client.WriteProperty(path, value, isFrozen))
-            return Result.Success();
-        return Result.Failure(Error.FailedToUpdateProperty);
-    }
-    private void HandlePropertyChangedEvent(object sender, PropertyChangedEventArgs args)
-    {
-        if(!Client.IsMapperLoaded)
+        try
         {
-            return;
-        }
-        foreach (var prop in args.ChangedProperties)
-        {
-            Client.UpdateProperty(prop);
-            _pendingUpdates.Add(prop.Path);
-        }
+            var prop = instance.Mapper.Properties[path];
 
-        var pendingUpdates = _pendingUpdates.ToArray();
-        long nowTicks = DateTime.UtcNow.Ticks;
-        if (_lastUpdate <= nowTicks - _batchTicks)
-        {
-            foreach (var path in pendingUpdates)
+            if (prop.IsReadOnly)
             {
-                _propertyUpdateService.NotifyChanges(path);
+                return Result.Failure(Error.FailedToUpdateProperty);
             }
-            _lastUpdate = nowTicks;
-            _pendingUpdates.Clear();
-        }
 
-    }
-    public void UpdateEditPropertyModel(EditPropertyModel model)
-    {
-        if(!Client.IsMapperLoaded)
-            return;
-        var prop = Client.GetPropertyByPath(model.Path);
-        model.UpdateFromPropertyModel(prop);
+            await instance.WriteValue(prop, value, isFrozen);
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to update property.");
+            return Result.Failure(Error.FailedToUpdateProperty);
+        }
     }
 
     public async Task UnloadMapper()
     {
-        if(!Client.IsMapperLoaded)
-            return;
-        await Client.UnloadMapper();
+        await instanceService.StopProcessing();
     }
 
-    public void OnReadExceptionHandler(Action handler)
+    private async Task<bool> LoadMapper(string mapperId, IPokeAByteDriver driver)
     {
-        Client.AttachOnReadExceptionOccuredHandler(handler);
-    }
-    public void DetachOnReadExceptionHandler(Action handler)
-    {
-        Client.DetachOnReadExceptionOccuredHandler(handler);
+        // Load the mapper file.
+        if (string.IsNullOrEmpty(mapperId))
+        {
+            throw new ArgumentException("ID was NULL or empty.", nameof(mapperId));
+        }
+
+        // Get the file path from the filesystem provider.
+        var mapperContent = await mapperFileService.LoadContentAsync(mapperId);
+        var instance = instanceService.Instance;
+        if (instance == null)
+        {
+            logger.LogDebug("Poke-A-Byte instance has not been initialized!");
+        }
+        logger.LogDebug("Replacing mapper.");
+
+        if (driver is IPokeAByteDriver)
+        {
+            await instanceService.LoadMapper(mapperContent, driver);
+            logger.LogInformation($"'{driver.ProperName}' driver loaded.");
+        }
+        else
+        {
+            logger.LogError("A valid driver was not supplied.");
+        }
+        return instanceService.Instance != null;
     }
 }

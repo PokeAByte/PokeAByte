@@ -4,13 +4,8 @@ namespace PokeAByte.Domain;
 
 public static class AddressMath
 {
-    public static bool TrySolve(Expression? addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
+    public static bool TrySolve(Expression addressExpression, Dictionary<string, object?> variables, out MemoryAddress address)
     {
-        if (addressExpression == null)
-        {
-            address = 0x00;
-            return false;
-        }
         try
         {
             foreach (var variable in variables)
@@ -19,9 +14,7 @@ public static class AddressMath
                 {
                     // This is a situation where the javascript has set a variable to null,
                     // this can be done for a variety of reasons that are game-specific.
-
                     // In this case, we don't want to evalulate the expression, and instead return null.
-
                     address = 0x00;
                     return false;
                 }
@@ -29,9 +22,9 @@ public static class AddressMath
                 addressExpression.Parameters[variable.Key] = variable.Value;
             }
             var result = addressExpression.Evaluate();
-            if (result is uint castedResult)
+            if (result is double doubleResult)
             {
-                address = castedResult;
+                address = (uint)doubleResult;
                 return true;
             }
             else

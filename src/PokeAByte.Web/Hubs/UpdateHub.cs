@@ -1,37 +1,31 @@
 using Microsoft.AspNetCore.SignalR;
-using PokeAByte.Application;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
+using PokeAByte.Web.Services.Mapper;
 
-namespace PokeAByte.Web.Hubs
+namespace PokeAByte.Web.Hubs;
+
+public class UpdateHub(IInstanceService instanceService, Domain.Models.AppSettings appSettings) : Hub
 {
-
-    public class UpdateHub(PokeAByteInstance pokeAByte, Domain.Models.AppSettings appSettings) : Hub
+    public override Task OnConnectedAsync()
     {
-        private PokeAByteInstance _instance = pokeAByte;
-        private Domain.Models.AppSettings _appSettings = appSettings;
-        public delegate void UpdateHubConnectionEvent(ISingleClientProxy newClient);
+        var mapper = instanceService.Instance?.Mapper;
+        var mapperModel = mapper == null
+            ? null
+            : new MapperModel
+            {
+                Meta = new MapperMetaModel
+                {
+                    Id = mapper.Metadata.Id,
+                    FileId = mapper.Metadata.FileId,
+                    GameName = mapper.Metadata.GameName,
+                    GamePlatform = mapper.Metadata.GamePlatform,
+                    MapperReleaseVersion = appSettings.MAPPER_VERSION
+                },
+                Properties = mapper.Properties.Values,
+                Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()
+            };
 
-        public event UpdateHubConnectionEvent? OnConnection;
-
-        public override Task OnConnectedAsync() {
-            this.Clients.Caller.SendAsync(
-                "Hello", 
-                _instance.Mapper == null 
-                    ? null
-                    : new MapperModel {
-                        Meta = new MapperMetaModel
-                        {
-                            Id = _instance.Mapper.Metadata.Id,
-                            GameName = _instance.Mapper.Metadata.GameName,
-                            GamePlatform = _instance.Mapper.Metadata.GamePlatform,
-                            MapperReleaseVersion = _appSettings.MAPPER_VERSION
-                        },
-                        Properties = _instance.Mapper.Properties.Values.Select(x => x.MapToPropertyModel()).ToArray(),
-                        Glossary = _instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
-                    }
-            );
-            return Task.CompletedTask;
-        }
+        return this.Clients.Caller.SendAsync("Hello", mapperModel);
     }
 }

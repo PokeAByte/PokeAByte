@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<LangVersion>13.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net48</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyName>EDPS.Bizhawk</AssemblyName>
+		<RootNamespace>PokeAByte.Protocol.BizHawk</RootNamespace>
+	</PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugSymbols>False</DebugSymbols>
+		<DebugType>None</DebugType>
+    </PropertyGroup>
+	<PropertyGroup Condition=" '$(BIZHAWK_DLLS)' == '' ">
+		<BIZHAWK_HOME>$(ProjectDir)/third-party/dll</BIZHAWK_HOME><!-- if building EmuHawk from source, point to e.g. `$(ProjectDir)../BizHawk/output/` -->
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="..\PokeAByte.Protocol\**\*.cs" />
+		<Compile Remove="..\PokeAByte.Protocol\bin\**\*.cs" />
+		<Compile Remove="..\PokeAByte.Protocol\obj\**\*.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="System.Windows.Forms" />
+		<Reference Include="BizHawk.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Common.dll" Private="false" />
+		<Reference Include="BizHawk.Client.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Client.Common.dll" Private="false" />
+		<Reference Include="BizHawk.Emulation.Common" HintPath="$(BIZHAWK_DLLS)/BizHawk.Emulation.Common.dll" Private="false" />
+	</ItemGroup>
+</Project>

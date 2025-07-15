@@ -1,11 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Infrastructure.Drivers
 {
+    [JsonSerializable(typeof(Dictionary<uint, byte[]>))]
+    public partial class StaticMemoryDriverContext : JsonSerializerContext;
+
     public class StaticMemoryDriver : IStaticMemoryDriver
     {
         public string ProperName => "StaticMemory";
@@ -13,7 +16,7 @@ namespace PokeAByte.Infrastructure.Drivers
 
         private readonly ILogger<StaticMemoryDriver> _logger;
         private Dictionary<uint, byte[]> MemoryFragmentLayout { get; set; } = [];
-        private bool _isConnected = false;
+        private static bool _isConnected = false;
         public StaticMemoryDriver(ILogger<StaticMemoryDriver> logger)
         {
             _logger = logger;
@@ -49,26 +52,37 @@ namespace PokeAByte.Infrastructure.Drivers
             if (File.Exists(path) == false) throw new Exception($"Unable to load memory container file '{filename}'.");
 
             var contents = await File.ReadAllTextAsync(path);
-            MemoryFragmentLayout = JsonSerializer.Deserialize<Dictionary<uint, byte[]>>(contents) ?? throw new Exception("Cannot deserialize memory fragment layout.");
+            MemoryFragmentLayout = JsonSerializer.Deserialize(contents, StaticMemoryDriverContext.Default.DictionaryUInt32ByteArray)
+                ?? throw new Exception("Cannot deserialize memory fragment layout.");
         }
 
-        public Task<BlockData[]> ReadBytes(IList<MemoryAddressBlock> blocks)
+        public ValueTask ReadBytes(BlockData[] transferBlocks)
         {
             if (BuildEnvironment.IsDebug == false)
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            return Task.FromResult(MemoryFragmentLayout.Select(x => new BlockData(x.Key, x.Value)).ToArray());
+            for (int i = 0; i < transferBlocks.Length; i++)
+            {
+                transferBlocks[i].Data = MemoryFragmentLayout[transferBlocks[i].Start];
+            }
+            return ValueTask.CompletedTask;
         }
-        public Task WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
+
+        public ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
         {
             if (BuildEnvironment.IsDebug == false)
             {
                 throw new Exception("Static Memory Driver operations are not allowed if not in DEBUG mode.");
             }
 
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
+        }
+
+        public static Task<bool> Probe(AppSettings _)
+        {
+            return Task.FromResult(_isConnected);
         }
     }
 }

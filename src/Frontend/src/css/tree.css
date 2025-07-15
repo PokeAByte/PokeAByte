@@ -1,0 +1,82 @@
+
+.tree {
+	--tree-spacing: 24px;
+	--tree-radius: 10px;
+	padding-left: 0;
+}
+
+.tree li:has(details), .tree ul {
+	&:not(:last-child){
+		border-bottom: 1px solid var(--color-border-0);
+	}
+}
+
+table.tree {
+	width: 100%;
+	border: none;
+	margin: 0;
+	border-collapse: collapse;
+
+	&>tbody>tr>th {
+		width: 0;
+		white-space: nowrap;
+		text-align: left;
+	}
+
+	&>tbody>tr.leaf:not(:first-child) {
+		border-top: 1px solid var(--color-border-1);
+	}
+
+	.icon-button {
+		margin: 0 var(--margin-0) 0 0;
+		padding: 2px !important;
+		.material-icons {
+			font-size: 22px !important;
+		}
+	}
+	label,
+	input {
+		font-family: var(--monospace-font);
+	}
+
+	button:not(.icon-button),
+	input {
+		margin: 0 var(--margin-0) 0 0;
+		font-size: var(--font-size-0);
+		padding: var(--margin-0);
+		padding: 3.375px !important;
+	}
+	input[role="switch"] {
+		height: 29.25px;
+	}
+	input[role="switch"]::before {
+		height: 19.25px;
+	}
+}
+
+tr.leaf {
+	td, th {
+		height: 40px;
+		> * {
+			vertical-align: middle;
+		}
+	}
+	th {
+		text-align: left;
+		width: 0;
+		white-space: nowrap;
+	}
+	td {
+		display: flex;
+		align-items: center;
+		.hide-icon {
+			margin-left: auto;
+			margin-right: var(--margin-0);
+			cursor: pointer;
+		}
+	}
+}
+
+tr.hidden {
+	display: none;
+}

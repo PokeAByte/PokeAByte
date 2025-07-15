@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
@@ -9,130 +9,100 @@ namespace PokeAByte.Web.Controllers;
 [Produces("application/json")]
 [Consumes("application/json")]
 [Route("mapper-service")]
-public class MapperServiceController : ControllerBase
+public static class MapperServiceEndpoints
 {
-    private readonly ILogger<MapperServiceController> _logger;
-    private readonly MapperClientService _mapperClientService;
-
-    public MapperServiceController(ILogger<MapperServiceController> logger, 
-        MapperClientService mapperClientService)
+    public static void MapMapperServiceEndpoints(this WebApplication app)
     {
-        _logger = logger;
-        _mapperClientService = mapperClientService;
+        app.MapGet("mapper-service/get-mappers", GetMappers);
+        app.MapGet("mapper-service/is-connected", GetIsConnected);
+        app.MapPut("mapper-service/change-mapper", ChangeMapperAsync);
+        app.MapGet("mapper-service/get-metadata", GetMetadata);
+        app.MapGet("mapper-service/get-get-properties", GetProperties);
+        app.MapGet("mapper-service/get-glossary", GetGlossaryByReferenceKey);
+        app.MapPut("mapper-service/write-property", WritePropertyAsync);
+        app.MapPut("mapper-service/unload-mapper", UnloadMapperAsync);
     }
 
-    [HttpGet]
-    [Route("get-mappers")]
-    public ActionResult<List<MapperFileModel>> GetMappers()
+    public static IEnumerable<MapperFileModel> GetMappers(IMapperFileService mapperFileService)
     {
-        return Ok(_mapperClientService.GetMappers().ToList());
+        return mapperFileService
+            .ListInstalled()
+            .Select(x => new MapperFileModel(x.Id, x.DisplayName));
     }
 
-    [HttpGet]
-    [Route("is-connected")]
-    public ActionResult<bool> GetIsConnected()
+    public static bool GetIsConnected(MapperClientService mapperClientService)
     {
-        return Ok(_mapperClientService.IsCurrentlyConnected);
+        return mapperClientService.IsCurrentlyConnected;
     }
 
-    [HttpPut]
-    [Route("change-mapper")]
-    public async Task<IActionResult> ChangeMapperAsync([FromBody] string mapperId)
+    public static async Task<IResult> ChangeMapperAsync(MapperClientService mapperClientService, [FromBody] string mapperId)
     {
-        try
+        var mapperResult = await mapperClientService.ChangeMapper(mapperId);
+        if (mapperResult.IsSuccess)
         {
-            var mapperResult = await _mapperClientService.ChangeMapper(
-                mapperId, 
-                null, 
-                null);
-            if (mapperResult.IsSuccess)
-            {
-                return Ok();
-            }
-            return NotFound();
+            return TypedResults.Ok();
         }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Bad Request");
-            return BadRequest(e);
-        }
+        return TypedResults.InternalServerError(mapperResult.AdditionalErrorMessage);
     }
 
-    [HttpGet]
-    [Route("get-metadata")]
-    public ActionResult<MapperMetaModel> GetMetadata()
+    public static IResult GetMetadata(MapperClientService mapperClientService)
     {
-        var metadataResult = _mapperClientService.GetMetaData();
+        var metadataResult = mapperClientService.GetMetaData();
         if (metadataResult.IsSuccess)
         {
-            return Ok(metadataResult.ResultValue);
+            return TypedResults.Ok(metadataResult.ResultValue);
         }
 
         if (metadataResult.IsException)
-            return BadRequest(metadataResult.ToString());
-        return NotFound(metadataResult.ToString());
+            return TypedResults.BadRequest(metadataResult.ToString());
+        return TypedResults.NotFound(metadataResult.ToString());
     }
 
-    [HttpGet]
-    [Route("get-properties")]
-    public ActionResult<List<PropertyModel>> GetProperties()
+    public static IResult GetProperties(IInstanceService instanceService)
     {
-        var properties = _mapperClientService.Properties;
-        if (properties.Count == 0)
+        if (instanceService.Instance?.Mapper == null || instanceService.Instance.Mapper.Properties.Count == 0)
         {
-            return NotFound();
+            return TypedResults.NotFound();
         }
-        return Ok(properties);
+        var properties = instanceService.Instance.Mapper.Properties.Values;
+        return TypedResults.Ok(properties);
     }
 
-    [HttpGet]
-    [Route("get-glossary")]
-    public ActionResult<List<GlossaryItemModel>> GetGlossaryByReferenceKey([FromQuery] string glossaryKey)
+    public static IResult GetGlossaryByReferenceKey(MapperClientService mapperClientService, [FromQuery] string glossaryKey)
     {
-        var glossaryResult = _mapperClientService.GetGlossaryByReferenceKey(glossaryKey);
+        var glossaryResult = mapperClientService.GetGlossaryByReferenceKey(glossaryKey);
         if (glossaryResult.IsSuccess)
         {
-            return Ok(glossaryResult.ResultValue);
+            return TypedResults.Ok(glossaryResult.ResultValue);
         }
 
         if (glossaryResult.IsException)
         {
-            return BadRequest(glossaryResult.ToString());
+            return TypedResults.BadRequest(glossaryResult.ToString());
         }
-
-        return NotFound(glossaryResult.ToString());
+        return TypedResults.NotFound(glossaryResult.ToString());
     }
 
-    [HttpPut]
-    [Route("write-property")]
-    public async Task<IActionResult> WritePropertyAsync([FromBody] PropertyUpdateModel model)
+    public static async Task<IResult> WritePropertyAsync(MapperClientService mapperClientService, [FromBody] PropertyUpdateModel model)
     {
-        var writeResult = await _mapperClientService
+        var writeResult = await mapperClientService
             .WritePropertyData(model.Path, model.Value, model.IsFrozen);
         if (writeResult.IsSuccess)
         {
-            return Ok();
+            return TypedResults.Ok();
         }
 
         if (writeResult.IsException)
         {
-            return BadRequest(writeResult.ToString());
+            return TypedResults.BadRequest(writeResult.ToString());
         }
-        return NotFound(writeResult.ToString());
+        return TypedResults.NotFound(writeResult.ToString());
     }
 
     [HttpPut]
     [Route("unload-mapper")]
-    public async Task<IActionResult> UnloadMapperAsync()
-    {
-        await _mapperClientService.UnloadMapper();
-        return Ok();
-    }
+    public static Task UnloadMapperAsync(MapperClientService mapperClientService)
+        => mapperClientService.UnloadMapper();
 }
 
-public class PropertyUpdateModel
-{
-    public string Path { get; set; }
-    public string Value { get; set; }
-    public bool IsFrozen { get; set; }
-}
+public record PropertyUpdateModel(string Path, string Value, bool IsFrozen);

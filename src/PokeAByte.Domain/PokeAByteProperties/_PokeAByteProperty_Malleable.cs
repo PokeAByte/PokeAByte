@@ -1,272 +1,176 @@
 ﻿using NCalc;
 using PokeAByte.Domain.Interfaces;
 
-namespace PokeAByte.Domain.PokeAByteProperties
+namespace PokeAByte.Domain.PokeAByteProperties;
+
+public partial class PokeAByteProperty : IPokeAByteProperty
 {
-    public abstract partial class PokeAByteProperty : IPokeAByteProperty
+    private string? _memoryContainer;
+    private uint? _address;
+    private string? _addressString;
+    private int _length;
+    private int? _size;
+    private string? _bits;
+    private string? _reference;
+    private string? _description;
+    private object? _value;
+    private byte[] _bytes = [];
+    private byte[] _bytesFrozen = [];
+
+    public string? MemoryContainer
     {
-        private string? _memoryContainer { get; set; }
-        private uint? _address { get; set; }
-        private string? _addressString { get; set; }
-        private int? _length { get; set; }
-        private int? _size { get; set; }
-        private string? _bits { get; set; }
-        private string? _reference { get; set; }
-        private string? _description { get; set; }
-        private object? _value { get; set; }
-        private object? _fullValue { get; set; }
-        private byte[]? _bytes { get; set; }
-        private byte[]? _bytesFrozen { get; set; }
-        private string? _readFunction { get; set; }
-        private string? _writeFunction { get; set; }
-        private string? _afterReadValueExpression { get; set; }
-        private string? _afterReadValueFunction { get; set; }
-        private string? _beforeWriteValueFunction { get; set; }
-
-        public string? MemoryContainer
+        get { return _memoryContainer; }
+        set
         {
-            get { return _memoryContainer; }
-            set
-            {
-                if (value == _memoryContainer) { return; }
+            if (value == _memoryContainer) { return; }
 
-                FieldsChanged.Add("memoryContainer");
-                _memoryContainer = value;
-            }
+            FieldsChanged |= FieldChanges.MemoryContainer;
+            _memoryContainer = value;
         }
+    }
 
-        public uint? Address
+    public uint? Address
+    {
+        get { return _address; }
+        set
         {
-            get { return _address; }
-            set
-            {
-                if (value == _address) { return; }
-
-                _address = value;
-                _addressString = value.ToString();
-
-                IsMemoryAddressSolved = true;
-
-                FieldsChanged.Add("address");
-            }
+            if (value == _address) { return; }
+            _address = value;
+            _addressString = value.ToString();
+            _isMemoryAddressSolved = true;
+            FieldsChanged |= FieldChanges.Address;
         }
+    }
 
-        public string OriginalAddressString { get; }
+    public string OriginalAddressString { get; }
 
-        public string? AddressString
+    public string? AddressString
+    {
+        get { return _addressString; }
+        set
         {
-            get { return _addressString; }
-            set
-            {
-                if (value == _addressString) { return; }
+            if (value == _addressString) { return; }
 
-                _addressString = value;
-                _hasAddressParameter = false;
-                _addressExpression = !string.IsNullOrEmpty(value) 
-                    ? new Expression(value)
-                    : null;
-                try
-                {
-                    if (_addressExpression!=null) {
-                        _addressExpression.EvaluateParameter += OnParamEvaluation;
-                    }
-                    IsMemoryAddressSolved = AddressMath.TrySolve(_addressExpression, Instance.Variables, out var solvedAddress);
-                    if (_addressExpression!=null) {
-                        _addressExpression.EvaluateParameter -= OnParamEvaluation;
-                    }
-                    
-                    if (IsMemoryAddressSolved == false)
-                    {
-                        _address = null;
-                    }
-                    else
-                    {
-                        _address = solvedAddress;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    return;
-                }
-
-                FieldsChanged.Add("address");
-            }
+            _addressString = value;
+            _isMemoryAddressSolved = false;
+            _hasAddressParameter = value.AsSpan().ContainsAnyExcept(_plainAddressSearch);
+            _addressExpression = !string.IsNullOrEmpty(value)
+                ? new Expression(value)
+                : null;
         }
+    }
 
-        private void OnParamEvaluation(string name, ParameterArgs args)
+    public int Length
+    {
+        get => _length;
+        set
         {
-            _hasAddressParameter = true;
+            if (_length == value) return;
+
+            FieldsChanged |= FieldChanges.Length;
+            _length = value;
         }
+    }
 
-        public int? Length
+    public int? Size
+    {
+        get => _size;
+        set
         {
-            get => _length;
-            set
-            {
-                if (_length == value) return;
+            if (_size == value) return;
 
-                FieldsChanged.Add("length");
-                _length = value;
-            }
+            FieldsChanged |= FieldChanges.Size;
+            _size = value;
         }
+    }
 
-        public int? Size
+    public string? Bits
+    {
+        get => _bits;
+        set
         {
-            get => _size;
-            set
+            if (value != _bits)
             {
-                if (_size == value) return;
-
-                FieldsChanged.Add("size");
-                _size = value;
-            }
-        }
-
-        public string? Bits
-        {
-            get => _bits;
-            set
-            {
-                if (_bits == value) return;
-
-                FieldsChanged.Add("bits");
                 _bits = value;
-            }
-        }
-
-        public string? Reference
-        {
-            get => _reference;
-            set
-            {
-                if (_reference == value) return;
-
-                FieldsChanged.Add("reference");
-                _reference = value;
-            }
-        }
-
-        public string? Description
-        {
-            get => _description;
-            set
-            {
-                if (_description == value) return;
-
-                FieldsChanged.Add("description");
-                _description = value;
-            }
-        }
-
-        public object? Value
-        {
-            get => _value;
-            set
-            {
-                if (_value == null && value == null) return;
-                if (_value != null && _value.Equals(value)) return;
-
-                FieldsChanged.Add("value");
-                _value = value;
-            }
-        }
-
-
-        public object? FullValue
-        {
-            get => _fullValue;
-            set
-            {
-                if (_fullValue != null && _fullValue.Equals(value)) return;
-
-                //FieldsChanged.Add("value");
-                _fullValue = value;
-            }
-        }
-        public byte[]? Bytes
-        {
-            get => _bytes;
-            set
-            {
-                if (_bytes == null && value == null) return;
-                if (_bytes != null && value != null && _bytes.SequenceEqual(value)) return;
-
-                FieldsChanged.Add("bytes");
-                _bytes = value;
-            }
-        }
-
-        public byte[]? BytesFrozen
-        {
-            get => _bytesFrozen;
-            set
-            {
-                if (_bytesFrozen != null && value != null && _bytesFrozen.SequenceEqual(value)) return;
-
-                FieldsChanged.Add("frozen");
-                _bytesFrozen = value;
-            }
-        }
-
-        public string? ReadFunction
-        {
-            get => _readFunction;
-            set
-            {
-                if (_readFunction == value) return;
-
-                FieldsChanged.Add("readFunction");
-                _readFunction = value;
-            }
-        }
-
-        public string? WriteFunction
-        {
-            get => _writeFunction;
-            set
-            {
-                if (_writeFunction == value) return;
-
-                FieldsChanged.Add("writeFunction");
-                _writeFunction = value;
-            }
-        }
-
-        public string? AfterReadValueExpression
-        {
-            get => _afterReadValueExpression;
-            set
-            {
-                if (_afterReadValueExpression == value) return;
-
-                FieldsChanged.Add("afterReadValueExpression");
-                _afterReadValueExpression = value;
-            }
-        }
-
-        public string? AfterReadValueFunction
-        {
-            get => _afterReadValueFunction;
-            set
-            {
-                if (_afterReadValueFunction == value) return;
-
-                FieldsChanged.Add("afterReadValueFunction");
-                _afterReadValueFunction = value;
-            }
-        }
-
-        public string? BeforeWriteValueFunction
-        {
-            get => _beforeWriteValueFunction;
-            set
-            {
-                if (_beforeWriteValueFunction == value) return;
-
-                FieldsChanged.Add("beforeWriteValueFunction");
-                _beforeWriteValueFunction = value;
+                BitIndexes = value != null
+                    ? PropertyLogic.ParseBits(value)
+                    : null;
+                FieldsChanged |= FieldChanges.Bits;
             }
         }
     }
+
+    internal int[]? BitIndexes { get; private set; }
+
+    public string? Reference
+    {
+        get => _reference;
+        set
+        {
+            if (_reference == value) return;
+
+            FieldsChanged |= FieldChanges.Reference;
+            _reference = value;
+        }
+    }
+
+    public string? Description
+    {
+        get => _description;
+        set
+        {
+            if (_description == value) return;
+
+            FieldsChanged |= FieldChanges.Description;
+            _description = value;
+        }
+    }
+
+    public object? Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == null && value == null) return;
+            if (_value != null && _value.Equals(value)) return;
+
+            FieldsChanged |= FieldChanges.Value;
+            _value = value;
+        }
+    }
+
+    public object? FullValue { get; set; }
+
+    public byte[] Bytes
+    {
+        get => _bytes;
+        set
+        {
+            if (_bytes.SequenceEqual(value)) return;
+            FieldsChanged |= FieldChanges.Bytes;
+            _bytes = value;
+        }
+    }
+
+    public byte[] BytesFrozen
+    {
+        get => _bytesFrozen;
+        set
+        {
+            if (_bytesFrozen.SequenceEqual(value)) return;
+
+            FieldsChanged |= FieldChanges.IsFrozen;
+            _bytesFrozen = value;
+        }
+    }
+
+    public string? ReadFunction { get; set; }
+
+    public string? WriteFunction { get; set; }
+
+    public string? AfterReadValueExpression { get; set; }
+
+    public string? AfterReadValueFunction { get; set; }
+
+    public string? BeforeWriteValueFunction { get; set; }
 }

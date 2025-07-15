@@ -1,21 +1,24 @@
-﻿namespace PokeAByte.Domain.Interfaces
+﻿namespace PokeAByte.Domain.Interfaces;
+
+public interface IPokeAByteInstance : IAsyncDisposable
 {
-    public interface IPokeAByteInstance
-    {
-        bool Initalized { get; }
-        Dictionary<string, object?> State { get; }
-        Dictionary<string, object?> Variables { get; }
+    Dictionary<string, object?> State { get; }
+    Dictionary<string, object?> Variables { get; }
 
-        List<IClientNotifier> ClientNotifiers { get; }
-        IPokeAByteDriver? Driver { get; }
-        IPokeAByteMapper? Mapper { get; }
-        IPlatformOptions? PlatformOptions { get; }
-        Task ResetState();
-        Task Load(IPokeAByteDriver driver, string mapperId);
+    IClientNotifier ClientNotifier { get; }
+    IPokeAByteDriver Driver { get; }
+    IPokeAByteMapper Mapper { get; }
+    Task StartProcessing();
 
-        object? ExecuteExpression(string? expression, object x);
-        object? ExecuteModuleFunction(string? function, IPokeAByteProperty property);
+    object? ExecuteExpression(string expression, object x);
+    object? ExecuteModuleFunction(string function, IPokeAByteProperty property);
 
-        bool? GetModuleFunctionResult(string? function, IPokeAByteProperty property);
-    }
+    bool? GetModuleFunctionResult(string function, IPokeAByteProperty property);
+    public event InstanceProcessingAbort? OnProcessingAbort;
+    public Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen);
+    public Task UnfreezeProperty(IPokeAByteProperty target);
+    public Task WriteValue(IPokeAByteProperty target, string value, bool? freeze);
+    public Task WriteBytes(IPokeAByteProperty target, byte[] bytesToWrite, bool? freeze);
 }
+
+public delegate Task InstanceProcessingAbort();

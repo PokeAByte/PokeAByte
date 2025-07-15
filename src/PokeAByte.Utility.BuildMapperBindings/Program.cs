@@ -1,5 +1,5 @@
-﻿using PokeAByte.Application;
-using PokeAByte.Domain;
+﻿using PokeAByte.Domain;
+using PokeAByte.Domain.Mapper;
 using PokeAByte.Utility.BuildMapperBindings;
 
 // Load XML file paths.
@@ -11,9 +11,8 @@ foreach (var xmlFilePath in filePaths)
 {
     try
     {
-        var instance = new PokeAByteFakeInstance();
         var contents = await File.ReadAllTextAsync(xmlFilePath);
-        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(instance, xmlFilePath, contents);
+        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(contents, "");
 
         // Create child directory if not exists.
         if (mapper.Metadata.GamePlatform.Any(x => char.IsLetter(x) == false && char.IsNumber(x) == false))
@@ -30,6 +29,7 @@ foreach (var xmlFilePath in filePaths)
 
         // Generate typescript bindings.
         var tsResult = TsGenerator.FromMapper(contents);
+        Console.WriteLine($"Wrote ts file: {tsFilePath}");
         await File.WriteAllTextAsync(tsFilePath, tsResult);
     }
     catch (Exception ex)

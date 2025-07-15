@@ -359,8 +359,6 @@
                 }
             }
         },
-        "/favicon.ico": {},
-        "/site.css": {},
         "/dist/gameHookMapperClient.js": {}
     },
     "components": {
