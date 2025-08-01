@@ -50,10 +50,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
                 _readBlocks[i].GameAddress = blocks[i].Start;
                 _readBlocks[i].Length = blocks[i].Data.Length;
                 _readBlocks[i].Position = (uint)position;
-                if (i > 0)
-                {
-                    position += _readBlocks[i].Length;
-                }
+                position += _readBlocks[i].Length;
                 fileSize += _readBlocks[i].Length;
             }
             if (fileSize == 0)

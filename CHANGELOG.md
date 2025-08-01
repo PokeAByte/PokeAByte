@@ -1,6 +1,13 @@
+[Version 0.9.1](#091)  
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+# 0.9.1 (Future)
+
+## Bugfixes
+- Fixed the "freeze" button turning completely blue, instead of just the icon inside.
+- Fixed an issue with bogus memory reading when using the EDPS bizhawk integration tool.
+
 # 0.9.0
 - [Features](#features)
 - [UI Features](#ui-features)

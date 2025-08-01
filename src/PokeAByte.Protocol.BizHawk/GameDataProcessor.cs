@@ -44,7 +44,7 @@ internal class GameDataProcessor : IDisposable
         for (int i = 0; i < setup.BlockCount; i++)
         {
             var readBlock = setup.Data[i];
-            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length);
+            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length-1);
             if (entry == null)
             {
                 continue;
@@ -55,7 +55,7 @@ internal class GameDataProcessor : IDisposable
                 Domain = entry.Value.DomainId,
                 TransferPosition = readBlock.Position,
                 RelativeStart = address,
-                RelativeEnd = address + readBlock.Length - 1,
+                RelativeEnd = address + readBlock.Length
             };
         }
         for (int i = 0; i < setup.BlockCount; i++)

@@ -38,7 +38,6 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 	const [focusIndex, setFocusedIndex] = useState<number>(-1);
 	const valueDisplay = findDisplayByValue(props.options, props.value);
 	const filteredOptions = props.options.filter(matchDisplayValue(searchValue));
-	const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 	const optionsContainer = useRef<HTMLDivElement | null>(null);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -114,7 +113,6 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 						<button
 							role="button"
 							key={index}
-							ref={el => optionRefs.current[index] = el}
 							onClick={() => handleSelection(x)}
 							tabIndex={-1}
 							className={focusIndex === index ? "focused" : ""}
