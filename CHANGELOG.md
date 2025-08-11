@@ -4,9 +4,13 @@
   
 # 0.9.1
 
+## Features
+- UI: The first item in a combobox will automatically be submitted if enter is pressed without a selection.
+
 ## Bugfixes
 - Fixed the "freeze" button turning completely blue, instead of just the icon inside.
 - Fixed an issue with bogus memory reading when using the EDPS bizhawk integration tool.
+- Fixed style inconsistencies with the comboboxes.
 
 # 0.9.0
 - [Features](#features)
