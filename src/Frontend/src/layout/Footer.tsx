@@ -4,7 +4,7 @@ import { Link } from "wouter";
 export function Footer() {
 	return (
 		<footer>
-			Poke-A-Byte 2025 ( <Link to="/license/">AGPL</Link> )
+			Poke-A-Byte {globalThis.__POKEABYTE_VERSION__} 2025 ( <Link to="/license/">AGPL</Link> )
 		</footer>
 	)
 }
