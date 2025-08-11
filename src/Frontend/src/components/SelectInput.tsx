@@ -48,7 +48,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 		setSearchValue("");
 	}
 	const handleOnFocus = () => {
-		setIsOpen(!props.isReadonly);		
+		setIsOpen(!props.isReadonly);
 	}
 	const handleBlur = () => {
 		window.requestAnimationFrame(() => {
@@ -65,6 +65,11 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 			return;
 		}
 		switch (event.key) {
+			case "Enter":
+				if (filteredOptions.length > 0 && focusIndex === -1) {
+					handleSelection(filteredOptions[0]);
+				}
+				break;
 			case "ArrowDown":
 				event.preventDefault();
 				newFocus = focusIndex < (filteredOptions.length - 1) ? focusIndex + 1 : 0;
@@ -114,6 +119,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 							role="button"
 							key={index}
 							onClick={() => handleSelection(x)}
+							class={index === 0 && focusIndex === -1 ? "highlight" : ""}
 							tabIndex={-1}
 							className={focusIndex === index ? "focused" : ""}
 						>
