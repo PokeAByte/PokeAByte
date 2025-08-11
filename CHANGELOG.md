@@ -2,7 +2,7 @@
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
-# 0.9.1 (Future)
+# 0.9.1
 
 ## Bugfixes
 - Fixed the "freeze" button turning completely blue, instead of just the icon inside.
