@@ -75,7 +75,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             if (Mapper.Memory.ReadRanges.Any())
             {
                 blocksToRead = Mapper.Memory.ReadRanges
-                    .Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End))
+                    .Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End+1))
                     .ToArray();
                 _logger.LogInformation($"Using {Mapper.Memory.ReadRanges.Count()} memory read ranges from mapper.");
             }
@@ -98,7 +98,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             _transferBlocks[i] = new BlockData(
                 block.StartingAddress,
-                memory.GetDefaultMemory(block.StartingAddress, block.EndingAddress+1)
+                memory.GetDefaultMemory(block.StartingAddress, block.EndingAddress)
             );
             i++;
         }
