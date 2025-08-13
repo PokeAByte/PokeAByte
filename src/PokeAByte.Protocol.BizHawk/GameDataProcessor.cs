@@ -15,12 +15,11 @@ internal class GameDataProcessor : IDisposable
     private Label _mainLabel;
     private PlatformEntry _platform;
     private MemoryMappedViewAccessor _dataAccessor;
-    private byte[] _writeBuffer;
     private DomainReadInstruction[] _readInstructions;
     private int _frameSkip;
     private int _skippedFrames;
     private MemoryMappedFile _memoryMappedFile;
-    private byte[] DataBuffer { get; } = new byte[4 * 1024 * 1024];
+    private byte[] _writeBuffer;
 
     internal GameDataProcessor(
         PlatformEntry platform,
@@ -75,15 +74,15 @@ internal class GameDataProcessor : IDisposable
         mainLabel.Text = $"Providing memory data ({totalSize} bytes) to client...";
     }
 
-    private unsafe void WriteToMMF()
+    private unsafe void WriteToMMF(byte[] data, int position, int length)
     { 
         try
         {
             byte* destination = null;
             _dataAccessor.SafeMemoryMappedViewHandle.AcquirePointer(ref destination);
-            fixed (byte* source = _writeBuffer)
+            fixed (byte* source = data)
             {
-                Buffer.MemoryCopy(source, destination, _writeBuffer.Length, _writeBuffer.Length);
+                Buffer.MemoryCopy(source, destination + position, length, length);
             }
         }
         finally
@@ -144,14 +143,8 @@ internal class GameDataProcessor : IDisposable
                 if (domain != null)
                 {
                     var length = instruction.RelativeEnd - instruction.RelativeStart;
-                    domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), DataBuffer);
-                    Buffer.BlockCopy(
-                        DataBuffer,
-                        0,
-                        _writeBuffer,
-                        (int)instruction.TransferPosition,
-                        (int)length
-                    );
+                    domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), _writeBuffer);
+                    WriteToMMF(_writeBuffer, (int)instruction.TransferPosition, (int)length);
                 }
             }
         }
@@ -160,7 +153,7 @@ internal class GameDataProcessor : IDisposable
             _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
         }
 
-        WriteToMMF();
+        
     }
 
     internal void WriteToMemory(WriteInstruction instruction, IMemoryDomains domains)

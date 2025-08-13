@@ -14,6 +14,7 @@
 
 ## Performance
 - Skip memory boundary checks when address has not changed. Reduces CPU work by ~10% for mappers with a lot of properties.
+- EPDS BizHawk Tool: Reduced amount of memory used, reduced number of memory copy operations.
 
 # 0.9.0
 - [Features](#features)
