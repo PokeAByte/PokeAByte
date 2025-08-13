@@ -52,11 +52,11 @@ public class MemoryManager : IMemoryManager
     }
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
+    public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length, bool skipCheck = false)
     {
         if (area == null || area == "default")
         {
-            return DefaultNamespace.GetReadonlyBytes(memoryAddress, length);
+            return DefaultNamespace.GetReadonlyBytes(memoryAddress, length, skipCheck);
         }
         return Namespaces[area].GetReadonlyBytes(memoryAddress, length);
     }
@@ -103,7 +103,7 @@ public class MemoryNamespace : IMemoryNamespace
         return new ByteArray(memoryAddress, GetReadonlyBytes(memoryAddress, length).ToArray());
     }
 
-    public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length)
+    public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length, bool skipCheck = false)
     {
         for (int i = 0; i < Fragments.Count; i++)
         {
@@ -112,7 +112,7 @@ public class MemoryNamespace : IMemoryNamespace
             {
                 int offset = (int)(memoryAddress - fragment.StartingAddress);
 
-                if (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length)
+                if (!skipCheck && (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length))
                 {
                     throw new Exception($"Cannot retrieve bytes starting at {memoryAddress.ToHexdecimalString()} (starting address at {fragment.StartingAddress.ToHexdecimalString()} because getting {length} bytes would overflow the fragment array.");
                 }

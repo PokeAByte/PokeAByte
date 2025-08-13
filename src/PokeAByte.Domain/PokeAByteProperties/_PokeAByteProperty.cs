@@ -157,9 +157,9 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
     public void ProcessLoop(IPokeAByteInstance instance, IMemoryManager memoryManager, bool reloadAddresses)
     {
-        if (Type == PropertyType.String && Length == 1 && Value is not null)
+        if (Type == PropertyType.String && _length == 1 && _value is not null)
         {
-            var valString = Value.ToString();
+            var valString = _value.ToString();
             if (!string.IsNullOrWhiteSpace(valString))
             {
                 Length = valString.Length;
@@ -179,6 +179,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
 
         MemoryAddress? address = Address;
+        bool newAddress = false;
         if (reloadAddresses && _hasAddressParameter)
         {
             _isMemoryAddressSolved = false;
@@ -191,6 +192,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 {
                     address = solvedAddress;
                     _isMemoryAddressSolved = true;
+                    newAddress = true;
                 }
             }
             catch (Exception e)
@@ -205,11 +207,15 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             // Hopefully a postprocessor will pick it up and set it's value!
             return;
         }
+        else if (_address != address)
+        {
+            Address = address;
+        }
 
         byte[] bytes;
         try
         {
-            var readonlyBytes = memoryManager.GetReadonlyBytes(MemoryContainer, address ?? 0x00, Length);
+            var readonlyBytes = memoryManager.GetReadonlyBytes(_memoryContainer, address ?? 0x00, _length, !newAddress);
             if (readonlyBytes.SequenceEqual(_bytes.AsSpan()))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
@@ -217,7 +223,6 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
                 // Do nothing, we don't need to calculate the new value as
                 // the bytes are the same.
-                Address = address;
                 return;
             }
             bytes = readonlyBytes.ToArray();
@@ -229,8 +234,14 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 $"Unable to retrieve bytes for property '{Path}': {e.Message}"
             );
         }
-        Address = address;
-        _bytes = [.. bytes];
+        if (_bytes.Length == bytes.Length)
+        {
+            bytes.AsSpan().CopyTo(_bytes);
+        }
+        else
+        {
+            _bytes = [.. bytes];
+        }
         FieldsChanged |= FieldChanges.Bytes;
 
         // Store the original, full value
