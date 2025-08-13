@@ -12,6 +12,9 @@
 - Fixed an issue with bogus memory reading when using the EDPS bizhawk integration tool.
 - Fixed style inconsistencies with the comboboxes.
 
+## Performance
+- Skip memory boundary checks when address has not changed. Reduces CPU work by ~10% for mappers with a lot of properties.
+
 # 0.9.0
 - [Features](#features)
 - [UI Features](#ui-features)
