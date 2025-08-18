@@ -1,7 +1,7 @@
 import { Store } from "../../utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
 import { unique } from "./utils/unique";
-import { useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { useSyncExternalStore } from "preact/compat";
 import { useLocation } from "wouter";
 import { HidePropertyContextProvider, IfNotHidden, ToggleForceVisible } from "../../Contexts/HidePropertyContext";
@@ -9,6 +9,7 @@ import { Advanced } from "../../Contexts/Advanced";
 
 export function PropertyEditor() {
 	const [, setLocation] = useLocation();
+	const [search, setSearch] = useState("");
 	const properties = Store.getAllProperties();
 	const paths = Object.keys(properties)
 		.map(x => x.split(".")[0])
@@ -32,8 +33,8 @@ export function PropertyEditor() {
 	}
 
 	return (
-		<HidePropertyContextProvider mapperId={mapper.id}>
-			<div className="layout-box margin-top">
+		<HidePropertyContextProvider mapperId={mapper.id} key="unique">
+			<div className="layout-box margin-top" >
 				<div class="title">
 					<div>
 						<strong>{mapper.gameName}</strong>
@@ -44,15 +45,27 @@ export function PropertyEditor() {
 						</Advanced>
 					</div>
 				</div>
+				<Advanced>
+					<label>Search property: </label>
+					<span class="input-addon">
+						<input type="text" value={search} onChange={x => setSearch(x.currentTarget.value)}></input>
+						<button 
+							class={"add-on material-icons"} 
+							disabled={!search}
+							onClick={() => setSearch("")}
+							title={"Clear search"}
+						>
+							clear
+						</button>
+					</span>
+				</Advanced>
 				<table className="tree">
 					<tbody>
-						{paths.map((x) => {
-							return (
-								<IfNotHidden key={x} path={x} >
-									<PropertyTree path={x} />
-								</IfNotHidden>
-							);
-						})}
+						{paths.map((x) => 
+							<IfNotHidden key={x} path={x} >
+								<PropertyTree path={x} search={search} />
+							</IfNotHidden>
+						)}
 					</tbody>
 				</table>
 			</div>

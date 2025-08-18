@@ -45,8 +45,8 @@ export function HidePropertyContextProvider(props: { mapperId: string, children:
 			{props.children}
 		</HidePropertyContext.Provider>
 	)
-
 }
+
 /**
  * Renders the children only when the path is not a hidden property and the global is not set.
  */
