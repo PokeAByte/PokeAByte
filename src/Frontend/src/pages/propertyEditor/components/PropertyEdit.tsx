@@ -21,16 +21,21 @@ export function PropertyEdit({ path }: { path: string }) {
 	const type = (propertyType === "bit" || propertyType === "bool") ? "checkbox" : "text";
 	const isSelect = reference && reference !== "defaultCharacterMap"
 	const actualValue = getPropertyFieldValue(property?.value, propertyType) ?? "";
-	const [value, setValue] = useState<string|boolean|null>(null);
+	const [value, setValue] = useState<string | boolean | null | number[]>(null);
 	const [madeEdit, setMadeEdit] = useState(false);
 	const [saved, setSaved] = useState(false);
-	const handleUpdate = (newValue: string|boolean)  => {
+	const handleUpdate = (newValue: string | boolean | number[])  => {
 		setValue(newValue);
 		setMadeEdit(newValue !== actualValue);
 	};
 	const handleSave = () => {
+		let newPropertyValue = value;
+		// @ts-expect-error
+		if (property?.type === "byteArray" && typeof(newPropertyValue) === "string") {
+			newPropertyValue = newPropertyValue.split(" ").map(x => Number.parseInt(x, 16));
+		}
 		if (path) {
-			Store.client.updatePropertyValue(path, value, isFrozen)
+			Store.client.updatePropertyValue(path, newPropertyValue, isFrozen)
 			.then(() => {
 				setSaved(true);
 				Toasts.push(`Successfully saved property value!`, "task_alt", "success");

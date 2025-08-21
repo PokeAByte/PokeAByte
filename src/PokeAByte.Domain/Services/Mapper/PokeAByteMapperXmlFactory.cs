@@ -100,6 +100,7 @@ public static class PokeAByteMapperXmlFactory
                         "int" => PropertyType.Int,
                         "string" => PropertyType.String,
                         "uint" => PropertyType.Uint,
+                        "byteArray" => PropertyType.ByteArray,
                         _ => throw new Exception($"Unknown property type {x.GetAttributeValue("type")}."),
                     };
 

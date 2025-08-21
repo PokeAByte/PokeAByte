@@ -96,6 +96,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 return PropertyLogic.GetStringValue(in data, Size, computedReference, _endian);
             case PropertyType.Uint:
                 return PropertyLogic.GetUIntValue(in data, _endian);
+            case PropertyType.ByteArray:
+                return data.ToArray();
         }
         throw new NotImplementedException();
     }
@@ -104,6 +106,16 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     {
         switch (Type)
         {
+            case PropertyType.ByteArray:
+                if (value.StartsWith("[") && value.EndsWith("]"))
+                {
+                    var bytes = value.Substring(1, value.Length - 2)
+                        .Split(",")
+                        .Select(static x => x.Trim())
+                        .Select(byte.Parse);
+                    return bytes.ToArray();
+                }
+                throw new ArgumentException("Invalid value format for byte array property. Expected '[255, 255, ...]'");
             case PropertyType.BinaryCodedDecimal:
                 throw new NotImplementedException();
             case PropertyType.BitArray:
