@@ -75,6 +75,11 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     public void Fill(uint address, byte[] data)
     {
-        data.AsSpan().CopyTo(Data.Span.Slice((int)(address-_offset), data.Length));
+        data.AsSpan().CopyTo(Data.Span.Slice((int)(address - _offset), data.Length));
+    }
+
+    public byte[] GetAllBytes()
+    {
+        return Data.ToArray();
     }
 }

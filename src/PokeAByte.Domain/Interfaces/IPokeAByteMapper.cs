@@ -16,6 +16,8 @@ public class MemorySection
     public ReadRange[] ReadRanges { get; init; } = [];
 }
 
+
+
 public class ReadRange
 {
     public uint Start { get; init; }
@@ -52,7 +54,7 @@ public interface IPokeAByteMapper : IDisposable
     /// The dictionary key is the <see cref="IPokeAByteProperty.Path"/>.
     /// </summary>
     Dictionary<string, IPokeAByteProperty> Properties { get; }
-    
+
     /// <summary>
     /// Provides a glossary to translate game specific IDs and dataytypes into more useful values. <br/>
     /// Each entry in the glossary is a collection of key-value pairs.
@@ -63,7 +65,7 @@ public interface IPokeAByteMapper : IDisposable
     /// See also <see cref="IPokeAByteProperty.Reference"/>.
     /// </remarks>
     Dictionary<string, ReferenceItems> References { get; }
-    
+
     /// <summary>
     /// The <see cref="IPlatformOptions"/> relevant for the mapper.
     /// </summary>

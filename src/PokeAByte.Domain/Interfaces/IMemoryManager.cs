@@ -40,6 +40,8 @@ public interface IMemoryManager
     /// </remarks>
     IByteArray Get(string? area, MemoryAddress memoryAddress, int length);
 
+    byte[] GetAllBytes(string? area);
+
     /// <summary>
     /// Get a <see cref="ReadOnlySpan{T}"/> over a number of bytes from starting address in the target namepsace.
     /// </summary>
@@ -231,4 +233,6 @@ public interface IMemoryNamespace
     /// or if the length of 8 exceeds the bounds of the fragment.
     /// </remarks>
     public ulong get_uint64_be(MemoryAddress memoryAddress) => (ulong)((get_uint32_be(memoryAddress + 0) << 32) | (get_uint32_be(memoryAddress + 4) << 0));
+
+    byte[] GetAllBytes();
 }

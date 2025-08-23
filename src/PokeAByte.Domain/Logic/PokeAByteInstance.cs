@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Jint;
@@ -36,8 +37,13 @@ public class PokeAByteInstance : IPokeAByteInstance
 
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPreprocessor { get; set; }
+
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPostprocessor { get; set; }
+
+    [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
+    private bool HasContainerProcessor { get; set; }
+
     public event InstanceProcessingAbort? OnProcessingAbort;
     public IClientNotifier ClientNotifier { get; }
     public IPokeAByteDriver Driver { get; private set; }
@@ -135,6 +141,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             JavascriptModuleInstance = JavascriptEngine.Modules.Import(mapperContent.ScriptPath);
             HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");
             HasPostprocessor = JavascriptModuleInstance.HasProperty("postprocessor");
+            HasContainerProcessor = JavascriptModuleInstance.HasProperty("containerprocessor");
         }
         else
         {
@@ -185,8 +192,19 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             while (ReadLoopToken.IsCancellationRequested == false)
             {
-                await Read();
+                if (HasContainerProcessor)
+                {
+                    foreach (var item in this.MemoryContainerManager.Namespaces)
+                    {
+                        if (item.Value is DynamicMemoryContainer dynamicContainer && dynamicContainer.IsDirty)
+                        {
+                            this.ExecuteContainerProcessor(item.Key, dynamicContainer.GetAllBytes());
+                            dynamicContainer.ClearDirtyFlag();
+                        }
+                    }
+                }
                 await Task.Delay(Driver.DelayMsBetweenReads);
+                await Read();
             }
         }
         catch (Exception ex)
@@ -230,10 +248,13 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Preprocessor
         if (HasPreprocessor)
         {
-            if (JavascriptModuleInstance.Get("preprocessor").Call().ToObject() as bool? == false)
-            {
-                // The function returned false, which means we do not want to continue.
-                return;
+            lock (this.JavascriptModuleInstance)
+            {                
+                if (JavascriptModuleInstance.Get("preprocessor").Call().ToObject() as bool? == false)
+                {
+                    // The function returned false, which means we do not want to continue.
+                    return;
+                }
             }
         }
 
@@ -255,10 +276,13 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Postprocessor
         if (HasPostprocessor)
         {
-            if (JavascriptModuleInstance.Get("postprocessor").Call().ToObject() as bool? == false)
+            lock (this.JavascriptModuleInstance)
             {
-                // The function returned false, which means we do not want to continue.
-                return;
+                if (JavascriptModuleInstance.Get("postprocessor").Call().ToObject() as bool? == false)
+                {
+                    // The function returned false, which means we do not want to continue.
+                    return;
+                }
             }
         }
 
@@ -287,8 +311,27 @@ public class PokeAByteInstance : IPokeAByteInstance
     public object? ExecuteModuleFunction(string function, IPokeAByteProperty property)
     {
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
+        object? result = null;
+        lock (this.JavascriptModuleInstance)
+        {
+            result = JavascriptModuleInstance.Get(function)
+                .Call(JsValue.FromObject(JavascriptEngine, property))
+                .ToObject();
+        }
+        return result;
+    }
 
-        return JavascriptModuleInstance.Get(function).Call(JsValue.FromObject(JavascriptEngine, property)).ToObject();
+    public void ExecuteContainerProcessor(string container,  byte[] bytes)
+    {
+        if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
+        lock (this.JavascriptModuleInstance)
+        {
+            
+            JavascriptModuleInstance.Get("containerprocessor")?.Call(
+                JsValue.FromObject(JavascriptEngine, container),
+                JsValue.FromObject(JavascriptEngine, bytes)
+            );
+        }
     }
 
     public object? ExecuteExpression(string expression, object x)
@@ -353,8 +396,10 @@ public class PokeAByteInstance : IPokeAByteInstance
             // They want to do it themselves entirely in Javascript.
             return;
         }
+
         await WriteBytes(property, bytes, freeze);
     }
+
 
     public async Task WriteBytes(IPokeAByteProperty target, byte[] bytesToWrite, bool? freeze)
     {
@@ -397,6 +442,24 @@ public class PokeAByteInstance : IPokeAByteInstance
         if (bytes.Length != property.Length)
         {
             throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
+        }
+        if (property.MemoryContainer != null && property.MemoryContainer != "default")
+        {
+            var container = (DynamicMemoryContainer)MemoryContainerManager.Namespaces[property.MemoryContainer];
+            container.Fill((MemoryAddress)property.Address, bytes);
+            this.ExecuteContainerProcessor(property.MemoryContainer, container.GetAllBytes());
+            
+            if (freeze == true)
+            {
+                property.Bytes = bytes;
+                property.Value = property.CalculateObjectValue(this, bytes);
+                await this.FreezeProperty(property, bytes);
+            }
+            else if (freeze == false)
+            {
+                await UnfreezeProperty(property);
+            }
+            return;
         }
         await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
         if (freeze == true)

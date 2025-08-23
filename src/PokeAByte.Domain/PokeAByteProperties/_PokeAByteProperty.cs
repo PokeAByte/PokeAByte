@@ -2,6 +2,7 @@
 using System.Collections;
 using NCalc;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Logic;
 
 namespace PokeAByte.Domain.PokeAByteProperties;
 
@@ -261,9 +262,17 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         bytes = BytesFromBits(bytes);
         if (address != null && BytesFrozen.Length != 0)
         {
-            // Bytes have changed, but property is frozen, so force the bytes back to the original value.
-            // Pretend nothing has changed. :)
-            _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
+            if (_memoryContainer == null || _memoryContainer == "default")
+            {
+                // Bytes have changed, but property is frozen, so force the bytes back to the original value.
+                // Pretend nothing has changed. :)
+                _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
+            }
+            else
+            {
+                memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
+                ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
+            }
             return;
         }
 

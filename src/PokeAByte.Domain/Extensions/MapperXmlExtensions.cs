@@ -6,14 +6,9 @@ public static class MapperXmlExtensions
 {
     static string ReplaceStart(this string input, string oldValue, string newValue)
     {
-        if (input.StartsWith(oldValue))
-        {
-            return string.Concat(newValue, input.AsSpan(oldValue.Length));
-        }
-        else
-        {
-            return input;
-        }
+        return input.StartsWith(oldValue)
+            ? string.Concat(newValue, input.AsSpan(oldValue.Length)) 
+            : input;
     }
 
     static string ReplaceEnd(this string input, string oldValue, string newValue)

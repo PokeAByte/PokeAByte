@@ -35,7 +35,7 @@ static class PokeAByteMapperXmlHelpers
 
 public static class PokeAByteMapperXmlFactory
 {
-    private const int CURRENT_SYNTAX = 2;
+    private const int CURRENT_SYNTAX = 3;
 
     static ulong ToULong(string value)
     {
