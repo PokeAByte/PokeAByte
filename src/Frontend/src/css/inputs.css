@@ -112,6 +112,7 @@ span.input-addon {
 		outline: 2px dashed var(--color-blue);
 	}
 	input {
+		min-height: 19px;
 		margin-top: 0;
 		border-right-style: dashed;
 		&:focus-visible {
