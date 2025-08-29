@@ -17,15 +17,17 @@ export function Notifications() {
 		toasts.forEach(toast => Toasts.remove(toast.id));
 	}, [toasts])
 	return (
-		<div className="notifications">
-			{toasts.map(toast => {
-				return <Toast key={toast.id} {...toast} />
-			})}
-			{toasts.length > 5 &&
-				<button type="button"  class="purple" onClick={closeAll}> 
-					Close all <i class="material-icons"> close </i>
-				</button>
-			}
+		<div className="notification-wrapper">
+			<div className="notifications">
+				{toasts.map(toast => {
+					return <Toast key={toast.id} {...toast} />
+				})}
+				{toasts.length > 5 &&
+					<button type="button"  class="purple" onClick={closeAll}> 
+						Close all <i class="material-icons"> close </i>
+					</button>
+				}
+			</div>
 		</div>
 	);
 }
