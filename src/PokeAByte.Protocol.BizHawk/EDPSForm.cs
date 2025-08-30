@@ -13,7 +13,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
     public ApiContainer? APIs { get; set; }
 
     [RequiredService]
-    public IMemoryDomains MemoryDomains { get; set; } = null!;
+    public IMemoryDomains? MemoryDomains { get; set; } = null;
 
     private readonly Label MainLabel = new()
     {
@@ -50,9 +50,11 @@ public sealed class EDPSForm : Form, IExternalToolForm
 
     private void StartServer()
     {
-        _server = new EmulatorProtocolServer();
-        _server.OnWrite = WriteToMemory;
-        _server.OnSetup = Setup;
+        _server = new EmulatorProtocolServer
+        {
+            OnWrite = (instruction) => this._processor?.QueueWrite(instruction),
+            OnSetup = Setup
+        };
         _server.Start();
     }
 
@@ -93,11 +95,6 @@ public sealed class EDPSForm : Form, IExternalToolForm
         );
     }
 
-    private void WriteToMemory(WriteInstruction instruction)
-    {
-        this._processor?.WriteToMemory(instruction, this.MemoryDomains);
-    }
-
     public void Restart()
     {
         var gameInfo = APIs?.Emulation.GetGameInfo();
@@ -120,7 +117,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
     {
         if (type == ToolFormUpdateType.PostFrame && this.MemoryDomains != null)
         {
-            this._processor?.Update(this.MemoryDomains);
+            this._processor?.UpdateGameMemory(this.MemoryDomains);
         }
     }
 }
