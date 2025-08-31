@@ -4,13 +4,17 @@
   
 # 0.9.1
 
+## General
+- The mapper syntax version is now `2`. If you use new mapper features (see below) add `syntax="2"` to the
+  `<mapper />` element. That way people using older versions of Poke-A-Byte will get an error message telling them to
+  update when they try to load that mapper.
+
 ## Features
 - UI: The first item in a combobox will automatically be submitted if enter is pressed without a selection.
 - Added a search function to the property editor (advanced mode)
 - Added a new (old) property type: `byteArray`. Their `Value` is always the same as their `Bytes`.
-  - The mapper syntax version is now `2`. If you use the `byteArray` type in your mapper, add `syntax="2"`  to the
-    `<mapper />` element. That way people using older versions of Poke-A-Byte will get an error message telling them to
-    update.
+- Added support for the `containerprocessor`, allowing the mapper JavaScript to react to  writes of properties that
+  live outside the default memory container. This can be used to update encrypted memory regions in a game. 
 
 ## Bugfixes
 - Fixed the "freeze" button turning completely blue, instead of just the icon inside.
