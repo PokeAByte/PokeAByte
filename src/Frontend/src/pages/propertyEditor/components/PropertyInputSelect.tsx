@@ -17,12 +17,12 @@ export function PropertyInputSelect({ path, isReadonly, onChange, displayValue, 
 	const options = glossaryItems
 		.map(x => ({ 
 			value: x.key.toString(), 
-			display: x.value === null ? "<none>" : x.value
+			display: x.value === null ? `[${x.key.toString()}]` : x.value
 		}));
 
-	const value = !displayValue 
+	const value = !displayValue
 		? glossaryItems.find(x => x.value === property!.value)?.key
-		: glossaryItems.find(x => x.value === displayValue)?.key;
+		: glossaryItems.find(x => x.value?.toString() === displayValue)?.key;
 
 	const handleSelection = (option: SelectOption<string>) => {
 		onChange(option.display);
@@ -36,6 +36,7 @@ export function PropertyInputSelect({ path, isReadonly, onChange, displayValue, 
 			options={options}
 			isReadonly={isReadonly}
 			placeholder={placeholder}
-			onSelection={handleSelection} />
+			onSelection={handleSelection} 
+		/>
 	);
 }
