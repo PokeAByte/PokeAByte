@@ -16,6 +16,8 @@
 - Fixed the "freeze" button turning completely blue, instead of just the icon inside.
 - Fixed an issue with bogus memory reading when using the EDPS bizhawk integration tool.
 - Fixed style inconsistencies with the comboboxes.
+- EDPS BizHawk tool: Changed when memory is written back to the game, increasing reliability.
+- Fixed "0" and null options not being available in dropdowns for certain properties (such as Yellow -> status_condition).
 
 ## Performance
 - Skip memory boundary checks when address has not changed. Reduces CPU work by ~10% for mappers with a lot of properties.

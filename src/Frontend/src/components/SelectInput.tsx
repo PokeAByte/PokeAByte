@@ -25,8 +25,8 @@ function matchDisplayValue<T>(search: string) {
 }
 
 export function findDisplayByValue<V, T extends SelectOption<V>>(options: T[], value?: V) {
-	if (value !== 0 && value !== "" && !value) {
-		return "";
+	if (value === null || value === undefined) {
+		return "<null>";
 	}
 	return options.find(x => x.value === value)?.display ?? "";
 }

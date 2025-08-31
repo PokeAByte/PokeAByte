@@ -15,8 +15,10 @@ export function PropertyInputSelect({ path, isReadonly, onChange, displayValue, 
 	const property = useGameProperty(path);
 	const glossaryItems = Store.getGlossaryItem(property!.reference!) ?? [];
 	const options = glossaryItems
-		.filter((x) => x.value)
-		.map(x => ({ value: x.key.toString(), display: x.value }));
+		.map(x => ({ 
+			value: x.key.toString(), 
+			display: x.value === null ? "<none>" : x.value
+		}));
 
 	const value = !displayValue 
 		? glossaryItems.find(x => x.value === property!.value)?.key
