@@ -164,9 +164,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             if (ex is JavaScriptException jsException)
             {
                 var location = jsException.Location;
-                throw new MapperException(
-                    $"{jsException.Message}\n at {location}"
-                );
+                throw new MapperException($"{jsException.Message}\n at {location}");
             }
             else
             {
@@ -203,8 +201,8 @@ public class PokeAByteInstance : IPokeAByteInstance
                         }
                     }
                 }
-                await Task.Delay(Driver.DelayMsBetweenReads);
                 await Read();
+                await Task.Delay(Driver.DelayMsBetweenReads);
             }
         }
         catch (Exception ex)
