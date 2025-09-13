@@ -104,3 +104,30 @@ button {
 .icon-button-bare:focus-visible {
 	outline: 2px dashed var(--color-blue);
 }
+
+span.input-addon {
+	margin-top: var(--margin-0);
+	display: inline-block;
+	&:focus-within {
+		outline: 2px dashed var(--color-blue);
+	}
+	input {
+		min-height: 19px;
+		margin-top: 0;
+		border-right-style: dashed;
+		&:focus-visible {
+			outline: none;
+		}
+	}
+	button {
+		margin-top: 0;
+		font-size: 19px;
+		border-style: solid;
+		vertical-align: top;
+		border-left: 0;
+		&:focus-visible {
+			outline: none;
+			color: var(--color-blue)
+		}
+	}
+}

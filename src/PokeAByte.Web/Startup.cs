@@ -29,11 +29,13 @@ public static class Startup
                 (options) =>
                 {
                     options.PayloadSerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
+                    options.PayloadSerializerOptions.Converters.Add(new ByteArrayJsonConverter());
                 }
             );
         services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
+            options.SerializerOptions.Converters.Add(new ByteArrayJsonConverter());
         });
 
         services.AddSingleton<AppSettings>();

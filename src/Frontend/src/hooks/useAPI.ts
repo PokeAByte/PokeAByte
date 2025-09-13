@@ -1,12 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-
-export function usePrevious<T>(value: T): T {
-	var ref = useRef(value);
-	useEffect(() => {
-		ref.current = value;
-	}, [value]);
-	return ref.current;
-}
+import { useState } from "preact/hooks";
 
 export function useAPI<T extends (...args: any[]) => Promise<any>>(
 	api: T,

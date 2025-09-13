@@ -2,7 +2,7 @@ import { useState, useContext } from "preact/hooks";
 import { useAPI } from "../../../hooks/useAPI";
 import { Store } from "../../../utility/propertyStore";
 import { ArchivedMapper, ArchivedMappers } from "pokeaclient";
-import { ConfirmationModal } from "./ConfirmationModal";
+import { ConfirmationModal } from "../../../components/ConfirmationModal";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Advanced } from "../../../Contexts/Advanced";

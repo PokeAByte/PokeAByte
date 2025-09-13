@@ -9,8 +9,7 @@ public class PokeAByteMapper : IPokeAByteMapper, IDisposable
         IPlatformOptions platformOptions,
         MemorySection memory,
         IEnumerable<IPokeAByteProperty> properties,
-        IEnumerable<ReferenceItems> references
-    )
+        IEnumerable<ReferenceItems> references)
     {
         Metadata = metadata;
         Memory = memory;

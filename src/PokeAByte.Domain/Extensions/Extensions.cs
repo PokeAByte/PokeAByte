@@ -7,11 +7,9 @@ public static partial class Extensions
 {
     [GeneratedRegex(@"0x[a-fA-F\d]+")]
     private static partial Regex HexdecimalMemoryAddress();
-    public static string ToHexdecimalString(this int value) => $"0x{value:X2}";
     public static string ToHexdecimalString(this MemoryAddress value) => $"0x{value:X2}";
     public static string ToHexdecimalString(this byte value) => ((uint)value).ToHexdecimalString();
-    public static string ToHexdecimalString(this IEnumerable<int> value, string joinCharacter = " ") => string.Join(joinCharacter, value.Select(x => ((uint)x).ToHexdecimalString()));
-
+    
     /// <summary>
     /// Parse a hex memory address into a uint. 
     /// </summary>
@@ -78,6 +76,4 @@ public static partial class Extensions
 
         return string.Concat(words);
     }
-
-
 }

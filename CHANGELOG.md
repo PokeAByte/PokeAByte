@@ -1,6 +1,32 @@
+[Version 0.9.1](#091)  
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+# 0.9.1
+
+## General
+- The mapper syntax version is now `2`. If you use new mapper features (see below) add `syntax="2"` to the
+  `<mapper />` element. That way people using older versions of Poke-A-Byte will get an error message telling them to
+  update when they try to load that mapper.
+
+## Features
+- UI: The first item in a combobox will automatically be submitted if enter is pressed without a selection.
+- Added a search function to the property editor (advanced mode)
+- Added a new (old) property type: `byteArray`. Their `Value` is always the same as their `Bytes`.
+- Added support for the `containerprocessor`, allowing the mapper JavaScript to react to  writes of properties that
+  live outside the default memory container. This can be used to update encrypted memory regions in a game. 
+
+## Bugfixes
+- Fixed the "freeze" button turning completely blue, instead of just the icon inside.
+- Fixed an issue with bogus memory reading when using the EDPS bizhawk integration tool.
+- Fixed style inconsistencies with the comboboxes.
+- EDPS BizHawk tool: Changed when memory is written back to the game, increasing reliability.
+- Fixed "0" and null options not being available in dropdowns for certain properties (such as Yellow -> status_condition).
+
+## Performance
+- Skip memory boundary checks when address has not changed. Reduces CPU work by ~10% for mappers with a lot of properties.
+- EPDS BizHawk Tool: Reduced amount of memory used, reduced number of memory copy operations.
+
 # 0.9.0
 - [Features](#features)
 - [UI Features](#ui-features)

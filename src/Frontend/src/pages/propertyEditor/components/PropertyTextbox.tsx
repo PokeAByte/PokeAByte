@@ -6,6 +6,11 @@ export function getPropertyFieldValue(value: any, type: GamePropertyType | null)
 	if (type === "bitArray") {
 		return value.map((x: boolean) => x ? "1" : "0").join("") ?? "";
 	}
+	if (type === "byteArray") {
+		console.log(value);
+		return value.map((x:number) => x.toString(16).toUpperCase().padStart(2, "0")).join(" ");
+
+	}
 	return value;
 }
 
@@ -15,7 +20,7 @@ export type PropertyTextboxProps = {
 	isEdit: boolean,
 	isReadonly: boolean,
 	propertyType: GamePropertyType | null,
-	editValue: string|boolean | null,
+	editValue: string | boolean | number[] | null,
 	placeholder?: string,
 	save: () => void,
 	setValue: (value: string|boolean) => void,

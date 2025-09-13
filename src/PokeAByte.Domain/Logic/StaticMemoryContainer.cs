@@ -43,9 +43,9 @@ public class StaticMemoryContainer : IMemoryNamespace
         return false;
     }
 
-    public ReadOnlySpan<byte> GetReadonlyBytes(uint address, int length)
+    public ReadOnlySpan<byte> GetReadonlyBytes(uint address, int length, bool skipCheck = false)
     {
-        if (!CheckRange(address, length))
+        if (!skipCheck && !CheckRange(address, length))
         {
             throw new Exception(
                 $"Invalid memory read: {address:X2} - {address + length:X2} is outside of available memory regions. Check mapper."
@@ -75,6 +75,11 @@ public class StaticMemoryContainer : IMemoryNamespace
 
     public void Fill(uint address, byte[] data)
     {
-        data.AsSpan().CopyTo(Data.Span.Slice((int)(address-_offset), data.Length));
+        data.AsSpan().CopyTo(Data.Span.Slice((int)(address - _offset), data.Length));
+    }
+
+    public byte[] GetAllBytes()
+    {
+        return Data.ToArray();
     }
 }

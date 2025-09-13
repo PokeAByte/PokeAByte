@@ -26,7 +26,6 @@ export function PropertyValue({ path, mapperId }: { mapperId: string, path: stri
 				</NotAdvanced>
 				<td>
 					<PropertyEdit path={path} />
-					{/* <i class="material-icons hide-icon margin-right"> visibility_off </i> */}
 				</td>
 			</tr>
 			<Advanced>

@@ -35,7 +35,7 @@ static class PokeAByteMapperXmlHelpers
 
 public static class PokeAByteMapperXmlFactory
 {
-    private const int CURRENT_SYNTAX = 1;
+    private const int CURRENT_SYNTAX = 3;
 
     static ulong ToULong(string value)
     {
@@ -100,6 +100,7 @@ public static class PokeAByteMapperXmlFactory
                         "int" => PropertyType.Int,
                         "string" => PropertyType.String,
                         "uint" => PropertyType.Uint,
+                        "byteArray" => PropertyType.ByteArray,
                         _ => throw new Exception($"Unknown property type {x.GetAttributeValue("type")}."),
                     };
 

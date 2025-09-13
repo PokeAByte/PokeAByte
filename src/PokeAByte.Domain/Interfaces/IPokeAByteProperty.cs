@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace PokeAByte.Domain.Interfaces;
 
 [JsonSerializable(typeof(byte))]
-public partial class ConverterCOntext : JsonSerializerContext;
+public partial class ConverterContext : JsonSerializerContext;
 
 public class ByteArrayJsonConverter : JsonConverter<byte[]>
 {
@@ -21,7 +21,7 @@ public class ByteArrayJsonConverter : JsonConverter<byte[]>
 
         while (reader.TokenType != JsonTokenType.EndArray)
         {
-            elements.Add(JsonSerializer.Deserialize(ref reader, ConverterCOntext.Default.Byte)!);
+            elements.Add(JsonSerializer.Deserialize(ref reader, ConverterContext.Default.Byte)!);
 
             reader.Read();
         }
@@ -35,7 +35,7 @@ public class ByteArrayJsonConverter : JsonConverter<byte[]>
 
         foreach (byte item in value)
         {
-            JsonSerializer.Serialize(writer, item, ConverterCOntext.Default.Byte);
+            JsonSerializer.Serialize(writer, item, ConverterContext.Default.Byte);
         }
 
         writer.WriteEndArray();
@@ -84,7 +84,10 @@ public enum PropertyType : byte
     String,
 
     [JsonStringEnumMemberName("uint")]
-    Uint
+    Uint,
+
+    [JsonStringEnumMemberName("byteArray")]
+    ByteArray
 }
 
 public interface IPokeAByteProperty
@@ -165,7 +168,6 @@ public interface IPokeAByteProperty
     /// The raw memory bytes from game memory as specified by the <see cref="Address"/> and <see cref="Length"/>.
     /// </summary>
     [JsonPropertyName("bytes")]
-    [JsonConverter(typeof(ByteArrayJsonConverter))]
     byte[] Bytes { get; }
 
     /// <summary>

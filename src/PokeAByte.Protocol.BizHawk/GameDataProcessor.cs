@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 using BizHawk.Common;
 using BizHawk.Emulation.Common;
@@ -16,22 +16,17 @@ internal class GameDataProcessor : IDisposable
     private Label _mainLabel;
     private PlatformEntry _platform;
     private MemoryMappedViewAccessor _dataAccessor;
-    private byte[] _writeBuffer;
     private DomainReadInstruction[] _readInstructions;
     private int _frameSkip;
     private int _skippedFrames;
     private MemoryMappedFile _memoryMappedFile;
-
-    private byte[] DataBuffer { get; } = new byte[4 * 1024 * 1024];
-    private Thread _backgroundCopy;
-    private bool _copyReady;
-    private object _copyLock = new();
+    private byte[] _writeBuffer;
+    private Queue<WriteInstruction> _writeQueue = new();
 
     internal GameDataProcessor(
         PlatformEntry platform,
         SetupInstruction setup,
-        Label mainLabel
-    )
+        Label mainLabel)
     {
         _mainLabel = mainLabel;
         _platform = platform;
@@ -44,7 +39,7 @@ internal class GameDataProcessor : IDisposable
         for (int i = 0; i < setup.BlockCount; i++)
         {
             var readBlock = setup.Data[i];
-            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length);
+            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length - 1);
             if (entry == null)
             {
                 continue;
@@ -55,7 +50,7 @@ internal class GameDataProcessor : IDisposable
                 Domain = entry.Value.DomainId,
                 TransferPosition = readBlock.Position,
                 RelativeStart = address,
-                RelativeEnd = address + readBlock.Length - 1,
+                RelativeEnd = address + readBlock.Length
             };
         }
         for (int i = 0; i < setup.BlockCount; i++)
@@ -67,132 +62,41 @@ internal class GameDataProcessor : IDisposable
         {
             throw new InvalidDataException("Setup instruction came with invalid block sizes. ");
         }
-        GetMMFAccessor(totalSize);
-        if (_memoryMappedFile == null)
-        {
-            _memoryMappedFile = null!;
-        }
-        if (_dataAccessor == null)
-        {
-            _dataAccessor = null!;
-        }
+        _memoryMappedFile = CreateMemoryMappedFile(totalSize);
+        _dataAccessor = _memoryMappedFile.CreateViewAccessor();
         _writeBuffer = new byte[totalSize];
         mainLabel.Text = $"Providing memory data ({totalSize} bytes) to client...";
-        _backgroundCopy = new Thread(this.CopyData);
-        _backgroundCopy.Start();
     }
 
-    private void CopyData()
+    /// <summary>
+    /// Write the byte array into the memory mapped file.
+    /// </summary>
+    /// <param name="source"> The bytes to write. </param>
+    /// <param name="position"> The position in the MMF where the write starts. </param>
+    /// <param name="length"> How many bytes from the source to write into the MMF. </param>
+    private unsafe void UpdateMemoryMappedFile(byte[] source, int position, int length)
     {
-        while (true)
-        {
-
-            SpinWait.SpinUntil(() => _copyReady);
-            lock (_copyLock)
-            {
-                if (_dataAccessor.SafeMemoryMappedViewHandle.ByteLength < (ulong)_writeBuffer.Length)
-                {
-                    _copyReady = false;
-                    continue;
-                }
-                unsafe
-                {
-                    try
-                    {
-                        byte* destination = null;
-                        _dataAccessor.SafeMemoryMappedViewHandle.AcquirePointer(ref destination);
-                        fixed (byte* source = _writeBuffer)
-                        {
-                            Buffer.MemoryCopy(source, destination, _writeBuffer.Length, _writeBuffer.Length);
-                        }
-                    }
-                    finally
-                    {
-                        _dataAccessor.SafeMemoryMappedViewHandle.ReleasePointer();                        
-                        _copyReady = false;
-                    }
-                }
-            }
-        }
-    }
-
-    private void GetMMFAccessor(int size)
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            _memoryMappedFile = MemoryMappedFile.CreateOrOpen(
-                SharedConstants.MemoryMappedFileName,
-                size,
-                MemoryMappedFileAccess.ReadWrite
-            );
-        }
-        else
-        {
-            if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
-            {
-                File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
-            }
-            _memoryMappedFile = MemoryMappedFile.CreateFromFile(
-                $"/dev/shm/{SharedConstants.MemoryMappedFileName}",
-                FileMode.OpenOrCreate,
-                null,
-                size,
-                MemoryMappedFileAccess.ReadWrite
-            );
-        }
-        _dataAccessor = _memoryMappedFile.CreateViewAccessor();
-    }
-
-    public void Update(IMemoryDomains memoryDomains)
-    {
-        if (_skippedFrames > _frameSkip)
-        {
-            _skippedFrames = 0;
-        }
-        else
-        {
-            _skippedFrames++;
-            return;
-        }
-        SpinWait.SpinUntil(() => !_copyReady);
-        DomainReadInstruction instruction = _readInstructions[0];
         try
         {
-            for (int i = 0; i < _readInstructions.Length; i++)
+            byte* destination = null;
+            _dataAccessor.SafeMemoryMappedViewHandle.AcquirePointer(ref destination);
+            fixed (byte* sourcePointer = source)
             {
-                instruction = _readInstructions[i];
-                if (instruction.RelativeStart == instruction.RelativeEnd)
-                {
-                    continue;
-                }
-                var domain = memoryDomains[instruction.Domain];
-                if (domain != null)
-                {
-                    var length = instruction.RelativeEnd - instruction.RelativeStart;
-                    domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), DataBuffer);
-                    Buffer.BlockCopy(
-                        DataBuffer,
-                        0,
-                        _writeBuffer,
-                        (int)instruction.TransferPosition,
-                        (int)length
-                    );
-                }
+                Buffer.MemoryCopy(sourcePointer, destination + position, length, length);
             }
         }
-        catch (Exception ex)
+        finally
         {
-            _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
-        }
-
-        // signal the other thread that copying can be done:
-        lock (_copyLock)
-        {
-            _copyReady = true;
+            _dataAccessor.SafeMemoryMappedViewHandle.ReleasePointer();
         }
     }
 
-    internal void WriteToMemory(WriteInstruction instruction, IMemoryDomains domains)
+    /// <summary>
+    /// Execute the given write instruction, updating the games memory.
+    /// </summary>
+    /// <param name="instruction"> The write instruction to execute. </param>
+    /// <param name="domains"> The BizHawk memory domains to be used for memory access. </param>
+    private void WriteToGameMemory(WriteInstruction instruction, IMemoryDomains domains)
     {
         DomainLayout? layout = _platform.Domains.FirstOrDefault(
             x => x.Start <= instruction.Address && x.End >= instruction.Address + instruction.Data.Length
@@ -217,10 +121,89 @@ internal class GameDataProcessor : IDisposable
         }
     }
 
+    private MemoryMappedFile CreateMemoryMappedFile(int size)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return MemoryMappedFile.CreateOrOpen(
+                SharedConstants.MemoryMappedFileName,
+                size,
+                MemoryMappedFileAccess.ReadWrite
+            );
+        }
+        else
+        {
+            if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
+            {
+                File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
+            }
+            return MemoryMappedFile.CreateFromFile(
+                $"/dev/shm/{SharedConstants.MemoryMappedFileName}",
+                FileMode.OpenOrCreate,
+                null,
+                size,
+                MemoryMappedFileAccess.ReadWrite
+            );
+        }
+    }
+
+    /// <summary>
+    /// Write memory back into the emulator if a write has been queued and read emulator memory and update the memory
+    /// mapped file.
+    /// </summary>
+    /// <param name="memoryDomains"> The BizHawk memory domains to be used for memory access. </param>
+    internal void UpdateGameMemory(IMemoryDomains memoryDomains)
+    {
+        while (_writeQueue.Count > 0)
+        {
+            WriteToGameMemory(_writeQueue.Dequeue(), memoryDomains);
+        }
+
+        if (_skippedFrames > _frameSkip)
+        {
+            _skippedFrames = 0;
+        }
+        else
+        {
+            _skippedFrames++;
+            return;
+        }
+
+        foreach (DomainReadInstruction instruction in _readInstructions)
+        {
+            try
+            {
+                if (instruction.RelativeStart == instruction.RelativeEnd)
+                {
+                    continue;
+                }
+                var domain = memoryDomains[instruction.Domain];
+                if (domain != null)
+                {
+                    var length = instruction.RelativeEnd - instruction.RelativeStart;
+                    domain.BulkPeekByte(instruction.RelativeStart.RangeToExclusive(instruction.RelativeEnd), _writeBuffer);
+                    UpdateMemoryMappedFile(_writeBuffer, (int)instruction.TransferPosition, (int)length);
+                }
+            }
+            catch (Exception ex)
+            {
+                _mainLabel.Text = $"Error reading {instruction.RelativeStart:x2} in '{instruction.Domain}': {ex.Message}";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Add a write instruction to the queue. The instruction will be executed the next time 
+    /// <see cref="UpdateGameMemory(IMemoryDomains)"/> is called, i.e. after the current emulation frame is done.
+    /// </summary>
+    /// <param name="instruction"> The instruction to queue.</param>
+    internal void QueueWrite(WriteInstruction instruction)
+    {
+        this._writeQueue.Enqueue(instruction);
+    }
 
     public void Dispose()
     {
-        _backgroundCopy.Abort();
         this._dataAccessor.Dispose();
         this._memoryMappedFile.Dispose();
         if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))

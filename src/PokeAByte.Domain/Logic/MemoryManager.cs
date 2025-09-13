@@ -45,26 +45,39 @@ public class MemoryManager : IMemoryManager
         Namespaces.TryGetValue(area, out IMemoryNamespace? namespaceArea);
         if (namespaceArea == null)
         {
-            namespaceArea = new MemoryNamespace();
+            namespaceArea = new DynamicMemoryContainer();
             Namespaces[area] = namespaceArea;
         }
         namespaceArea.Fill(memoryAddress, data);
     }
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length)
+    public ReadOnlySpan<byte> GetReadonlyBytes(string? area, uint memoryAddress, int length, bool skipCheck = false)
     {
         if (area == null || area == "default")
         {
-            return DefaultNamespace.GetReadonlyBytes(memoryAddress, length);
+            return DefaultNamespace.GetReadonlyBytes(memoryAddress, length, skipCheck);
         }
         return Namespaces[area].GetReadonlyBytes(memoryAddress, length);
     }
+
+    public byte[] GetAllBytes(string? area)
+    {
+        if (area == null || area == "default")
+        {
+            return DefaultNamespace.GetAllBytes();
+        }
+        return Namespaces[area].GetAllBytes();
+    }
 }
 
-public class MemoryNamespace : IMemoryNamespace
+public class DynamicMemoryContainer : IMemoryNamespace
 {
     public IList<IByteArray> Fragments { get; } = new List<IByteArray>();
+    public bool IsDirty { get; private set; } = false;
+
+    public void ClearDirtyFlag() => IsDirty = false;
+    public void SetDirtyFlag() => IsDirty = true;
 
     public void Fill(MemoryAddress memoryAddress, byte[] data)
     {
@@ -103,7 +116,7 @@ public class MemoryNamespace : IMemoryNamespace
         return new ByteArray(memoryAddress, GetReadonlyBytes(memoryAddress, length).ToArray());
     }
 
-    public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length)
+    public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length, bool skipCheck = false)
     {
         for (int i = 0; i < Fragments.Count; i++)
         {
@@ -112,7 +125,7 @@ public class MemoryNamespace : IMemoryNamespace
             {
                 int offset = (int)(memoryAddress - fragment.StartingAddress);
 
-                if (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length)
+                if (!skipCheck && (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length))
                 {
                     throw new Exception($"Cannot retrieve bytes starting at {memoryAddress.ToHexdecimalString()} (starting address at {fragment.StartingAddress.ToHexdecimalString()} because getting {length} bytes would overflow the fragment array.");
                 }
@@ -124,6 +137,12 @@ public class MemoryNamespace : IMemoryNamespace
     }
 
     public byte get_byte(MemoryAddress memoryAddress) => get_bytes(memoryAddress, 1).get_byte(0);
+
+    public byte[] GetAllBytes()
+    {
+        // TODO: Container might have multiple fragments.
+        return this.Fragments.FirstOrDefault()?.Data ?? [];
+    }
 }
 
 public class ByteArray : IByteArray
@@ -151,7 +170,7 @@ public class ByteArray : IByteArray
         {
             throw new Exception($"The destination array is not long enough. The destination array has a length of {Data.Length} where the source array has a length of {data.Length}.");
         }
-        data.AsSpan().CopyTo(Data);
+        data.AsSpan().CopyTo(Data.AsSpan().Slice(offset, data.Length));
     }
 
     public bool Contains(MemoryAddress memoryAddress)

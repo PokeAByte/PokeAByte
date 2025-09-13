@@ -4,7 +4,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "preact/hoo
 import { Store } from "../../utility/propertyStore";
 import { useAPI } from "../../hooks/useAPI";
 import { GithubSettings } from "pokeaclient";
-import { ConfirmationModal } from "../mappers/subpages/ConfirmationModal";
+import { ConfirmationModal } from "../../components/ConfirmationModal";
 
 export function GithubSettingsPage() {
 	const filesClient = Store.client.files;

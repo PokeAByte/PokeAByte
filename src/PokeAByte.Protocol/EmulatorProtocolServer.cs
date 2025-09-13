@@ -12,10 +12,8 @@ public delegate void SetupHandler(SetupInstruction instruction);
 public class EmulatorProtocolServer : IDisposable
 {
     private const int PORT = 55356;
-    private byte[] _buffer = new byte[65_535];
-    private object _state = new();
     private bool _disposed;
-    private Socket _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+    private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     private Thread? _thread;
     private List<IPEndPoint> _clients = [];
     private UdpClient _listener;
@@ -30,35 +28,28 @@ public class EmulatorProtocolServer : IDisposable
 
     private void Receive()
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            return;
+            _listener.BeginReceive(OnData, new {});
         }
-        
-        _listener.BeginReceive(OnData, new {});
     }
 
     private void OnData(IAsyncResult ar)
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            return;
+            IPEndPoint remote = new(0, 0);
+            var message = _listener.EndReceive(ar, ref remote);
+            HandleMessage(message, remote);
+            Receive();
         }
-        IPEndPoint remote = new IPEndPoint(0, 0);
-        var message = _listener.EndReceive(ar, ref remote);
-        HandleMessage(message, remote);
-        Receive();
     }
 
     private void HandleMessage(byte[] message, IPEndPoint endpoint)
     {
-        if (_disposed)
-        {
-            return;
-        }
         var protocolVersion = message[0];
         var instructionType = message[4];
-        if (message[5] != 0)
+        if (_disposed || message[5] != 0)
         {
             return;
         }
@@ -94,20 +85,21 @@ public class EmulatorProtocolServer : IDisposable
 
     public void Dispose()
     {
-        if (!_disposed)
+        if (_disposed)
         {
-            if (_listener != null)
-            {
-                var close = new CloseInstruction().GetByteArray();
-                foreach (var remote in _clients)
-                {
-                    _listener.Send(close, close.Length, remote);
-                }
-            }
-            _disposed = true;
-            _thread?.Abort();
-            _listener?.Dispose();
+            return;
         }
+        if (_listener != null)
+        {
+            var close = new CloseInstruction().GetByteArray();
+            foreach (var remote in _clients)
+            {
+                _listener.Send(close, close.Length, remote);
+            }
+        }
+        _disposed = true;
+        _thread?.Abort();
+        _listener?.Dispose();
     }
 
     public void Start()

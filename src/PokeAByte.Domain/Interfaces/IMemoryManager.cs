@@ -40,12 +40,15 @@ public interface IMemoryManager
     /// </remarks>
     IByteArray Get(string? area, MemoryAddress memoryAddress, int length);
 
+    byte[] GetAllBytes(string? area);
+
     /// <summary>
     /// Get a <see cref="ReadOnlySpan{T}"/> over a number of bytes from starting address in the target namepsace.
     /// </summary>
     /// <param name="area"> The target namespace. <see cref="DefaultNamespace"/> if <see langword="null"/>. </param>
     /// <param name="memoryAddress"> The starting address. </param>
     /// <param name="length"> The number of bytes to read. </param>
+    /// <param name="skipCheck"> Whether the boundary check can be safely skipped. </param>
     /// <returns> The <see cref="ReadOnlySpan{T}"/>. </returns>
     /// <returns> A readonly span that refers to the target memory, without copying it. </returns>
     /// <remarks>
@@ -53,7 +56,7 @@ public interface IMemoryManager
     /// or if the specified length exceeds the memory bounds. <br/>
     /// Using this method from inside JavaScript is not recommended.
     /// </remarks>
-    ReadOnlySpan<byte> GetReadonlyBytes(string? area, MemoryAddress memoryAddress, int length);
+    ReadOnlySpan<byte> GetReadonlyBytes(string? area, MemoryAddress memoryAddress, int length, bool skipCheck = false);
 
     /// <summary>
     /// Write a number of bytes into the target namespace at the specified address.
@@ -117,7 +120,7 @@ public interface IMemoryNamespace
     /// of the namespace. <br/>
     /// Using this from inside mapper JavaScript is not recommended.
     /// </remarks>
-    ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length);
+    ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length, bool skipCheck = false);
 
     /// <summary>
     /// Read an individual byte from the target address.
@@ -230,4 +233,6 @@ public interface IMemoryNamespace
     /// or if the length of 8 exceeds the bounds of the fragment.
     /// </remarks>
     public ulong get_uint64_be(MemoryAddress memoryAddress) => (ulong)((get_uint32_be(memoryAddress + 0) << 32) | (get_uint32_be(memoryAddress + 4) << 0));
+
+    byte[] GetAllBytes();
 }

@@ -75,13 +75,14 @@ main {
 header {
 	display: flex;
 	flex-direction: row;
-	margin-top: var(--margin-0);
+	padding-top: var(--margin-0);
 	padding-left: var(--margin-0);
 	padding-right: var(--margin-0);
 	background-color: var(--color-surface-0);
 	border-bottom: 2px solid var(--color-border-0);
 	align-items: center;
 	justify-content: space-between;
+	z-index: 2000;
 
 	nav {
 		display: flex;

@@ -25,7 +25,7 @@ function matchDisplayValue<T>(search: string) {
 }
 
 export function findDisplayByValue<V, T extends SelectOption<V>>(options: T[], value?: V) {
-	if (value !== 0 && value !== "" && !value) {
+	if (value === null || value === undefined) {
 		return "";
 	}
 	return options.find(x => x.value === value)?.display ?? "";
@@ -38,7 +38,6 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 	const [focusIndex, setFocusedIndex] = useState<number>(-1);
 	const valueDisplay = findDisplayByValue(props.options, props.value);
 	const filteredOptions = props.options.filter(matchDisplayValue(searchValue));
-	const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 	const optionsContainer = useRef<HTMLDivElement | null>(null);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -49,7 +48,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 		setSearchValue("");
 	}
 	const handleOnFocus = () => {
-		setIsOpen(!props.isReadonly);		
+		setIsOpen(!props.isReadonly);
 	}
 	const handleBlur = () => {
 		window.requestAnimationFrame(() => {
@@ -66,6 +65,11 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 			return;
 		}
 		switch (event.key) {
+			case "Enter":
+				if (filteredOptions.length > 0 && focusIndex === -1) {
+					handleSelection(filteredOptions[0]);
+				}
+				break;
 			case "ArrowDown":
 				event.preventDefault();
 				newFocus = focusIndex < (filteredOptions.length - 1) ? focusIndex + 1 : 0;
@@ -114,8 +118,8 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 						<button
 							role="button"
 							key={index}
-							ref={el => optionRefs.current[index] = el}
 							onClick={() => handleSelection(x)}
+							class={index === 0 && focusIndex === -1 ? "highlight" : ""}
 							tabIndex={-1}
 							className={focusIndex === index ? "focused" : ""}
 						>
