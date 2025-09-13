@@ -30,7 +30,6 @@ export function PropertyEdit({ path }: { path: string }) {
 	};
 	const handleSave = () => {
 		let newPropertyValue = value;
-		// @ts-expect-error
 		if (property?.type === "byteArray" && typeof(newPropertyValue) === "string") {
 			newPropertyValue = newPropertyValue.split(" ").map(x => Number.parseInt(x, 16));
 		}

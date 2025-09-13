@@ -6,7 +6,7 @@ import MapperPage from "../pages/mappers/MapperPage";
 import { Store } from "../utility/propertyStore";
 import { Settings } from "../pages/settings/Settings";
 import { LicensePage } from "../pages/LicensePage";
-import { usePrevious } from "../hooks/useAPI";
+import { usePrevious } from "../hooks/usePrevious";
 
 export function MainView() {
 	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);

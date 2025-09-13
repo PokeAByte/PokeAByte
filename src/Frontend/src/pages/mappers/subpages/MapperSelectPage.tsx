@@ -20,7 +20,6 @@ export function MapperSelection(props: MapperSelectProps) {
 	const mapperFileContext = useContext(MapperFilesContext);
 	const mapper = props.mapper;
 
-	// @ts-expect-error The upstream type definition is incomplete, accessing fileId works just fine.
 	const fileId = mapper?.fileId;
 	const loadButtonRef = useRef<HTMLButtonElement>(null)
 	const changeMapperApi = useAPI(changeMapper);
