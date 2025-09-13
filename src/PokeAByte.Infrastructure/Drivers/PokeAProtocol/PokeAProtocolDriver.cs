@@ -38,7 +38,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
     {
         if (_client == null)
         {
-            throw new Exception($"No connection to bizhawk");
+            throw new Exception($"EDPS Driver: No connection to bizhawk");
         }
         if (_readBlocks == null)
         {
@@ -55,7 +55,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
             }
             if (fileSize == 0)
             {
-                throw new Exception("Invalid filesize for the MMF. Can not connect to EDPS.");
+                throw new Exception("EDPS Driver: Invalid filesize for the MMF. Can not connect to EDPS.");
             }
             await _client.Setup(_readBlocks, fileSize, _frameSkip);
         }
