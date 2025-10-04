@@ -14,11 +14,6 @@ function isNumeric(x: any) {
 }
 
 function matchProperty(property: GameProperty<any>, query: string) {
-	query = query.toLowerCase();
-	if (query.startsWith("0x")) {
-		query = query.substring(2);
-	}
-
 	return property.path.toLocaleLowerCase().includes(query)
 		|| property.address?.toString(16) === query
 }
@@ -33,9 +28,16 @@ export function PropertyTree({ path, level = 1, search = "" }: { path: string, l
 
 	let immediateChildren: string[];
 	if (search) {
+		let query = search.toLowerCase();
+		if (query.startsWith("0x")) {
+			query = query.substring(2);
+		}
 		immediateChildren = Object.keys(properties)
-			.filter(x => x.startsWith(path + ".") && matchProperty(properties[x], search))
-			.map(x => ({ name: x.split(".")[level], level: x.split('.').length, path: x }))
+			.filter(x => x.startsWith(path + ".") && matchProperty(properties[x], query))
+			.map(x => { 
+				const levels = x.split(".");
+				return { name: levels[level], level: levels.length, path: x }
+			})
 			.toSorted((a, b) => {
 				if (a.level > b.level) return 1;
 				if (a.level < b.level) return -1;
@@ -87,26 +89,15 @@ export function PropertyTree({ path, level = 1, search = "" }: { path: string, l
 	const openOverride = search && (immediateChildren.length <= 6 || level === 1);
 	return (
 		<>
-			<tr class="leaf interactive" onClick={onToggleOpen}>
-				<th >
-					<i className="material-icons"> {isOpen ? "folder" : "folder_open"} </i>
-					<span class="margin-left">
-						{name}
-						{secondaryName &&
-							<span> - {secondaryName?.toString()} </span>
-						}
-					</span>
-				</th>
-				<td>
-					<span class="margin-left color-darker">
-						{immediateChildren.length} Entries 
-						{hiddenItemCount > 0 && ` (+${hiddenItemCount} hidden)`}
-					</span>
-					<Advanced>
-						<ToggleHidden path={path} />
-					</Advanced>
-				</td>
-			</tr>
+			<PropertyTreeHeader 
+				isOpen={isOpen}
+				onToggleOpen={onToggleOpen}
+				path={path}
+				name={name}
+				secondaryName={secondaryName}
+				entryCount={immediateChildren.length}
+				hiddenEntryCount={hiddenItemCount}
+			/>
 			<tr class={(isOpen || openOverride) ? "" : "hidden"}>
 				<td colSpan={2}>
 					{(isOpen || openOverride) &&
@@ -123,4 +114,39 @@ export function PropertyTree({ path, level = 1, search = "" }: { path: string, l
 			</tr>
 		</>
 	)
+}
+
+type PropertyTreeHeaderProps = {
+	onToggleOpen: () => void,
+	isOpen: boolean,
+	name: string,
+	secondaryName?: string,
+	entryCount: number,
+	hiddenEntryCount: number,
+	path: string,
+}
+
+function PropertyTreeHeader(props: PropertyTreeHeaderProps) {
+	return (
+		<tr class="leaf interactive" onClick={props.onToggleOpen}>
+			<th >
+				<i className="material-icons"> {props.isOpen ? "folder" : "folder_open"} </i>
+				<span class="margin-left">
+					{props.name}
+					{props.secondaryName &&
+						<span> - {props.secondaryName?.toString()} </span>
+					}
+				</span>
+			</th>
+			<td>
+				<span class="margin-left color-darker">
+					{props.entryCount} Entries 
+					{props.hiddenEntryCount > 0 && ` (+${props.hiddenEntryCount} hidden)`}
+				</span>
+				<Advanced>
+					<ToggleHidden path={props.path} />
+				</Advanced>
+			</td>
+		</tr>
+	);
 }

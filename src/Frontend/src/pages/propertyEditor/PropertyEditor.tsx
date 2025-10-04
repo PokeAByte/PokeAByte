@@ -1,15 +1,22 @@
 import { Store } from "../../utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
 import { unique } from "./utils/unique";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { useSyncExternalStore } from "preact/compat";
 import { useLocation } from "wouter";
 import { HidePropertyContextProvider, IfNotHidden, ToggleForceVisible } from "../../Contexts/HidePropertyContext";
 import { Advanced } from "../../Contexts/Advanced";
+import debounce from "debounce";
 
 export function PropertyEditor() {
 	const [, setLocation] = useLocation();
+	const [internalSearch, setInternalSearch] = useState("");
 	const [search, setSearch] = useState("");
+	const updateSearch = useMemo(() => debounce(setSearch, 100), []);
+	const onSearchInput = (value: string) => {
+		setInternalSearch(value);
+		updateSearch(value);
+	};
 	const properties = Store.getAllProperties();
 	const paths = Object.keys(properties)
 		.map(x => x.split(".")[0])
@@ -41,18 +48,18 @@ export function PropertyEditor() {
 					</div>
 					<div>
 						<Advanced>
-							<ToggleForceVisible/>
+							<ToggleForceVisible />
 						</Advanced>
 					</div>
 				</div>
 				<Advanced>
 					<label>Search property: </label>
 					<span class="input-addon">
-						<input type="text" value={search} onChange={x => setSearch(x.currentTarget.value)}></input>
-						<button 
-							class={"add-on material-icons"} 
-							disabled={!search}
-							onClick={() => setSearch("")}
+						<input type="text" value={internalSearch} onInput={x => onSearchInput(x.currentTarget.value)}></input>
+						<button
+							class={"add-on material-icons"}
+							disabled={!internalSearch}
+							onClick={() => setInternalSearch("")}
 							title={"Clear search"}
 						>
 							clear
@@ -61,7 +68,7 @@ export function PropertyEditor() {
 				</Advanced>
 				<table className="tree">
 					<tbody>
-						{paths.map((x) => 
+						{paths.map((x) =>
 							<IfNotHidden key={x} path={x} >
 								<PropertyTree path={x} search={search} />
 							</IfNotHidden>
