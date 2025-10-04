@@ -247,15 +247,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 $"Unable to retrieve bytes for property '{Path}': {e.Message}"
             );
         }
-        if (_bytes.Length == bytes.Length)
-        {
-            bytes.AsSpan().CopyTo(_bytes);
-        }
-        else
-        {
-            _bytes = [.. bytes];
-        }
-        FieldsChanged |= FieldChanges.Bytes;
+        this.Bytes = bytes.ToArray();
 
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
