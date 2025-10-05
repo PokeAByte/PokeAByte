@@ -1,61 +1,59 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web" InitialTargets="NpmRunBuild">
 
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <PublicSign>false</PublicSign>
-        <Company>Scott's Thoughts</Company>
-        <AssemblyVersion>0.9.1</AssemblyVersion>
-        <FileVersion>0.9.1</FileVersion>
-		<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-		<PublishSingleFile>true</PublishSingleFile>
-		<SelfContained>true</SelfContained>
-		<PublishTrimmed>true</PublishTrimmed>
-		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PublicSign>false</PublicSign>
+    <Company>Scott's Thoughts</Company>
+    <AssemblyVersion>0.9.2</AssemblyVersion>
+    <FileVersion>0.9.2</FileVersion>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-		<DebugSymbols>False</DebugSymbols>
-		<DebugType>None</DebugType>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
 
-	<Target Name="NpmInstall" Outputs="../Frontend/node_modules/.install-stamp">
-		<Exec Command="npm ci" Condition="'$(RestorePackagesWithLockFile)' == 'true'" WorkingDirectory="../Frontend" />
-		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != 'true'" WorkingDirectory="../Frontend" />
-		<!-- Write the stamp file, so incremental builds work -->
-		<Touch Files="../Frontend/node_modules/.install-stamp" AlwaysCreate="true" />
-	</Target>
-	<Target Name="NpmRunBuild" DependsOnTargets="NpmInstall" BeforeTargets="BeforeBuild">
-		<Exec Command="npm run build" WorkingDirectory="../Frontend" />
-	</Target>
-	<ItemGroup>
-	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.8" />
-	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.8" />
-      <PackageReference Include="Serilog" Version="4.3.0" />
-      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-      <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
-      <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-      <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    </ItemGroup>
+  <Target BeforeTargets="PrepareForBuild" Name="NpmInstall" Inputs="../Frontend/package.json" Outputs="../Frontend/node_modules/.install-stamp">
+    <Exec Command="npm ci" WorkingDirectory="../Frontend" />
+    <Touch Files="../Frontend/node_modules/.install-stamp" AlwaysCreate="true" />
+  </Target>
+  <Target Name="NpmRunBuild" DependsOnTargets="NpmInstall">
+    <Exec Command="npm run build" WorkingDirectory="../Frontend" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.1" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
-      <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
+    <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
-      <EmbeddedResource Include="wwwroot\favicon.png" />
-      <EmbeddedResource Include="..\Frontend\dist\**" />
-    </ItemGroup>
-	<ItemGroup>
-		<Content Update="package-lock.json">
-			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
-		</Content>
-		<Content Update="wwwroot/**/*">
-			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\dist\gameHookMapperClient.js" />
+    <EmbeddedResource Include="wwwroot\favicon.png" />
+    <EmbeddedResource Include="..\Frontend\dist\**" Type="Non-Resx" WithCulture="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="package-lock.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot/**/*">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -1,0 +1,28 @@
+<Solution>
+  <Project Path="PokeAByte.Domain/PokeAByte.Domain.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Infrastructure/PokeAByte.Infrastructure.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Integrations.BizHawk/PokeAByte.Integrations.BizHawk.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Protocol.BizHawk/PokeAByte.Protocol.BizHawk.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Protocol/PokeAByte.Protocol.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Utility.BuildMapperBindings/PokeAByte.Utility.BuildMapperBindings.csproj">
+    <BuildType Project="Release" />
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Project Path="PokeAByte.Utility.BuildMapperTree/PokeAByte.Utility.BuildMapperTree.csproj">
+    <BuildType Project="Release" />
+  </Project>
+  <Project Path="PokeAByte.Web/PokeAByte.Web.csproj">
+    <BuildType Project="Release" />
+    <Deploy Solution="Release|*" />
+  </Project>
+</Solution>
