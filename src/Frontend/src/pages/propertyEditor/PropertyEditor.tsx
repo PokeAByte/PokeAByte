@@ -4,8 +4,10 @@ import { unique } from "./utils/unique";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { useSyncExternalStore } from "preact/compat";
 import { useLocation } from "wouter";
-import { HidePropertyContextProvider, IfNotHidden, ToggleForceVisible } from "../../Contexts/HidePropertyContext";
-import { Advanced } from "../../Contexts/Advanced";
+import { HidePropertyContextProvider } from "../../Contexts/HidePropertyContext";
+import { ForceVisibilityToggle } from "../../components/ForceVisibilityToggle";
+import { IfNotHidden } from "../../components/IfNotHidden";
+import { Advanced } from "../../components/Advanced";
 import debounce from "debounce";
 
 export function PropertyEditor() {
@@ -48,7 +50,7 @@ export function PropertyEditor() {
 					</div>
 					<div>
 						<Advanced>
-							<ToggleForceVisible />
+							<ForceVisibilityToggle />
 						</Advanced>
 					</div>
 				</div>

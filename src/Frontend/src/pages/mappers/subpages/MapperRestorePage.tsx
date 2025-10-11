@@ -5,7 +5,7 @@ import { ArchivedMapper, ArchivedMappers } from "pokeaclient";
 import { ConfirmationModal } from "../../../components/ConfirmationModal";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
-import { Advanced } from "../../../Contexts/Advanced";
+import { Advanced } from "../../../components/Advanced";
 
 export function MapperRestorePage() {
 	const filesClient = Store.client.files;

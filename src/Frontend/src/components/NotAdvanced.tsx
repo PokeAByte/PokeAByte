@@ -1,6 +1,6 @@
 import { ComponentChildren } from "preact";
 import { useContext } from "preact/hooks";
-import { AdvancedFeatureContext } from "./advancedFeatureContext";
+import { AdvancedFeatureContext } from "../Contexts/advancedFeatureContext";
 
 /**
  * Renders the children only when advanced mode is disabled.

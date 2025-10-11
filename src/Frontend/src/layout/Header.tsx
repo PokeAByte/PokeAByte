@@ -1,7 +1,7 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
 import {  useSyncExternalStore } from "preact/compat";
-import { AdvancedToggle } from "../Contexts/AdvancedToggle";
+import { AdvancedToggle } from "../components/AdvancedToggle";
 
 export function Header() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);

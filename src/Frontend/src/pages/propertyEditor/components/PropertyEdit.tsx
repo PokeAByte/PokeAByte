@@ -9,8 +9,8 @@ import { PropertyInputSelect } from "./PropertyInputSelect";
 import { useEffect, useState } from "preact/hooks";
 import { CopyValueIcon } from "./CopyValueIcon";
 import { clipboardCopy } from "../utils/clipboardCopy";
-import { Advanced } from "../../../Contexts/Advanced";
-import { ToggleHidden } from "../../../Contexts/HidePropertyContext";
+import { Advanced } from "../../../components/Advanced";
+import { VisibilityToggle } from "../../../components/VisibilityToggle";
 
 export function PropertyEdit({ path }: { path: string }) {
 	const property = useGameProperty(path);
@@ -131,7 +131,7 @@ export function PropertyEdit({ path }: { path: string }) {
 				</span>
 			</Advanced>
 			<Advanced>
-				<ToggleHidden path={path} />
+				<VisibilityToggle path={path} />
 			</Advanced>
 		</>
 	)

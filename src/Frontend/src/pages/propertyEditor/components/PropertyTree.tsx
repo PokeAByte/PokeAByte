@@ -5,8 +5,10 @@ import { unique } from "../utils/unique";
 import { useStorageRecordState } from "../../../hooks/useStorageState";
 import { useContext, useState } from "preact/hooks";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";
-import { HidePropertyContext, IfNotHidden, ToggleHidden } from "../../../Contexts/HidePropertyContext";
-import { Advanced } from "../../../Contexts/Advanced";
+import { HidePropertyContext } from "../../../Contexts/HidePropertyContext";
+import { VisibilityToggle } from "../../../components/VisibilityToggle";
+import { IfNotHidden } from "../../../components/IfNotHidden";
+import { Advanced } from "../../../components/Advanced";
 import { GameProperty } from "pokeaclient";
 
 function isNumeric(x: any) {
@@ -144,7 +146,7 @@ function PropertyTreeHeader(props: PropertyTreeHeaderProps) {
 					{props.hiddenEntryCount > 0 && ` (+${props.hiddenEntryCount} hidden)`}
 				</span>
 				<Advanced>
-					<ToggleHidden path={props.path} />
+					<VisibilityToggle path={props.path} />
 				</Advanced>
 			</td>
 		</tr>

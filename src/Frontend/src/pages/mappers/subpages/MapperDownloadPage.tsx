@@ -7,7 +7,7 @@ import { MapperUpdate } from "pokeaclient";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Toasts } from "../../../notifications/ToastStore";
-import { Advanced } from "../../../Contexts/Advanced";
+import { Advanced } from "../../../components/Advanced";
 
 export function MapperDownloadPage() {
 	const filesClient = Store.client.files;
