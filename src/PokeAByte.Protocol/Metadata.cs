@@ -15,6 +15,15 @@ public static class Instructions
 public static class SharedConstants
 {
     public const string MemoryMappedFileName = "EDPS_MemoryData.bin";
+    public const string MemoryMappedFilePathOSX = "/tmp/EDPS_MemoryData.bin";
+    public const string MemoryMappedFilePathLinux = "/dev/shm/EDPS_MemoryData.bin";
+
+    public static string GetMmfPath()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) 
+            ? SharedConstants.MemoryMappedFilePathOSX
+            : SharedConstants.MemoryMappedFilePathLinux;
+    }
 }
 
 /// <summary>

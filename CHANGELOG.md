@@ -2,6 +2,20 @@
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+# 0.9.2
+
+## Bugfixes
+
+- Fixed and edgecase where some properties may not get updates correctly the first time the game memory changes.
+- Fixed an inconsistent spacing in the property table in the UI.
+- EDPS: Create the memory mapped file in /tmp/ on macOS.
+
+## Performance
+
+- Improved *perceived* performance of property search in the UI (advanced mode).
+- Upgraded to .NET 10, which gives a small performance improvement for some mappers.
+- Updated several dependencies, which should make memory utilisation more consistent when switching between mappers.
+
 # 0.9.1
 
 ## General

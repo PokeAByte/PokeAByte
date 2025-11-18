@@ -65,12 +65,9 @@ public class PokeAProtocolClient : IDisposable
         try
         {
             _mmfData = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? MemoryMappedFile.OpenExisting(
-                    SharedConstants.MemoryMappedFileName,
-                    MemoryMappedFileRights.Read
-                )
+                ? MemoryMappedFile.OpenExisting(SharedConstants.MemoryMappedFileName, MemoryMappedFileRights.Read)
                 : MemoryMappedFile.CreateFromFile(
-                    $"/dev/shm/{SharedConstants.MemoryMappedFileName}",
+                    SharedConstants.GetMmfPath(),
                     FileMode.Open,
                     null,
                     _fileSize,
