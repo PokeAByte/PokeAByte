@@ -53,9 +53,9 @@ public struct Metadata
 
     /// <summary>
     /// Whether the current packet is a request to the emulator (0) or response to the client (1). <br/>
-    /// Byte 6 of the metadata.
+    /// Byte 5 of the metadata.
     /// </summary>
-    [FieldOffset(6)]
+    [FieldOffset(5)]
     public byte IsResponse;
 
     public void CopyTo(byte[] destination)

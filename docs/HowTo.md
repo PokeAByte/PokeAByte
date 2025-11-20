@@ -6,24 +6,26 @@ The following emulators are currently compatible:
 
 - [Bizhawk](https://tasvideos.org/Bizhawk)
 - [RetroArch](https://www.retroarch.com/?page=platforms)
-- SuperShuckie (privately distributed)
+- SuperShuckie ([source available here](https://github.com/SnowyMouse/supershuckie64))
 
-If you are using RetroArch, note that not all emulator cores work with Poke-A-Byte. You will also need to enable the 
+If you are using **RetroArch**, note that not all emulator cores work with Poke-A-Byte. You will also need to enable the 
 Network Control Interface. You can do this by opening retroarch, going into "Settings", then "Network". There, enable 
 "Network Commands" and make sure that "Network Command Port" is 55355 (should be the default).
 
-For Bizhawk, you also need to download the so called External Tool. Currently there are two options available. 
-The `PokeAByte.Integrations.BizHawk.dll` is better tested, whereas `Bizhawk-EDPS.dll` should have slightly better 
-performance. You download one of these files and copy it into the `ExternalTools` folder that should be located at the same
-place that your Bizhawk executable is (`EmuHawk.exe`). If the folder does not exist, create it and then place the DLL file
-inside.
+For **Bizhawk**, you also need to download the so called "External Tool". Download the `EDPS.Bizhawk.dll` from the 
+[release page](https://github.com/PokeAByte/PokeAByte/releases/latest) and copy it into the `ExternalTools` folder that 
+should be located at the same place that your Bizhawk executable is (`EmuHawk.exe`). If the folder does not exist, 
+create it and then place the DLL file inside.
 
 Once you started BizHawk and loaded the game ROM, go to `Tools` in the menu bar, hover over the the `External Tools` item
-and then select `Poke-A-Byte Integration` or `Emulator Data Protocol Server` depending on which DLL you downloaded.
+and then select `Emulator Data Protocol Server`.
+
+![A screenshow illustrating the selection of the "Emulator Data Protocol Server" menu item.](images/bizhawk_edps.png)
 
 ## 2. Downloading and opening Poke-A-Byte
 
-To start Poke-A-Byte, download the version build for your operating system, unpack the Zip-folder, and click on `PokeAByte.Web`.
+To start Poke-A-Byte, [download](https://github.com/PokeAByte/PokeAByte/releases/latest) the version build for your 
+operating system, unpack the Zip-folder, and click on `PokeAByte.Web`.
 
 A new page should open automatically open in your default browser. If not, go to http://localhost:8085/ui/mappers.
 
@@ -52,4 +54,3 @@ You can now open whatever software that depends on Poke-A-Byte, such as Scotts o
 
 Be aware that the software in question may require specific mappers to function properly. For instance Scotts Generation 1
 overlay only works with the Mappers that have "deprecated" in their name. 
-

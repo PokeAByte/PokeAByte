@@ -39,7 +39,7 @@ public struct SetupInstruction
         data.CopyTo(Data, 0);
     }
 
-    public byte[] GetByteArray()
+    public readonly byte[] GetByteArray()
     {
         int size = Marshal.SizeOf(this);
         byte[] bytes = new byte[size];
@@ -60,7 +60,7 @@ public struct SetupInstruction
 
     public static SetupInstruction FromByteArray(byte[] bytes)
     {
-        SetupInstruction instruction = new SetupInstruction();
+        SetupInstruction instruction = new();
 
         int size = Marshal.SizeOf(instruction);
         IntPtr ptr = IntPtr.Zero;
@@ -75,23 +75,5 @@ public struct SetupInstruction
             Marshal.FreeHGlobal(ptr);
         }
         return instruction;
-    }
-}
-
-[StructLayout(LayoutKind.Explicit)]
-public struct PingInstruction
-{
-    [FieldOffset(0)]
-    public Metadata Metadata = new Metadata(Instructions.PING, 0x00);
-
-    public PingInstruction()
-    {
-    }
-
-    public byte[] GetByteArray()
-    {
-        var result = new byte[Metadata.HEADER_LENGTH];
-        Metadata.CopyTo(result);
-        return result;
     }
 }
