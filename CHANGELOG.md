@@ -5,6 +5,10 @@
   
 # 0.9.2
 
+## Features
+
+- The EDPS driver can now work on macOS (thanks to Snowy).
+
 ## Bugfixes
 
 - Fixed and edgecase where some properties may not get updates correctly the first time the game memory changes.
