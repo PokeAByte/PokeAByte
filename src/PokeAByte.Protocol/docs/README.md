@@ -99,6 +99,8 @@ The payload (following directly after the header) is the raw bytes to write to t
 ## CLOSE
 
 **Length:** Only header (32 bytes).
-**Purpose:** Informs Poke-A-Byte about emulator shutdown.
+**Purpose:** Informs either side of the connection that the other one is shutting down.
 
 The emulator is expected to send this instruction to Poke-A-Byte before shutting down and disposal of the MMF.
+
+The emulator CAN handle a CLOSE instruction from Poke-A-Byte and tear down the MFF and discard the setup.

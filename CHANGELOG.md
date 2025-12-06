@@ -8,6 +8,7 @@
 ## Features
 
 - The EDPS driver can now work on macOS (thanks to Snowy).
+- Changes to the EDPS protocol. The Bizhawk Tool will now stop providing memory if Poke-A-Byte unloads the mapper.
 
 ## Bugfixes
 

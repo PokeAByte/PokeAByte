@@ -53,7 +53,12 @@ public sealed class EDPSForm : Form, IExternalToolForm
         _server = new EmulatorProtocolServer
         {
             OnWrite = (instruction) => this._processor?.QueueWrite(instruction),
-            OnSetup = Setup
+            OnSetup = Setup,
+            OnCloseRequest = () =>
+            {
+                Cleanup();
+                StartServer();
+            }
         };
         _server.Start();
     }

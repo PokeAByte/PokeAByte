@@ -2,12 +2,12 @@ namespace PokeAByte.Protocol;
 
 public struct CloseInstruction
 {
-    public static Metadata Metadata = new Metadata(Instructions.CLOSE, 0x01);
-    private static byte[] _bytes = new byte[Metadata.HEADER_LENGTH];
+    private byte[] _bytes = new byte[Metadata.HEADER_LENGTH];
 
-    static CloseInstruction()
+    public CloseInstruction(bool toClient)
     {
-        Metadata.CopyTo(_bytes);
+        var metaData = new Metadata(Instructions.CLOSE, toClient ? (byte)0x01 : (byte)0x00);
+        metaData.CopyTo(_bytes);
     }
 
     public byte[] GetByteArray()

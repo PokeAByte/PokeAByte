@@ -8,6 +8,7 @@ namespace PokeAByte.Protocol;
 
 public delegate void WriteHandler(WriteInstruction instruction);
 public delegate void SetupHandler(SetupInstruction instruction);
+public delegate void CloseRequestHandler();
 
 public class EmulatorProtocolServer : IDisposable
 {
@@ -19,6 +20,7 @@ public class EmulatorProtocolServer : IDisposable
     private UdpClient _listener;
 
     public WriteHandler? OnWrite { get; set; }
+    public CloseRequestHandler? OnCloseRequest { get; set; }
     public SetupHandler? OnSetup { get; set; }
 
     public EmulatorProtocolServer()
@@ -60,7 +62,10 @@ public class EmulatorProtocolServer : IDisposable
             {
                 case Instructions.PING:
                     _socket.SendTo(new PingResponse().GetByteArray(), endpoint);
-
+                    break;
+                case Instructions.CLOSE:
+                    OnCloseRequest?.Invoke();
+                    // todo: handle.
                     break;
                 case Instructions.NOOP:
                     break;
@@ -91,7 +96,7 @@ public class EmulatorProtocolServer : IDisposable
         }
         if (_listener != null)
         {
-            var close = new CloseInstruction().GetByteArray();
+            var close = new CloseInstruction(toClient: true).GetByteArray();
             foreach (var remote in _clients)
             {
                 _listener.Send(close, close.Length, remote);

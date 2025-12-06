@@ -118,4 +118,10 @@ public class PokeAProtocolClient : IDisposable
             _client.Dispose();
         }
     }
+
+    internal async Task RequestCloseAsync()
+    {
+        var instruction = new CloseInstruction(toClient: false);
+        await _client!.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
+    }
 }
