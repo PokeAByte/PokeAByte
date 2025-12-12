@@ -2,7 +2,7 @@
 
 namespace PokeAByte.Protocol;
 
-public struct WriteInstruction
+public struct WriteInstruction : IEmulatorInstruction
 {
     public static Metadata Metadata = new(Instructions.WRITE, 0x00);
     public long Address; // At: 0x08
@@ -21,11 +21,10 @@ public struct WriteInstruction
 
     public static WriteInstruction FromByteArray(byte[] bytes)
     {
-        var startingAddress = BitConverter.ToInt64(bytes, Metadata.LENGTH + 0);
         var dataLength = BitConverter.ToInt32(bytes, Metadata.LENGTH + 8);
         var instruction = new WriteInstruction
         {
-            Address = startingAddress,
+            Address = BitConverter.ToInt64(bytes, Metadata.LENGTH + 0),
             Length = dataLength,
             Data = new byte[dataLength],
         };

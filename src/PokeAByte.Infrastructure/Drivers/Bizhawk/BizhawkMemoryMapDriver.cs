@@ -11,6 +11,7 @@ namespace PokeAByte.Infrastructure.Drivers.Bizhawk;
 public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
 {
     public string ProperName => "Bizhawk";
+    public bool SupportsFreeze => false;
     public int DelayMsBetweenReads { get; }
     private int IntegrationVersion;
     private string SystemName = string.Empty;

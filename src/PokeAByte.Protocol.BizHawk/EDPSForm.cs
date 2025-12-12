@@ -52,8 +52,10 @@ public sealed class EDPSForm : Form, IExternalToolForm
     {
         _server = new EmulatorProtocolServer
         {
-            OnWrite = (instruction) => this._processor?.QueueWrite(instruction),
+            OnWrite = (instruction) => _processor?.QueueWrite(instruction),
             OnSetup = Setup,
+            OnFreeze = (instruction) => _processor?.AddFreeze(instruction),
+            OnUnfreeze = (instruction) => _processor?.RemoveFreeze(instruction),
             OnCloseRequest = () =>
             {
                 Cleanup();
@@ -122,6 +124,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
     {
         if (type == ToolFormUpdateType.PostFrame && this.MemoryDomains != null)
         {
+            this._processor?.WriteFreezes(this.MemoryDomains);
             this._processor?.UpdateGameMemory(this.MemoryDomains);
         }
     }

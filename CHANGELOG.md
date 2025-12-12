@@ -24,7 +24,7 @@
 
 ### Core
 
-
+- Emulator Data Protocol: Added "FREEZE" and "UNFREEZE" instructions. This can reduce communication overhead when freezing properties that update frequently in the game.
 
 ## Bugfixes
 

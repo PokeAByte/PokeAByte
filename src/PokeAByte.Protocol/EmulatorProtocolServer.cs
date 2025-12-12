@@ -6,6 +6,8 @@ using System.Threading;
 
 namespace PokeAByte.Protocol;
 
+public delegate void FreezeHandler(FreezeInstruction instruction);
+public delegate void UnfreezeHandler(UnfreezeInstruction instruction);
 public delegate void WriteHandler(WriteInstruction instruction);
 public delegate void SetupHandler(SetupInstruction instruction);
 public delegate void CloseRequestHandler();
@@ -22,6 +24,8 @@ public class EmulatorProtocolServer : IDisposable
     public WriteHandler? OnWrite { get; set; }
     public CloseRequestHandler? OnCloseRequest { get; set; }
     public SetupHandler? OnSetup { get; set; }
+    public FreezeHandler? OnFreeze { get; set; }
+    public UnfreezeHandler? OnUnfreeze { get; set; }
 
     public EmulatorProtocolServer()
     {
@@ -68,6 +72,14 @@ public class EmulatorProtocolServer : IDisposable
                     // todo: handle.
                     break;
                 case Instructions.NOOP:
+                    break;
+                case Instructions.FREEZE:
+                    var freezeInstruction = FreezeInstruction.FromByteArray(message);
+                    OnFreeze?.Invoke(freezeInstruction);
+                    break;
+                case Instructions.UNFREEZE:
+                    var unfreezeInstruction = UnfreezeInstruction.FromByteArray(message);
+                    OnUnfreeze?.Invoke(unfreezeInstruction);
                     break;
                 case Instructions.WRITE:
                     WriteInstruction instruction = WriteInstruction.FromByteArray(message);

@@ -1,5 +1,10 @@
 namespace PokeAByte.Protocol;
 
+/// <summary>
+/// Signals the closing of the connection. <br />
+/// If sent from the emulator, it also means the memory mapped file will be destroyed. <br />
+/// The emulator may ignore the CLOSE signal from Poke-A-Byte.
+/// </summary>
 public struct CloseInstruction
 {
     private byte[] _bytes = new byte[Metadata.HEADER_LENGTH];

@@ -26,13 +26,15 @@ back to Poke-A-Byte.
 
 The instruction types are:
 
-| Value  | Type  |
-| ------ | ----- |
-| `0x00` | NOOP  |
-| `0x01` | PING  |
-| `0x02` | SETUP |
-| `0x03` | WRITE |
-| `0xFF` | CLOSE |
+| Value  | Type     |
+| ------ | -------- |
+| `0x00` | NOOP     |
+| `0x01` | PING     |
+| `0x02` | SETUP    |
+| `0x03` | WRITE    |
+| `0x04` | FREEZE   |
+| `0x05` | UNFREEZE |
+| `0xFF` | CLOSE    |
 
 ## Header
 
@@ -95,6 +97,34 @@ The payload consists of 128 memory block descriptors. Their layout is as follows
 ### Payload
 
 The payload (following directly after the header) is the raw bytes to write to the game memory.
+
+## FREEZE 
+
+**Length:** Variable (at least 33 bytes).
+**Purpose:** Same as WRITE, but additionally an instruction to the emulator to keep the target address (range) at the
+payload value after each frame.
+
+Alternatively, the emulator make the game memory entirely unchangeable.
+
+### Header
+|   Bytes | Type  | Name                                  |
+| ------: | ----- | ------------------------------------- |
+|  8 - 15 | int64 | Game address to freeze.               |
+| 16 - 19 | int32 | The length, in bytes, of frozen value |
+
+### Payload
+
+The payload (following directly after the header) is the raw bytes to write to the game memory after each frame.
+
+## UNFREEZE
+
+**Purpose:** Instructs the emulator to re-allow changes to a previousy frozen address.
+**Length:** 32 bytes.
+
+### Header
+|   Bytes | Type  | Name                                  |
+| ------: | ----- | ------------------------------------- |
+|  8 - 15 | int64 | Game address to unfreeze.             |
 
 ## CLOSE
 
