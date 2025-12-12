@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { useContext } from "preact/hooks";
-import { AdvancedFeatureContext } from "./advancedFeatureContext";
+import { AdvancedFeatureContext } from "../Contexts/advancedFeatureContext";
 
 /**
- * Provides the toggle icon button that enables or disabled advanced mode.
+ * The toggle button to activate/deactivate advanced mode.
  */
 export function AdvancedToggle() {
 	const context = useContext(AdvancedFeatureContext);

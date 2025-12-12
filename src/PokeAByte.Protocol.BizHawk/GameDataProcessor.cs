@@ -133,12 +133,12 @@ internal class GameDataProcessor : IDisposable
         }
         else
         {
-            if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
+            if (File.Exists(SharedConstants.GetMmfPath()))
             {
-                File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
+                File.Delete(SharedConstants.GetMmfPath());
             }
             return MemoryMappedFile.CreateFromFile(
-                $"/dev/shm/{SharedConstants.MemoryMappedFileName}",
+                SharedConstants.GetMmfPath(),
                 FileMode.OpenOrCreate,
                 null,
                 size,
@@ -206,9 +206,9 @@ internal class GameDataProcessor : IDisposable
     {
         this._dataAccessor.Dispose();
         this._memoryMappedFile.Dispose();
-        if (File.Exists($"/dev/shm/{SharedConstants.MemoryMappedFileName}"))
+        if (File.Exists(SharedConstants.GetMmfPath()))
         {
-            File.Delete($"/dev/shm/{SharedConstants.MemoryMappedFileName}");
+            File.Delete(SharedConstants.GetMmfPath());
         }
     }
 }

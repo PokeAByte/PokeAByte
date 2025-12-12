@@ -1,7 +1,7 @@
 import { PropertyEdit } from "./PropertyEdit";
 import { AttributesTable } from "./AttributesTable";
-import { NotAdvanced } from "../../../Contexts/NotAdvanced";
-import { Advanced } from "../../../Contexts/Advanced";
+import { NotAdvanced } from "../../../components/NotAdvanced";
+import { Advanced } from "../../../components/Advanced";
 import { useStorageRecordState } from "../../../hooks/useStorageState";
 
 export function PropertyValue({ path, mapperId }: { mapperId: string, path: string }) {

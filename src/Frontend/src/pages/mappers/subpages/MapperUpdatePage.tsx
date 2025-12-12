@@ -7,7 +7,7 @@ import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Toasts } from "../../../notifications/ToastStore";
-import { Advanced } from "../../../Contexts/Advanced";
+import { Advanced } from "../../../components/Advanced";
 
 export function MapperUpdatePage() {
 	const filesClient = Store.client.files;

@@ -39,7 +39,7 @@ table.tree {
 
 	button:not(.icon-button),
 	input {
-		margin: 0 var(--margin-0) 0 0;
+		margin: 0 0 0 0;
 		font-size: var(--font-size-0);
 		padding: var(--margin-0);
 		padding: 3.375px !important;

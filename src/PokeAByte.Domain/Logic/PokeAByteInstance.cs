@@ -34,6 +34,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     private BlockData[] _transferBlocks;
     private Engine JavascriptEngine { get; set; }
     private ObjectInstance? JavascriptModuleInstance { get; set; }
+    private Lock _jsModuleLock = new Lock();
 
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPreprocessor { get; set; }
@@ -246,7 +247,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Preprocessor
         if (HasPreprocessor)
         {
-            lock (this.JavascriptModuleInstance)
+            lock (_jsModuleLock)
             {                
                 if (JavascriptModuleInstance.Get("preprocessor").Call().ToObject() as bool? == false)
                 {
@@ -274,7 +275,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Postprocessor
         if (HasPostprocessor)
         {
-            lock (this.JavascriptModuleInstance)
+            lock (_jsModuleLock)
             {
                 if (JavascriptModuleInstance.Get("postprocessor").Call().ToObject() as bool? == false)
                 {
@@ -309,8 +310,8 @@ public class PokeAByteInstance : IPokeAByteInstance
     public object? ExecuteModuleFunction(string function, IPokeAByteProperty property)
     {
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
-        object? result = null;
-        lock (this.JavascriptModuleInstance)
+        object? result;
+        lock (_jsModuleLock)
         {
             result = JavascriptModuleInstance.Get(function)
                 .Call(JsValue.FromObject(JavascriptEngine, property))
@@ -322,9 +323,8 @@ public class PokeAByteInstance : IPokeAByteInstance
     public void ExecuteContainerProcessor(string container,  byte[] bytes)
     {
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
-        lock (this.JavascriptModuleInstance)
+        lock (_jsModuleLock)
         {
-            
             JavascriptModuleInstance.Get("containerprocessor")?.Call(
                 JsValue.FromObject(JavascriptEngine, container),
                 JsValue.FromObject(JavascriptEngine, bytes)

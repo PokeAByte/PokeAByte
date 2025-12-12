@@ -5,10 +5,16 @@ type ModalProps = {
 	title?: string;
 	text: string | React.ReactNode;
 	confirmLabel: string;
+	/** Callback invoked when the user confirms the action. */
 	onConfirm: () => void;
+	/** Callback invoked when the user declines / cancels the action. */
 	onCancel: () => void;
 };
 
+/**
+ * A generic modal for confirming or cancelling an action.
+ * @param props Component props.
+ */
 export function ConfirmationModal(props: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const hasCurrentDialog = !!dialogRef.current;

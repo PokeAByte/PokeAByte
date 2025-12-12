@@ -27,11 +27,14 @@ public class PokeAProtocolDriver : IPokeAByteDriver
         return Task.CompletedTask;
     }
 
-    public Task Disconnect()
+    public async Task Disconnect()
     {
-        _client?.Dispose();
-        _client = null;
-        return Task.CompletedTask;
+        if (_client != null)
+        {
+            await _client.RequestCloseAsync();
+            _client.Dispose();
+            _client = null;
+        }
     }
 
     public async ValueTask ReadBytes(BlockData[] blocks)

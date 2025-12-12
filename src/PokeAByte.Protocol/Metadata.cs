@@ -15,6 +15,15 @@ public static class Instructions
 public static class SharedConstants
 {
     public const string MemoryMappedFileName = "EDPS_MemoryData.bin";
+    public const string MemoryMappedFilePathOSX = "/tmp/EDPS_MemoryData.bin";
+    public const string MemoryMappedFilePathLinux = "/dev/shm/EDPS_MemoryData.bin";
+
+    public static string GetMmfPath()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) 
+            ? SharedConstants.MemoryMappedFilePathOSX
+            : SharedConstants.MemoryMappedFilePathLinux;
+    }
 }
 
 /// <summary>
@@ -44,9 +53,9 @@ public struct Metadata
 
     /// <summary>
     /// Whether the current packet is a request to the emulator (0) or response to the client (1). <br/>
-    /// Byte 6 of the metadata.
+    /// Byte 5 of the metadata.
     /// </summary>
-    [FieldOffset(6)]
+    [FieldOffset(5)]
     public byte IsResponse;
 
     public void CopyTo(byte[] destination)

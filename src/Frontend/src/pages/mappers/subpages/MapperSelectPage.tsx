@@ -8,7 +8,7 @@ import { AvailableMapper, Mapper } from "pokeaclient";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { unique } from "../../propertyEditor/utils/unique";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
-import { Advanced } from "../../../Contexts/Advanced";
+import { Advanced } from "../../../components/Advanced";
 import { useStorageState } from "../../../hooks/useStorageState";
 import { changeMapper } from "../../../utility/fetch";
 
