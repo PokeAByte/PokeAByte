@@ -3,6 +3,13 @@
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+# 0.9.3
+
+## Bugfixes
+
+- Accidentally introduced and incompatibility in the emulator data procotol, causing property writes to fail when
+  using the EDPS bizhawk tool.
+
 # 0.9.2
 
 ## Features

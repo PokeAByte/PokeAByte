@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace PokeAByte.Protocol;
 
-[StructLayout(LayoutKind.Explicit, Size = 8)]
 public struct WriteInstruction
 {
     public static Metadata Metadata = new(Instructions.WRITE, 0x00);
-    [FieldOffset(0x08)]
-    public long Address;
-    [FieldOffset(0x0F)]
-    public int Length;
-    [FieldOffset(32)]
-    public byte[] Data;
+    public long Address; // At: 0x08
+    public int Length; // At: 0x0F
+    public byte[] Data; // At: 0x20
 
     public byte[] GetByteArray()
     {
