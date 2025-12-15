@@ -41,7 +41,7 @@ export function PropertyTextbox(props: PropertyTextboxProps) {
 			<label >
 				<input
 					title={checked?.toString() ?? "false"}
-					type={"checkbox"}
+					type="checkbox"
 					role="switch"
 					checked={checked}
 					onKeyDown={(e) => {

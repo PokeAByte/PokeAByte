@@ -8,8 +8,10 @@ import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Toasts } from "../../../notifications/ToastStore";
 import { Advanced } from "../../../components/Advanced";
+import { WideButton } from "../../../components/WideButton";
+import { Panel } from "@/components/Panel";
 
-export function MapperDownloadPage() {
+export function DownloadMapperPanel() {
 	const filesClient = Store.client.files;
 	const mapperFileContext = useContext(MapperFilesContext);
 	const [downloads, setDownloads] = useState<MapperUpdate[]>([]);
@@ -19,9 +21,9 @@ export function MapperDownloadPage() {
 		(success) => {
 			if (success) {
 				mapperFileContext.refresh();
-				Toasts.push(`Successfully downloaded mapper(s).`, "task_alt", "success");
+				Toasts.push(`Successfully downloaded mapper(s).`, "task_alt", "green");
 			} else {
-				Toasts.push(`An error occured while downloading (a) mapper(s).`, "", "error");
+				Toasts.push(`An error occured while downloading (a) mapper(s).`, "", "red");
 			}
 		}
 	);
@@ -43,31 +45,25 @@ export function MapperDownloadPage() {
 		return <LoadProgress label="Downloading mapper(s)" />
 	}
 	return (
-		<article>
+		<Panel id="mapper-download" title="Download mappers" >
 			<span>
 				{selectedDownloads.length} / {downloads.length} Mappers Selected
 			</span>
-			<div className="margin-top">
-				<button className="green margin-right wide-button" disabled={!selectedDownloads.length} onClick={handleDownload}>
-					Download selected
-				</button>
-				<button className="green margin-right wide-button" disabled={!downloads.length} onClick={handleDownloadAll}>
-					Download all
-				</button>
-				<button className="blue margin-right wide-button" disabled onClick={mapperFileContext.refresh}>
-					Reload mapper list
-				</button>
+			<div class="margin-top">
+				<WideButton text="Download selected" color="green" disabled={!selectedDownloads.length} onClick={handleDownload}  />
+				<WideButton text="Download all" color="green" disabled={!downloads.length} onClick={handleDownloadAll}  />
+				<WideButton text="Reload mapper list" color="blue" disabled onClick={mapperFileContext.refresh}  />
 				<Advanced>
 					<OpenMapperFolderButton />
 				</Advanced>
 			</div>
-			<div className="margin-top">
+			<div class="margin-top">
 				<MapperSelectionTable
 					availableMappers={downloads}
 					selectedMappers={selectedDownloads}
 					onMapperSelection={setSelectedDownloads}
 				/>
 			</div>
-		</article>
+		</Panel>
 	);
 }

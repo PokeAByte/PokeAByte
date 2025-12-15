@@ -1,5 +1,6 @@
 import { MapperUpdate, MapperVersion } from "pokeaclient";
 import { useEffect, useState } from "preact/hooks";
+import { WideButton } from "../../../../components/WideButton";
 
 type MapperSelectionTableProps = {
 	onMapperSelection: React.Dispatch<React.SetStateAction<string[]>>,
@@ -30,7 +31,7 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 				const filteredMappers = allMappers
 					.filter(
 						x => x.display_name.toLowerCase().includes(filterLower)
-						|| x.path.toLowerCase().includes(filterLower)
+							|| x.path.toLowerCase().includes(filterLower)
 					);
 				setMappers(filteredMappers);
 			}
@@ -57,7 +58,7 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 	if (allMappers.length === 0) {
 		return (
 			<>
-				<br/>
+				<br />
 				<strong>No Mappers Found</strong>
 			</>
 		)
@@ -66,27 +67,25 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 	return (
 		<>
 			<label htmlFor="mapper-filter margin-right">Filter:</label>
-			<input 
+			<input
 				id="mapper-filter"
-				type="text" 
+				type="text"
 				className="margin-right margin-left"
-				placeholder="" 
-				onInput={(event) => setFilter(event.currentTarget.value)} 
+				placeholder=""
+				onInput={(event) => setFilter(event.currentTarget.value)}
 			/>
 			{props.onUpdateList &&
-				<button type="button" className="blue wide-button" onClick={props.onUpdateList}>
-					Reload mapper list
-				</button>
+				<WideButton text="Reload mapper list" color="blue" onClick={props.onUpdateList} />
 			}
-			<table className="striped">
+			<table class="striped">
 				<thead>
 					<tr  >
-						<th className="min">
-							<label className="checkbox">
-								<input 
-									type="checkbox" 
-									checked={selectedMappers.length == mappers.length} 
-									onInput={(e) => selectAll(e.currentTarget.checked)} 
+						<th>
+							<label class="checkbox">
+								<input  
+									type="checkbox"  
+									checked={selectedMappers.length == mappers.length}  
+									onInput={(e) => selectAll(e.currentTarget.checked)}  
 								/>
 								<span />
 							</label>

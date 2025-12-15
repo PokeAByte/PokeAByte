@@ -1,21 +1,20 @@
 import classNames from "classnames";
-import { useContext } from "preact/hooks";
-import { AdvancedFeatureContext } from "../Contexts/advancedFeatureContext";
+import { useUISetting } from "@/Contexts/UISettingsContext";
+import { IconButton } from "./IconButton";
 
 /**
  * The toggle button to activate/deactivate advanced mode.
  */
 export function AdvancedToggle() {
-	const context = useContext(AdvancedFeatureContext);
+	const [advancedMode, setAdvancedMode] = useUISetting("advancedMode");
 	return (
-		<i
-			role={"button"}
+		<IconButton
 			tabIndex={0}
-			title={"Toggle advanced mode"}
-			class={classNames("material-icons icon-button-bare", { "text-green": context.show })}
-			onClick={context.toggle}
-		>
-			rocket
-		</i>
+			noBorder
+			title="Toggle advanced mode"
+			onClick={() => setAdvancedMode(!advancedMode)}
+			class={classNames({ "text-green": advancedMode })}
+			icon="rocket"
+		/>
 	);
 }

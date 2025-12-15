@@ -23,18 +23,19 @@ export function MainView() {
 	useEffect(() => {
 		if (mapper && !previousMapper) {
 			setLocation("/properties", { replace: false});
+			
 		}
 	}, [mapper, previousMapper, setLocation]);
 
 	if (!isConnected) {
 		return (
-			<main className="loading">
+			<main class="loading">
 				<LoadProgress label="Waiting for WebSocket connection" />
 			</main>
 		);
 	}
 	return (
-		<main className="responsive max surface-container-high">
+		<main>
 			<Switch>
 				<Route path="/properties">
 					<PropertyEditor />
@@ -42,10 +43,10 @@ export function MainView() {
 				<Route path="/settings">
 					<Settings />
 				</Route>
-				<Route path={"/mapper"} nest>
+				<Route path="/mapper" nest>
 					<MapperPage />
 				</Route>
-				<Route path={"/license/"} nest>
+				<Route path="/license/" nest>
 					<LicensePage />
 				</Route>
 				<Route>

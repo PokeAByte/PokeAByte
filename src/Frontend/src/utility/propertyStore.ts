@@ -2,11 +2,12 @@ import { ChangedField, GameProperty, Glossary, PokeAClient, ProblemDetails } fro
 import { Toasts } from "../notifications/ToastStore";
 
 type Callback = () => void;
+type UpdateCallback = (path: string) => void;
 
 export class PropertyStore {
+	private _updateListener: UpdateCallback[] = [];
 	private _connectionSubscriber: ((connected: boolean) => void)[] = [];
 	private _mapperSubscriber: Callback[] = [];
-	private _propertyCallbacks: Record<string, Callback[]> = {};
 	client: PokeAClient;
 	private _pendingPathUpdates: string[];
 
@@ -24,19 +25,20 @@ export class PropertyStore {
 			updateOn: [ChangedField.bytes, ChangedField.value, ChangedField.frozen]
 		});
 		this.client.connect();
-		window.setInterval(() => this.sendPropertyChanges(), 32);
+		window.setInterval(() => {
+			this.sendPropertyChanges()
+			
+		}, 32);
 	}
 
 	/**
 	 * Send property changes to subscribers.
 	 */
 	sendPropertyChanges = () => {
-		if (this._pendingPathUpdates.length > 0) {
-			this._pendingPathUpdates.forEach((path) => {
-				this._propertyCallbacks[path]?.forEach(x => x());
-			});
-			this._pendingPathUpdates.length = 0;
-		}
+		this._pendingPathUpdates.forEach((path) => {
+			this._updateListener.forEach(callback => callback(path));
+		});
+		this._pendingPathUpdates.length = 0;
 	}
 
 	onPropertiesChange = (paths: string[]) => {
@@ -56,17 +58,7 @@ export class PropertyStore {
 	}
 
 	onError = (error: ProblemDetails) => {
-		Toasts.push(`${error.title}: ${error.detail}`, "", "error", false);
-	}
-
-	subscribeProperty = (path: string) => (onStoreChange: () => void) => {
-		if (!this._propertyCallbacks[path]) {
-			this._propertyCallbacks[path] = [];
-		}
-		this._propertyCallbacks[path].push(onStoreChange)
-		return () => {
-			this._propertyCallbacks[path] = this._propertyCallbacks[path].filter(x => x != onStoreChange);
-		}
+		Toasts.push(`${error.title}: ${error.detail}`, "", "red", false);
 	}
 
 	subscribeMapper = (onStoreChange: () => void) => {
@@ -82,6 +74,7 @@ export class PropertyStore {
 			this._connectionSubscriber = this._connectionSubscriber.filter(x => x != onConnectedChange);
 		}
 	}
+	
 	isConnected = () => this.client.isConnected();
 
 	getMapper = () => this.client.getMapper();
@@ -97,6 +90,14 @@ export class PropertyStore {
 			return null;
 		}
 		return glossary[item];
+	}
+
+	addUpdateListener = (callback: UpdateCallback) => {
+		this._updateListener.push(callback);
+	}
+
+	removeUpdateListener = (callback: UpdateCallback) => {
+		this._updateListener = this._updateListener.filter(x => x !== callback);
 	}
 }
 

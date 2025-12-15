@@ -6,6 +6,6 @@ export function clipboardCopy(value: any) {
 		Toasts.push(`Copied '${value}' to the clipboard`, "info", "blue");
 		navigator.clipboard.writeText(value?.toString());
 	} else {
-		Toasts.push(`No value to copy to clipboard.`, "info", "error");
+		Toasts.push(`No value to copy to clipboard.`, "info", "red");
 	}
 }

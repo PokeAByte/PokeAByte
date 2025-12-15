@@ -1,4 +1,4 @@
-button {
+button, .icon-button {
 	--button-background: var(--button-background-default);
 	margin-top: var(--margin-0);
 	font-size: var(--font-size-0);
@@ -12,7 +12,7 @@ button {
 		--button-background: var(--button-background-hover);
 	}
 	
-	&[disabled] {
+	&[disabled], &[aria-disabled=true] {
 		--button-background: var(--button-background-disabled);
 		border-color: var(--button-border-disabled);
 		color: var(--button-color-disabled);
@@ -20,10 +20,6 @@ button {
 
 	&:focus-visible {
 		outline: 2px dashed var(--color-blue);
-	}
-
-	&.highlight {
-		color: var(--color-blue)
 	}
 }
 input,
@@ -48,10 +44,6 @@ input[type="checkbox"] {
 
 	&:focus-visible {
 		outline: 2px dashed var(--color-blue);
-	}
-
-	&.highlight {
-		color: var(--color-blue)
 	}
 }
 
@@ -101,7 +93,11 @@ button {
 	border-style: outset;
 }
 
-.icon-button-bare:focus-visible {
+.interactive,
+i[role="button"] {
+	cursor: default;
+}
+i[role="button"]:focus-visible {
 	outline: 2px dashed var(--color-blue);
 }
 
@@ -119,12 +115,12 @@ span.input-addon {
 			outline: none;
 		}
 	}
-	button {
+	button, .icon-button {
 		margin-top: 0;
 		font-size: 19px;
 		border-style: solid;
 		vertical-align: top;
-		border-left: 0;
+		border-left: 0 !important;
 		&:focus-visible {
 			outline: none;
 			color: var(--color-blue)

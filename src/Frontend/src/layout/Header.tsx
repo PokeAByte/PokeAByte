@@ -2,49 +2,52 @@ import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
 import {  useSyncExternalStore } from "preact/compat";
 import { AdvancedToggle } from "../components/AdvancedToggle";
+import { Mapper } from "pokeaclient";
+import { IconButton } from "@/components/IconButton";
+
+async function performReload(mapper: Mapper) {
+	await Store.client.changeMapper(mapper.fileId);
+}
 
 export function Header() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
-	const reloadMapper = () => {
+	const reloadMapper = async () => {
 		if (mapper != null) {
-			Store.client.changeMapper(mapper.fileId)
+			performReload(mapper);
 		}
 	};
-	const textHighlightClass = mapper ? "text-green" : "text-red";
+	const textColor = mapper ? "text-green" : "text-red";
 
 	return (
-		<header className="layout-box">
-			<h1 class={textHighlightClass}>
+		<header>
+			<h1 class={textColor}>
 				Poke-A-Byte
 			</h1>
-			<nav className={`tab`}>
+			<nav class="tab">
 				<HeaderNavigation mapper={mapper} />
 			</nav>
-			<div class={"mapper-info"}>
+			<div class="mapper-info">
 				{mapper 
-					?<>
-						<span class={`margin-right ${textHighlightClass}`}  title={"Current mapper: " + mapper.gameName}>Connected</span>
-						<i
-							tabIndex={0} 
+					? <>
+						<span class={`margin-right ${textColor}`}  title={"Current mapper: " + mapper.gameName}>
+							Connected
+						</span>
+						<IconButton
+							noBorder
 							title="Unload Mapper" 
-							role={"button"} 
-							className={`icon-button-bare material-icons text-red`} 
+							class="text-red" 
 							onClick={Store.client.unloadMapper}
-						> 
-							clear 
-						</i>
-						<i tabIndex={0} 
+							icon="clear"
+						/>
+						<IconButton
+							noBorder
 							title="Reload Mapper" 
-							role={"button"} 
-							className={`icon-button-bare material-icons text-purple`} 
+							class="text-purple" 
 							onClick={reloadMapper}
-						> 
-							refresh
-						</i>
+							icon="refresh"
+						/>
 					</>
-					: <>
-						No Mapper loaded
-					</>
+					: "No Mapper loaded"
 				}
 				<AdvancedToggle />
 			</div>		

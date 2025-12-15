@@ -1,10 +1,11 @@
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";
 import { clipboardCopy } from "../utils/clipboardCopy";
 import { CopyValueIcon } from "./CopyValueIcon";
 import { SaveValueButton } from "./SaveValueButton";
 import { Store } from "../../../utility/propertyStore";
 import { Toasts } from "../../../notifications/ToastStore";
+import { IconButton } from "@/components/IconButton";
 
 export function AttributesTable({ path }: { path: string }) {
 	const type = useGamePropertyField(path, "type");
@@ -16,7 +17,7 @@ export function AttributesTable({ path }: { path: string }) {
 	const memoryContainer = useGamePropertyField(path, "memoryContainer");
 
 	return (
-		<table className="attributes-table stripes small-space">
+		<table class="attributes-table">
 			<tbody>
 				<tr>
 					<th>type</th>
@@ -46,7 +47,7 @@ export function AttributesTable({ path }: { path: string }) {
 					<tr>
 						<th>address</th>
 						<td >
-							<CopyValueIcon onClick={() => clipboardCopy(address ? `0x${address.toUpperCase()}`: "")} />
+							<CopyValueIcon onClick={() => clipboardCopy(address ? `0x${address.toUpperCase()}` : "")} />
 						</td>
 						<td>{address ? `0x${address.toUpperCase()}` : "-"}</td>
 					</tr>
@@ -55,7 +56,7 @@ export function AttributesTable({ path }: { path: string }) {
 					<tr>
 						<th>bits</th>
 						<td >
-							<CopyValueIcon onClick={() => clipboardCopy(address ? `0x${address.toUpperCase()}`: "")} />
+							<CopyValueIcon onClick={() => clipboardCopy(address ? `0x${address.toUpperCase()}` : "")} />
 						</td>
 						<td>{bits}</td>
 					</tr>
@@ -82,31 +83,36 @@ export function AttributesTable({ path }: { path: string }) {
 	);
 }
 
+const convertByte = (byte: number) =>  byte.toString(16).padStart(2, "0").toUpperCase();
+const convertBytes = (bytes: number[] | null) =>  bytes?.map(convertByte) ?? [];
+
 export function PropertyByteRow({ path }: { path: string }) {
 	const bytes = useGamePropertyField(path, "bytes");
 	const [hasFocus, setHasFocus] = useState<boolean>(false);
 	const [madeEdit, setMadeEdit] = useState<boolean>(false);
-	const originalValue = bytes?.map(x => x.toString(16).toUpperCase()) ?? [];
 	const [values, setValues] = useState<string[]>([]);
-	useEffect(() => {
-		if (!madeEdit && !hasFocus) {
-			setValues(bytes?.map(x => x.toString(16).toUpperCase().padStart(2, "0")) ?? []);
-		}
-	}, [bytes, madeEdit, hasFocus])
+	const showTrueValues = !hasFocus && !madeEdit;
 	const handleEdit = (byte: string, index: number) => {
 		const newValues = structuredClone(values);
 		newValues[index] = byte.toUpperCase();
 		setValues(newValues);
-		setMadeEdit(newValues[index] !== originalValue[index]);
+		setMadeEdit(bytes === null || newValues[index] !== convertByte(bytes[index]));
 	};
 	const handleSave = () => {
 		Store.client.updatePropertyBytes(path, values.map(x => parseInt(x, 16)))
 			.then(() => {
 				setMadeEdit(false);
-				Toasts.push(`Successfully saved bytes!`, "task_alt", "success");
+				Toasts.push(`Successfully saved bytes!`, "task_alt", "green");
 			});
 		setMadeEdit(false);
-	}
+	};
+	const clipboardBytes = () => {
+		const value = showTrueValues 
+			? convertBytes(Store.getProperty(path)!.bytes) 
+			: values;
+		clipboardCopy(value.join(" "));
+	};
+
 	if (bytes == null) {
 		return null;
 	}
@@ -114,39 +120,37 @@ export function PropertyByteRow({ path }: { path: string }) {
 		<tr>
 			<th>bytes</th>
 			<td>
-				<CopyValueIcon 
-					onClick={() => clipboardCopy(values.join(" "))} 
-				/>
+				<CopyValueIcon onClick={clipboardBytes}  />
 			</td>
-			<td className="property-bytes">
-				<span>0x&nbsp;</span>
-				{values.map((value, i) => {
-					return (
-						<input
-							key={i}
-							type="text"
-							size={2}
-							maxLength={2}
-							value={value}
-							onFocus={() => setHasFocus(true)}
-							onBlur={() => setHasFocus(false)}
-							onInput={(e) => handleEdit(e.currentTarget.value, i)}
-						/>
-					);
-				})}
-				{ madeEdit && 
-					<>
-						<SaveValueButton active={madeEdit} onClick={handleSave} />
-						<button 
-							className="icon-button margin-left" 
-							disabled={!madeEdit} 
-							type="button" 
-							onClick={() => {setValues(originalValue); setMadeEdit(false)}}
-						>
-							<i className="material-icons"> undo </i>
-						</button>
-					</>
-				}
+			<td class="property-bytes">
+				<span>
+					<span>0x&nbsp;</span>
+					{(showTrueValues ? (convertBytes(bytes)) : values).map((value, i) => {
+						return (
+							<input
+								key={i}
+								type="text"
+								size={2}
+								maxLength={2}
+								value={value}
+								onFocus={() => { setHasFocus(true); setValues(convertBytes(bytes)); }}
+								onBlur={() => setHasFocus(false)}
+								onInput={(e) => handleEdit(e.currentTarget.value, i)}
+							/>
+						);
+					})}
+					{madeEdit &&
+						<>
+							<SaveValueButton onClick={handleSave} />
+							<IconButton
+								disabled={!madeEdit}
+								onClick={() => {setValues(convertBytes(bytes)); setMadeEdit(false)}}
+								title="Undo"
+								icon="undo"
+							/>
+						</>
+					}
+				</span>
 			</td>
 		</tr>
 	);

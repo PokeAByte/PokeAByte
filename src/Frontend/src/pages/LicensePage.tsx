@@ -3,7 +3,7 @@ import license from "../../LICENSE.txt?raw";
 
 export function LicensePage() {
 	return (
-		<article className="layout-box license">
+		<article class="license">
 			<h2>License</h2>
 			<p>
 				Poke-A-Byte is available under the GNU Affero General Public License. <br />
@@ -22,51 +22,51 @@ export function LicensePage() {
 			<table>
 				<thead>
 					<tr>
-						<th className="min">Package</th>
-						<th className="min">Copyright</th>
-						<th className="min">License</th>
+						<th class="min">Package</th>
+						<th class="min">Copyright</th>
+						<th class="min">License</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td className="min">classnames</td>
-						<td className="min">Jed Watson</td>
-						<td className="min">MIT</td>
+						<td class="min">classnames</td>
+						<td class="min">Jed Watson</td>
+						<td class="min">MIT</td>
 					</tr>
 					<tr>
-						<td className="min">deep-equal</td>
-						<td className="min">James Hallida</td>
-						<td className="min">MIT</td>
+						<td class="min">deep-equal</td>
+						<td class="min">James Hallida</td>
+						<td class="min">MIT</td>
 					</tr>
 					<tr>
-						<td className="min">pokeaclient</td>
-						<td className="min">StringEpsilon</td>
-						<td className="min">Apache-2.0</td>
+						<td class="min">pokeaclient</td>
+						<td class="min">StringEpsilon</td>
+						<td class="min">Apache-2.0</td>
 					</tr>
 					<tr>
-						<td className="min">preact</td>
-						<td className="min">Jason Miller</td>
-						<td className="min">MIT</td>
+						<td class="min">preact</td>
+						<td class="min">Jason Miller</td>
+						<td class="min">MIT</td>
 					</tr>
 					<tr>
-						<td className="min">wouter</td>
-						<td className="min">Alexey Taktarov</td>
-						<td className="min">Unlicense license</td>
+						<td class="min">wouter</td>
+						<td class="min">Alexey Taktarov</td>
+						<td class="min">Unlicense license</td>
 					</tr>
 					<tr>
-						<td className="min">Material Icons</td>
-						<td className="min">Google</td>
-						<td className="min">Apache-2.0 license </td>
+						<td class="min">Material Icons</td>
+						<td class="min">Google</td>
+						<td class="min">Apache-2.0 license </td>
 					</tr>
 					<tr>
-						<td className="min">Roboto (font)</td>
-						<td className="min">The Roboto Project Authors</td>
-						<td className="min"> SIL Open Font License, Version 1.1</td>
+						<td class="min">Roboto (font)</td>
+						<td class="min">The Roboto Project Authors</td>
+						<td class="min"> SIL Open Font License, Version 1.1</td>
 					</tr>
 					<tr>
-						<td className="min">Roboto Mono (font)</td>
-						<td className="min">Christian Robertson</td>
-						<td className="min">Apache-2.0 license</td>
+						<td class="min">Roboto Mono (font)</td>
+						<td class="min">Christian Robertson</td>
+						<td class="min">Apache-2.0 license</td>
 					</tr>
 				</tbody>
 			</table>
@@ -74,26 +74,26 @@ export function LicensePage() {
 			<table>
 				<thead>
 					<tr>
-						<th className="min">Package</th>
-						<th className="min">Copyright</th>
-						<th className="min">License</th>
+						<th class="min">Package</th>
+						<th class="min">Copyright</th>
+						<th class="min">License</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td className="min">CoreCLR-NCalc</td>
-						<td className="min">Sebastien Ros, Sebastian Klose</td>
-						<td className="min">MIT</td>
+						<td class="min">CoreCLR-NCalc</td>
+						<td class="min">Sebastien Ros, Sebastian Klose</td>
+						<td class="min">MIT</td>
 					</tr>
 					<tr>
-						<td className="min">Jint</td>
-						<td className="min">Sebastien Ros</td>
-						<td className="min">BSD-2-Clause</td>
+						<td class="min">Jint</td>
+						<td class="min">Sebastien Ros</td>
+						<td class="min">BSD-2-Clause</td>
 					</tr>
 					<tr>
-						<td className="min">Serilog</td>
-						<td className="min">Serilog Contributors</td>
-						<td className="min">Apache-2.0 license</td>
+						<td class="min">Serilog</td>
+						<td class="min">Serilog Contributors</td>
+						<td class="min">Apache-2.0 license</td>
 					</tr>
 				</tbody>
 			</table>

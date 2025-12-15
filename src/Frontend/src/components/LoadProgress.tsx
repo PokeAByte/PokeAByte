@@ -8,7 +8,7 @@ export function LoadProgress({ label }: { label: string }) {
 				{label}
 			</h2>
 			<div>
-				<progress className="error" />
+				<progress class="error" />
 			</div>
 		</>
 	);

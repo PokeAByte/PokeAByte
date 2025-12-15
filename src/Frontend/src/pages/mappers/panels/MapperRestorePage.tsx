@@ -6,8 +6,10 @@ import { ConfirmationModal } from "../../../components/ConfirmationModal";
 import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Advanced } from "../../../components/Advanced";
+import { WideButton } from "../../../components/WideButton";
+import { Panel } from "@/components/Panel";
 
-export function MapperRestorePage() {
+export function RestoreMapperPanel() {
 	const filesClient = Store.client.files;
 	const mapperFileContext = useContext(MapperFilesContext);
 	const deleteArchiveApi = useAPI(filesClient.deleteMappers, mapperFileContext.refresh);
@@ -15,26 +17,24 @@ export function MapperRestorePage() {
 	const archives = processArchive(mapperFileContext.archives);
 
 	return (
-		<div>
+		<Panel id="mapper-restore" title="Restore backup/archive" >
 			<div class="margin-top">
 				<strong>
 					{archives.length} Archives/Backups and {archives.reduce((c, x) => c + x.Mappers.length, 0)} files found
 				</strong>
 			</div>
 			<Advanced>
-				<div className="row margin-top">
+				<div class="row margin-top">
 					<OpenMapperFolderButton />
-					<button className="margin-left blue wide-button" type="button" onClick={filesClient.openMapperFolder}>
-						Open archive/backup folder
-					</button>
+					<WideButton color="blue" onClick={filesClient.openMapperFolder} text="Open archive/backup folder" />
 				</div>
 				<br />
 			</Advanced>
-			<ul className="mapper-archives margin-top">
+			<ul class="mapper-archives margin-top">
 				{archives.map((archive) => {
 					return (
 						<MapperRestoreRow
-							key={archive.Path}
+							key={archive.Path + "" +  archive.Mappers.length}
 							archive={archive}
 							restoreArchive={restoreArchiveApi.call}
 							deleteArchive={deleteArchiveApi.call}
@@ -42,7 +42,7 @@ export function MapperRestorePage() {
 					);
 				})}
 			</ul>
-		</div>
+		</Panel>
 	);
 }
 
@@ -57,26 +57,22 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 	const [restoreModal, setRestoreModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
 	return (
-		<li className="margin-top">
+		<li class="margin-top">
 			<details>
 				<summary>
-					<span className={"material-icons"}> catching_pokemon </span>
+					<span class="material-icons"> catching_pokemon </span>
 					<span>
 						{archive.Path} ({archive.Mappers.length} files)
 					</span>
 					<span>
-						<button type="button" className="wide-button green margin-right" onClick={() => setRestoreModal(true)}>
-							Restore
-						</button>
-						<button type="button" className="wide-button red" onClick={() => setDeleteModal(true)}>
-							Delete
-						</button>
+						<WideButton text="Restore" color="green" onClick={() => setRestoreModal(true)} />
+						<WideButton text="Delete" color="red" onClick={() => setDeleteModal(true)} />
 					</span>
 				</summary>
 				<div>
 					<ul>
 						{archive.Mappers.map(archivedMapper =>
-							<li key={archivedMapper.fullPath}>
+							<li key={archivedMapper.fullPath +  archivedMapper.mapper.path}>
 								{archivedMapper.pathDisplayName}/{archivedMapper.mapper.display_name}
 								&nbsp;
 								<i>({archivedMapper.mapper.date_created})</i>

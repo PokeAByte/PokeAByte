@@ -1,15 +1,17 @@
 
-import type { JSX } from "preact";
+import type { JSX, TargetedInputEvent } from "preact";
 import { useCallback, useEffect, useReducer, useRef, useState } from "preact/hooks";
-import { Store } from "../../utility/propertyStore";
-import { useAPI } from "../../hooks/useAPI";
+import { Store } from "@/utility/propertyStore";
+import { useAPI } from "@/hooks/useAPI";
 import { GithubSettings } from "pokeaclient";
-import { ConfirmationModal } from "../../components/ConfirmationModal";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { WideButton } from "@/components/WideButton";
+import { Panel } from "@/components/Panel";
 
-export function GithubSettingsPage() {
+export function GithubSettingsPanel() {
 	const filesClient = Store.client.files;
 	const [status, setStatus] = useState({ color: "", message: "" });
-	const [formState, setField] = useReducer(
+	const [formState, setFieldState] = useReducer(
 		(data, update: { fieldId: keyof GithubSettings, value: string }) => {
 			const newState = structuredClone(data);
 			newState[update.fieldId] = update.value;
@@ -19,16 +21,22 @@ export function GithubSettingsPage() {
 			owner: "", repo: "", dir: "", token: "", accept: "", api_version: "",
 		},
 	);
+
+	const setField = (e: TargetedInputEvent<HTMLInputElement>) => {
+		if (e.currentTarget) {
+			setFieldState({ fieldId: e.currentTarget.name as keyof GithubSettings, value: e.currentTarget.value })
+		}
+	};
 	const githubSettings = useAPI(Store.client.files.getGithubSettings);
 	const githubSettingsResult = githubSettings.result;
 	useEffect(() => {
-		setField({ fieldId: "owner", value: githubSettingsResult?.owner ?? "" });
-		setField({ fieldId: "repo", value: githubSettingsResult?.repo ?? "" });
-		setField({ fieldId: "dir", value: githubSettingsResult?.dir ?? "" });
-		setField({ fieldId: "token", value: githubSettingsResult?.token ?? "" });
-		setField({ fieldId: "accept", value: githubSettingsResult?.accept ?? "" });
-		setField({ fieldId: "api_version", value: githubSettingsResult?.api_version ?? "" });
-	}, [githubSettingsResult, setField])
+		setFieldState({ fieldId: "owner", value: githubSettingsResult?.owner ?? "" });
+		setFieldState({ fieldId: "repo", value: githubSettingsResult?.repo ?? "" });
+		setFieldState({ fieldId: "dir", value: githubSettingsResult?.dir ?? "" });
+		setFieldState({ fieldId: "token", value: githubSettingsResult?.token ?? "" });
+		setFieldState({ fieldId: "accept", value: githubSettingsResult?.accept ?? "" });
+		setFieldState({ fieldId: "api_version", value: githubSettingsResult?.api_version ?? "" });
+	}, [githubSettingsResult, setFieldState])
 	const [clearModal, setClearModal] = useState<boolean>(false);
 	const formRef = useRef<HTMLFormElement | null>(null);
 	const formData = formRef.current ? new FormData(formRef.current) : null;
@@ -92,17 +100,15 @@ export function GithubSettingsPage() {
 		return false;
 	}
 	return (
-		<article>
-			<h3 className="small"><strong>GitHub Api Settings</strong></h3>
+		<Panel id="settings_gh" title="GitHub API settings" defaultOpen>
 			<div>
-				<hr />
-				<p className="error-text large-line">
+				<span class="text-red">
 					Changing these settings is generally not recommended unless you know what you are doing.
+					<br />
 					These settings allow you to set a custom mapper repository, incorrect settings can cause issues retrieving
-					new and updated mappers. Please only do so with caution.
-				</p>
+					new and updated mappers. <strong>Please only do so with caution.</strong>
+				</span>
 				<hr />
-				<br />
 				<form onSubmit={onSubmit} ref={formRef}>
 					<table>
 						<tbody>
@@ -111,12 +117,7 @@ export function GithubSettingsPage() {
 									<label htmlFor="owner">GitHub Account Name: </label>
 								</th>
 								<td>
-									<input
-										name="owner"
-										type="text"
-										value={formState.owner}
-										onInput={(e) => setField({ fieldId: "owner", value: e.currentTarget.value })}
-									/>
+									<input name="owner" type="text" value={formState.owner} onInput={setField} />
 								</td>
 							</tr>
 							<tr>
@@ -124,12 +125,7 @@ export function GithubSettingsPage() {
 									<label htmlFor="repo">Repository Name:</label>
 								</th>
 								<td>
-									<input
-										name="repo"
-										type="text"
-										value={formState.repo}
-										onInput={(e) => setField({ fieldId: "repo", value: e.currentTarget.value })}
-									/>
+									<input name="repo" type="text" value={formState.repo} onInput={setField} />
 								</td>
 							</tr>
 							<tr>
@@ -137,12 +133,7 @@ export function GithubSettingsPage() {
 									<label htmlFor="dir">Alternative Directory Name:</label>
 								</th>
 								<td>
-									<input
-										name="dir"
-										type="text"
-										value={formState.dir}
-										onInput={(e) => setField({ fieldId: "dir", value: e.currentTarget.value })}
-									></input>
+									<input name="dir" type="text" value={formState.dir} onInput={setField} />
 									<br />
 									<small>
 										Note: This is only required if the mapper_tree.json is not in the root directory of the repository.
@@ -154,12 +145,7 @@ export function GithubSettingsPage() {
 									<label htmlFor="token">Personal Access Token:</label>
 								</th>
 								<td>
-									<input
-										name="token"
-										type="text"
-										value={formState.token}
-										onInput={(e) => setField({ fieldId: "token", value: e.currentTarget.value })}
-									/>
+									<input name="token" type="text" value={formState.token} onInput={setField} />
 									<br />
 									<small>
 										Note: This is required if the repository is private or if you want to bypass the
@@ -176,24 +162,13 @@ export function GithubSettingsPage() {
 
 					<br />
 					{status.message !== "" &&
-						<span className={status.color}>{status.message}</span>
+						<span class={status.color}>{status.message}</span>
 					}
 					<br />
-					<button className="wide-button blue margin-right" onClick={testGithubSettings} type="button">
-						Test settings
-					</button>
-					<button className="wide-button purple margin-right" onClick={openGithubLink} type="button">
-						Open GitHub link
-					</button>
-					<button className="wide-button green margin-right" type="submit">
-						Save settings
-					</button>
-					<button
-						className="wide-button red"
-						onClick={() => setClearModal(true)}
-					>
-						Clear settings
-					</button>
+					<WideButton text="Test settings" color="blue" onClick={testGithubSettings} />
+					<WideButton text="Open GitHub link" color="purple" onClick={openGithubLink} />
+					<WideButton text="Save settings" color="green" onClick={openGithubLink} />
+					<WideButton text="Clear settings" color="red" onClick={() => setClearModal(true)} />
 					<ConfirmationModal
 						display={clearModal}
 						title="Warning"
@@ -208,6 +183,6 @@ export function GithubSettingsPage() {
 					/>
 				</form>
 			</div>
-		</article>
+		</Panel>
 	)
 }
