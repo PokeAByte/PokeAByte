@@ -394,7 +394,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             // They want to do it themselves entirely in Javascript.
             return;
         }
-
+        
         await WriteBytes(property, bytes, freeze);
     }
 
@@ -430,10 +430,9 @@ public class PokeAByteInstance : IPokeAByteInstance
             return;
         }
 
-        if (freeze == true)
+        if (property.IsFrozen)
         {
-            // The property is frozen, but we want to write bytes anyway.
-            // So this should replace the existing frozen bytes.
+            // Update value on already frozen property:
             property.BytesFrozen = bytes;
         }
 
@@ -441,35 +440,23 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
         }
-        if (property.MemoryContainer != null && property.MemoryContainer != "default")
-        {
-            var container = (DynamicMemoryContainer)MemoryContainerManager.Namespaces[property.MemoryContainer];
-            container.Fill((MemoryAddress)property.Address, bytes);
-            this.ExecuteContainerProcessor(property.MemoryContainer, container.GetAllBytes());
-            
-            if (freeze == true)
-            {
-                property.Bytes = bytes;
-                property.Value = property.CalculateObjectValue(this, bytes);
-                await this.FreezeProperty(property, bytes);
-            }
-            else if (freeze == false)
-            {
-                await UnfreezeProperty(property);
-            }
-            return;
-        }
-        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
+
         if (freeze == true)
         {
-            property.Bytes = bytes;
-            property.Value = property.CalculateObjectValue(this, bytes);
             await this.FreezeProperty(property, bytes);
         }
         else if (freeze == false)
         {
             await UnfreezeProperty(property);
         }
+        if (property.MemoryContainer != null && property.MemoryContainer != "default")
+        {
+            var container = (DynamicMemoryContainer)MemoryContainerManager.Namespaces[property.MemoryContainer];
+            container.Fill((MemoryAddress)property.Address, bytes);
+            this.ExecuteContainerProcessor(property.MemoryContainer, container.GetAllBytes());
+            return;
+        }
+        await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
 
     public async Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen)

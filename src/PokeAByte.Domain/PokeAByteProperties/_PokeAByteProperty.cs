@@ -238,6 +238,30 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 // the bytes are the same.
                 return;
             }
+            if (BytesFrozen.Length != 0)
+            {
+                if (address != null)
+                {                        
+                    if (_memoryContainer == null || _memoryContainer == "default")
+                    {
+                        // Bytes have changed, but property is frozen, so force the bytes back to the original value.
+                        // Pretend nothing has changed. :)
+                        _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
+                    }
+                    else
+                    {
+                        memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
+                        ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
+                    }
+                }
+                if (!BytesFrozen.SequenceEqual(Bytes))
+                {
+                    Bytes = BytesFrozen.ToArray();
+                    FullValue = ToValue(BytesFrozen, instance.Mapper);
+                    Value = CalculateObjectValue(instance, BytesFromBits(BytesFrozen));
+                }
+                return;
+            }
             bytes = readonlyBytes.ToArray();
         }
         catch (Exception e)
@@ -247,27 +271,12 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 $"Unable to retrieve bytes for property '{Path}': {e.Message}"
             );
         }
-        this.Bytes = bytes.ToArray();
+        
+        this.Bytes = bytes.ToArray();        
 
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
         bytes = BytesFromBits(bytes);
-        if (address != null && BytesFrozen.Length != 0)
-        {
-            if (_memoryContainer == null || _memoryContainer == "default")
-            {
-                // Bytes have changed, but property is frozen, so force the bytes back to the original value.
-                // Pretend nothing has changed. :)
-                _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
-            }
-            else
-            {
-                memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
-                ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
-            }
-            return;
-        }
-
         Value = CalculateObjectValue(instance, bytes);
     }
 
