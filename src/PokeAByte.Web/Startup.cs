@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
@@ -11,6 +10,7 @@ using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
+using PokeAByte.Web.Middleware;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
@@ -20,9 +20,7 @@ public static class Startup
 {
     public static void ConfigureServices(this IServiceCollection services)
     {
-        //Inherited services from GameHook
         services.AddCors();
-        // Add Web API
 
         services.AddSignalR()
             .AddJsonProtocol(
@@ -34,7 +32,7 @@ public static class Startup
             );
         services.ConfigureHttpJsonOptions(options =>
         {
-            options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default);
+            options.SerializerOptions.TypeInfoResolverChain.Add(ApiJsonContext.Default);
             options.SerializerOptions.Converters.Add(new ByteArrayJsonConverter());
         });
 
@@ -45,13 +43,14 @@ public static class Startup
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         services.AddSingleton<IInstanceService, InstanceService>();
         services.AddSingleton<IDriverService, DriverService>();
+        services.AddSingleton<RequestLogMiddleware>();
 
         services.AddScoped<IGithubService, GitHubService>();
         services.AddScoped(x =>
-        {
-            var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
-            return MapperUpdaterSettings.Load(logger);
-        });
+            {
+                var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
+                return MapperUpdaterSettings.Load(logger);
+            });
         services.AddScoped<IMapperUpdateManager, MapperUpdateManager>();
         services.AddScoped<MapperClientService>();
     }
@@ -68,43 +67,22 @@ public static class Startup
             x.AllowCredentials();
         });
 
-        var provider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
-        app.UseSpaStaticFiles(new() { FileProvider = provider });
+        var embeddedFileProvider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
+        app.UseSpaStaticFiles(new() { FileProvider = embeddedFileProvider });
         app.UseSpa(configuration =>
         {
-            configuration.Options.DefaultPageStaticFileOptions = new StaticFileOptions(new SharedOptions
-            {
-                FileProvider = provider,
-            });
+            configuration.Options.DefaultPageStaticFileOptions = new() { FileProvider = embeddedFileProvider };
             configuration.Options.DefaultPage = "/index.html";
-            configuration.Options.DefaultPageStaticFileOptions.OnPrepareResponse = (context) =>
+            configuration.Options.DefaultPageStaticFileOptions?.OnPrepareResponse = (context) =>
             {
                 context.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
                 context.Context.Response.Headers.Append("X-Clacks-Overhead", "GNU Terry Pratchett");
                 context.Context.Response.Headers.Append("Expires", "-1");
             };
         });
+        app.UseMiddleware<RequestLogMiddleware>();
+        app.MapHub<UpdateHub>("/updates");
 
-        app.Use(async (context, next) =>
-        {
-            try
-            {
-                await next();
-            }
-            catch (Exception ex)
-            {
-                var logger = context.RequestServices.GetRequiredService<ILogger<RestAPI>>();
-                string endpointName = "";
-                var requestDelegate = context.GetEndpoint()?.RequestDelegate;
-                if (requestDelegate?.Method != null)
-                {
-                    endpointName = (requestDelegate.Method.DeclaringType?.Name ?? "<anonymous>") + "."
-                        + requestDelegate.Method.Name;
-                }
-                logger.LogWarning($"Endpoint {context.GetEndpoint()?.DisplayName} encountered an exception: {ex}");
-                await Results.InternalServerError("Request failed due to an exception: " + ex.Message).ExecuteAsync(context);
-            }
-        });
         app.MapFilesEndpoints();
         app.MapGithubEndpoints();
         app.MapDriverEndpoints();
@@ -114,6 +92,5 @@ public static class Startup
 
         app.MapGet("/favicon.png", () => Results.File(ApiHelper.EmbededResources.Favicon, contentType: "image/png"));
         app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.ClientScript, contentType: "application/javascript"));
-        app.MapHub<UpdateHub>("/updates");
     }
 }

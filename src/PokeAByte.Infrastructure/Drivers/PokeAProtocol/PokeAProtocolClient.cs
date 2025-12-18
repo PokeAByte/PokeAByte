@@ -34,7 +34,7 @@ public class PokeAProtocolClient : IDisposable
                 try
                 {
                     var response = await _client!.ReceiveAsync(_connectionCts.Token);
-                    if (response.Buffer.AsSpan().SequenceEqual(new CloseInstruction().GetByteArray().AsSpan()))
+                    if (response.Buffer.AsSpan().SequenceEqual(new CloseInstruction(true).GetByteArray().AsSpan()))
                     {
                         _connected = false;
                         return;

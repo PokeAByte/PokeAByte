@@ -1,8 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using PokeAByte.Domain.Models;
-using Serilog;
-using Serilog.Events;
+using PokeAByte.Web.Logger;
 
 namespace PokeAByte.Web;
 
@@ -10,29 +9,24 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        Environment.SetEnvironmentVariable("SERILOG_LOG_FILE_PATH", BuildEnvironment.LogFilePath);
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File(BuildEnvironment.LogFilePath)
-            .CreateBootstrapLogger();
+        ILogger? logger = null;
         try
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Host.UseSerilog((bc, sp, lc) =>
-                lc.MinimumLevel.Information()
-                    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                    .MinimumLevel.Override("Serilog.AspNetCore.RequestLoggingMiddleware", LogEventLevel.Warning)
-                    .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
-                    .WriteTo.Console(outputTemplate:
-                        "{Timestamp:HH:mm} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}")
-                    .WriteTo.File(path: BuildEnvironment.LogFilePath,
-                        fileSizeLimitBytes: 16000000,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}")
-                    .Enrich.FromLogContext());
+            builder.Logging.ClearProviders();
+            builder.Logging.AddPokeAByteLogger(o =>
+            {
+                o.LogLevel = LogLevel.Information;
+                o.LogFile = BuildEnvironment.LogFilePath;
+                o.AddOverride("Microsoft.Hosting.Lifetime", LogLevel.Information);
+                o.AddOverride("Microsoft", LogLevel.Warning);
+                o.AddOverride("System.Net.Http.HttpClient", LogLevel.Warning);
+                o.FileSizeLimit = 8_000_000; // ~8 megabytes worth of logs should be enough.
+            });
             builder.Services.ConfigureServices();
 
             var app = builder.Build();
+            logger = app.Services.GetRequiredService<ILogger<Program>>();
 
             LogVersion(app);
             app.ConfigureApp();
@@ -42,11 +36,7 @@ public class Program
         }
         catch (Exception ex)
         {
-            Log.Fatal(ex, "Poke-A-Byte startup failed!");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
+            logger?.LogCritical(ex, "Poke-A-Byte startup failed!");
         }
     }
 

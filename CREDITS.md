@@ -16,6 +16,5 @@ The following libraries (or code from them) are used in this project:
 - PKHeX
 - CoreCLR-NCalc
 - Jint
-- Serilog
 
 As well as the .NET and ASP.NET Core runtime and libraries.
