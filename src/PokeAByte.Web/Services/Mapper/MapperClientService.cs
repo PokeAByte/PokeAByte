@@ -40,9 +40,9 @@ public class MapperClientService(
                     );
                 var result = await ReplaceMapper(mapperId, driver);
                 connected = result.IsSuccess;
-                if (result.ExceptionValue is MapperException mapperException)
+                if (result.ExceptionValue is MapperException pokeAByteException)
                 {
-                    return Result.Failure(Error.FailedToLoadMapper, mapperException.Message);
+                    return Result.Failure(Error.FailedToLoadMapper, pokeAByteException.Message);
                 }
             }
             catch (Exception e)

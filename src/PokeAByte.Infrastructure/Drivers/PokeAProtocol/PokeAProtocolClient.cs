@@ -1,7 +1,5 @@
-﻿using System.IO.MemoryMappedFiles;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Protocol;
@@ -24,6 +22,8 @@ public class PokeAProtocolClient : IDisposable
         _client = new UdpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0));
         _connectionCts = new();
     }
+
+    private Exception ConnectionClosed() => new PokeAByteException("Poke-A-Protocol server closed the connection.");
 
     private void WaitForClose()
     {
@@ -51,7 +51,7 @@ public class PokeAProtocolClient : IDisposable
     public ValueTask<int> SendToEmulatorAsync(IEmulatorInstruction instruction)
     {
         if (!_connected) {
-            throw new VisibleException("Poke-A-Protocol server closed the connection.");
+            ConnectionClosed();
         }
         return _client.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
     }
@@ -67,7 +67,7 @@ public class PokeAProtocolClient : IDisposable
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                throw new VisibleException("Poke-A-Protocol server closed the connection.");
+                throw ConnectionClosed();
             }
         }
         
@@ -93,7 +93,10 @@ public class PokeAProtocolClient : IDisposable
         }
         catch (Exception ex)
         {
-            throw new VisibleException($"Poke-A-Protocol communication timed out. Inner exception: {ex.Message}");
+            throw new PokeAByteException(
+                $"Poke-A-Protocol setup timed out. Check if mapper matches running game.", 
+                ex.Message
+            );
         }
     }
 
@@ -101,7 +104,7 @@ public class PokeAProtocolClient : IDisposable
     {
         var memoryAccessor = GetMemoryAccessor();
         if (!_connected) {
-            throw new VisibleException("Poke-A-Protocol server closed the connection.");
+            throw ConnectionClosed();
         }
         
         memoryAccessor.CopyBytesToSpan(position, block.Data.Span);

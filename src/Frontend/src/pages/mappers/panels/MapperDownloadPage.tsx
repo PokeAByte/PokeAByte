@@ -18,12 +18,10 @@ export function DownloadMapperPanel() {
 	const [selectedDownloads, setSelectedDownloads] = useState<string[]>([]);
 	const downloadMappers = useAPI(
 		filesClient.downloadMapperUpdatesAsync, 
-		(success) => {
+		(_, success) => {
 			if (success) {
 				mapperFileContext.refresh();
 				Toasts.push(`Successfully downloaded mapper(s).`, "task_alt", "green");
-			} else {
-				Toasts.push(`An error occured while downloading (a) mapper(s).`, "", "red");
 			}
 		}
 	);

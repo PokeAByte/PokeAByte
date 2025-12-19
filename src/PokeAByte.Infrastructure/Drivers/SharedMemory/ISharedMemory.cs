@@ -1,6 +1,4 @@
-using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using PokeAByte.Protocol;
 
 namespace PokeAByte.Infrastructure.SharedMemory;
 

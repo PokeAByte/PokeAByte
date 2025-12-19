@@ -171,7 +171,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             }
             else
             {
-                await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+                await this.ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             }
             if (OnProcessingAbort != null)
             {
@@ -211,7 +211,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occured when read looping the mapper.");
-            await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+            await this.ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             if (OnProcessingAbort != null)
             {
                 await OnProcessingAbort.Invoke();
@@ -270,7 +270,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError($"Property {property.Path} failed to run processor. {ex.Message}");
-                await ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+                await ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             }
         }
 
@@ -304,7 +304,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Could not send property change events.");
-                throw new PropertyProcessException($"Could not send property change events.", ex);
+                throw new MapperException($"Could not send property change events.", ex);
             }
         }
     }
