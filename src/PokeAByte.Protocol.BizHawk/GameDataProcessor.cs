@@ -30,6 +30,7 @@ internal class GameDataProcessor : IDisposable
         _platform = platform;
 
         int totalSize = 0;
+        int rejectedBlocks = 0;
         var blocks = new ReadBlock[setup.BlockCount];
         _readInstructions = new DomainReadInstruction[blocks.Length];
         _frameSkip = setup.FrameSkip == -1 ? _platform.FrameSkipDefault : setup.FrameSkip;
@@ -37,15 +38,18 @@ internal class GameDataProcessor : IDisposable
         for (int i = 0; i < setup.BlockCount; i++)
         {
             var readBlock = setup.Data[i];
-            DomainLayout? entry = _platform.Domains.FirstOrDefault(x => x.Start <= readBlock.GameAddress && x.End >= readBlock.GameAddress + readBlock.Length - 1);
-            if (entry == null)
+            DomainLayout entry = _platform.Domains.FirstOrDefault(
+                x => x.Start <= readBlock.GameAddress && x.End >= readBlock.LastAddress
+            );
+            if (entry.Length == 0)
             {
+                rejectedBlocks++;
                 continue;
             }
-            var address = readBlock.GameAddress - entry.Value.Start;
+            var address = readBlock.GameAddress - entry.Start;
             _readInstructions[i] = new DomainReadInstruction
             {
-                Domain = entry.Value.DomainId,
+                Domain = entry.DomainId,
                 TransferPosition = readBlock.Position,
                 RelativeStart = address,
                 RelativeEnd = address + readBlock.Length
@@ -56,14 +60,14 @@ internal class GameDataProcessor : IDisposable
             totalSize += setup.Data[i].Length;
             blocks[i] = setup.Data[i];
         }
-        if (totalSize == 0)
+        if (totalSize == 0 || rejectedBlocks > setup.BlockCount / 2 )
         {
             throw new InvalidDataException("Setup instruction came with invalid block sizes. ");
         }
         _memoryMappedFile = CreateMemoryMappedFile(totalSize);
         _dataAccessor = _memoryMappedFile.CreateViewAccessor();
         _writeBuffer = new byte[totalSize];
-        mainLabel.Text = $"Providing memory data ({totalSize} bytes) to client...";
+        mainLabel.Text = $"Providing {totalSize} bytes of {_platform.SystemId} memory to client...";
     }
 
     /// <summary>
