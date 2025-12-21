@@ -17,7 +17,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
 
     public PokeAProtocolDriver(AppSettings appSettings)
     {
-        DelayMsBetweenReads = appSettings.BIZHAWK_DELAY_MS_BETWEEN_READS;
+        DelayMsBetweenReads = appSettings.DELAY_MS_BETWEEN_READS;
         _frameSkip = appSettings.PROTOCOL_FRAMESKIP;
     }
 

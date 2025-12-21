@@ -21,7 +21,7 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
 
     public BizhawkMemoryMapDriver(AppSettings appSettings)
     {
-        DelayMsBetweenReads = appSettings.BIZHAWK_DELAY_MS_BETWEEN_READS;
+        DelayMsBetweenReads = appSettings.DELAY_MS_BETWEEN_READS;
     }
 
     string GetStringFromBytes(ReadOnlySpan<byte> data)

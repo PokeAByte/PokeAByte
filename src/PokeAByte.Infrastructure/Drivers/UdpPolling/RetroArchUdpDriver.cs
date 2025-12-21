@@ -40,7 +40,7 @@ public class RetroArchUdpDriver : IPokeAByteDriver
     public RetroArchUdpDriver(ILogger<RetroArchUdpDriver> logger, AppSettings appSettings)
     {
         Logger = logger;
-        DelayMsBetweenReads = appSettings.RETROARCH_DELAY_MS_BETWEEN_READS;
+        DelayMsBetweenReads = appSettings.DELAY_MS_BETWEEN_READS;
         _appSettings = appSettings;
 
     }
