@@ -38,6 +38,7 @@
 ### UI
 
 - Minor UI tweaks (phrasing, margins, etc).
+- The "Settings" tab is no longer exclusive to advanced mode.
 
 # 0.9.3
 

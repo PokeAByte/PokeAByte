@@ -42,3 +42,31 @@ export async function archiveMappers(mappers: MapperVersion[]) {
 export async function backupMappers(mappers: MapperVersion[]) {
 	return await postWithoutResult(BASE_URL + "/files/mapper/backup_mappers", mappers);
 }
+
+export type AppSettingsModel = {
+	RETROARCH_LISTEN_IP_ADDRESS: string,
+	RETROARCH_LISTEN_PORT: number,
+	RETROARCH_READ_PACKET_TIMEOUT_MS: number,
+	DELAY_MS_BETWEEN_READS: number,
+	PROTOCOL_FRAMESKIP: number,
+}
+
+export async function getAppSettings<AppSettings>() {
+	try {
+		const response = await fetch(
+			BASE_URL + "/settings/appsettings",
+			{ headers: DEFAULT_HEADERS }
+		);
+		return <AppSettings>response.json();
+	} catch {
+		throw new Error("Unable to retrieve app settings.");
+	}
+}
+
+export async function saveAppSettings(settings: Partial<AppSettingsModel>) {
+	return await postWithoutResult(BASE_URL + "/settings/save_appsettings", settings);
+}
+
+export async function resetAppSettings() {
+	return await postWithoutResult(BASE_URL + "/settings/appsettings/reset");
+}

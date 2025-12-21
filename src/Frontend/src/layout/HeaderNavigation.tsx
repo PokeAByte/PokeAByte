@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import { useLocation } from "wouter";
 import { Mapper } from "pokeaclient";
-import { Advanced } from "@/components/Advanced";
 
 export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 	const [location, setLocation] = useLocation();
@@ -40,22 +39,20 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				</i>
 				PROPERTIES
 			</button>
-			<Advanced>
-				<button
-					role="link"
-					type="button"
-					className={classNames({"active": settingsActive })}
-					onClick={() => setLocation("/settings/")}
-					>
-					<i 
-						className={classNames("material-icons", { [activeClass]: settingsActive })}
-						aria-hidden="true"
-					>
-						settings
-					</i>
-					SETTINGS
-				</button>
-			</Advanced>
+			<button
+				role="link"
+				type="button"
+				className={classNames({"active": settingsActive })}
+				onClick={() => setLocation("/settings/")}
+				>
+				<i 
+					className={classNames("material-icons", { [activeClass]: settingsActive })}
+					aria-hidden="true"
+				>
+					settings
+				</i>
+				SETTINGS
+			</button>
 		</>
 	)
 }
