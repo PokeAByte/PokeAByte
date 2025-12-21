@@ -22,6 +22,13 @@ button, .icon-button {
 		outline: 2px dashed var(--color-blue);
 	}
 }
+
+.icon-button {
+	padding: 2px !important;
+	font-size: 22px !important;
+	border: 2px solid var(--color-border-1) !important;
+}
+
 input,
 input[type="checkbox"] {
 	margin-top: var(--margin-0);

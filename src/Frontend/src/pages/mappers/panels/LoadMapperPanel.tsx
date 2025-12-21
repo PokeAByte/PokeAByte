@@ -12,6 +12,8 @@ import { useStorageState } from "@/hooks/useStorageState";
 import { changeMapper } from "@/utility/fetch";
 import { createMapperLoadToast } from "./createMapperLoadToast";
 import { Panel } from "@/components/Panel";
+import { FavoriteIcon } from "./components/FavoriteIcon";
+import { useUISetting } from "@/Contexts/UISettingsContext";
 
 type MapperSelectProps = {
 	mapper: Mapper | null
@@ -21,6 +23,7 @@ function createMapperOption(value: AvailableMapper) {
 	return {
 		value: value.id,
 		display: value.displayName,
+		extra: <FavoriteIcon mapperId={value.id} />,
 	};
 }
 
@@ -31,6 +34,8 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 	const changeMapperApi = useAPI(changeMapper, createMapperLoadToast);
 	const [currentMapper, setCurrentMapper] = useState<string | null>(null);
 	const [filter, setFilter] = useStorageState("mapper-category", "");
+	const [isRecentlyUsedEnabled] = useUISetting("recentlyUsedEnabled");
+	const [recentMappers, setRecentMappers] = useUISetting("recentMappers");
 
 	useEffect(() => {
 		if (currentMapper) {
@@ -45,6 +50,9 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 	const onLoadMapper = () => {
 		if (currentMapper) {
 			changeMapperApi.call(currentMapper);
+			if (isRecentlyUsedEnabled) {
+				setRecentMappers([currentMapper, ...(recentMappers??[])].filter(unique).slice(0, 5));
+			}
 		}
 	};
 

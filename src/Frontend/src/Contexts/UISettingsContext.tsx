@@ -7,6 +7,11 @@ export type UISettings = {
 	advancedMode?: boolean,
 	forceVisible?: boolean,
 	openPanels: Record<string, boolean | undefined>,
+	preserveFreeze?: boolean,
+	test?: Record<string, any>,
+	recentlyUsedEnabled?: boolean,
+	favoriteMappers?: string[],
+	recentMappers?: string[],
 }
 
 export type  UISettingsContextType = {

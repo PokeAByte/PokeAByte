@@ -56,3 +56,7 @@ button.red {
 .float-right {
 	float: right;
 }
+
+.hidden {
+	display: none;
+}

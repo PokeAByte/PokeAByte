@@ -1,6 +1,7 @@
 import { Advanced } from "@/components/Advanced";
 import { GithubSettingsPanel } from "./panels/GithubSettingsPanel";
 import { AppSettingsPanel } from "./panels/AppSettingsPanel";
+import { UISettingsPanel } from "./panels/UISettingsPanel";
 
 export function Settings() {
 	return (
@@ -9,6 +10,7 @@ export function Settings() {
 				<GithubSettingsPanel />
 			</Advanced>
 			<AppSettingsPanel />
+			<UISettingsPanel />
 		</article>
 	);
 }

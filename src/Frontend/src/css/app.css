@@ -253,15 +253,6 @@ table.striped {
 
 
 
-.icon-button {
-	padding: 4px !important;
-	border: 2px solid var(--color-border-1) !important;
-	.material-icons {
-		margin: auto;
-		font-size: var(--font-size-1);
-	}
-}
-
 .center-self {
 	align-self: center;
 }
@@ -310,10 +301,6 @@ form>table {
 		&:nth-of-type(4n-3) {
 			background-color: var(--color-surface-0);
 		}
-	}
-
-	.hidden {
-		display: none;
 	}
 
 	& > tbody > tr.leaf:not(:first-child) {
@@ -377,5 +364,14 @@ form>table {
 				margin: 0
 			}
 		}
+	}
+}
+
+.favorites {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	>button {
+		width: 10em;
 	}
 }
