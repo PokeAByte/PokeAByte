@@ -228,7 +228,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         byte[] bytes;
         try
         {
-            var readonlyBytes = memoryManager.GetReadonlyBytes(_memoryContainer, address ?? 0x00, _length, !newAddress);
+            var readonlyBytes = memoryManager.GetReadonlyBytes(_memoryContainer, address.Value, _length, !newAddress);
             if (readonlyBytes.SequenceEqual(_bytes.AsSpan()))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
@@ -240,19 +240,16 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             }
             if (BytesFrozen.Length != 0)
             {
-                if (address != null)
-                {                        
-                    if (_memoryContainer == null || _memoryContainer == "default")
-                    {
-                        // Bytes have changed, but property is frozen, so force the bytes back to the original value.
-                        // Pretend nothing has changed. :)
-                        _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
-                    }
-                    else
-                    {
-                        memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
-                        ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
-                    }
+                if (_memoryContainer == null || _memoryContainer == "default")
+                {
+                    // Bytes have changed, but property is frozen, so force the bytes back to the original value.
+                    // Pretend nothing has changed. :)
+                    _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
+                }
+                else
+                {
+                    memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
+                    ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
                 }
                 if (!BytesFrozen.SequenceEqual(Bytes))
                 {
@@ -267,9 +264,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw new Exception(
-                $"Unable to retrieve bytes for property '{Path}': {e.Message}"
-            );
+            throw new Exception($"Unable to retrieve bytes for property '{Path}': {e.Message}");
         }
         
         this.Bytes = bytes.ToArray();        
