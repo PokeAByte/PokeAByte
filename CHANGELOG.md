@@ -49,6 +49,7 @@
 ### UI
 
 - Minor UI tweaks (phrasing, margins, etc).
+- Fixed display of the Poke-A-Byte version in the footer of the UI.
 - The "Settings" tab is no longer exclusive to advanced mode.
 
 # 0.9.3
