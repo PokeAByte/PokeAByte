@@ -51,9 +51,10 @@ export function Dropdown<Value>(props: SelectInputProps<Value, SelectOption<Valu
 				readOnly={props.isReadonly} />
 			<menu role="combobox">
 				<div>
-					{props.options.map((x, index) => <button role="button" key={index} onClick={() => handleSelection(x)}>
-						{x.display}
-					</button>
+					{props.options.map((x, index) => 
+						<button role="button" key={index} onClick={() => handleSelection(x)}>
+							{x.display}
+						</button>
 					)}
 				</div>
 			</menu>
