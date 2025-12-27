@@ -7,6 +7,7 @@ import { Store } from "../utility/propertyStore";
 import { Settings } from "../pages/settings/Settings";
 import { LicensePage } from "../pages/LicensePage";
 import { usePrevious } from "../hooks/usePrevious";
+import { DepreciationNotices } from "./DepreciationNotices";
 
 export function MainView() {
 	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);
@@ -53,6 +54,8 @@ export function MainView() {
 					<Redirect to={mapper ? "/properties": "/mapper/"} />
 				</Route>
 			</Switch>
+			<DepreciationNotices mapperId={mapper?.id ?? null}/>
 		</main>
 	);
 }
+
