@@ -1,15 +1,15 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
-import {  useSyncExternalStore } from "preact/compat";
+import { useSyncExternalStore } from "preact/compat";
 import { AdvancedToggle } from "../components/AdvancedToggle";
-import { GameProperty, Mapper } from "pokeaclient";
+import { GameProperty } from "pokeaclient";
 import { IconButton } from "@/components/IconButton";
 import { useUISetting } from "../Contexts/UISettingsContext";
 import { Toasts } from "../notifications/ToastStore";
 
-async function performReload(mapper: Mapper, preserveFreeze: boolean ) {
+async function performReload( preserveFreeze: boolean ) {
 	if (!preserveFreeze) {
-		await Store.client.changeMapper(mapper.fileId);
+		await Store.reloadMapper();
 		return;
 	}
 
@@ -20,7 +20,7 @@ async function performReload(mapper: Mapper, preserveFreeze: boolean ) {
 			.map(x => propertyMap[x])
 			.filter(x => x.isFrozen);
 	}
-	const success = await Store.client.changeMapper(mapper.fileId);
+	const success = await Store.reloadMapper();
 	if (success && frozenProperties.length > 0) {
 		frozenProperties.forEach(
 			property => {
@@ -41,7 +41,7 @@ export function Header() {
 	const [preserveFreeze] = useUISetting("preserveFreeze");
 	const reloadMapper = async () => {
 		if (mapper != null) {
-			performReload(mapper, !!preserveFreeze);
+			performReload(!!preserveFreeze);
 		}
 	};
 	const textColor = mapper ? "text-green" : "text-red";

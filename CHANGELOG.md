@@ -49,6 +49,7 @@
 ### UI
 
 - Minor UI tweaks (phrasing, margins, etc).
+- When loading a new mapper, or reloading the current one, old error notifications are cleared.
 - Fixed display of the Poke-A-Byte version in the footer of the UI.
 - The "Settings" tab is no longer exclusive to advanced mode.
 - Tab and escape now work properly in dropdowns.

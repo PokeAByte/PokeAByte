@@ -10,6 +10,7 @@ export class PropertyStore {
 	private _mapperSubscriber: Callback[] = [];
 	client: PokeAClient;
 	private _pendingPathUpdates: string[];
+	private _suppressUpdate: boolean = false;
 
 	/**
 	 * Creates an instance of PropertyStore.
@@ -31,6 +32,20 @@ export class PropertyStore {
 		}, 32);
 	}
 
+	reloadMapper = async () => {
+		const mapperFileId = this.client.getMapper()?.fileId;
+		if (!mapperFileId) {
+			return;
+		}
+		this._suppressUpdate = true;
+		await Store.client.unloadMapper();
+		Toasts.clearErrors();
+		const success = await Store.client.changeMapper(mapperFileId);
+		this._suppressUpdate = false;
+		this.onMapperChange();
+		return success;
+	}
+
 	/**
 	 * Send property changes to subscribers.
 	 */
@@ -50,7 +65,9 @@ export class PropertyStore {
 	}
 
 	onMapperChange = () => {
-		this._mapperSubscriber.forEach(callback => callback());
+		if (!this._suppressUpdate) {
+			this._mapperSubscriber.forEach(callback => callback());
+		}
 	}
 
 	onConnectionChange = (connected: boolean) => {

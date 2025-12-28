@@ -1,18 +1,15 @@
-import { useSyncExternalStore } from "preact/compat";
-import { useCallback, useRef } from "preact/hooks";
+import { useCallback,  useEffect,  useState } from "preact/hooks";
 import { ToastNotification, Toasts } from "./ToastStore";
 import { Toast } from "./Toast";
 
 export function Notifications() {
-	const ref = useRef<ToastNotification[]>([]);
+	const [toasts, setToasts] = useState<ToastNotification[]>(Toasts.getToasts())
 	const getToasts = () => {
-		const newToasts = Toasts.getToasts();
-		if (newToasts.map(x => x.id.toString()).join() !== ref.current.map(x => x.id.toString()).join()) {
-			ref.current = newToasts;
-		}
-		return ref.current;
+		setToasts(Toasts.getToasts());
 	};
-	const toasts = useSyncExternalStore(Toasts.subscribe, getToasts);
+	useEffect(() => {
+		Toasts.subscribe(getToasts);
+	}, []);
 	const closeAll = useCallback(() => {
 		toasts.forEach(toast => Toasts.remove(toast.id));
 	}, [toasts])

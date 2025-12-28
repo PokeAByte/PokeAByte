@@ -14,6 +14,7 @@ import { createMapperLoadToast } from "./createMapperLoadToast";
 import { Panel } from "@/components/Panel";
 import { FavoriteIcon } from "./components/FavoriteIcon";
 import { useUISetting } from "@/Contexts/UISettingsContext";
+import { Toasts } from "@/notifications/ToastStore";
 
 type MapperSelectProps = {
 	mapper: Mapper | null
@@ -49,6 +50,7 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 
 	const onLoadMapper = () => {
 		if (currentMapper) {
+			Toasts.clearErrors();
 			changeMapperApi.call(currentMapper);
 			if (isRecentlyUsedEnabled) {
 				setRecentMappers([currentMapper, ...(recentMappers??[])].filter(unique).slice(0, 5));
