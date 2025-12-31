@@ -135,26 +135,19 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                     var computedReference = GetComputedReference(mapper);
                     if (computedReference == null) throw new Exception("ReferenceObject is NULL.");
 
-                    var uints = value
-                        .Select(x => computedReference.Values.FirstOrDefault(y => x.ToString() == y?.Value?.ToString()))
+                    int charSize = Size ?? 1;
+                    int stringLength = (Length / charSize) - 1; // -1 to fit the terminator at the end.
+                    var items = value
+                        .Take(stringLength)
+                        .Select(x => computedReference.GetFirstByValue(x))
                         .ToList();
 
-                    if (uints.Count + 1 > Length)
-                    {
-                        uints = uints.Take(Length).ToList();
-                    }
-
-                    var nullTerminationKey = computedReference.Values.First(x => x.Value == null);
-                    uints.Add(nullTerminationKey);
-                    return uints
-                        .Select(x => x?.Value == null
-                            ? nullTerminationKey.Key
-                            : x.Key
-                        ).SelectMany(x => Size is null
-                            ? BitConverter.GetBytes(x).Take(new Range(0, 1))
-                            : BitConverter.GetBytes(x).Take(Size.Value)
-                        )
-                        .ToArray();
+                    var terminatorKey = computedReference.Values.First(x => x.Value == null);
+                    var terminator = BitConverter.GetBytes(terminatorKey.Key).Take(charSize);
+                    return [
+                        ..items.SelectMany(x => BitConverter.GetBytes(x?.Key ?? terminatorKey.Key).Take(charSize)),
+                        ..terminator
+                    ];
                 }
             case PropertyType.Uint:
                 {
