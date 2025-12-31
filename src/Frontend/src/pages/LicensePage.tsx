@@ -81,9 +81,14 @@ export function LicensePage() {
 				</thead>
 				<tbody>
 					<tr>
-						<td class="min">CoreCLR-NCalc</td>
-						<td class="min">Sebastien Ros, Sebastian Klose</td>
-						<td class="min">MIT</td>
+						<td className="min">PKHeX</td>
+						<td className="min">PKHeX contributors</td>
+						<td className="min">GPLv3</td>
+					</tr>
+					<tr>
+						<td className="min">CoreCLR-NCalc</td>
+						<td className="min">Sebastien Ros, Sebastian Klose</td>
+						<td className="min">MIT</td>
 					</tr>
 					<tr>
 						<td class="min">Jint</td>
