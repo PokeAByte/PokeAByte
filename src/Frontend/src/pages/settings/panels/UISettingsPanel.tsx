@@ -6,6 +6,7 @@ import { FavoriteManagement } from "./components/FavoriteManagement";
 export function UISettingsPanel() {
 	const settingsContext = useContext(UISettingsContext);
 	const [advancedMode, setAdanvedMode] = useUISetting("advancedMode");
+	const [stickyHeader, setStickyHeader] = useUISetting("stickyHeader");
 	const [preserveFreeze, setPreserveFreeze] = useUISetting("preserveFreeze");
 	const [forceVisible, setForceVisible] = useUISetting("forceVisible");
 	const [recentlyUsedEnabled, setRecentlyUsed] = useUISetting("recentlyUsedEnabled");
@@ -80,6 +81,21 @@ export function UISettingsPanel() {
 							</td>
 						</tr>
 						<FavoriteManagement />
+						<tr>
+							<th>
+								<label htmlFor="stickyHeader">Sticky header: </label>
+							</th>
+							<td>
+								<input
+									name="stickyHeader"
+									type="checkbox"
+									role="switch"
+									checked={stickyHeader}
+									onInput={() => setStickyHeader(!stickyHeader)}
+								/>
+								<span>Keep header visible when scrolled down.</span>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</form>

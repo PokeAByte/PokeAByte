@@ -8,8 +8,8 @@ export type UISettings = {
 	forceVisible?: boolean,
 	openPanels: Record<string, boolean | undefined>,
 	preserveFreeze?: boolean,
-	test?: Record<string, any>,
 	recentlyUsedEnabled?: boolean,
+	stickyHeader?: boolean,
 	favoriteMappers?: string[],
 	recentMappers?: string[],
 }

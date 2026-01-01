@@ -38,6 +38,7 @@ async function performReload( preserveFreeze: boolean ) {
 
 export function Header() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
+	const [sticky] = useUISetting("stickyHeader");
 	const [preserveFreeze] = useUISetting("preserveFreeze");
 	const reloadMapper = async () => {
 		if (mapper != null) {
@@ -47,7 +48,7 @@ export function Header() {
 	const textColor = mapper ? "text-green" : "text-red";
 
 	return (
-		<header>
+		<header class={sticky ? "sticky" : ""}>
 			<h1 class={textColor}>
 				Poke-A-Byte
 			</h1>
