@@ -44,20 +44,16 @@ public class Program
     {
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-        var version = Assembly
-            .GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyFileVersionAttribute>()
-            ?.Version;
-        logger.LogInformation($"Poke-A-Byte version: {version}");
         var informationalVersion = Assembly
             .GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion;
-        if (informationalVersion != null)
+            ?.InformationalVersion
+            ?.Split("+");
+        var version = informationalVersion?.FirstOrDefault();
+        logger.LogInformation($"Poke-A-Byte version: {version}");
+        if (informationalVersion?.Length > 1)
         {
-            var commit = informationalVersion.Contains("+")
-                ? informationalVersion.Split("+")[1]
-                : "<unknown>";
+            var commit = informationalVersion[1];
             logger.LogInformation($"Poke-A-Byte commit: {commit}");
         }
     }

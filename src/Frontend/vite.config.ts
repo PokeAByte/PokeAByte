@@ -3,9 +3,12 @@ import preact from "@preact/preset-vite";
 import { readFileSync } from 'fs';
 import path from "path";
 
-const match = readFileSync("../PokeAByte.Web/PokeAByte.Web.csproj", "utf-8")
-	.match(/(?:<AssemblyVersion>)((\d+\.)+\d)/);
-const version = match ? match[1] : "";
+const webProject = readFileSync("../PokeAByte.Web/PokeAByte.Web.csproj", "utf-8");
+const versionPrefix = webProject.match(/(?:<VersionPrefix>)((\d+\.)+\d)/)?.at(1);
+const versionSuffix = webProject.match(/(?:<VersionSuffix>)(.+)(<\/VersionSuffix>)/)?.at(1);
+const version = versionSuffix
+	? versionPrefix+"-"+versionSuffix
+	: versionPrefix;
 
 export default defineConfig({
 	plugins: [preact()],

@@ -2,25 +2,30 @@
 
 ## 1. Install a compatible emulator.
 
-The following emulators are currently compatible:
+###  BizHawk
 
-- [Bizhawk](https://tasvideos.org/Bizhawk)
-- [RetroArch](https://www.retroarch.com/?page=platforms)
-- SuperShuckie ([source available here](https://github.com/SnowyMouse/supershuckie64))
+1. Download the emulator at https://tasvideos.org/Bizhawk.
+2. Download the `EDPS.Bizhawk.dll` from the 
+[release page](https://github.com/PokeAByte/PokeAByte/releases/latest) 
+3. In the BizHawk folder (where `EmuHawk.exe`) is found, create a folder named `ExternalTools` if it does not exist.
+4. Place the `EDPS.Bizhawk.dll` in the `ExternalTools` folder.
+5. Start BizHawk and load a ROM
+6. Once the ROM is loaded, select "Tools" -> "External Tool" -> "Emulator Data Protocol Server"
 
-If you are using **RetroArch**, note that not all emulator cores work with Poke-A-Byte. You will also need to enable the 
-Network Control Interface. You can do this by opening retroarch, going into "Settings", then "Network". There, enable 
-"Network Commands" and make sure that "Network Command Port" is 55355 (should be the default).
+![A screenshot illustrating the selection of the "Emulator Data Protocol Server" menu item.](images/bizhawk_edps.png)
 
-For **Bizhawk**, you also need to download the so called "External Tool". Download the `EDPS.Bizhawk.dll` from the 
-[release page](https://github.com/PokeAByte/PokeAByte/releases/latest) and copy it into the `ExternalTools` folder that 
-should be located at the same place that your Bizhawk executable is (`EmuHawk.exe`). If the folder does not exist, 
-create it and then place the DLL file inside.
+###  Super Shuckie 2
 
-Once you started BizHawk and loaded the game ROM, go to `Tools` in the menu bar, hover over the the `External Tools` item
-and then select `Emulator Data Protocol Server`.
+1. Download the emulator at https://github.com/SnowyMouse/supershuckie/releases/latest
+2. Open the emulator
+3. Select "Settings" -> check "Enable Poke-A-Byte integration".
+4. Load a ROM.
 
-![A screenshow illustrating the selection of the "Emulator Data Protocol Server" menu item.](images/bizhawk_edps.png)
+![A screenshot illustrating the selection of the "Enable Poke-A-Byte integration" menu item.](images/supershuckie2.png)
+
+### Retroarch, Super Shuckie 1
+
+Support for RetroArch and Super Shuckie 1 will be discontinued in the future.
 
 ## 2. Downloading and opening Poke-A-Byte
 

@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PublicSign>false</PublicSign>
     <Company>Scott's Thoughts</Company>
-    <AssemblyVersion>0.9.3</AssemblyVersion>
-    <FileVersion>0.9.3</FileVersion>
+    <VersionPrefix>0.10.0</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
