@@ -41,8 +41,13 @@ export class PropertyStore {
 		await Store.client.unloadMapper();
 		Toasts.clearErrors();
 		const success = await Store.client.changeMapper(mapperFileId);
-		this._suppressUpdate = false;
-		this.onMapperChange();
+		const interval = window.setInterval(() => {
+			if (this.getMapper()) {
+				this._suppressUpdate = false;				
+				this.onMapperChange();
+				clearInterval(interval);
+			}
+		}, 5);
 		return success;
 	}
 

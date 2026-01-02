@@ -17,7 +17,6 @@ export function FavoriteManagement() {
 		}
 		const newArrangement = [...favoriteIds];
 		const index = newArrangement.indexOf(favoriteId);
-		console.log(index + " => " + (index - 1));
 		if (index > 0) {
 			newArrangement.splice(index, 1);
 			newArrangement.splice(index - 1, 0, favoriteId);
@@ -36,7 +35,6 @@ export function FavoriteManagement() {
 			newArrangement.splice(index + 1, 0, favoriteId);
 			setFavorites([...newArrangement]);
 		}
-		console.log(newArrangement.join(" "));
 	};
 	const mapperFileContext = useContext(MapperFilesContext);
 	const favorites = favoriteIds?.map(id => mapperFileContext.availableMappers?.find(mapper => mapper.id == id))

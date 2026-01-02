@@ -24,7 +24,6 @@ async function performReload( preserveFreeze: boolean ) {
 	if (success && frozenProperties.length > 0) {
 		frozenProperties.forEach(
 			property => {
-				console.log(property.path + " " + property.value);
 				Store.client.updatePropertyBytes(property.path, property.bytes, true)
 			}
 		);

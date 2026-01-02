@@ -2,12 +2,13 @@
 import { useEffect, useState } from "preact/hooks";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useAPI } from "@/hooks/useAPI";
-import { AppSettingsModel, getAppSettings, saveAppSettings } from "@/utility/fetch";
+import { AppSettingsModel, getAppSettings, resetAppSettings, saveAppSettings } from "@/utility/fetch";
 import { Toasts } from "@/notifications/ToastStore";
 import { TargetedInputEvent } from "preact";
 import { Panel } from "@/components/Panel";
 
 export function AppSettingsPanel() {
+	const [dialog, setDialog] = useState<boolean>(false);
 	const [formState, setFormState] = useState<Partial<AppSettingsModel>>({});
 	const generalSettings = useAPI(
 		getAppSettings,
@@ -17,6 +18,10 @@ export function AppSettingsPanel() {
 			}
 		}
 	);
+	const doReset = useAPI(resetAppSettings, () => {
+		generalSettings.call();
+		setDialog(false);
+	})
 	useEffect(
 		() => generalSettings.call(),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,11 +141,11 @@ export function AppSettingsPanel() {
 				<button className="wide-button green margin-right" type="submit">
 					Save settings
 				</button>
-				<button className="wide-button red margin-right" type="button">
+				<button className="wide-button red margin-right" type="button" onClick={() => setDialog(true)}>
 					Reset settings
 				</button>
 				<ConfirmationModal
-					display={false}
+					display={dialog}
 					title="Warning"
 					confirmLabel="Reset"
 					text={
@@ -148,8 +153,8 @@ export function AppSettingsPanel() {
 							Are you sure you want to delete your current settings and set them to default?
 						</p>
 					}
-					onCancel={() => console.log("ajshdajkd")}
-					onConfirm={() => console.log("ajshdajkd")}
+					onCancel={() => setDialog(false)}
+					onConfirm={doReset.call}
 				/>
 			</form>
 		</Panel>

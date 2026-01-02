@@ -10,6 +10,7 @@ public static class SettingsEndpoints
     public static void MapSettingsEndpoints(this WebApplication app)
     {
         app.MapPost("/settings/save_appsettings", SaveAppSettings);
+        app.MapPost("/settings/appsettings/reset", ResetAppSettings);
         app.MapGet("/settings/appsettings", (AppSettings settings) => new AppSettingsDto
         {
             RETROARCH_LISTEN_IP_ADDRESS = settings.RETROARCH_LISTEN_IP_ADDRESS,
@@ -18,6 +19,20 @@ public static class SettingsEndpoints
             DELAY_MS_BETWEEN_READS = settings.DELAY_MS_BETWEEN_READS,
             PROTOCOL_FRAMESKIP = settings.PROTOCOL_FRAMESKIP,
         });
+    }
+
+    public static IResult ResetAppSettings(
+        [FromServices] IGithubService githubService,
+        [FromServices] AppSettings settings)
+    {
+        var defaults = new AppSettings();
+        settings.RETROARCH_LISTEN_IP_ADDRESS = defaults.RETROARCH_LISTEN_IP_ADDRESS;
+        settings.RETROARCH_LISTEN_PORT = defaults.RETROARCH_LISTEN_PORT;
+        settings.RETROARCH_READ_PACKET_TIMEOUT_MS = defaults.RETROARCH_READ_PACKET_TIMEOUT_MS;
+        settings.DELAY_MS_BETWEEN_READS = defaults.DELAY_MS_BETWEEN_READS;
+        settings.PROTOCOL_FRAMESKIP = defaults.PROTOCOL_FRAMESKIP;
+        settings.Save();
+        return TypedResults.Ok();
     }
 
     public static IResult SaveAppSettings(
