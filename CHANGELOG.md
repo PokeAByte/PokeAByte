@@ -39,7 +39,16 @@
 
 ## Mapper changes
 
+- Mapper syntax version is now `4`
+- Added `game_functions` module to mapper scripts with `pokemon` class.
+  - You should add `syntax="4` to the mapper XML so users get prompted to upgrade Poke-A-Byte when trying to load it.
 
+```js
+import { pokemon } from "game_functions";
+// `pokemon` has the following methods:
+pokemon.Decrypt(gameGeneration, byteArray);
+pokemon.Encrypt(gameGeneration, byteArray);
+```
 
 ## Other changes
 

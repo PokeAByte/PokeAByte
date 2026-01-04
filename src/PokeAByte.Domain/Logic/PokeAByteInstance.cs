@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Jint;
@@ -139,6 +138,8 @@ public class PokeAByteInstance : IPokeAByteInstance
                 .SetValue("__memory", MemoryContainerManager)
                 .SetValue("__driver", Driver);
 
+            JavascriptEngine.Modules
+                .Add("game_functions", b => b.ExportType<ScriptModules.PokemonFunctions>("pokemon"));
             JavascriptModuleInstance = JavascriptEngine.Modules.Import(mapperContent.ScriptPath);
             HasPreprocessor = JavascriptModuleInstance.HasProperty("preprocessor");
             HasPostprocessor = JavascriptModuleInstance.HasProperty("postprocessor");

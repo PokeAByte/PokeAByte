@@ -1,6 +1,6 @@
 # Credits
 
-The following libraries are used in this project:
+The following libraries (or code from them) are used in this project:
 
 **Frontend:**
 - classnames
@@ -13,6 +13,7 @@ The following libraries are used in this project:
 - Roboto Mono (font)
 
 **Backend:**
+- PKHeX
 - CoreCLR-NCalc
 - Jint
 - Serilog
