@@ -1,15 +1,13 @@
-.notification-wrapper {
+.toasts {
 	bottom: var(--margin-2);
 	right: var(--margin-2);
 	position: fixed;
 	z-index: 1000;
-	overflow: clip;
-	display: flex;
-	align-items: flex-end;
-}
-
-.notifications {
-	text-align: end;	
+	display: grid;
+	&>button {
+		width: fit-content;
+		justify-self: end;
+	}
 	.toast {
 		text-align: left;
 		margin-top: var(--margin-0);
@@ -40,7 +38,7 @@
 		width: 100%;
 		flex-direction: row;
 		> *:nth-child(1) {
-			align-self: top;
+			align-self: flex-start;
 			flex-grow: 0;
 		}
 		> *:nth-child(2) {

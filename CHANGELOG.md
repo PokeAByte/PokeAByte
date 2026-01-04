@@ -2,7 +2,43 @@
 [Version 0.9.1](#091)  
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
-  
+
+# 0.10.0
+
+## Features
+
+### UI
+
+
+
+### Core
+
+
+
+## Bugfixes
+
+### UI
+
+
+
+### Core
+
+
+
+## Mapper changes
+
+
+
+## Other changes
+
+### Core
+
+
+
+### UI
+
+- Minor UI tweaks (phrasing, margins, etc).
+
 # 0.9.3
 
 ## Bugfixes

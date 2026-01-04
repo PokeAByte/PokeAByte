@@ -1,15 +1,17 @@
-import { Store } from "../../../utility/propertyStore"
+import { Store } from "@/utility/propertyStore"
 import { useState, useContext, useEffect } from "preact/hooks";
-import { LoadProgress } from "../../../components/LoadProgress";
+import { LoadProgress } from "@/components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
-import { useAPI } from "../../../hooks/useAPI";
-import { archiveMappers, backupMappers } from "../../../utility/fetch";
+import { useAPI } from "@/hooks/useAPI";
+import { archiveMappers, backupMappers } from "@/utility/fetch";
 import { MapperUpdate } from "pokeaclient";
-import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
-import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
-import { Advanced } from "../../../components/Advanced";
+import { MapperFilesContext } from "@/Contexts/availableMapperContext";
+import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
+import { Advanced } from "@/components/Advanced";
+import { WideButton } from "@/components/WideButton";
+import { Panel } from "@/components/Panel";
 
-export function MapperBackupPage() {
+export function MapperBackupPanel() {
 	const filesClient = Store.client.files;
 	const mapperFileContext = useContext(MapperFilesContext);
 	const [availableMappers, setAvailableMappers] = useState<MapperUpdate[]>([]);
@@ -48,45 +50,47 @@ export function MapperBackupPage() {
 		return <LoadProgress label="Processing mapper(s)" />
 	}
 	return (
-		<article>
+		<Panel id="mapper-backup" title="Backup mappers" >		
 			<span>{selectedMappers.length} / {availableMappers.length} Mappers Selected</span>
-			<div className="margin-top">
-				<button className="green margin-right wide-button" disabled={!selectedMappers.length} onClick={handleBackupSelected}>
-					Backup selected
-				</button>
-				<button className="margin-right green wide-button" disabled={!availableMappers.length} onClick={handleBackupAll}>
-					Backup all
-				</button>
+			<div class="margin-top">
+				<WideButton 
+					text="Backup selected" 
+					disabled={!selectedMappers.length} 
+					onClick={handleBackupSelected} 
+					color="green" 
+				/>
+				<WideButton 
+					text="Backup all" 
+					disabled={!availableMappers.length} 
+					onClick={handleBackupAll} 
+					color="green" 
+				/>
 				<Advanced>
 					<OpenMapperFolderButton />
 				</Advanced>
 			</div>
-			<div className="margin-top">
-				<button 
-					role="button"
-					className="red margin-right wide-button" 
+			<div class="margin-top">
+				<WideButton 
+					text="Archive selected" 
 					disabled={selectedMappers.length === 0} 
-					onClick={handleArchiveSelected}
-				>
-					Archive selected
-				</button>
-				<button 
-					className="margin-right red wide-button" 
+					onClick={handleArchiveSelected} 
+					color="red" 
+				/>
+				<WideButton 
+					color="red" 
 					disabled={availableMappers.length === 0} 
 					onClick={handleArchiveAll}
-				>
-					Archive all
-				</button>
+					text="Archive all"
+				/>
 				<Advanced>
-					<button 
-						className="purple wide-button" 
+					<WideButton 
+						color="purple" 
 						onClick={filesClient.openMapperArchiveFolder}
-					>
-						Open archive folder
-					</button>
+						text="Open archive folder"
+					/>
 				</Advanced>
 			</div>
-			<div className="margin-top">
+			<div class="margin-top">
 				{archiveMappersApi.isLoading
 					? <LoadProgress label="Archiving mapper(s)" />
 					: <MapperSelectionTable
@@ -97,6 +101,6 @@ export function MapperBackupPage() {
 					/>
 				}
 			</div>
-		</article>
+		</Panel>
 	);
 }

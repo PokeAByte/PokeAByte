@@ -1,27 +1,20 @@
-import { useSyncExternalStore } from "preact/compat";
-import { useCallback, useRef } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { Store } from "../../../utility/propertyStore";
-import deepEqual from "fast-deep-equal";
 import { GameProperty } from "pokeaclient";
 
 export function useGameProperty<T>(path: string) {
-	const ref = useRef<GameProperty | null>(null);
-	// Cache the result of the store snapshot function (getProperty) to avoid unncessary updates:
-	const getProperty = useCallback(
+	const [property, setProperty] = useState<GameProperty<T>|null>(() => Store.getProperty(path));
+	useEffect(
 		() => {
-			const newProperty = Store.getProperty<T>(path);
-			if (!deepEqual(newProperty, ref.current)) {
-				ref.current = newProperty;
-			}
-			return ref.current;
+			const callback = (updatedPath: string) => {
+				if (updatedPath === path) {
+					setProperty(Store.getProperty(path))
+				}
+			};
+			Store.addUpdateListener(callback);
+			return () => Store.removeUpdateListener(callback);
 		},
 		[path]
 	);
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const subscribe = useCallback(
-		Store.subscribeProperty(path),
-		[path]
-	);
-	return useSyncExternalStore(subscribe, getProperty);
+	return property;
 }

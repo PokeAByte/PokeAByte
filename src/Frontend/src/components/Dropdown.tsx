@@ -31,7 +31,7 @@ export function Dropdown<Value>(props: SelectInputProps<Value, SelectOption<Valu
 
 	return (
 		<div
-			className={"combobox " + (isOpen ? "open" : "")}
+			class={"combobox " + (isOpen ? "open" : "")}
 			ref={divRef}
 			tabIndex={-1}
 			onBlur={handleBlur}

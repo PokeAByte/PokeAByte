@@ -1,5 +1,4 @@
-import { useSyncExternalStore } from "preact/compat";
-import { useCallback, useRef } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { Store } from "../../../utility/propertyStore";
 import { GameProperty } from "pokeaclient";
 
@@ -8,28 +7,26 @@ import { GameProperty } from "pokeaclient";
  *
  * @export
  * @param {string} path The path of the property to select.
- * @param {K} field The property field to select. See {@link GameProperty} definition.
- * @returns {(GameProperty[K]|null)} The property field value, or null if the property does not exist.
+ * @param {Key} field The property field to select. See {@link GameProperty} definition.
+ * @returns {(GameProperty[Key]|null)} The property field value, or null if the property does not exist.
  */
 export function useGamePropertyField<K extends keyof GameProperty>(path: string, field: K): GameProperty[K] | null {
-	const ref = useRef<GameProperty[K] | null>(null);
-
-	// Cache the result of the store snapshot function (getProperty) to avoid unncessary updates:
-	const getProperty = useCallback(() => {
-		const newProperty = Store.getProperty(path);
-		if (newProperty && ref.current && newProperty[field] !== ref.current[field]) {
-			ref.current = newProperty[field];
-		} else if (!!newProperty !== !!ref.current) {
-			ref.current = newProperty ? newProperty[field] : null;
-		}
-		return ref.current;
-	}, [path, field])
-
-
-	const subscribe = useCallback(
-		Store.subscribeProperty(path),
-		[path]
+	const [data, setData] = useState(() => {
+		const prop = Store.getProperty(path)
+		return prop ? prop[field] : null;
+	})
+	useEffect(
+		() => {
+			const getProperty = (updatedPath: string) => {
+				if (updatedPath === path) {
+					const newProperty = Store.getProperty(path);
+					setData(newProperty ? newProperty[field] : null);
+				}
+			};
+			Store.addUpdateListener(getProperty);
+			return () => Store.removeUpdateListener(getProperty);
+		},
+		[path, field]
 	);
-
-	return useSyncExternalStore(subscribe, getProperty);
+	return data;
 }

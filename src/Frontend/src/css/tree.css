@@ -28,9 +28,7 @@ table.tree {
 	.icon-button {
 		margin: 0 var(--margin-0) 0 0;
 		padding: 2px !important;
-		.material-icons {
-			font-size: 22px !important;
-		}
+		font-size: 22px !important;
 	}
 	label,
 	input {
@@ -43,12 +41,20 @@ table.tree {
 		font-size: var(--font-size-0);
 		padding: var(--margin-0);
 		padding: 3.375px !important;
+		contain: paint layout;
+	}
+	.combobox > input {
+		contain: none;
 	}
 	input[role="switch"] {
 		height: 29.25px;
 	}
 	input[role="switch"]::before {
 		height: 19.25px;
+	}
+
+	.icon-button, input, button, .combobox {
+		margin-right: var(--margin-0);
 	}
 }
 

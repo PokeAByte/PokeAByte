@@ -27,11 +27,12 @@
 		div {
 			display: table !important;
 			width: 100%;
-			button {
+			& > button {
 				width: 100%;
 				min-width: max-content;
 				margin: 0 !important;
-				text-align: start;
+				width: 100%;
+				display: flex;
 				border: 1px dashed var(--color-border-0);
 				border-left-width: 0;
 				border-right-width: 0;
@@ -46,6 +47,14 @@
 					color: var(--color-blue);
 					border-color: var(--color-blue);
 					outline: none;
+				}
+				span:nth-child(1) {
+					flex-grow: 1;
+					text-align: start;
+				}
+				span:nth-child(2) {
+					text-align: end;
+					color: white;
 				}
 			}
 		}

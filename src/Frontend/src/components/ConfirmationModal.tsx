@@ -17,12 +17,15 @@ type ModalProps = {
  */
 export function ConfirmationModal(props: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const hasCurrentDialog = !!dialogRef.current;
-	useEffect(() => {
-		if (!!dialogRef.current && props.display) {
-			dialogRef.current.showModal();
-		}
-	}, [hasCurrentDialog, props.display]);
+	useEffect(
+		() => {
+			if (!!dialogRef.current && props.display) {
+				dialogRef.current.showModal();
+			}
+		},
+		[dialogRef, props.display]
+	);
+
 	if (!props.display) {
 		return null;
 	}
@@ -31,10 +34,10 @@ export function ConfirmationModal(props: ModalProps) {
 			{props.title && <h2>{props.title}</h2>}
 			<p>{props.text}</p>
 			<div>
-				<button className="margin-right" onClick={props.onCancel}>
+				<button class="margin-right" onClick={props.onCancel}>
 					CANCEL
 				</button>
-				<button className="purple" onClick={props.onConfirm}>
+				<button class="purple" onClick={props.onConfirm}>
 					{props.confirmLabel}
 				</button>
 			</div>

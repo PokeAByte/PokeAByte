@@ -1,9 +1,14 @@
+import { IconButton } from "@/components/IconButton";
 
 export function FreezeValueButton({ isFrozen, onClick, disabled}: { isFrozen: boolean, onClick: () => void, disabled: boolean }) {
-	const classes = isFrozen ? "icon-button margin-right highlight" : "icon-button margin-right";
+	const classes = isFrozen ? "text-blue" : "";
 	return (
-		<button className={classes} type="button" onClick={onClick} disabled={disabled} title={"Freeze (reset value if it changes)"}>
-			<i className="material-icons"> ac_unit </i>
-		</button>
+		<IconButton 
+			class={classes} 
+			onClick={onClick} 
+			disabled={disabled} 
+			title="Freeze (reset value if it changes)"
+			icon="ac_unit"
+		/>
 	)
 }

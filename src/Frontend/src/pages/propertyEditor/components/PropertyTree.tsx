@@ -1,7 +1,7 @@
 
 import { Store } from "../../../utility/propertyStore";
 import { PropertyValue } from "./PropertyValue";
-import { unique } from "../utils/unique";
+import { unique } from "../../../utility/unique";
 import { useStorageRecordState } from "../../../hooks/useStorageState";
 import { useContext, useState } from "preact/hooks";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";
@@ -132,7 +132,7 @@ function PropertyTreeHeader(props: PropertyTreeHeaderProps) {
 	return (
 		<tr class="leaf interactive" onClick={props.onToggleOpen}>
 			<th >
-				<i className="material-icons"> {props.isOpen ? "folder" : "folder_open"} </i>
+				<i class="material-icons"> {props.isOpen ? "folder" : "folder_open"} </i>
 				<span class="margin-left">
 					{props.name}
 					{props.secondaryName &&

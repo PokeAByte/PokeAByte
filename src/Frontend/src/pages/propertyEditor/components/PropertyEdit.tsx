@@ -7,10 +7,7 @@ import { GamePropertyType } from "pokeaclient";
 import { getPropertyFieldValue, PropertyTextbox } from "./PropertyTextbox";
 import { PropertyInputSelect } from "./PropertyInputSelect";
 import { useEffect, useState } from "preact/hooks";
-import { CopyValueIcon } from "./CopyValueIcon";
-import { clipboardCopy } from "../utils/clipboardCopy";
-import { Advanced } from "../../../components/Advanced";
-import { VisibilityToggle } from "../../../components/VisibilityToggle";
+import { IconButton } from "@/components/IconButton";
 
 export function PropertyEdit({ path }: { path: string }) {
 	const property = useGameProperty(path);
@@ -37,7 +34,7 @@ export function PropertyEdit({ path }: { path: string }) {
 			Store.client.updatePropertyValue(path, newPropertyValue, isFrozen)
 			.then(() => {
 				setSaved(true);
-				Toasts.push(`Successfully saved property value!`, "task_alt", "success");
+				Toasts.push(`Successfully saved property value!`, "task_alt", "green");
 			});
 		}
 	};
@@ -47,7 +44,7 @@ export function PropertyEdit({ path }: { path: string }) {
 			const message = `Property value now frozen to: '${freezeValue}'!`
 			Store.client.updatePropertyValue(path, freezeValue, true)
 				.then(() => {
-					Toasts.push(message, "task_alt", "success");
+					Toasts.push(message, "task_alt", "green");
 				});
 			if(madeEdit) {
 				setValue(null);
@@ -56,15 +53,10 @@ export function PropertyEdit({ path }: { path: string }) {
 		} else {
 			const message = `Property value is no longer frozen!`;
 			Store.client.freezeProperty(path, false)
-				.then(() => Toasts.push(message, "task_alt", "success"));
+				.then(() => Toasts.push(message, "task_alt", "green"));
 		}
 	}
-	const handleCopyClick = () => {
-		const currentPropValue = Store.getProperty(path);
-		if (currentPropValue) {
-			clipboardCopy(getPropertyFieldValue(property?.value, propertyType));
-		}
-	};
+
 	useEffect(() => {
 		if (saved) {
 			setSaved(false);
@@ -73,12 +65,7 @@ export function PropertyEdit({ path }: { path: string }) {
 		}
 	}, [property, saved, madeEdit, setSaved, setMadeEdit]);
 
-	let addressString = property?.address ? `0x${property?.address.toString(16).toUpperCase()}` : "";
-	if (property?.bits) {
-		addressString += property.bits.includes("-")
-			? ` (bits: ${property.bits})`
-			: ` (bit: ${property.bits})`
-	}
+
 	let placeholder = "";
 	if (!madeEdit) {
 		if (property?.value === null) {
@@ -89,7 +76,6 @@ export function PropertyEdit({ path }: { path: string }) {
 	}
 	return (
 		<>
-			<CopyValueIcon onClick={handleCopyClick} />
 			<FreezeValueButton disabled={isReadonly} isFrozen={isFrozen} onClick={handleFreeze} />
 			{isSelect
 				? <PropertyInputSelect 
@@ -113,26 +99,14 @@ export function PropertyEdit({ path }: { path: string }) {
 			}
 			{ madeEdit && 
 				<>
-					<SaveValueButton active={madeEdit} onClick={handleSave} />
-					<button 
-						className="icon-button margin-left" 
-						disabled={!madeEdit} 
-						type="button" 
-						title={"Discard pending changes"}
+					<SaveValueButton onClick={handleSave} />
+					<IconButton 
+						title="Discard pending changes"
 						onClick={() => {setValue(null); setMadeEdit(false)}}
-						>
-						<i className="material-icons"> undo </i>
-					</button>
+						icon="undo"
+					/>
 				</>
-			}
-			<Advanced>
-				<span class="margin-left color-darker center-self">
-					{addressString}
-				</span>
-			</Advanced>
-			<Advanced>
-				<VisibilityToggle path={path} />
-			</Advanced>
+			}			
 		</>
 	)
 }

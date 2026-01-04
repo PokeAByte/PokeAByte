@@ -15,10 +15,12 @@ export function useStorageState<T>(key: string, defaultValue: T): [T, (value: T)
 			}
 		}
 	);
+	
 	const setter = useCallback((newValue: T) => {
-		setItem(newValue);
+		setItem(structuredClone(newValue));		
 		window.localStorage.setItem(key, JSON.stringify(newValue));
 	}, [setItem, key]);
+
 	return [item, setter]
 }
 
@@ -33,26 +35,28 @@ export function useStorageRecordState<K extends string, V>(
 		if (json) {
 			try {
 				record = JSON.parse(json) as Record<K, V>  ?? {};
-			} catch {
-			}
+			} catch { /* empty */ }
 		}
 		return record;
-	}, [])
+	}, [name]);
+
 	const [item, setItem] = useState<V>(
 		() => {
 			const record = getStoredRecord();
 			return record[key] ?? defaultValue;
 		}
 	);
+
 	const setter = useCallback((newValue: V) => {
 		setItem(newValue);
-		let record = getStoredRecord();
+		const record = getStoredRecord();
 		if (newValue === false) {
 			delete record[key];
 		} else {
 			record[key] = newValue;
 		}
 		window.localStorage.setItem(name, JSON.stringify(record));
-	}, [setItem]);
+	}, [getStoredRecord, key, name]);
+
 	return [item, setter]
 }

@@ -8,7 +8,7 @@ export interface ToastNotification {
 	close: () => void,
 }
 
-export type NotificationColor = "success" | "error" | "blue";
+export type NotificationColor = "green" | "red" | "blue";
 
 export class ToastStore {
 	private _callbacks: (() => void)[] = [];

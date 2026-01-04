@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 
 export function useAPI<T extends (...args: any[]) => Promise<any>>(
 	api: T,
-	chain?: (success: boolean) => void,
+	chain?: (success: boolean, result: Awaited<ReturnType<T>> | null) => void,
 ) {
 	const [isLoading, setLoading] = useState(false);
 	const [wasCalled, setCalled] = useState(false);
@@ -15,14 +15,14 @@ export function useAPI<T extends (...args: any[]) => Promise<any>>(
 				setLoading(false);
 				setResult(result);
 				if (chain) {
-					chain(true);
+					chain(true, result);
 				}
 			})
 			.catch(() => {
 				setLoading(false)
 				setResult(null);
 				if (chain) {
-					chain(true);
+					chain(false, null);
 				}
 			});
 	}

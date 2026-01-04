@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { useLocation } from "wouter";
 import { Mapper } from "pokeaclient";
-import { Advanced } from "../components/Advanced";
+import { Advanced } from "@/components/Advanced";
 
 export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 	const [location, setLocation] = useLocation();
@@ -15,10 +15,10 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				onClick={() => setLocation("/mapper/")}
 				role="link"
 				type="button"
-				className={classNames({"active": mapperActive })}
+				class={classNames({"active": mapperActive })}
 			>
 				<i
-					className={classNames("material-icons", { [activeClass]: mapperActive })}
+					class={classNames("material-icons", { [activeClass]: mapperActive })}
 					aria-hidden="true"
 				> 
 					catching_pokemon 
@@ -30,10 +30,10 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				type="button"
 				onClick={() => setLocation("/properties")}
 				disabled={!mapper}
-				className={classNames({"active": propertiesActive })}
+				class={classNames({"active": propertiesActive })}
 				>
 				<i 
-					className={classNames("material-icons", { [activeClass]: propertiesActive })}
+					class={classNames("material-icons", { [activeClass]: propertiesActive })}
 					aria-hidden="true"
 				> 
 					api 
@@ -46,7 +46,7 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 					type="button"
 					className={classNames({"active": settingsActive })}
 					onClick={() => setLocation("/settings/")}
-				>
+					>
 					<i 
 						className={classNames("material-icons", { [activeClass]: settingsActive })}
 						aria-hidden="true"

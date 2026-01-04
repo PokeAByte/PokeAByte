@@ -1,9 +1,9 @@
-import { GithubSettingsPage } from "./GithubSettings";
+import { GithubSettingsPanel } from "./panels/GithubSettingsPanel";
 
 export function Settings() {
 	return (
-		<div className="layout-box">
-			<GithubSettingsPage />
-		</div>
+		<article class="margin-top">
+			<GithubSettingsPanel />				
+		</article>
 	);
 }

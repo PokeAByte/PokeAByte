@@ -1,14 +1,15 @@
-import { Store } from "../../utility/propertyStore";
+import { Store } from "@/utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
-import { unique } from "./utils/unique";
+import { unique } from "@/utility/unique";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { useSyncExternalStore } from "preact/compat";
 import { useLocation } from "wouter";
-import { HidePropertyContextProvider } from "../../Contexts/HidePropertyContext";
-import { ForceVisibilityToggle } from "../../components/ForceVisibilityToggle";
-import { IfNotHidden } from "../../components/IfNotHidden";
-import { Advanced } from "../../components/Advanced";
+import { HidePropertyContextProvider } from "@/Contexts/HidePropertyContext";
+import { ForceVisibilityToggle } from "@/components/ForceVisibilityToggle";
+import { IfNotHidden } from "@/components/IfNotHidden";
+import { Advanced } from "@/components/Advanced";
 import debounce from "debounce";
+import { IconButton } from "@/components/IconButton";
 
 export function PropertyEditor() {
 	const [, setLocation] = useLocation();
@@ -43,7 +44,7 @@ export function PropertyEditor() {
 
 	return (
 		<HidePropertyContextProvider mapperId={mapper.id} key="unique">
-			<div className="layout-box margin-top" >
+			<div class="layout-box margin-top" >
 				<div class="title">
 					<div>
 						<strong>{mapper.gameName}</strong>
@@ -58,17 +59,15 @@ export function PropertyEditor() {
 					<label>Search property: </label>
 					<span class="input-addon">
 						<input type="text" value={internalSearch} onInput={x => onSearchInput(x.currentTarget.value)}></input>
-						<button
-							class={"add-on material-icons"}
+						<IconButton
 							disabled={!internalSearch}
-							onClick={() => setInternalSearch("")}
-							title={"Clear search"}
-						>
-							clear
-						</button>
+							onClick={() => onSearchInput("")}
+							title="Clear search"
+							icon="clear"
+						/>
 					</span>
 				</Advanced>
-				<table className="tree">
+				<table class="tree">
 					<tbody>
 						{paths.map((x) =>
 							<IfNotHidden key={x} path={x} >
