@@ -31,7 +31,8 @@ public class RetroArchUdpDriver : IPokeAByteDriver
     private static uint _maxChunkSize = (uint)Math.Floor((GetLoopbackMtu() - 128) / 3d);
 
     private CancellationTokenSource? _connectionCts;
-    public string ProperName { get; } = "RetroArch";
+    public string ProperName => "RetroArch";
+    public bool SupportsFreeze => false;
     public int DelayMsBetweenReads { get; }
     private ILogger<RetroArchUdpDriver> Logger { get; }
     private readonly AppSettings _appSettings;

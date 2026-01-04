@@ -48,12 +48,12 @@ public class PokeAProtocolClient : IDisposable
         }, _connectionCts.Token);
     }
 
-    public void WriteToBizhawk(WriteInstruction instruction)
+    public ValueTask<int> SendToEmulatorAsync(IEmulatorInstruction instruction)
     {
         if (!_connected) {
             throw new VisibleException("Poke-A-Protocol server closed the connection.");
         }
-        _client.Send(instruction.GetByteArray(), _remoteEndpoint);
+        return _client.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
     }
 
     private ISharedMemory GetMemoryAccessor()

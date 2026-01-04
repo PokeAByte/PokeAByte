@@ -70,6 +70,8 @@ public interface IPokeAByteDriver
     /// <param name="appSettings"> General application settings. </param>
     /// <returns> True if the driver was able to connect. </returns>
     static virtual Task<bool> Probe(AppSettings appSettings) => Task.FromResult(false);
+
+    bool SupportsFreeze { get; }
 }
 
 public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
@@ -77,4 +79,10 @@ public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
 public interface IStaticMemoryDriver : IPokeAByteDriver
 {
     Task SetMemoryFragment(string filename);
+}
+
+public interface IPokeAByteFreezeDriver
+{
+    public Task Freeze(MemoryAddress address, byte[] bytes);
+    public Task Unfreeze(MemoryAddress address);
 }

@@ -477,6 +477,13 @@ public class PokeAByteInstance : IPokeAByteInstance
         if (target is PokeAByteProperty property)
         {
             property.BytesFrozen = bytesFrozen;
+            // We have to handle bitfield freezes with normal writes, unforunately. So we have to check that "Bits"
+            // is not set or else we create problems as the emulator would write back the entire byte-array unchanged
+            // instead of only the bitfield.
+            if (property.Bits == null &&  property.Address != null && Driver is IPokeAByteFreezeDriver freezeDriver)
+            {
+                await freezeDriver.Freeze(property.Address.Value, bytesFrozen);
+            }
             await ClientNotifier.SendPropertiesChanged([property]);
         }
     }
@@ -486,6 +493,11 @@ public class PokeAByteInstance : IPokeAByteInstance
         if (target is PokeAByteProperty property)
         {
             property.BytesFrozen = [];
+            // Again, exclude bitfield properties, see above.
+            if (property.Bits == null && Driver is IPokeAByteFreezeDriver freezeDriver && property.Address != null)
+            {
+                await freezeDriver.Unfreeze(property.Address.Value);
+            }
             await ClientNotifier.SendPropertiesChanged([property]);
         }
     }

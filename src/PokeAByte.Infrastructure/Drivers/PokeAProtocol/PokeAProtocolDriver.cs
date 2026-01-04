@@ -6,9 +6,10 @@ using PokeAByte.Protocol;
 
 namespace PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 
-public class PokeAProtocolDriver : IPokeAByteDriver
+public class PokeAProtocolDriver : IPokeAByteDriver, IPokeAByteFreezeDriver
 {
     public string ProperName => "PokeAProtocol";
+    public bool SupportsFreeze => false;
     public int DelayMsBetweenReads { get; }
 
     private int _frameSkip;
@@ -69,7 +70,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
         }
     }
 
-    public ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
+    public async ValueTask WriteBytes(uint startingMemoryAddress, byte[] values, string? path = null)
     {
         if (_client == null)
         {
@@ -81,8 +82,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver
             Data = values,
             Length = values.Length,
         };
-        _client.WriteToBizhawk(instruction);
-        return ValueTask.CompletedTask;
+        await _client.SendToEmulatorAsync(instruction);
     }
 
     public static async Task<bool> Probe(AppSettings appSettings)
@@ -102,5 +102,31 @@ public class PokeAProtocolDriver : IPokeAByteDriver
         {
             return false;
         }
+    }
+
+    public async Task Freeze(uint address, byte[] bytes)
+    {
+        if (_client == null)
+        {
+            return;
+        }
+        await _client.SendToEmulatorAsync(
+            new FreezeInstruction() { 
+                Address = address, 
+                Data = bytes, 
+                Length = bytes.Length 
+            }
+        );
+    }
+
+    public async Task Unfreeze(uint address)
+    {
+        if (_client == null)
+        {
+            return;
+        }
+        await _client.SendToEmulatorAsync(
+            new UnfreezeInstruction() { Address = address }
+        );
     }
 }
