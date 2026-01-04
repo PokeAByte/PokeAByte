@@ -1,0 +1,23 @@
+name: Draft a release
+env:
+  GH_TOKEN: ${{ github.token }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10"
+      - name: Run build.sh
+        run: ./build.sh --publish ${{ github.event.inputs.version }}
