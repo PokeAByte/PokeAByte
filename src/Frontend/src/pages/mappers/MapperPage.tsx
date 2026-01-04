@@ -5,13 +5,17 @@ import { DownloadMapperPanel } from "./panels/MapperDownloadPage";
 import { MapperBackupPanel } from "./panels/MapperBackupPanel";
 import { UpdateMapperPanel } from "./panels/UpdateMapperPanel";
 import { RestoreMapperPanel } from "./panels/MapperRestorePage";
+import { FavoritePanel } from "./panels/FavoritePanel";
+import { RecentPanel } from "./panels/RecentPanel";
 
 export default function MapperPage() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
 	
 	return (
 		<article class="margin-top">
-			<LoadMapperPanel mapper={mapper} />				
+			<FavoritePanel />
+			<LoadMapperPanel mapper={mapper} />			
+			<RecentPanel />				
 			<DownloadMapperPanel />
 			<UpdateMapperPanel />			
 			<MapperBackupPanel />

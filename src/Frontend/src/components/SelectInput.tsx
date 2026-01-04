@@ -31,6 +31,16 @@ export function findDisplayByValue<V, T extends SelectOption<V>>(options: T[], v
 	return options.find(x => x.value === value)?.display ?? "";
 }
 
+function wrapIndex(index: number, length: number) {
+	if (index < 0) {
+		return length-1;
+	}
+	if (index == length) {
+		return 0;
+	}
+	return index;
+}
+
 export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<Value>>) {
 	const divRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -64,29 +74,35 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 		if (!isOpen) {
 			return;
 		}
+		let focusShift = 0;
 		switch (event.key) {
+			case "Space":
 			case "Enter":
 				if (filteredOptions.length > 0 && focusIndex === -1) {
 					handleSelection(filteredOptions[0]);
 				}
 				break;
+			case "Tab":
+				focusShift = event.shiftKey 
+					? focusShift = -1
+					: focusShift = 1;
+				break;
 			case "ArrowDown":
-				event.preventDefault();
-				newFocus = focusIndex < (filteredOptions.length - 1) ? focusIndex + 1 : 0;
-				(optionsContainer.current?.childNodes[newFocus] as HTMLElement)?.focus();
-				setFocusedIndex(focusIndex < (filteredOptions.length - 1) ? focusIndex + 1 : 0);
+				focusShift = 1;
 				break;
 			case "ArrowUp":
-				event.preventDefault();
-				newFocus = focusIndex > 0 ? focusIndex - 1 : filteredOptions.length - 1;
-				(optionsContainer.current?.childNodes[newFocus] as HTMLElement)?.focus();
-				setFocusedIndex(focusIndex > 0 ? focusIndex - 1 : filteredOptions.length - 1);
+				focusShift = -1;
 				break;
 			case "Escape":
-				event.preventDefault();
-				setFocusedIndex(-1);
-				inputRef.current?.focus();
+				inputRef.current?.blur();
+				(optionsContainer.current?.childNodes[focusIndex] as HTMLElement)?.blur();
 				break;
+		}
+		if (focusShift != 0) {
+			event.preventDefault();
+			newFocus = wrapIndex(focusIndex + focusShift, filteredOptions.length);
+			(optionsContainer.current?.childNodes[newFocus] as HTMLElement)?.focus();
+			setFocusedIndex(newFocus);
 		}
 	}
 

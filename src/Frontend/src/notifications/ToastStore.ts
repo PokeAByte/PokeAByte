@@ -14,13 +14,16 @@ export class ToastStore {
 	private _callbacks: (() => void)[] = [];
 	private _toasts: ToastNotification[] = [];
 	private _lastId: number = 1;
+	private _changes: boolean = false;
 
 	constructor() {
-		window.setInterval(() => this._clear(), 100);
-	}
-
-	private _notifySubscribers = () => {
-		this._callbacks.forEach(x => x());
+		window.setInterval(() => {
+			this._clear();
+			if (this._changes) {
+				this._callbacks.forEach(x => x());
+				this._changes = false;
+			}
+		}, 50);
 	}
 
 	private _clear = () => {
@@ -30,13 +33,18 @@ export class ToastStore {
 			x => x.autoclear === false || x.clearAt >= now
 		);
 		if (this._toasts.length !== count) {
-			this._notifySubscribers();
+			this._changes = true;
 		}
+	}
+
+	clearErrors = () => {
+		this._toasts = this._toasts.filter(x => x.type !== "red");
+		this._changes = true;
 	}
 
 	remove = (id: number) => {
 		this._toasts = this._toasts.filter(x => x.id !== id);
-		this._notifySubscribers();
+		this._changes = true;
 	}
 
 	push = (message: string, icon: string = "", type: NotificationColor, autoclear: boolean = true) => {
@@ -66,7 +74,7 @@ export class ToastStore {
 				clearAt: autoclear ? new Date().getTime() + 5000 : 0,
 			});
 		}
-		this._notifySubscribers();
+		this._changes = true;
 	}
 
 	subscribe = (onStoreChange: () => void) => {

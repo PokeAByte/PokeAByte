@@ -1,25 +1,53 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
-import {  useSyncExternalStore } from "preact/compat";
+import { useSyncExternalStore } from "preact/compat";
 import { AdvancedToggle } from "../components/AdvancedToggle";
-import { Mapper } from "pokeaclient";
+import { GameProperty } from "pokeaclient";
 import { IconButton } from "@/components/IconButton";
+import { useUISetting } from "../Contexts/UISettingsContext";
+import { Toasts } from "../notifications/ToastStore";
 
-async function performReload(mapper: Mapper) {
-	await Store.client.changeMapper(mapper.fileId);
+async function performReload( preserveFreeze: boolean ) {
+	if (!preserveFreeze) {
+		await Store.reloadMapper();
+		return;
+	}
+
+	let frozenProperties: GameProperty<any>[] = [];
+	if (preserveFreeze) {
+		const propertyMap = Store.getAllProperties();
+		frozenProperties = Object.getOwnPropertyNames(propertyMap)
+			.map(x => propertyMap[x])
+			.filter(x => x.isFrozen);
+	}
+	const success = await Store.reloadMapper();
+	if (success && frozenProperties.length > 0) {
+		frozenProperties.forEach(
+			property => {
+				Store.client.updatePropertyBytes(property.path, property.bytes, true)
+			}
+		);
+		Toasts.push("Reloaded mapper with "+ frozenProperties.length + " frozen values reapplied", "", "green");
+	} else {
+		if (frozenProperties.length > 0) {
+			Toasts.push("Failed to reapply frozen values. Frozen values are unfortunately lost. :/", "", "red");
+		}
+	}
 }
 
 export function Header() {
 	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
+	const [sticky] = useUISetting("stickyHeader");
+	const [preserveFreeze] = useUISetting("preserveFreeze");
 	const reloadMapper = async () => {
 		if (mapper != null) {
-			performReload(mapper);
+			performReload(!!preserveFreeze);
 		}
 	};
 	const textColor = mapper ? "text-green" : "text-red";
 
 	return (
-		<header>
+		<header class={sticky ? "sticky" : ""}>
 			<h1 class={textColor}>
 				Poke-A-Byte
 			</h1>

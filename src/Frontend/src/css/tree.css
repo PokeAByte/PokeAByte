@@ -1,19 +1,10 @@
-
-.tree {
-	padding-left: 0;
-}
-
-.tree li:has(details), .tree ul {
-	&:not(:last-child){
-		border-bottom: 1px solid var(--color-border-0);
-	}
-}
-
 table.tree {
 	width: 100%;
 	border: none;
 	margin: 0;
+	padding-left: 0;
 	border-collapse: collapse;
+	font-family: var(--monospace-font);
 
 	&>tbody>tr>th {
 		width: 0;
@@ -25,19 +16,8 @@ table.tree {
 		border-top: 1px solid var(--color-border-1);
 	}
 
-	.icon-button {
-		margin: 0 var(--margin-0) 0 0;
-		padding: 2px !important;
-		font-size: 22px !important;
-	}
-	label,
-	input {
-		font-family: var(--monospace-font);
-	}
-
 	button:not(.icon-button),
 	input {
-		margin: 0 0 0 0;
 		font-size: var(--font-size-0);
 		padding: var(--margin-0);
 		padding: 3.375px !important;
@@ -49,12 +29,9 @@ table.tree {
 	input[role="switch"] {
 		height: 29.25px;
 	}
-	input[role="switch"]::before {
-		height: 19.25px;
-	}
 
 	.icon-button, input, button, .combobox {
-		margin-right: var(--margin-0);
+		margin: 0 var(--margin-0) 0 0;
 	}
 }
 
@@ -79,8 +56,4 @@ tr.leaf {
 			cursor: pointer;
 		}
 	}
-}
-
-tr.hidden {
-	display: none;
 }

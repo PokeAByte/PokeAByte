@@ -17,6 +17,7 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(int))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(double))]
+[JsonSerializable(typeof(AppSettingsDto))]
 [JsonSerializable(typeof(MapperUpdaterSettings))]
 [JsonSerializable(typeof(IGithubSettings))]
 [JsonSerializable(typeof(GithubSettings))]

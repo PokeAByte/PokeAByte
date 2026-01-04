@@ -110,6 +110,7 @@ public static class Startup
         app.MapDriverEndpoints();
         app.MapMapperEndpoints();
         app.MapMapperServiceEndpoints();
+        app.MapSettingsEndpoints();
 
         app.MapGet("/favicon.png", () => Results.File(ApiHelper.EmbededResources.Favicon, contentType: "image/png"));
         app.MapGet("/dist/gameHookMapperClient.js", () => Results.File(ApiHelper.EmbededResources.ClientScript, contentType: "application/javascript"));

@@ -10,6 +10,9 @@ import { render } from "preact";
 import { UISettingsProvider } from "./Contexts/UISettingsContext.tsx";
 import { MapperFilesContextProvider } from "./Contexts/availableMapperContext.tsx";
 
+// @ts-expect-error "__POKEABYTE_VERSION__" is injected via vite.
+document.title = "Poke-A-Byte " + __POKEABYTE_VERSION__;
+
 render(
 	<Router base="/ui">
 		<UISettingsProvider>

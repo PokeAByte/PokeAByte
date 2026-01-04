@@ -7,6 +7,11 @@ export type UISettings = {
 	advancedMode?: boolean,
 	forceVisible?: boolean,
 	openPanels: Record<string, boolean | undefined>,
+	preserveFreeze?: boolean,
+	recentlyUsedEnabled?: boolean,
+	stickyHeader?: boolean,
+	favoriteMappers?: string[],
+	recentMappers?: string[],
 }
 
 export type  UISettingsContextType = {
@@ -40,7 +45,7 @@ export function UISettingsProvider(props: { children: ComponentChildren}) {
 
 	useEffect(() => {
 		// remove some time after 1.0:
-		if (!settings.initialized) {
+		if (!settings.initialized || !settings.openPanels ) {
 			saveSettings({
 				initialized: true,
 				advancedMode: tryGetLocalStorage("_advandedMode", false),

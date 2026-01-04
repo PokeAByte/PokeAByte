@@ -44,6 +44,7 @@ public record MapperDto
     }
 }
 
+[JsonSerializable(typeof(List<AppSettings>))]
 [JsonSerializable(typeof(List<MapperDto>))]
 public partial class MapperDtoContext : JsonSerializerContext
 {

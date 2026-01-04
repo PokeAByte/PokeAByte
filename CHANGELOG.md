@@ -9,6 +9,17 @@
 
 ### UI
 
+- Added a "Poke-A-Byte settings" panel to the settings tab.
+  Allows configuration of the `appsettings.json` options through the Web UI.
+- Added a "UI settings" panel to the settings tab.
+  - Added an option to preserve frozen property values between mapper reloads (via the button in the header).
+- Added favorites 
+  - You can favorite a mapper via the heart icon in the mapper select.
+  - Favorite mappers are shown as buttons above the "Load mapper" panel for those mappers with one click.
+  - In the UI settings panel, you can clear your favorites or change their order.
+- Added "recently used mapper" panel
+  - Must be enabled in the UI settings
+  - Shows the last 5 most recently used mappers.
 
 
 ### Core
@@ -38,6 +49,10 @@
 ### UI
 
 - Minor UI tweaks (phrasing, margins, etc).
+- When loading a new mapper, or reloading the current one, old error notifications are cleared.
+- Fixed display of the Poke-A-Byte version in the footer of the UI.
+- The "Settings" tab is no longer exclusive to advanced mode.
+- Tab and escape now work properly in dropdowns.
 
 # 0.9.3
 
