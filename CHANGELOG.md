@@ -2,7 +2,7 @@
 [Version 0.9.1](#091)  
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
-
+  
 # 0.10.0
 
 ## Features
@@ -34,7 +34,8 @@
 
 ### Core
 
-
+- When freezing properties, sometimes the displayed value and the actual value would desync. This was mostly a display
+		  issue but could cause undeseriable behavior in some scenarios.
 
 ## Mapper changes
 

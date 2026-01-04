@@ -228,7 +228,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         byte[] bytes;
         try
         {
-            var readonlyBytes = memoryManager.GetReadonlyBytes(_memoryContainer, address ?? 0x00, _length, !newAddress);
+            var readonlyBytes = memoryManager.GetReadonlyBytes(_memoryContainer, address.Value, _length, !newAddress);
             if (readonlyBytes.SequenceEqual(_bytes.AsSpan()))
             {
                 // Fast path - if the bytes match, then we can assume the property has not been
@@ -238,36 +238,40 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 // the bytes are the same.
                 return;
             }
+            if (BytesFrozen.Length != 0)
+            {
+                if (_memoryContainer == null || _memoryContainer == "default")
+                {
+                    // Bytes have changed, but property is frozen, so force the bytes back to the original value.
+                    // Pretend nothing has changed. :)
+                    _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
+                }
+                else
+                {
+                    memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
+                    ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
+                }
+                if (!BytesFrozen.SequenceEqual(Bytes))
+                {
+                    Bytes = BytesFrozen.ToArray();
+                    FullValue = ToValue(BytesFrozen, instance.Mapper);
+                    Value = CalculateObjectValue(instance, BytesFromBits(BytesFrozen));
+                }
+                return;
+            }
             bytes = readonlyBytes.ToArray();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw new Exception(
-                $"Unable to retrieve bytes for property '{Path}': {e.Message}"
-            );
+            throw new Exception($"Unable to retrieve bytes for property '{Path}': {e.Message}");
         }
-        this.Bytes = bytes.ToArray();
+        
+        this.Bytes = bytes.ToArray();        
 
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);
         bytes = BytesFromBits(bytes);
-        if (address != null && BytesFrozen.Length != 0)
-        {
-            if (_memoryContainer == null || _memoryContainer == "default")
-            {
-                // Bytes have changed, but property is frozen, so force the bytes back to the original value.
-                // Pretend nothing has changed. :)
-                _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
-            }
-            else
-            {
-                memoryManager.Namespaces[_memoryContainer].Fill(address.Value, BytesFrozen);
-                ((DynamicMemoryContainer)memoryManager.Namespaces[_memoryContainer]).SetDirtyFlag();
-            }
-            return;
-        }
-
         Value = CalculateObjectValue(instance, bytes);
     }
 
