@@ -227,7 +227,7 @@ public static class PokeAByteMapperXmlFactory
             "GBA" => new GBA_PlatformOptions(),
             "PSX" => new PSX_PlatformOptions(),
             "NDS" => new NDS_PlatformOptions(),
-            _ => throw new MapperException($"Unknown game platform {metaData.GamePlatform}.")
+            _ => throw new MapperException($"Mapper specifies an unknown game platform {metaData.GamePlatform}.")
         };
         return new PokeAByteMapper(
             metaData,

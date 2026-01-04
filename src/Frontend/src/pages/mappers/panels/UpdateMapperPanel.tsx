@@ -17,13 +17,11 @@ export function UpdateMapperPanel() {
 	const [availableUpdates, setAvailableUpdates] = useState<MapperUpdate[]>([]);
 	const [selectedUpdates, sectSelectedUpdates] = useState<string[]>([]);
 	const downloadMappers = useAPI(
-		filesClient.downloadMapperUpdatesAsync,
-		(success) => {
+		filesClient.downloadMapperUpdatesAsync, 
+		(_, success) => {
 			if (success) {
 				mapperFileContext.refresh();
 				Toasts.push(`Successfully update mapper(s).`, "task_alt", "green");
-			} else {
-				Toasts.push(`An error occured while updating.`, "", "red");
 			}
 		}
 	);

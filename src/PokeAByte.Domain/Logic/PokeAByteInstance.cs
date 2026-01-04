@@ -81,7 +81,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             if (Mapper.Memory.ReadRanges.Any())
             {
                 blocksToRead = Mapper.Memory.ReadRanges
-                    .Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End+1))
+                    .Select(x => new MemoryAddressBlock($"Range {x.Start}", x.Start, x.End + 1))
                     .ToArray();
                 _logger.LogInformation($"Using {Mapper.Memory.ReadRanges.Count()} memory read ranges from mapper.");
             }
@@ -96,7 +96,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
 
 
-        var memory =  new MemoryManager(blocksToRead);
+        var memory = new MemoryManager(blocksToRead);
         MemoryContainerManager = memory;
         _transferBlocks = new BlockData[blocksToRead.Length];
         int i = 0;
@@ -124,6 +124,8 @@ public class PokeAByteInstance : IPokeAByteInstance
         var engineOptions = new Options { Strict = true };
 
         engineOptions.Host.StringCompilationAllowed = false;
+        // Makes some javascript exceptions easier to follow with better stacktraces:
+        engineOptions.Interop.ExceptionHandler = (_) => true;
 
         if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
         {
@@ -162,15 +164,14 @@ public class PokeAByteInstance : IPokeAByteInstance
         catch (Exception ex)
         {
             this._readLoopFinished.Set();
-            _logger.LogError(ex, "An error occured when read looping the mapper.");
             if (ex is JavaScriptException jsException)
             {
                 var location = jsException.Location;
-                throw new MapperException($"{jsException.Message}\n at {location}");
+                throw new MapperException($"Error in mapper script: {jsException.Message}", ex);
             }
             else
             {
-                await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+                await this.ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             }
             if (OnProcessingAbort != null)
             {
@@ -210,7 +211,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occured when read looping the mapper.");
-            await this.ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+            await this.ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             if (OnProcessingAbort != null)
             {
                 await OnProcessingAbort.Invoke();
@@ -249,7 +250,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         if (HasPreprocessor)
         {
             lock (_jsModuleLock)
-            {                
+            {
                 if (JavascriptModuleInstance.Get("preprocessor").Call().ToObject() as bool? == false)
                 {
                     // The function returned false, which means we do not want to continue.
@@ -269,7 +270,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError($"Property {property.Path} failed to run processor. {ex.Message}");
-                await ClientNotifier.SendError(new MapperProblem("Exception", ex.Message));
+                await ClientNotifier.SendError(new MapperProblem("Error", ex.Message));
             }
         }
 
@@ -303,7 +304,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Could not send property change events.");
-                throw new PropertyProcessException($"Could not send property change events.", ex);
+                throw new MapperException($"Could not send property change events.", ex);
             }
         }
     }
@@ -321,7 +322,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         return result;
     }
 
-    public void ExecuteContainerProcessor(string container,  byte[] bytes)
+    public void ExecuteContainerProcessor(string container, byte[] bytes)
     {
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
         lock (_jsModuleLock)

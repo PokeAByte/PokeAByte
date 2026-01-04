@@ -42,7 +42,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver, IPokeAByteFreezeDriver
     {
         if (_client == null)
         {
-            throw new Exception($"EDPS Driver: No connection to bizhawk");
+            throw new Exception($"EDPS Driver: No connection to emulator");
         }
         if (_readBlocks == null)
         {
@@ -74,7 +74,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver, IPokeAByteFreezeDriver
     {
         if (_client == null)
         {
-            throw new Exception($"No connection to bizhawk.");
+            throw new Exception($"No connection to emulator.");
         }
         WriteInstruction instruction = new()
         {

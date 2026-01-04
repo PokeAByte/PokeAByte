@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Interfaces;
+using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Services.MapperFile;
@@ -10,15 +11,17 @@ namespace PokeAByte.Infrastructure.Github;
 public class GitHubService : IGithubService
 {
     private readonly ILogger<IGithubService> _logger;
+    private readonly IClientNotifier _clientNotifier;
     private HttpContent? _cachedTreeFileResponse = null;
     private DateTime _treeFileCacheTime = DateTime.MinValue;
 
     public IGithubSettings Settings { get; private set; }
 
-    public GitHubService(ILogger<IGithubService> logger, AppSettings appSettings)
+    public GitHubService(ILogger<IGithubService> logger, AppSettings appSettings, IClientNotifier clientNotifier)
     {
-        this._logger = logger;
-        this.Settings = LoadSettings(appSettings.GITHUB_TOKEN)
+        _logger = logger;
+        _clientNotifier = clientNotifier;
+        Settings = LoadSettings(appSettings.GITHUB_TOKEN)
             ?? new GithubSettings() { Token = appSettings.GITHUB_TOKEN };
     }
 
@@ -119,6 +122,7 @@ public class GitHubService : IGithubService
             if (response is null || !response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to download the latest version of the mapper tree json from Github.");
+                await _clientNotifier.SendError(new MapperProblem("Error", "Failed to fetch latest mapper versions from GitHub"));
                 return _cachedTreeFileResponse;
             }
             _cachedTreeFileResponse = response.Content;
@@ -131,23 +135,29 @@ public class GitHubService : IGithubService
     {
         var count = 0;
         List<UpdateMapperDto> downloadedMappers = new();
-        foreach (var mapper in mapperDtos)
+        try
+        {            
+            foreach (var mapper in mapperDtos)
+            {
+                //Get the .xml and .js paths
+                var xmlPath = mapper.Path;
+                var jsPath = mapper.Path[..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
+                //Get the xml data
+                var xmlResponse = await GetContentRequest(xmlPath, true);
+                var xmlData = await ResponseMessageToJson(xmlResponse);
+                //Get the js data
+                var jsResponse = await GetContentRequest(jsPath, true);
+                var jsData = await ResponseMessageToJson(jsResponse);
+                //Add them to the list
+                downloadedMappers.Add(new UpdateMapperDto(
+                    xmlPath, xmlData ?? "",
+                    jsPath, jsData ?? "",
+                    mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
+                count++;
+            }
+        } catch(Exception ex)
         {
-            //Get the .xml and .js paths
-            var xmlPath = mapper.Path;
-            var jsPath = mapper.Path[..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
-            //Get the xml data
-            var xmlResponse = await GetContentRequest(xmlPath, true);
-            var xmlData = await ResponseMessageToJson(xmlResponse);
-            //Get the js data
-            var jsResponse = await GetContentRequest(jsPath, true);
-            var jsData = await ResponseMessageToJson(jsResponse);
-            //Add them to the list
-            downloadedMappers.Add(new UpdateMapperDto(
-                xmlPath, xmlData ?? "",
-                jsPath, jsData ?? "",
-                mapper.DateCreatedUtc, mapper.DateUpdatedUtc));
-            count++;
+            await _clientNotifier.SendError(new MapperProblem("Error", "Download of or more mappers from GitHub failed.\n"+ex.Message));
         }
         return downloadedMappers;
     }

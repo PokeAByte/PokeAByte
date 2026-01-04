@@ -22,4 +22,6 @@ public struct ReadBlock
     /// The number of bytes to read from the <see cref="GameAdress"/> (inclusive).
     /// </summary>
     public int Length;
+
+    public readonly uint LastAddress => GameAddress + (uint)Length - 1;
 }

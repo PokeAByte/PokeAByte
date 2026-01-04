@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -74,7 +75,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
         MainLabel.Text = $"Waiting for Client...";
     }
 
-    private void Setup(SetupInstruction instruction)
+    private bool Setup(SetupInstruction instruction)
     {
         if (_processor != null)
         {
@@ -87,19 +88,22 @@ public sealed class EDPSForm : Form, IExternalToolForm
         if (platform == null || gameInfo == null)
         {
             MainLabel.Text = $"Waiting for game to load";
-            return;
+            return false;
         }
         if (_server == null)
         {
             MainLabel.Text = $"Failed to initialize properly.";
-            return;
+            return false;
         }
         this._initializedGame = gameInfo.Name + gameInfo.Hash;
-        this._processor = new GameDataProcessor(
-            platform,
-            instruction,
-            MainLabel
-        );
+        try
+        {
+            this._processor = new GameDataProcessor(platform, instruction, MainLabel);
+            return true;
+        } catch (Exception)
+        {
+            return false;
+        }
     }
 
     public void Restart()

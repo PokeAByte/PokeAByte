@@ -42,7 +42,7 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
         }
         catch (FileNotFoundException ex)
         {
-            throw new VisibleException("Can't establish a communication with BizHawk. Is Bizhawk open? Is the PokeAByte integration tool running?", ex);
+            throw new PokeAByteException("Can't establish a communication with BizHawk. Is Bizhawk open? Is the PokeAByte integration tool running?", ex);
         }
     }
 
@@ -71,13 +71,13 @@ public class BizhawkMemoryMapDriver : IPokeAByteDriver, IBizhawkMemoryMapDriver
 
         if (IntegrationVersion != SharedPlatformConstants.BIZHAWK_INTEGRATION_VERSION)
         {
-            throw new VisibleException("BizHawk's PokeAByte integration is out of date! Please update it.");
+            throw new PokeAByteException("BizHawk's PokeAByte integration is out of date! Please update it.");
         }
 
         SystemName = GetStringFromBytes(metadata.AsSpan()[2..30]);
         if (string.IsNullOrEmpty(SystemName))
         {
-            throw new VisibleException("BizHawk connection is established, but does not have a game running.");
+            throw new PokeAByteException("BizHawk connection is established, but does not have a game running.");
         }
         _platform = SharedPlatformConstants.Information.SingleOrDefault(x => x.BizhawkIdentifier == SystemName)
             ?? throw new Exception($"System {SystemName} is not yet supported.");

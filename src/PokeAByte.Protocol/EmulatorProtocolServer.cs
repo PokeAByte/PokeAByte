@@ -9,7 +9,7 @@ namespace PokeAByte.Protocol;
 public delegate void FreezeHandler(FreezeInstruction instruction);
 public delegate void UnfreezeHandler(UnfreezeInstruction instruction);
 public delegate void WriteHandler(WriteInstruction instruction);
-public delegate void SetupHandler(SetupInstruction instruction);
+public delegate bool SetupHandler(SetupInstruction instruction);
 public delegate void CloseRequestHandler();
 
 public class EmulatorProtocolServer : IDisposable
@@ -86,9 +86,11 @@ public class EmulatorProtocolServer : IDisposable
                     OnWrite?.Invoke(instruction);
                     break;
                 case Instructions.SETUP:
-                    OnSetup?.Invoke(SetupInstruction.FromByteArray(message));
-                    _socket.SendTo(new SetupResponse().GetByteArray(), endpoint);
-                    _clients.Add(endpoint);
+                    if (OnSetup?.Invoke(SetupInstruction.FromByteArray(message)) is true)
+                    {
+                        _socket.SendTo(new SetupResponse().GetByteArray(), endpoint);
+                        _clients.Add(endpoint);
+                    }
                     break;
                 default:
                     return;

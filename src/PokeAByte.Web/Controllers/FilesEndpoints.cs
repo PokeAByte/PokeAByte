@@ -94,9 +94,13 @@ public static class FilesEndpoints
             )
             .ToList();
         var downloadedMappers = await githubService.DownloadMappersAsync(mapperDownloads);
-        await updateManager.SaveUpdatedMappersAsync(downloadedMappers);
-        mapperFileService.Refresh();
-        return TypedResults.Ok();
+        if (downloadedMappers.Count > 0)
+        {
+            await updateManager.SaveUpdatedMappersAsync(downloadedMappers);
+            mapperFileService.Refresh();
+            return TypedResults.Ok();
+        }
+        return TypedResults.InternalServerError("");
     }
 
     public static IEnumerable<MapperFileModel> GetMapperFiles(IMapperFileService mapperFileService)

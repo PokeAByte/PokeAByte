@@ -21,7 +21,7 @@ public static class MemoryMappedViewAccessorExtensions
                 byte* pointer = null;
                 if (accessor.SafeMemoryMappedViewHandle.ByteLength < (offset + (ulong)destination.Length))
                 {
-                    throw new ArgumentException("Tried to read memory out of bounds of the memory mapped file.", nameof(offset));
+                    throw new PokeAByteException("Driver tried to read memory out of bounds of the memory mapped file.");
                 }
                 accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
                 var span = new Span<byte>(pointer + offset, destination.Length);
