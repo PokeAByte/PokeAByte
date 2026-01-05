@@ -1,3 +1,5 @@
+[Version 0.10.0](#0100)  
+[Version 0.9.2](#093)  
 [Version 0.9.2](#092)  
 [Version 0.9.1](#091)  
 [Version 0.9.0](#090)  
@@ -21,21 +23,15 @@
   - Must be enabled in the UI settings
   - Shows the last 5 most recently used mappers.
 
-
 ### Core
 
 - Emulator Data Protocol: Added "FREEZE" and "UNFREEZE" instructions. This can reduce communication overhead when freezing properties that update frequently in the game.
 
 ## Bugfixes
 
-### UI
-
-
-
-### Core
-
 - When freezing properties, sometimes the displayed value and the actual value would desync. This was mostly a display
-		  issue but could cause undeseriable behavior in some scenarios.
+  issue but could cause undeseriable behavior in some scenarios.
+- Fixed handling of string property writing. String values are now properly limited to the properties `Length` in bytes, minus the terminator character.
 
 ## Mapper changes
 
@@ -57,7 +53,6 @@ pokemon.Encrypt(gameGeneration, byteArray);
 - Tweaks to the format of the logging.
 - Improved several error messages, especially JavaScript related errors.
 - EDPS.Bizhawk: Reject Poke-A-Byte setup if more than half of blocks are unreadable. This prevents Poke-A-Byte from loading a mapper "succesfully" on the wrong game.
-
 
 ### UI
 
