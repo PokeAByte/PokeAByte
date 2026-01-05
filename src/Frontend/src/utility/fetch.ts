@@ -35,6 +35,17 @@ export async function changeMapper(mapperId: string | null) {
 	}
 }
 
+export async function getDriverName() {
+	try {
+		const response = await fetch(
+			BASE_URL + "/driver/name",
+			{ headers: DEFAULT_HEADERS }
+		);
+		return await response.json() as string;
+	} catch {
+		return "";
+	}
+}
 export async function archiveMappers(mappers: MapperVersion[]) {
 	return await postWithoutResult(BASE_URL + "/files/mapper/archive_mappers", mappers);
 }

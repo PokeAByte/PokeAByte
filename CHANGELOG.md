@@ -7,6 +7,8 @@
   
 # 0.10.0
 
+**Important**: The drivers for the RetroArch protocol and the old BizHawk external tools are being deprecated.
+
 ## Features
 
 ### UI
@@ -28,6 +30,8 @@
 - Emulator Data Protocol: Added "FREEZE" and "UNFREEZE" instructions. This can reduce communication overhead when freezing properties that update frequently in the game.
 
 ## Bugfixes
+
+### Core
 
 - When freezing properties, sometimes the displayed value and the actual value would desync. This was mostly a display
   issue but could cause undeseriable behavior in some scenarios.

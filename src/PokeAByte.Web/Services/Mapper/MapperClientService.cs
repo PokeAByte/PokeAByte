@@ -107,7 +107,7 @@ public class MapperClientService(
                 FileId = instance.Mapper.Metadata.FileId,
                 GameName = instance.Mapper.Metadata.GameName,
                 GamePlatform = instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION
+                MapperReleaseVersion = appSettings.MAPPER_VERSION,
             }
         );
     }

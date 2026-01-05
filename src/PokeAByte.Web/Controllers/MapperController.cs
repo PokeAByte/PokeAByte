@@ -55,7 +55,7 @@ public static class MapperEndpoints
                 FileId = instanceService.Instance.Mapper.Metadata.FileId,
                 GameName = instanceService.Instance.Mapper.Metadata.GameName,
                 GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION
+                MapperReleaseVersion = appSettings.MAPPER_VERSION,
             },
             Properties = instanceService.Instance.Mapper.Properties.Values,
             Glossary = instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
@@ -100,7 +100,7 @@ public static class MapperEndpoints
             GameName = meta.GameName,
             FileId = meta.FileId,
             GamePlatform = meta.GamePlatform,
-            MapperReleaseVersion = appSettings.MAPPER_VERSION
+            MapperReleaseVersion = appSettings.MAPPER_VERSION,
         };
         return TypedResults.Ok(model);
     }

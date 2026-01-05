@@ -12,9 +12,11 @@ import debounce from "debounce";
 import { IconButton } from "@/components/IconButton";
 
 export function PropertyEditor() {
+
 	const [, setLocation] = useLocation();
 	const [internalSearch, setInternalSearch] = useState("");
 	const [search, setSearch] = useState("");
+
 	const updateSearch = useMemo(() => debounce(setSearch, 100), []);
 	const onSearchInput = (value: string) => {
 		setInternalSearch(value);

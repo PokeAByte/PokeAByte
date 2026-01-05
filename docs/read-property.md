@@ -3,10 +3,10 @@
 flowchart TB
     classDef js stroke:#f00
 
-    StartRead[["GameHookInstance.cs\nRead()"]] -->
+    StartRead[["PokeAByteInstance.cs\nRead()"]] -->
     JsGlobalPreprocessor[js fn: global preprocessor]:::js --> StartForEachProperty
     subgraph "For each property"
-        StartForEachProperty[["_BaseProperty.cs\nProcessLoop() Start"]] -->
+        StartForEachProperty[["_PokeAByteProperty.cs\nProcessLoop() Start"]] -->
 
         StaticValueQuestion[/StaticValue is defined?/] 
         StaticValueQuestion --> |Yes| StaticValueQuestionY[Set value to StaticValue] --> EndForEachProperty
@@ -21,7 +21,7 @@ flowchart TB
         RefIsDefinedQ --> |Yes| RefIsDefinedQY[Set value to reference value] --> EndForEachProperty
         RefIsDefinedQ --> |No| EndForEachProperty
 
-        EndForEachProperty[["_BaseProperty.cs\nProcessLoop() End"]]
+        EndForEachProperty[["_PokeAByteProperty.cs\nProcessLoop() End"]]
     end
     EndForEachProperty --> JsGlobalPostprocessor
     JsGlobalPostprocessor["js: global postprocessor()"]:::js
