@@ -1,7 +1,7 @@
 name: Draft a release
 env:
   GH_TOKEN: ${{ github.token }}
-
+  
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
