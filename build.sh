@@ -4,15 +4,17 @@ cd src
 
 declare -A targets=(
 	["win-x64"]="Windows-x64.zip"
-	["linux-x64"]="Linux-x64.zip"
-	["osx-arm64"]="macOS-arm64.zip"
-	["osx-x64"]="macOS-x64.zip"
+	# ["linux-x64"]="Linux-x64.zip"
+	# ["osx-arm64"]="macOS-arm64.zip"
+	# ["osx-x64"]="macOS-x64.zip"
 )
 
 build () {
 	dotnet publish PokeAByte.Web -r $1 -o artifacts/github/PokeAByte -c Release
-	zip artifacts/github/${targets[$1]} artifacts/github/PokeAByte/**
-	rm -rf artifacts/github/PokeAByte
+	pushd artifacts/github
+	zip -r ${targets[$1]} PokeAByte/
+	rm -rf PokeAByte/
+	popd
 }
 
 for entry in "${!targets[@]}"; do
@@ -20,8 +22,8 @@ for entry in "${!targets[@]}"; do
 done
 
 # Build the bizhawk DLLs:
-dotnet publish PokeAByte.Protocol.BizHawk -o artifacts/github/ -c Release
-dotnet publish PokeAByte.Integrations.BizHawk -o artifacts/github/ -c Release
+# dotnet publish PokeAByte.Protocol.BizHawk -o artifacts/github/ -c Release
+# dotnet publish PokeAByte.Integrations.BizHawk -o artifacts/github/ -c Release
 
 # If "--publish" flag is set, use the github cli to create a release:
 if [[ $1 == *--publish* ]] then
