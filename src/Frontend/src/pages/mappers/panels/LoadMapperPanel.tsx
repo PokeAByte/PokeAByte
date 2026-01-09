@@ -82,14 +82,12 @@ export function LoadMapperPanel() {
 				<Dropdown
 					size={10}
 					tabIndex={-1}
-					id="mapper-select"
 					onSelection={(option) => setFilter(option.value ?? "")}
 					value={filter}
 					options={availableCategories}
 				/>
 				<SelectInput
 					size={45}
-					id="mapper-select"
 					onSelection={(option) => setCurrentMapper(option.value)}
 					value={currentMapper}
 					options={filteredMappers.map(createMapperOption)}

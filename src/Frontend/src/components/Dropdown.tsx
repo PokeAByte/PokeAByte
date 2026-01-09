@@ -44,7 +44,7 @@ export function Dropdown<Value>(props: SelectInputProps<Value, SelectOption<Valu
 				autocorrect="off"
 				readonly
 				size={props.size}
-				name={props.id}
+
 				value={valueDisplay}
 				onFocus={handleOnFocus}
 				onBlur={handleBlur}

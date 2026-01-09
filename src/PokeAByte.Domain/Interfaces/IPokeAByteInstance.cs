@@ -17,7 +17,7 @@ public interface IPokeAByteInstance : IAsyncDisposable
     public event InstanceProcessingAbort? OnProcessingAbort;
     public Task FreezeProperty(IPokeAByteProperty target, byte[] bytesFrozen);
     public Task UnfreezeProperty(IPokeAByteProperty target);
-    public Task WriteValue(IPokeAByteProperty target, string value, bool? freeze);
+    public Task WriteValue(IPokeAByteProperty target, object? value, bool? freeze);
     public Task WriteBytes(IPokeAByteProperty target, byte[] bytesToWrite, bool? freeze);
 }
 

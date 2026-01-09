@@ -233,7 +233,7 @@ public static class MapperEndpoints
             return TypedResults.BadRequest("Property is read only.");
         }
 
-        await instance.WriteValue(prop, model.Value?.ToString() ?? string.Empty, model.Freeze);
+        await instance.WriteValue(prop, model.Value, model.Freeze);
 
         return TypedResults.Ok();
     }

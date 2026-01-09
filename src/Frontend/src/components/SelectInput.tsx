@@ -4,7 +4,6 @@ import { useRef, useState } from "preact/hooks";
 export type SelectOption<V> = { value: V, display: string, extra?: ComponentChild }
 
 export interface SelectInputProps<V, T extends SelectOption<V>> {
-	id: string,
 	label?: string,
 	value?: V,
 	options: T[],
@@ -22,16 +21,17 @@ function matchDisplayValue<T>(search: string) {
 			return true;
 		}
 		search = search.toLowerCase();
-		return option.display.toString().toLowerCase().includes(search);
+		return option.display?.toString()?.toLowerCase()?.includes(search) ?? false;
 	}
 }
 
 export function findDisplayByValue<V, T extends SelectOption<V>>(options: T[], value?: V) {
 	if (value === null || value === undefined) {
-		return "";
+		return undefined;
 	}
-	return options.find(x => x.value === value)?.display ?? "";
+	return options.find(x => x.value === value)?.display;
 }
+
 
 function wrapIndex(index: number, length: number) {
 	if (index < 0) {
@@ -136,8 +136,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 				autocomplete="off"
 				autocorrect="off"
 				size={props.size}
-				name={props.id}
-				value={isOpen ? searchValue : valueDisplay}
+				value={(isOpen ? searchValue : valueDisplay )?? ""}
 				onFocus={handleOnFocus}
 				onBlur={handleBlur}
 				placeholder={props.placeholder}
@@ -158,7 +157,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 							onBlur={handleBlur}
 						>
 							<span>
-								{x.display}
+								{x.display || "null"}
 							</span>
 							{x.extra && 
 								<span>{x.extra}</span>

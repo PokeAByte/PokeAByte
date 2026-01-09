@@ -11,20 +11,20 @@ import { IconButton } from "@/components/IconButton";
 export function PropertyEdit({ path }: { path: string }) {
 	const property = useGameProperty(path);
 	const propertyType = property?.type ?? GamePropertyType.int;
-	const reference = property?.reference;
 	const isFrozen = property?.isFrozen || false;
 	const isReadonly = !!(property?.address === null);
 	const type = (propertyType === "bit" || propertyType === "bool") ? "checkbox" : "text";
-	const isSelect = reference && reference !== "defaultCharacterMap"
-	const actualValue = getPropertyFieldValue(property?.value, propertyType) ?? "";
-	const [value, setValue] = useState<string | boolean | null | number[]>(null);
+	const isSelect = property?.reference !== null && property?.type != "string";
+	const actualValue = getPropertyFieldValue(property) ?? "";
+	const [value, setValue] = useState<string | boolean | null | number | number[]>(null);
 	const [madeEdit, setMadeEdit] = useState(false);
 	const [saved, setSaved] = useState(false);
-	
-	const handleUpdate = (newValue: string | boolean | number[])  => {
+
+	const handleUpdate = (newValue: string | boolean | number | number[])  => {
 		setValue(newValue);
 		setMadeEdit(newValue !== actualValue);
 	};
+
 	const handleSave = () => {
 		let newPropertyValue = value;
 		if (property?.type === "byteArray" && typeof(newPropertyValue) === "string") {
@@ -38,6 +38,7 @@ export function PropertyEdit({ path }: { path: string }) {
 			});
 		}
 	};
+
 	const handleFreeze = async () => {
 		if (!isFrozen) {
 			const freezeValue = madeEdit ? value : property?.value;
@@ -81,7 +82,8 @@ export function PropertyEdit({ path }: { path: string }) {
 			{isSelect
 				? <PropertyInputSelect 
 					path={path} 
-					displayValue={(value ?? "").toString()}
+					reference={property!.reference!}
+					value={value ?? actualValue}
 					isReadonly={isReadonly} 
 					onChange={handleUpdate}
 					save={handleSave}
@@ -89,6 +91,7 @@ export function PropertyEdit({ path }: { path: string }) {
 				/>
 				: <PropertyTextbox
 					type={type}
+					actualValue={actualValue}
 					propertyType={propertyType}
 					path={path}
 					editValue={value}

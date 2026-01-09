@@ -349,7 +349,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         await ClientNotifier.SendInstanceReset();
     }
 
-    public async Task WriteValue(IPokeAByteProperty target, string value, bool? freeze)
+    public async Task WriteValue(IPokeAByteProperty target, object? value, bool? freeze)
     {
         if (target is not PokeAByteProperty property)
         {
@@ -370,11 +370,25 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             var reference = property.GetComputedReference(Mapper);
             if (reference == null) throw new Exception("Glossary is NULL.");
-            bytes = BitConverter.GetBytes(reference.GetFirstByValue(value).Key);
+            ReferenceItem? item = null;
+            if (value is long numericValue)
+            {
+                item = reference.GetSingleOrDefaultByKey((ulong)numericValue);
+            }
+            if (item == null)
+            {
+                item = reference.GetFirstByValue(value);
+            }
+            bytes = BitConverter.GetBytes(item.Key);
         }
         else
         {
-            bytes = property.BytesFromValue(value, Mapper);
+            var stringValue = value?.ToString();
+            if (stringValue == null)
+            {
+                throw new Exception($"Can not write null to property '{property.Path}'");
+            }
+            bytes = property.BytesFromValue(stringValue, Mapper);
         }
 
         if (property.BitIndexes != null)

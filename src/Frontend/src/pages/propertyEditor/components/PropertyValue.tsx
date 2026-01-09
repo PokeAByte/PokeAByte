@@ -24,7 +24,10 @@ export function PropertyValue({ path }: { path: string }) {
 	const handleCopyClick = useCallback(() => {
 		const property = Store.getProperty(path);
 		if (property) {
-			clipboardCopy(getPropertyFieldValue(property?.value, property.type));
+			const value = property.reference && property.type !== "string"
+				? property.value
+				: getPropertyFieldValue(property)
+			clipboardCopy( value);
 		}
 	}, [path]);
 	if (!override && hiddenProperties.value.includes(path)) {
