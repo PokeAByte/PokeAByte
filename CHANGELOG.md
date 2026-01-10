@@ -1,3 +1,4 @@
+[Version 0.10.1](#0101)  
 [Version 0.10.0](#0100)  
 [Version 0.9.2](#093)  
 [Version 0.9.2](#092)  
@@ -5,6 +6,14 @@
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+
+# 0.10.1
+
+- Fixed a silent crash that occurs when running PokeAByte 0.10.0 as the first version used (or a fresh user profile).
+- Fixed defaults in `appsettings.json`.
+  - Note that if you have configured your appsettings in the UI, you'll have to reset them if you use the appsettings.json
+    provided with this release. This may change in the future.
+
 # 0.10.0
 
 **Important**: The drivers for the RetroArch protocol and the old BizHawk external tools are being deprecated.

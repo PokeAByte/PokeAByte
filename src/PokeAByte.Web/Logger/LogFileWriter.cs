@@ -8,9 +8,14 @@ internal class LogFileWriter : IDisposable
 
     internal LogFileWriter(string path, int maxSize)
     {
+        var logFileDir = Path.GetDirectoryName(path);
+        if (logFileDir != null)
+        {
+            Directory.CreateDirectory(logFileDir);
+        }
         if (!File.Exists(path))
         {
-            File.Create(path);
+            File.Create(path).Close();
         }
 
         // Truncate logfile to below half of max size, if max size is exceeded:
