@@ -61,7 +61,7 @@ export function LicensePage() {
 					<tr>
 						<td class="min">Roboto (font)</td>
 						<td class="min">The Roboto Project Authors</td>
-						<td class="min"> SIL Open Font License, Version 1.1</td>
+						<td class="min">SIL Open Font License, Version 1.1</td>
 					</tr>
 					<tr>
 						<td class="min">Roboto Mono (font)</td>
@@ -81,9 +81,14 @@ export function LicensePage() {
 				</thead>
 				<tbody>
 					<tr>
-						<td className="min">PKHeX</td>
-						<td className="min">PKHeX contributors</td>
-						<td className="min">GPLv3</td>
+						<td class="min">.NET runtime</td>
+						<td class="min">.NET Foundation and Contributors</td>
+						<td class="min">MIT</td>
+					</tr>
+					<tr>
+						<td class="min">ASP.NET Core</td>
+						<td class="min">.NET Foundation and Contributors</td>
+						<td class="min">MIT</td>
 					</tr>
 					<tr>
 						<td className="min">CoreCLR-NCalc</td>
@@ -94,6 +99,11 @@ export function LicensePage() {
 						<td class="min">Jint</td>
 						<td class="min">Sebastien Ros</td>
 						<td class="min">BSD-2-Clause</td>
+					</tr>
+					<tr>
+						<td className="min">PKHeX</td>
+						<td className="min">PKHeX contributors</td>
+						<td className="min">GPLv3</td>
 					</tr>
 				</tbody>
 			</table>
