@@ -1,6 +1,7 @@
 import { useCallback,  useEffect,  useState } from "preact/hooks";
 import { ToastNotification, Toasts } from "./ToastStore";
 import { Toast } from "./Toast";
+import { Icon } from "@/components/Icon";
 
 export function Notifications() {
 	const [toasts, setToasts] = useState<ToastNotification[]>(Toasts.getToasts())
@@ -20,7 +21,7 @@ export function Notifications() {
 			})}
 			{toasts.length > 5 &&
 				<button type="button"  class="purple" onClick={closeAll}> 
-					Close all <i class="material-icons"> close </i>
+					Close all <Icon name="close"/>
 				</button>
 			}
 		</div>

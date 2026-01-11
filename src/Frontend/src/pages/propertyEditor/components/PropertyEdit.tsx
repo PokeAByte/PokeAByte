@@ -1,5 +1,4 @@
 import { Store } from "../../../utility/propertyStore";
-import { SaveValueButton } from "./SaveValueButton";
 import { FreezeValueButton } from "./FreezeValueButton";
 import { useGameProperty } from "../hooks/useGameProperty";
 import { Toasts } from "../../../notifications/ToastStore";
@@ -8,6 +7,8 @@ import { getPropertyFieldValue, PropertyTextbox } from "./PropertyTextbox";
 import { PropertyInputSelect } from "./PropertyInputSelect";
 import { useEffect, useState } from "preact/hooks";
 import { IconButton } from "@/components/IconButton";
+
+
 
 export function PropertyEdit({ path }: { path: string }) {
 	const property = useGameProperty(path);
@@ -21,6 +22,7 @@ export function PropertyEdit({ path }: { path: string }) {
 	const [value, setValue] = useState<string | boolean | null | number[]>(null);
 	const [madeEdit, setMadeEdit] = useState(false);
 	const [saved, setSaved] = useState(false);
+	
 	const handleUpdate = (newValue: string | boolean | number[])  => {
 		setValue(newValue);
 		setMadeEdit(newValue !== actualValue);
@@ -67,6 +69,7 @@ export function PropertyEdit({ path }: { path: string }) {
 
 
 	let placeholder = "";
+	
 	if (!madeEdit) {
 		if (property?.value === null) {
 			placeholder = "null";
@@ -99,7 +102,7 @@ export function PropertyEdit({ path }: { path: string }) {
 			}
 			{ madeEdit && 
 				<>
-					<SaveValueButton onClick={handleSave} />
+					<IconButton onClick={handleSave} title="Save" icon="save"/>
 					<IconButton 
 						title="Discard pending changes"
 						onClick={() => {setValue(null); setMadeEdit(false)}}

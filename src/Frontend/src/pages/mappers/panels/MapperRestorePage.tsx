@@ -1,20 +1,22 @@
-import { useState, useContext } from "preact/hooks";
+import { useState } from "preact/hooks";
 import { useAPI } from "../../../hooks/useAPI";
 import { Store } from "../../../utility/propertyStore";
 import { ArchivedMapper, ArchivedMappers } from "pokeaclient";
 import { ConfirmationModal } from "../../../components/ConfirmationModal";
-import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
+import { mapperFilesSignal, refreshMapperFiles } from "../../../Contexts/mapperFilesSignal";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
-import { Advanced } from "../../../components/Advanced";
 import { WideButton } from "../../../components/WideButton";
 import { Panel } from "@/components/Panel";
+import { Show } from "@preact/signals/utils";
+import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
+import { Icon } from "@/components/Icon";
 
 export function RestoreMapperPanel() {
 	const filesClient = Store.client.files;
-	const mapperFileContext = useContext(MapperFilesContext);
-	const deleteArchiveApi = useAPI(filesClient.deleteMappers, mapperFileContext.refresh);
-	const restoreArchiveApi = useAPI(filesClient.restoreMapper, mapperFileContext.refresh);
-	const archives = processArchive(mapperFileContext.archives);
+	const mapperFiles = mapperFilesSignal.value;
+	const deleteArchiveApi = useAPI(filesClient.deleteMappers, refreshMapperFiles);
+	const restoreArchiveApi = useAPI(filesClient.restoreMapper, refreshMapperFiles);
+	const archives = processArchive(mapperFiles.archives);
 
 	return (
 		<Panel id="mapper-restore" title="Restore backup/archive" >
@@ -23,13 +25,13 @@ export function RestoreMapperPanel() {
 					{archives.length} Archives/Backups and {archives.reduce((c, x) => c + x.Mappers.length, 0)} files found
 				</strong>
 			</div>
-			<Advanced>
+			<Show when={advancedModeSignal}>
 				<div class="row margin-top">
 					<OpenMapperFolderButton />
 					<WideButton color="blue" onClick={filesClient.openMapperFolder} text="Open archive/backup folder" />
 				</div>
 				<br />
-			</Advanced>
+			</Show>
 			<ul class="mapper-archives margin-top">
 				{archives.map((archive) => {
 					return (
@@ -60,7 +62,7 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 		<li class="margin-top">
 			<details>
 				<summary>
-					<span class="material-icons"> catching_pokemon </span>
+					<Icon name="catching_pokemon"/>
 					<span>
 						{archive.Path} ({archive.Mappers.length} files)
 					</span>

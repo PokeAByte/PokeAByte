@@ -1,8 +1,10 @@
+import { navigateTo } from "@/components/Route";
 import { Toasts } from "../../../notifications/ToastStore";
 
-export function createMapperLoadToast(_: boolean, result: boolean | string | null) {
+export function onMapperLoaded(_: boolean, result: boolean | string | null) {
 	if (result === true) {
 		Toasts.push("Loaded mapper", "task_alt", "green");
+		navigateTo("/properties");
 	} else if (result !== null) {
 		Toasts.push("Failed to load mapper:\n " + result, "", "red", false);
 	} else {

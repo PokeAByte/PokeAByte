@@ -1,13 +1,11 @@
 import { ComponentChildren } from "preact";
-import { useContext } from "preact/hooks";
-import { HidePropertyContext } from "@/Contexts/HidePropertyContext";
+import { hiddenOverrideSignal, hiddenProperties } from "@/Contexts/hiddenPropertySignal";
 
 /**
  * Renders the children only when the path is not a hidden property and the global is not set.
  */
 export function IfNotHidden(props: { path: string; children: ComponentChildren; }) {
-	const context = useContext(HidePropertyContext);
-	if (context.override || !context.hiddenProperties.includes(props.path)) {
+	if (hiddenOverrideSignal.value || !hiddenProperties.value.includes(props.path)) {
 		return props.children;
 	}
 	return null;

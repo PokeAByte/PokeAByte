@@ -1,19 +1,19 @@
-import { useContext } from "preact/hooks";
-import { MapperFilesContext } from "@/Contexts/availableMapperContext";
-import { useUISetting } from "@/Contexts/UISettingsContext";
+import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
+import { uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { useAPI } from "@/hooks/useAPI";
 import { changeMapper } from "@/utility/fetch";
 import { Panel } from "../../../components/Panel";
-import { createMapperLoadToast } from "./createMapperLoadToast";
+import { onMapperLoaded } from "./createMapperLoadToast";
 import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
+import { useComputed } from "@preact/signals";
 
 export function RecentPanel() {
-	const [isEnabled] = useUISetting("recentlyUsedEnabled");
-	const [recentMappers] = useUISetting("recentMappers");
-	const mapperFileContext = useContext(MapperFilesContext);
-	const changeMapperApi = useAPI(changeMapper, createMapperLoadToast);
-	const mappers = recentMappers?.map(id => mapperFileContext.availableMappers?.find(mapper => mapper.id == id))
+	const isEnabled = useComputed(() => uiSettingsSignal.value.recentlyUsedEnabled).value;
+	const recentMappers = useComputed(() => uiSettingsSignal.value.recentMappers).value;
+	const mapperFiles = mapperFilesSignal.value;
+	const changeMapperApi = useAPI(changeMapper, onMapperLoaded);
+	const mappers = recentMappers?.map(id => mapperFiles.availableMappers?.find(mapper => mapper.id == id))
 		.filter(x => !!x);
 
 	if (!isEnabled || !mappers?.length) {

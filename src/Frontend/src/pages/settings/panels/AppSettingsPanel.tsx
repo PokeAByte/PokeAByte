@@ -6,6 +6,7 @@ import { AppSettingsModel, getAppSettings, resetAppSettings, saveAppSettings } f
 import { Toasts } from "@/notifications/ToastStore";
 import { TargetedInputEvent } from "preact";
 import { Panel } from "@/components/Panel";
+import { WideButton } from "@/components/WideButton";
 
 export function AppSettingsPanel() {
 	const [dialog, setDialog] = useState<boolean>(false);
@@ -138,12 +139,10 @@ export function AppSettingsPanel() {
 
 					</tbody>
 				</table>
-				<button className="wide-button green margin-right" type="submit">
+				<button class="wide-button green margin-right" type="submit">
 					Save settings
 				</button>
-				<button className="wide-button red margin-right" type="button" onClick={() => setDialog(true)}>
-					Reset settings
-				</button>
+				<WideButton onClick={() => setDialog(true)} text="Reset settings" color="red" />
 				<ConfirmationModal
 					display={dialog}
 					title="Warning"

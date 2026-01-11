@@ -1,12 +1,10 @@
-import { Link } from "wouter";
-
 /** Renders the footer. */
 export function Footer() {
 	// @ts-expect-error "__POKEABYTE_VERSION__" is injected via vite.
 	const version = __POKEABYTE_VERSION__;
 	return (
 		<footer>
-			Poke-A-Byte {version} © 2025 ( <Link to="/license/">AGPL</Link> )
+			Poke-A-Byte {version} © 2025 ( <a href="/ui/license">AGPL</a> )
 		</footer>
 	)
 }

@@ -1,27 +1,23 @@
-import classNames from "classnames";
-import { useLocation } from "wouter";
+import { Icon } from "@/components/Icon";
+import { useLocation } from "@/components/Route";
+import { className } from "@/utility/className";
 import { Mapper } from "pokeaclient";
 
 export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 	const [location, setLocation] = useLocation();
 	const activeClass = mapper ? "text-green" : "text-red";
-	const mapperActive = location === "/" || location.startsWith("/mapper");
-	const propertiesActive = location.startsWith("/properties");
-	const settingsActive = location.startsWith("/settings");
+	const mapperActive = location === "/" || location.startsWith("/ui/mappers");
+	const propertiesActive = location.startsWith("/ui/properties");
+	const settingsActive = location.startsWith("/ui/settings");
 	return (
 		<>
 			<button
-				onClick={() => setLocation("/mapper/")}
+				onClick={() => setLocation("/mappers")}
 				role="link"
 				type="button"
-				class={classNames({"active": mapperActive })}
+				class={className(mapperActive, "active")}
 			>
-				<i
-					class={classNames("material-icons", { [activeClass]: mapperActive })}
-					aria-hidden="true"
-				> 
-					catching_pokemon 
-				</i>
+				<Icon name="catching_pokemon" class={className(mapperActive, activeClass)}/>
 				MAPPERS
 			</button>
 			<button
@@ -29,28 +25,18 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				type="button"
 				onClick={() => setLocation("/properties")}
 				disabled={!mapper}
-				class={classNames({"active": propertiesActive })}
+				class={className(propertiesActive, "active")}
 				>
-				<i 
-					class={classNames("material-icons", { [activeClass]: propertiesActive })}
-					aria-hidden="true"
-				> 
-					api 
-				</i>
+				<Icon name="api" class={className(propertiesActive, activeClass)}/>
 				PROPERTIES
 			</button>
 			<button
 				role="link"
 				type="button"
-				className={classNames({"active": settingsActive })}
-				onClick={() => setLocation("/settings/")}
+				className={className(settingsActive, "active")}
+				onClick={() => setLocation("/settings")}
 				>
-				<i 
-					className={classNames("material-icons", { [activeClass]: settingsActive })}
-					aria-hidden="true"
-				>
-					settings
-				</i>
+				<Icon name="settings" class={className(settingsActive, activeClass)}/>
 				SETTINGS
 			</button>
 		</>

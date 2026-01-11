@@ -1,29 +1,30 @@
 import { Store } from "@/utility/propertyStore"
-import { useState, useContext, useEffect } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { LoadProgress } from "@/components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "@/hooks/useAPI";
 import { archiveMappers, backupMappers } from "@/utility/fetch";
 import { MapperUpdate } from "pokeaclient";
-import { MapperFilesContext } from "@/Contexts/availableMapperContext";
+import { mapperFilesSignal, refreshMapperFiles } from "@/Contexts/mapperFilesSignal";
 import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
-import { Advanced } from "@/components/Advanced";
 import { WideButton } from "@/components/WideButton";
 import { Panel } from "@/components/Panel";
+import { Show } from "@preact/signals/utils";
+import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
 
 export function MapperBackupPanel() {
 	const filesClient = Store.client.files;
-	const mapperFileContext = useContext(MapperFilesContext);
+	const mapperFiles = mapperFilesSignal.value;
 	const [availableMappers, setAvailableMappers] = useState<MapperUpdate[]>([]);
 	const [selectedMappers, setSelectedMappers] = useState<string[]>([]);
-	const archiveMappersApi = useAPI(archiveMappers, mapperFileContext.refresh);
-	const backupApi = useAPI(backupMappers, mapperFileContext.refresh);
+	const archiveMappersApi = useAPI(archiveMappers, refreshMapperFiles);
+	const backupApi = useAPI(backupMappers, refreshMapperFiles);
 	// Load available mappers:
 
 	// Process loaded mappers:
 	useEffect(() => {
-		setAvailableMappers(mapperFileContext.updates.filter(mapper => !!mapper.currentVersion) ?? []);
-	}, [mapperFileContext.updates])
+		setAvailableMappers(mapperFiles.updates.filter(mapper => !!mapper.currentVersion) ?? []);
+	}, [mapperFiles.updates])
 
 	const handleArchiveSelected = () => {
 		const mappers = availableMappers
@@ -46,7 +47,7 @@ export function MapperBackupPanel() {
 		backupApi.call(availableMappers.map(x => x.currentVersion));
 	}
 
-	if (mapperFileContext.isLoading) {
+	if (mapperFiles.isLoading) {
 		return <LoadProgress label="Processing mapper(s)" />
 	}
 	return (
@@ -65,9 +66,9 @@ export function MapperBackupPanel() {
 					onClick={handleBackupAll} 
 					color="green" 
 				/>
-				<Advanced>
+				<Show when={advancedModeSignal}>
 					<OpenMapperFolderButton />
-				</Advanced>
+				</Show>
 			</div>
 			<div class="margin-top">
 				<WideButton 
@@ -82,13 +83,13 @@ export function MapperBackupPanel() {
 					onClick={handleArchiveAll}
 					text="Archive all"
 				/>
-				<Advanced>
+				<Show when={advancedModeSignal}>
 					<WideButton 
 						color="purple" 
 						onClick={filesClient.openMapperArchiveFolder}
 						text="Open archive folder"
 					/>
-				</Advanced>
+				</Show>
 			</div>
 			<div class="margin-top">
 				{archiveMappersApi.isLoading
@@ -97,7 +98,7 @@ export function MapperBackupPanel() {
 						availableMappers={availableMappers}
 						selectedMappers={selectedMappers}
 						onMapperSelection={setSelectedMappers}
-						onUpdateList={mapperFileContext.refresh}
+						onUpdateList={refreshMapperFiles}
 					/>
 				}
 			</div>

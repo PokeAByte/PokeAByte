@@ -1,6 +1,7 @@
 import { useAPI } from "@/hooks/useAPI";
 import { useStorageState } from "@/hooks/useStorageState";
 import { getDriverName } from "@/utility/fetch";
+import { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 export function DepreciationNotices(props: { mapperId: string | null; }) {
@@ -51,7 +52,7 @@ export function BizhawkWarning() {
 	)
 }
 
-export function Warning(props: { flag: string, children: React.ReactNode[]}) {
+export function Warning(props: { flag: string, children: ComponentChildren}) {
 	const [closed, setClosed] = useState(false)
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [disabled, setDisabled] = useStorageState(props.flag, false);

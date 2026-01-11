@@ -3,24 +3,25 @@ import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
 import { MapperUpdate } from "pokeaclient";
-import { MapperFilesContext } from "../../../Contexts/availableMapperContext";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { mapperFilesSignal, refreshMapperFiles } from "../../../Contexts/mapperFilesSignal";
+import { useEffect, useState } from "preact/hooks";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
 import { Toasts } from "../../../notifications/ToastStore";
-import { Advanced } from "../../../components/Advanced";
 import { WideButton } from "../../../components/WideButton";
 import { Panel } from "@/components/Panel";
+import { Show } from "@preact/signals/utils";
+import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
 
 export function UpdateMapperPanel() {
 	const filesClient = Store.client.files;
-	const mapperFileContext = useContext(MapperFilesContext);
+	const mapperFiles = mapperFilesSignal.value;
 	const [availableUpdates, setAvailableUpdates] = useState<MapperUpdate[]>([]);
 	const [selectedUpdates, sectSelectedUpdates] = useState<string[]>([]);
 	const downloadMappers = useAPI(
 		filesClient.downloadMapperUpdatesAsync, 
 		(_, success) => {
 			if (success) {
-				mapperFileContext.refresh();
+				refreshMapperFiles();
 				Toasts.push(`Successfully update mapper(s).`, "task_alt", "green");
 			}
 		}
@@ -28,12 +29,12 @@ export function UpdateMapperPanel() {
 
 	useEffect(() => {
 		setAvailableUpdates(
-			mapperFileContext.updates
+			mapperFiles.updates
 				.filter(mapper => !!mapper.currentVersion)
 				.filter(mapper => !!mapper.latestVersion)
 		);
 		sectSelectedUpdates([]);
-	}, [mapperFileContext.updates])
+	}, [mapperFiles.updates])
 
 	useEffect(() => {
 		if (downloadMappers.wasCalled && !downloadMappers.isLoading) {
@@ -51,7 +52,7 @@ export function UpdateMapperPanel() {
 		downloadMappers.call(availableUpdates);
 	}
 
-	if (downloadMappers.isLoading || mapperFileContext.isLoading) {
+	if (downloadMappers.isLoading || mapperFiles.isLoading) {
 		return <LoadProgress label="Downloading mapper(s)" />
 	}
 
@@ -63,10 +64,10 @@ export function UpdateMapperPanel() {
 			<div class="margin-top">
 				<WideButton text="Update selected" color="green" disabled={!selectedUpdates.length} onClick={handleUpdate} />
 				<WideButton text="Update all" color="green" disabled={!availableUpdates.length} onClick={handleUpdateAll} />
-				<WideButton text="Reload mapper list" color="blue" onClick={mapperFileContext.refresh} />
-				<Advanced>
+				<WideButton text="Reload mapper list" color="blue" onClick={refreshMapperFiles} />
+				<Show when={advancedModeSignal}>
 					<OpenMapperFolderButton />
-				</Advanced>
+				</Show>
 			</div>
 			<MapperSelectionTable
 				availableMappers={availableUpdates}

@@ -14,7 +14,7 @@ type Props = {
 export function PropertyInputSelect({ path, isReadonly, onChange, displayValue, placeholder }: Props) {
 	const property = useGameProperty(path);
 	const glossaryItems = Store.getGlossaryItem(property!.reference!) ?? [];
-	const options = glossaryItems
+	const options: SelectOption<string>[] = glossaryItems
 		.map(x => ({ 
 			value: x.key.toString(), 
 			display: x.value === null ? `[${x.key.toString()}]` : x.value

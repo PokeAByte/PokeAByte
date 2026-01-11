@@ -2,7 +2,6 @@ import { useState } from "preact/hooks";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";
 import { clipboardCopy } from "../utils/clipboardCopy";
 import { CopyValueIcon } from "./CopyValueIcon";
-import { SaveValueButton } from "./SaveValueButton";
 import { Store } from "../../../utility/propertyStore";
 import { Toasts } from "../../../notifications/ToastStore";
 import { IconButton } from "@/components/IconButton";
@@ -77,7 +76,10 @@ export function AttributesTable({ path }: { path: string }) {
 						<td>{reference}</td>
 					</tr>
 				}
-				<PropertyByteRow path={path} />
+				<tr>
+					<th>bytes</th>
+					<PropertyByteRow path={path} />
+				</tr>
 			</tbody>
 		</table>
 	);
@@ -91,6 +93,7 @@ export function PropertyByteRow({ path }: { path: string }) {
 	const [hasFocus, setHasFocus] = useState<boolean>(false);
 	const [madeEdit, setMadeEdit] = useState<boolean>(false);
 	const [values, setValues] = useState<string[]>([]);
+
 	const showTrueValues = !hasFocus && !madeEdit;
 	const handleEdit = (byte: string, index: number) => {
 		const newValues = structuredClone(values);
@@ -117,8 +120,7 @@ export function PropertyByteRow({ path }: { path: string }) {
 		return null;
 	}
 	return (
-		<tr>
-			<th>bytes</th>
+		<>
 			<td>
 				<CopyValueIcon onClick={clipboardBytes}  />
 			</td>
@@ -141,7 +143,7 @@ export function PropertyByteRow({ path }: { path: string }) {
 					})}
 					{madeEdit &&
 						<>
-							<SaveValueButton onClick={handleSave} />
+							<IconButton onClick={handleSave} title="Save" icon="save"/>
 							<IconButton
 								disabled={!madeEdit}
 								onClick={() => {setValues(convertBytes(bytes)); setMadeEdit(false)}}
@@ -152,6 +154,6 @@ export function PropertyByteRow({ path }: { path: string }) {
 					}
 				</span>
 			</td>
-		</tr>
+		</>
 	);
 }

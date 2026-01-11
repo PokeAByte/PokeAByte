@@ -1,24 +1,22 @@
 import { SelectInput } from "@/components/SelectInput";
 import { Dropdown } from "@/components/Dropdown";
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { useAPI } from "@/hooks/useAPI";
 import { LoadProgress } from "@/components/LoadProgress";
-import { AvailableMapper, Mapper } from "pokeaclient";
-import { MapperFilesContext } from "@/Contexts/availableMapperContext";
+import { AvailableMapper } from "pokeaclient";
+import {  mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
 import { unique } from "@/utility/unique";
 import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
-import { Advanced } from "@/components/Advanced";
 import { useStorageState } from "@/hooks/useStorageState";
 import { changeMapper } from "@/utility/fetch";
-import { createMapperLoadToast } from "./createMapperLoadToast";
+import { onMapperLoaded as onMapperLoaded } from "./createMapperLoadToast";
 import { Panel } from "@/components/Panel";
 import { FavoriteIcon } from "./components/FavoriteIcon";
-import { useUISetting } from "@/Contexts/UISettingsContext";
+import { advancedModeSignal, saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { Toasts } from "@/notifications/ToastStore";
-
-type MapperSelectProps = {
-	mapper: Mapper | null
-}
+import { mapperSignal } from "@/Contexts/mapperSignal";
+import { useComputed } from "@preact/signals";
+import { Show } from "@preact/signals/utils";
 
 function createMapperOption(value: AvailableMapper) {
 	return {
@@ -28,15 +26,15 @@ function createMapperOption(value: AvailableMapper) {
 	};
 }
 
-export function LoadMapperPanel(props: MapperSelectProps) {
-	const mapperFileContext = useContext(MapperFilesContext);
-	const mapper = props.mapper;
+export function LoadMapperPanel() {
+	const mapperFiles = mapperFilesSignal.value;
+	const mapper = mapperSignal.value;
 	const loadButtonRef = useRef<HTMLButtonElement>(null)
-	const changeMapperApi = useAPI(changeMapper, createMapperLoadToast);
+	const changeMapperApi = useAPI(changeMapper, onMapperLoaded);
 	const [currentMapper, setCurrentMapper] = useState<string | null>(null);
 	const [filter, setFilter] = useStorageState("mapper-category", "");
-	const [isRecentlyUsedEnabled] = useUISetting("recentlyUsedEnabled");
-	const [recentMappers, setRecentMappers] = useUISetting("recentMappers");
+	const isRecentlyUsedEnabled = useComputed(() => uiSettingsSignal.value.recentlyUsedEnabled).value;
+	const recentMappers = useComputed(() => uiSettingsSignal.value.recentMappers).value;
 
 	useEffect(() => {
 		if (currentMapper) {
@@ -45,15 +43,15 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 	}, [currentMapper]);
 
 	useEffect(() => {
-		setCurrentMapper(mapperFileContext.availableMappers?.find(x => x.id === mapper?.fileId)?.id ?? null);
-	}, [mapper, mapperFileContext.availableMappers]);
+		setCurrentMapper(mapperFiles.availableMappers?.find(x => x.id === mapper?.fileId)?.id ?? null);
+	}, [mapper, mapperFiles.availableMappers]);
 
 	const onLoadMapper = () => {
 		if (currentMapper) {
 			Toasts.clearErrors();
 			changeMapperApi.call(currentMapper);
 			if (isRecentlyUsedEnabled) {
-				setRecentMappers([currentMapper, ...(recentMappers??[])].filter(unique).slice(0, 5));
+				saveSetting("recentMappers", [currentMapper, ...(recentMappers??[])].filter(unique).slice(0, 5));
 			}
 		}
 	};
@@ -64,14 +62,14 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 
 	const availableCategories = [
 		{ value: "", display: "<No filter>" },
-		...mapperFileContext.availableMappers.map(x => x.displayName?.substring(1, x.displayName.indexOf(')')))
+		...mapperFiles.availableMappers.map(x => x.displayName?.substring(1, x.displayName.indexOf(')')))
 			.filter(unique)
 			.toSorted()
 			.map(x => ({ value: x, display: x }))
 	];
 	const filteredMappers = filter
-		? mapperFileContext.availableMappers.filter(x => x.displayName.startsWith(`(${filter})`))
-		: mapperFileContext.availableMappers;
+		? mapperFiles.availableMappers.filter(x => x.displayName.startsWith(`(${filter})`))
+		: mapperFiles.availableMappers;
 	return (
 		<Panel id="mapper-load" title="Load mapper" defaultOpen>			
 			<span> Select the mapper you would like to load: </span>
@@ -96,11 +94,11 @@ export function LoadMapperPanel(props: MapperSelectProps) {
 			<button ref={loadButtonRef} class="green margin-left wide-button" onClick={onLoadMapper}>
 				Load Mapper
 			</button>
-			<Advanced>
+			<Show when={advancedModeSignal}>
 				<div class="margin-top">
 					<OpenMapperFolderButton />
 				</div>
-			</Advanced>
+			</Show>
 		</Panel>
 	);
 }

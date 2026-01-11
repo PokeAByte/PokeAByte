@@ -1,18 +1,17 @@
-import { useContext } from "preact/hooks";
-import { Link } from "wouter";
-import { MapperFilesContext } from "@/Contexts/availableMapperContext";
-import { useUISetting } from "@/Contexts/UISettingsContext";
+import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
+import { uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { useAPI } from "@/hooks/useAPI";
 import { changeMapper } from "@/utility/fetch";
 import { Panel } from "../../../components/Panel";
-import { createMapperLoadToast } from "./createMapperLoadToast";
+import { onMapperLoaded } from "./createMapperLoadToast";
 import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
+import { useComputed } from "@preact/signals";
 
 export function FavoritePanel() {
-	const [favoriteIds] = useUISetting("favoriteMappers");
-	const mapperFileContext = useContext(MapperFilesContext);
-	const changeMapperApi = useAPI(changeMapper, createMapperLoadToast);
+	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
+	const mapperFileContext = mapperFilesSignal.value;
+	const changeMapperApi = useAPI(changeMapper, onMapperLoaded);
 	const favorites = favoriteIds?.map(id => mapperFileContext.availableMappers?.find(mapper => mapper.id == id))
 		.filter(x => !!x);
 
@@ -44,7 +43,7 @@ export function FavoritePanel() {
 			</div>
 			<br />
 			<span>
-				You can manage your favorites <Link href="~/ui/settings/#settings_ui">here</Link>.
+				You can manage your favorites <a href="/ui/settings/#settings_ui">here</a>.
 			</span>
 		</Panel>
 	);

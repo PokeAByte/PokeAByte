@@ -1,16 +1,9 @@
-import { useContext } from "preact/hooks";
 import { Panel } from "../../../components/Panel";
-import { UISettingsContext, useUISetting } from "@/Contexts/UISettingsContext";
+import { saveSetting, UISettings, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { FavoriteManagement } from "./components/FavoriteManagement";
+import { useComputed } from "@preact/signals";
 
 export function UISettingsPanel() {
-	const settingsContext = useContext(UISettingsContext);
-	const [advancedMode, setAdanvedMode] = useUISetting("advancedMode");
-	const [stickyHeader, setStickyHeader] = useUISetting("stickyHeader");
-	const [preserveFreeze, setPreserveFreeze] = useUISetting("preserveFreeze");
-	const [forceVisible, setForceVisible] = useUISetting("forceVisible");
-	const [recentlyUsedEnabled, setRecentlyUsed] = useUISetting("recentlyUsedEnabled");
-
 	return (
 		<Panel id="settings_ui" title="UI settings">
 			<strong>
@@ -20,85 +13,63 @@ export function UISettingsPanel() {
 			<form onSubmit={(e) => e.preventDefault()}>
 				<table class="striped">
 					<tbody>
-						<tr>
-							<th>
-								<label htmlFor="advanced">Enable advanced mode: </label>
-							</th>
-							<td>
-								<input
-									name="advanced"
-									type="checkbox"
-									role="switch"
-									checked={advancedMode}
-									onInput={() => setAdanvedMode(!advancedMode)}
-								/>
-								<span>Displays additional information and enables certain features.</span>
-							</td>
-						</tr>
-						<tr>
-							<th>
-								<label htmlFor="forceVisible">Display hidden properties: </label>
-							</th>
-							<td>
-								<input
-									name="forceVisible"
-									type="checkbox"
-									role="switch"
-									checked={forceVisible}
-									onInput={() => setForceVisible(!forceVisible)}
-								/>
-								<span>Enabling this shows properties even if you chose to hide them. </span>
-							</td>
-						</tr>
-						<tr>
-							<th>
-								<label htmlFor="preserveFreeze">Preserve freezes on reload: </label>
-							</th>
-							<td>
-								<input
-									name="preserveFreeze"
-									type="checkbox"
-									role="switch"
-									checked={preserveFreeze}
-									onInput={() => setPreserveFreeze(!preserveFreeze)}
-								/>
-								<span>When reloading a mapper, reapply previously frozen values. </span>
-							</td>
-						</tr>
-						<tr>
-							<th>
-								<label htmlFor="recentlyUsed">Track recently used mappers:</label>
-							</th>
-							<td>
-								<input
-									name="recentlyUsed"
-									type="checkbox"
-									role="switch"
-									checked={settingsContext.settings.recentlyUsedEnabled}
-									onInput={() => setRecentlyUsed(!recentlyUsedEnabled)}
-								/>
-								<span> When enabled, keep track of the last 5 used mappers for quick loading </span>
-							</td>
-						</tr>
+						<SettingSwitch 
+							setting="advancedMode" 
+							label="Enable advanced mode:"
+							description="Displays additional information and enables certain features."
+						/>
+						<SettingSwitch 
+							setting="forceVisible" 
+							label="Display hidden properties:"
+							description="Enabling this shows properties even if you chose to hide them."
+						/>
+						<SettingSwitch 
+							setting="preserveFreeze" 
+							label="Preserve freezes on reload:"
+							description="When reloading a mapper, reapply previously frozen values."
+						/>
+						<SettingSwitch 
+							setting="recentlyUsedEnabled" 
+							label="Track recently used mappers:"
+							description="When enabled, keep track of the last 5 used mappers for quick loading."
+						/>
 						<FavoriteManagement />
-						<tr>
-							<th>
-								<label htmlFor="stickyHeader">Sticky header: </label>
-							</th>
-							<td>
-								<input
-									name="stickyHeader"
-									type="checkbox"
-									role="switch"
-									checked={stickyHeader}
-									onInput={() => setStickyHeader(!stickyHeader)}
-								/>
-								<span>Keep header visible when scrolled down.</span>
-							</td>
-						</tr>
+						<SettingSwitch 
+							setting="stickyHeader" 
+							label="Sticky header:"
+							description="Keep header visible when scrolled down."
+						/>
 					</tbody>
 				</table>
 			</form>
 		</Panel>
 	)
+}
+
+type BooleanUiSettings = { 
+	[K in keyof UISettings as UISettings[K] extends boolean|undefined ? K : never]: UISettings[K] 
+};
+
+function SettingSwitch(props: {setting: keyof BooleanUiSettings, label: string, description?: string}) {
+	const value = useComputed(() => uiSettingsSignal.value[props.setting]).value;
+	return (
+		<tr>
+			<th>
+				<label htmlFor={props.setting}>{props.label}</label>
+			</th>
+			<td>
+				<input
+					name={props.setting}
+					type="checkbox"
+					role="switch"
+					checked={value}
+					onInput={() => saveSetting(props.setting, !value)}
+				/>
+				{props.description 
+					? <span>{props.description}</span> 
+					: null
+				}				
+			</td>
+		</tr>
+	);
 }

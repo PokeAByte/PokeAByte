@@ -1,11 +1,12 @@
-import { useUISetting } from "@/Contexts/UISettingsContext";
+import { saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { PanelProps } from "../pages/mappers/MapperPage";
 import { useEffect } from "preact/hooks";
+import { useComputed } from "@preact/signals";
 
 export function Panel(props: PanelProps) {
-	const [openPanels, setOpenPanels] = useUISetting("openPanels");
+	const openPanels = useComputed(() => uiSettingsSignal.value.openPanels).value;
 	const setOpen = (isOpen: boolean) => {
-		setOpenPanels({...openPanels, [props.id]: isOpen });
+		saveSetting("openPanels", {...openPanels, [props.id]: isOpen });
 	}
 	useEffect(() => {
 		if (document.location.hash === '#' + props.id) {

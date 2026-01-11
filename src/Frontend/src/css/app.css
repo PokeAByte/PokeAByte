@@ -129,7 +129,10 @@ nav.tab {
 	justify-content: center;
 	align-self: end;
 	
-	button {
+	a {
+		text-decoration: none;
+	}
+	button, a {
 		--button-background-hover: var(--color-surface-2);
 		--button-background-disabled: var(--color-surface-0);
 		position: relative;
@@ -237,16 +240,19 @@ table {
 		thead {
 			background-color: var(--color-surface-2);
 		}
+		tbody {
+			& > tr:nth-child(even) {
+				background-color: var(--color-surface-2);
+			}
+			& > tr:nth-child(odd) {
+				background-color: var(--color-surface-1);
+			}
+		} 
+		
 	}
 
 	thead tr th {
 		border-bottom: 2px dashed var(--color-border-1);
-	}
-}
-
-table.striped {
-	tbody tr:nth-child(even) {
-		background-color: var(--color-surface-2);
 	}
 }
 

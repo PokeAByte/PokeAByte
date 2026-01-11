@@ -1,19 +1,18 @@
-import classNames from "classnames";
-import { useContext } from "preact/hooks";
-import { HidePropertyContext } from "@/Contexts/HidePropertyContext";
+import { forceVisible, toggleForceVisible } from "@/Contexts/hiddenPropertySignal";
 import { IconButton } from "./IconButton";
+import { className } from "@/utility/className";
 
 
 export function ForceVisibilityToggle() {
-	const context = useContext(HidePropertyContext);
+	const override = forceVisible.value;
 	return (
 		<IconButton
 			noBorder
 			tabIndex={0}
 			title="Toggle forced visibility"
-			class={classNames({ "text-blue": context.override })}
-			onClick={() => context.toggleOverride()}
-			icon={context.override ? "visibility" : "visibility_off"}
+			class={className(override, "text-blue")}
+			icon={override ? "visibility" : "visibility_off"}
+			onClick={toggleForceVisible}
 		/>
 	);
 }

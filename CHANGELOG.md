@@ -13,6 +13,9 @@
 - Fixed defaults in `appsettings.json`.
   - Note that if you have configured your appsettings in the UI, you'll have to reset them if you use the appsettings.json
     provided with this release. This may change in the future.
+- Fixed performance issues in the UI:
+  - Searching for properties (advanced mode) should be a lot more responsive.
+  - Frontend should use slightly less CPU and memory.
 
 # 0.10.0
 

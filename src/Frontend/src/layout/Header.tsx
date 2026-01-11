@@ -1,11 +1,12 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
-import { useSyncExternalStore } from "preact/compat";
 import { AdvancedToggle } from "../components/AdvancedToggle";
 import { GameProperty } from "pokeaclient";
 import { IconButton } from "@/components/IconButton";
-import { useUISetting } from "../Contexts/UISettingsContext";
+import { uiSettingsSignal } from "../Contexts/uiSettingsSignal";
 import { Toasts } from "../notifications/ToastStore";
+import { mapperSignal } from "@/Contexts/mapperSignal";
+import { useComputed } from "@preact/signals";
 
 async function performReload( preserveFreeze: boolean ) {
 	if (!preserveFreeze) {
@@ -36,9 +37,9 @@ async function performReload( preserveFreeze: boolean ) {
 }
 
 export function Header() {
-	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);
-	const [sticky] = useUISetting("stickyHeader");
-	const [preserveFreeze] = useUISetting("preserveFreeze");
+	const mapper = mapperSignal.value;
+	const isSticky = useComputed(() => uiSettingsSignal.value.stickyHeader ?? false).value;
+	const preserveFreeze = useComputed(() => uiSettingsSignal.value.preserveFreeze ?? false).value;
 	const reloadMapper = async () => {
 		if (mapper != null) {
 			performReload(!!preserveFreeze);
@@ -47,7 +48,7 @@ export function Header() {
 	const textColor = mapper ? "text-green" : "text-red";
 
 	return (
-		<header class={sticky ? "sticky" : ""}>
+		<header class={isSticky ? "sticky" : ""}>
 			<h1 class={textColor}>
 				Poke-A-Byte
 			</h1>

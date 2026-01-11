@@ -1,6 +1,7 @@
+import { ComponentChild } from "preact";
 import { useRef, useState } from "preact/hooks";
 
-export type SelectOption<V> = { value: V, display: string, extra?: React.ReactNode }
+export type SelectOption<V> = { value: V, display: string, extra?: ComponentChild }
 
 export interface SelectInputProps<V, T extends SelectOption<V>> {
 	id: string,
@@ -47,7 +48,10 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 	const [searchValue, setSearchValue] = useState<string>("");
 	const [focusIndex, setFocusedIndex] = useState<number>(-1);
 	const valueDisplay = findDisplayByValue(props.options, props.value);
-	const filteredOptions = props.options.filter(matchDisplayValue(searchValue));
+	const filteredOptions = isOpen 
+		? props.options.filter(matchDisplayValue(searchValue))
+		: [];
+
 	const optionsContainer = useRef<HTMLDivElement | null>(null);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 

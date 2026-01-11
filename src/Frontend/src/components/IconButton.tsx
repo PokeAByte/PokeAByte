@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import { className } from "@/utility/className";
 import type { MaterialIcon } from "material-icons";
 
 export type Props = {
@@ -19,7 +19,7 @@ export function IconButton(props: Props) {
 			tabIndex={props.tabIndex ?? 0}
 			aria-disabled={props.disabled}
 			title={props.title}
-			class={classNames("material-icons", {"icon-button": !props.noBorder}, props.class)}
+			class={"material-icons " + (props.class??"") + " " + className(!props.noBorder, "icon-button")}
 			onClick={props.onClick}
 			onKeyUp={e => e.key === "Enter" ? props.onClick(e) : false}
 		>

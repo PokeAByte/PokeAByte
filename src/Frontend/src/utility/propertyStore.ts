@@ -28,7 +28,6 @@ export class PropertyStore {
 		this.client.connect();
 		window.setInterval(() => {
 			this.sendPropertyChanges()
-			
 		}, 32);
 	}
 

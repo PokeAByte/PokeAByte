@@ -1,9 +1,9 @@
 import { MapperUpdate, MapperVersion } from "pokeaclient";
-import { useEffect, useState } from "preact/hooks";
+import { Dispatch, StateUpdater, useEffect, useState } from "preact/hooks";
 import { WideButton } from "../../../../components/WideButton";
 
 type MapperSelectionTableProps = {
-	onMapperSelection: React.Dispatch<React.SetStateAction<string[]>>,
+	onMapperSelection: Dispatch<StateUpdater<string[]>>,
 	availableMappers: MapperUpdate[],
 	selectedMappers: string[],
 	onUpdateList?: () => void,
@@ -70,7 +70,7 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 			<input
 				id="mapper-filter"
 				type="text"
-				className="margin-right margin-left"
+				class="margin-right margin-left"
 				placeholder=""
 				onInput={(event) => setFilter(event.currentTarget.value)}
 			/>

@@ -1,18 +1,23 @@
 import { useCallback, useState } from "preact/hooks";
 
+
+export function getStorageItem<T>(key: string, defaultValue: T) {
+	const json = window.localStorage.getItem(key);
+	let value = defaultValue;
+	try {
+		if (json) {
+			value = JSON.parse(json) ?? defaultValue;
+		}
+	} catch (e) {
+		console.log(e);
+	}
+	return value;
+}
+
 export function useStorageState<T>(key: string, defaultValue: T): [T, (value: T) => void] {
 	const [item, setItem] = useState<T>(
 		() => {
-			const json = window.localStorage.getItem(key);
-			if (!json) {
-				return defaultValue;
-			}
-			try {
-				return JSON.parse(json) ?? defaultValue;
-			} catch (e) {
-				console.log(e);
-				return defaultValue;
-			}
+			return getStorageItem(key, defaultValue);
 		}
 	);
 	

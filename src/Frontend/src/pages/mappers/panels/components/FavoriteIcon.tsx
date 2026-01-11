@@ -1,13 +1,14 @@
-import { useUISetting } from "../../../../Contexts/UISettingsContext";
+import { useComputed } from "@preact/signals";
+import { saveSetting, uiSettingsSignal } from "../../../../Contexts/uiSettingsSignal";
 import { IconButton } from "@/components/IconButton";
 
 export function FavoriteIcon(props: { mapperId: string; }) {
-	const [favoriteIds, setFavorites] = useUISetting("favoriteMappers");
+	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
 	const handleClick = (event: UIEvent) => {
 		if (favoriteIds?.includes(props.mapperId)) {
-			setFavorites(favoriteIds?.filter(x => x !== props.mapperId) ?? []);
+			saveSetting("favoriteMappers", favoriteIds?.filter(x => x !== props.mapperId) ?? [] );
 		} else {
-			setFavorites([...(favoriteIds ?? []), props.mapperId]);
+			saveSetting("favoriteMappers", [...(favoriteIds ?? []), props.mapperId]);
 		}
 		event.stopPropagation();
 		return false;

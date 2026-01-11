@@ -1,104 +1,65 @@
 
 import { Store } from "../../../utility/propertyStore";
 import { PropertyValue } from "./PropertyValue";
-import { unique } from "../../../utility/unique";
 import { useStorageRecordState } from "../../../hooks/useStorageState";
-import { useContext, useState } from "preact/hooks";
-import { useGamePropertyField } from "../hooks/useGamePropertyField";
-import { HidePropertyContext } from "../../../Contexts/HidePropertyContext";
-import { VisibilityToggle } from "../../../components/VisibilityToggle";
+import { hiddenOverrideSignal, hiddenProperties } from "../../../Contexts/hiddenPropertySignal";
 import { IfNotHidden } from "../../../components/IfNotHidden";
-import { Advanced } from "../../../components/Advanced";
 import { GameProperty } from "pokeaclient";
+import { propertySearchSignal, PropertyTreeNode } from "../PropertyEditor";
+import { mapperSignal } from "@/Contexts/mapperSignal";
+import { PropertyTreeHeader } from "./PropertyTreeHeader";
 
-function isNumeric(x: any) {
-	return parseInt(x).toString() == x;
-}
-
-function matchProperty(property: GameProperty<any>, query: string) {
-	return property.path.toLocaleLowerCase().includes(query)
+function matchProperty(property: GameProperty<any>|undefined|null, query: string) {
+	if (!property) {
+		return false;
+	}
+	return property.path.toLowerCase().includes(query)
 		|| property.address?.toString(16) === query
 }
 
-export function PropertyTree({ path, level = 1, search = "" }: { path: string, level?: number, search: string }) {
-	const properties = Store.getAllProperties();
-	const hideContext = useContext(HidePropertyContext);
-	const hiddenItemCount = Object.keys(properties)
-		.filter(x => x.startsWith(path + "."))
-		.filter(x => !hideContext.override && hideContext.hiddenProperties.includes(x))
+export function PropertyTree({ node }: { node: PropertyTreeNode }) {
+	const mapperId = mapperSignal.peek()!.id;
+	const [isOpen, setIsOpen] = useStorageRecordState(mapperId, node.path, false);
+	const override = hiddenOverrideSignal.value;
+	const search = propertySearchSignal.value;
+	const hiddenItemCount = node.children
+		?.filter(x => !override && hiddenProperties.peek().includes(x.path))
 		.length
 
-	let immediateChildren: string[];
+	let immediateChildren: PropertyTreeNode[];
 	if (search) {
-		let query = search.toLowerCase();
-		if (query.startsWith("0x")) {
-			query = query.substring(2);
-		}
-		immediateChildren = Object.keys(properties)
-			.filter(x => x.startsWith(path + ".") && matchProperty(properties[x], query))
-			.map(x => { 
-				const levels = x.split(".");
-				return { name: levels[level], level: levels.length, path: x }
-			})
-			.toSorted((a, b) => {
-				if (a.level > b.level) return 1;
-				if (a.level < b.level) return -1;
-				return 0;
-			})
-			.map(x => x.name)
-			.filter(unique);
+		immediateChildren = node.children
+			?.filter(leaf => 
+				leaf.allChildren
+					? leaf.allChildren.some(x => matchProperty(Store.getProperty(x), search))
+					: matchProperty(Store.getProperty(leaf.path), search)
+			)
+			?? [];
 	} else {
-		immediateChildren = Object.keys(properties)
-			.filter(x => x.startsWith(path + "."))
-			.filter(x => hideContext.override || !hideContext.hiddenProperties.includes(x))
-			.map(x => ({ name: x.split(".")[level], level: x.split('.').length }))
-			.toSorted((a, b) => {
-				if (a.level > b.level) return 1;
-				if (a.level < b.level) return -1;
-				return 0;
-			})
-			.map(x => x.name)
-			.filter(unique);
+		immediateChildren = node.children
+			?.filter(x => override || !hiddenProperties.value.includes(x.path))
+			?? []
 	}
-	const mapperId = Store.getMapper()!.id;
-	const [isOpen, setIsOpen] = useStorageRecordState(mapperId, path, false);
-	const [[name, secondaryNameProperty] ] = useState(() => {
-		const pathSements = path.split(".");
-		const name = pathSements[pathSements.length - 1];
-		let secondaryNameProperty = "";
-		if (isNumeric(name)) {
-			if (properties[path + ".species"]) {
-				secondaryNameProperty = path + ".species";
-			} else {
-				secondaryNameProperty = path +  "." + immediateChildren[0];
-			}
-		}
-		return [name, secondaryNameProperty];
-	});
-	const secondaryName = useGamePropertyField(secondaryNameProperty, "value");
-	const onToggleOpen = () => setIsOpen(!isOpen);
-
-	if (properties[path]) {
+		
+	if (!node.children) {
 		return (
-			<IfNotHidden path={path}>
-				<PropertyValue mapperId= {mapperId} path={path} />
+			<IfNotHidden path={node.path}>
+				<PropertyValue mapperId= {mapperId} path={node.path} />
 			</IfNotHidden>
 		);
 	}
-	if (search && immediateChildren.length == 0) {
+	if (propertySearchSignal.value && immediateChildren.length == 0) {
 		return null;
 	}
-	const openOverride = search && (immediateChildren.length <= 6 || level === 1);
+	const openOverride = propertySearchSignal.value && (immediateChildren.length <= 10);
 	return (
 		<>
 			<PropertyTreeHeader 
 				isOpen={isOpen}
-				onToggleOpen={onToggleOpen}
-				path={path}
-				name={name}
-				secondaryName={secondaryName}
+				onToggleOpen={() => setIsOpen(!isOpen)}
+				node={node}
 				entryCount={immediateChildren.length}
-				hiddenEntryCount={hiddenItemCount}
+				hiddenEntryCount={hiddenItemCount ?? 0}
 			/>
 			<tr class={(isOpen || openOverride) ? "" : "hidden"}>
 				<td colSpan={2}>
@@ -106,8 +67,7 @@ export function PropertyTree({ path, level = 1, search = "" }: { path: string, l
 						<table class="property-table">
 							<tbody>
 								{immediateChildren.map(x => {
-									const childPath = path + "." + x;
-									return <PropertyTree key={childPath} path={childPath} level={level + 1} search={search} />;
+									return <PropertyTree key={x.key} node={x} />;
 								})}
 							</tbody>
 						</table>
@@ -116,39 +76,4 @@ export function PropertyTree({ path, level = 1, search = "" }: { path: string, l
 			</tr>
 		</>
 	)
-}
-
-type PropertyTreeHeaderProps = {
-	onToggleOpen: () => void,
-	isOpen: boolean,
-	name: string,
-	secondaryName?: string,
-	entryCount: number,
-	hiddenEntryCount: number,
-	path: string,
-}
-
-function PropertyTreeHeader(props: PropertyTreeHeaderProps) {
-	return (
-		<tr class="leaf interactive" onClick={props.onToggleOpen}>
-			<th >
-				<i class="material-icons"> {props.isOpen ? "folder" : "folder_open"} </i>
-				<span class="margin-left">
-					{props.name}
-					{props.secondaryName &&
-						<span> - {props.secondaryName?.toString()} </span>
-					}
-				</span>
-			</th>
-			<td>
-				<span class="margin-left color-darker">
-					{props.entryCount} Entries 
-					{props.hiddenEntryCount > 0 && ` (+${props.hiddenEntryCount} hidden)`}
-				</span>
-				<Advanced>
-					<VisibilityToggle path={props.path} />
-				</Advanced>
-			</td>
-		</tr>
-	);
 }

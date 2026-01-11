@@ -1,14 +1,14 @@
 import { IconButton } from "@/components/IconButton";
 import { WideButton } from "@/components/WideButton";
-import { MapperFilesContext } from "@/Contexts/availableMapperContext";
-import { useUISetting } from "@/Contexts/UISettingsContext";
-import { useContext } from "preact/hooks";
+import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
+import { saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
+import { useComputed } from "@preact/signals";
 
-
+/** Renders a table of favorite mappers with buttons to change their order or delete them. */
 export function FavoriteManagement() {
-	const [favoriteIds, setFavorites] = useUISetting("favoriteMappers");
+	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value ?? [];
 	const removeFavorite = (favorite: string) => {
-		setFavorites(favoriteIds?.filter(x => x !== favorite) ?? []);
+		saveSetting("favoriteMappers", favoriteIds?.filter(x => x !== favorite) ?? []);
 	};
 
 	const moveFavoriteUp = (favoriteId: string) => {
@@ -20,7 +20,7 @@ export function FavoriteManagement() {
 		if (index > 0) {
 			newArrangement.splice(index, 1);
 			newArrangement.splice(index - 1, 0, favoriteId);
-			setFavorites([...newArrangement]);
+			saveSetting("favoriteMappers", [...newArrangement]);
 		}
 	};
 
@@ -33,11 +33,11 @@ export function FavoriteManagement() {
 		if (index < newArrangement?.length) {
 			newArrangement.splice(index, 1);
 			newArrangement.splice(index + 1, 0, favoriteId);
-			setFavorites([...newArrangement]);
+			saveSetting("favoriteMappers", [...newArrangement]);
 		}
 	};
-	const mapperFileContext = useContext(MapperFilesContext);
-	const favorites = favoriteIds?.map(id => mapperFileContext.availableMappers?.find(mapper => mapper.id == id))
+	const mapperFiles = mapperFilesSignal.value;
+	const favorites = favoriteIds?.map(id => mapperFiles.availableMappers?.find(mapper => mapper.id == id))
 		.filter(x => !!x);
 
 	return (
@@ -82,10 +82,10 @@ export function FavoriteManagement() {
 						})}
 					</tbody>
 				</table>
-				{!!favoriteIds?.length &&
-					<WideButton text="Clear all" color="red" onClick={() => setFavorites([])} />}
-				{!favoriteIds?.length &&
-					<span> You currently have no favorites </span>}
+				{favoriteIds.length > 0 
+					? <WideButton text="Clear all" color="red" onClick={() => saveSetting("favoriteMappers", [])} />
+					: <span> You currently have no favorites </span>
+				}
 
 			</td>
 		</tr>

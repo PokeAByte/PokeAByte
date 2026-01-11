@@ -1,14 +1,11 @@
-import { useContext } from "preact/hooks";
-import { HidePropertyContext } from "../Contexts/HidePropertyContext";
+import { hiddenProperties, toggleHiddenProperty } from "../Contexts/hiddenPropertySignal";
 import { IconButton } from "./IconButton";
 
-
 export function VisibilityToggle(props: { path: string; }) {
-	const context = useContext(HidePropertyContext);
-	const isVisible = !context.hiddenProperties.includes(props.path);
+	const isVisible = !hiddenProperties.value.includes(props.path);
 		
 	const onToggle = (event: Event) => {
-		context.setHidden(props.path, isVisible);
+		toggleHiddenProperty(props.path);
 		event.stopPropagation();
 	};
 	

@@ -1,9 +1,10 @@
+import { ComponentChild } from "preact";
 import { useRef, useEffect } from "preact/hooks";
 
 type ModalProps = {
 	display: boolean;
 	title?: string;
-	text: string | React.ReactNode;
+	text: string | ComponentChild;
 	confirmLabel: string;
 	/** Callback invoked when the user confirms the action. */
 	onConfirm: () => void;

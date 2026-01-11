@@ -1,6 +1,7 @@
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { Store } from "../../../utility/propertyStore";
 import { GameProperty } from "pokeaclient";
+import { subscribePath } from "./subscribePaths";
 
 /**
  * Use a single field of a property from the store.
@@ -15,18 +16,15 @@ export function useGamePropertyField<K extends keyof GameProperty>(path: string,
 		const prop = Store.getProperty(path)
 		return prop ? prop[field] : null;
 	})
-	useEffect(
-		() => {
-			const getProperty = (updatedPath: string) => {
-				if (updatedPath === path) {
-					const newProperty = Store.getProperty(path);
-					setData(newProperty ? newProperty[field] : null);
-				}
-			};
-			Store.addUpdateListener(getProperty);
-			return () => Store.removeUpdateListener(getProperty);
-		},
-		[path, field]
-	);
+	const onPropertyChange = useCallback(() => {
+		const newProperty = Store.getProperty(path);
+		setData(newProperty ? newProperty[field] : null);
+	}, [path, field]);
+	
+	useEffect(() => {
+		if (path !== "") {
+			return subscribePath(path, onPropertyChange);
+		}
+	}, [onPropertyChange, path]);
 	return data;
 }

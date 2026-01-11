@@ -1,32 +1,17 @@
-import { useEffect, useSyncExternalStore } from "preact/compat";
-import { Switch, Route, Redirect, useLocation } from "wouter";
+
+import { navigateTo, Switch } from "@/components/Route";
 import { LoadProgress } from "../components/LoadProgress";
 import { PropertyEditor } from "../pages/propertyEditor/PropertyEditor";
 import MapperPage from "../pages/mappers/MapperPage";
-import { Store } from "../utility/propertyStore";
 import { Settings } from "../pages/settings/Settings";
-import { LicensePage } from "../pages/LicensePage";
-import { usePrevious } from "../hooks/usePrevious";
+import { LicensePage } from "../pages/license/LicensePage";
 import { DepreciationNotices } from "./DepreciationNotices";
+import { isConnectedSignal, mapperSignal } from "@/Contexts/mapperSignal";
+import { useEffect } from "preact/hooks";
 
 export function MainView() {
-	const isConnected = useSyncExternalStore(Store.subscribeConnected, Store.isConnected);
-	const [path, setLocation] = useLocation();
-	const mapper = useSyncExternalStore(Store.subscribeMapper, Store.getMapper);	
-	const previousMapper = usePrevious(mapper);
-
-	useEffect(() => {
-		if (path === "~/") {
-			setLocation(mapper ? "/properties" : "/mapper/", { replace: false});
-		}
-	}, [path, mapper, setLocation]);
-
-	useEffect(() => {
-		if (mapper && !previousMapper) {
-			setLocation("/properties", { replace: false});
-			
-		}
-	}, [mapper, previousMapper, setLocation]);
+	const isConnected = isConnectedSignal.value;
+	const mapper = mapperSignal.value;
 
 	if (!isConnected) {
 		return (
@@ -35,27 +20,24 @@ export function MainView() {
 			</main>
 		);
 	}
+	
 	return (
 		<main>
-			<Switch>
-				<Route path="/properties">
-					<PropertyEditor />
-				</Route>
-				<Route path="/settings">
-					<Settings />
-				</Route>
-				<Route path="/mapper" nest>
-					<MapperPage />
-				</Route>
-				<Route path="/license/" nest>
-					<LicensePage />
-				</Route>
-				<Route>
-					<Redirect to={mapper ? "/properties": "/mapper/"} />
-				</Route>
-			</Switch>
+			<Switch map={[
+				["/properties", PropertyEditor],
+				["/settings", Settings],
+				["/mappers", MapperPage],
+				["/license", LicensePage],
+				["*", DefaultRedirect],
+			]} />
 			<DepreciationNotices mapperId={mapper?.id ?? null}/>
 		</main>
 	);
 }
 
+function DefaultRedirect() {
+	useEffect(() => {
+		navigateTo(mapperSignal.value ? "/properties": "/mappers");
+	});
+	return null;
+}
