@@ -36,6 +36,7 @@ public class Program
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex);
             logger?.LogCritical(ex, "Poke-A-Byte startup failed!");
         }
     }

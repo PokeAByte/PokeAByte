@@ -5,7 +5,7 @@ using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Hubs;
 
-public class UpdateHub(IInstanceService instanceService, Domain.Models.AppSettings appSettings) : Hub
+public class UpdateHub(IInstanceService instanceService, AppSettingsService appSettingsService) : Hub
 {
     public override Task OnConnectedAsync()
     {
@@ -20,7 +20,7 @@ public class UpdateHub(IInstanceService instanceService, Domain.Models.AppSettin
                     FileId = mapper.Metadata.FileId,
                     GameName = mapper.Metadata.GameName,
                     GamePlatform = mapper.Metadata.GamePlatform,
-                    MapperReleaseVersion = appSettings.MAPPER_VERSION
+                    MapperReleaseVersion = appSettingsService.Get().MAPPER_VERSION
                 },
                 Properties = mapper.Properties.Values,
                 Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()

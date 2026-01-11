@@ -36,7 +36,7 @@ public static class Startup
             options.SerializerOptions.Converters.Add(new ByteArrayJsonConverter());
         });
 
-        services.AddSingleton<AppSettings>();
+        services.AddSingleton<AppSettingsService>();
         services.AddSingleton<ScriptConsole>();
         services.AddSingleton<IMapperFileService, MapperFileService>();
         services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();

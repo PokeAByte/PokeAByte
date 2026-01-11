@@ -22,33 +22,13 @@ public class MapperUpdaterSettings
     [JsonPropertyName("requires_update")]
     public bool RequiresUpdate { get; set; } = false;
 
-    private static string? ReadFileIfExists(string path)
-    {
-        if (!File.Exists(path))
-        {
-            return null;
-        }
-        string result = File.ReadAllText(path);
-        if (string.IsNullOrEmpty(result))
-        {
-            return null;
-        }
-        return result;
-    }
-
     public static MapperUpdaterSettings Load(ILogger logger)
     {
-        var settingsJson = ReadFileIfExists(MapperPaths.MapperUpdateSettingsFile);
-        MapperUpdaterSettings? result = null;
-        if (settingsJson != null)
-        {
-            try
-            {
-                // Deserialize the data 
-                result = JsonSerializer.Deserialize(settingsJson, MapperUpdaterSettingsContext.Default.MapperUpdaterSettings);
-            }
-            catch (Exception) { }
-        }
+        MapperUpdaterSettings? result = JsonFile.Deserialize(
+            MapperPaths.MapperUpdateSettingsFile, 
+            MapperUpdaterSettingsContext.Default.MapperUpdaterSettings, 
+            null
+        );
         if (result == null)
         {
             logger.LogWarning($"Failed to read {MapperPaths.MapperUpdateSettingsFile}. Creating a new one. ");

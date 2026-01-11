@@ -11,7 +11,7 @@ public class MapperClientService(
     ILogger<MapperClientService> logger,
     IInstanceService instanceService,
     IMapperFileService mapperFileService,
-    AppSettings appSettings,
+    AppSettingsService appSettingsService,
     IDriverService driverService
 )
 {
@@ -107,7 +107,7 @@ public class MapperClientService(
                 FileId = instance.Mapper.Metadata.FileId,
                 GameName = instance.Mapper.Metadata.GameName,
                 GamePlatform = instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION,
+                MapperReleaseVersion = appSettingsService.Get().MAPPER_VERSION,
             }
         );
     }

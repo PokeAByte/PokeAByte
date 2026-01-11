@@ -119,17 +119,11 @@ public static class FilesEndpoints
     public static async Task<IResult> GetUpdatesAsync(IMapperUpdateManager updateManager)
     {
         await updateManager.CheckForUpdates();
-        if (!File.Exists(MapperPaths.OutdatedMapperTreeJson))
+        var result = JsonFile.Deserialize(MapperPaths.OutdatedMapperTreeJson, ApiJsonContext.Default.IEnumerableMapperComparisonDto, null);
+        if (result == null)
         {
-            return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} does not exist locally.");
+            return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} does not exist or was empty.");
         }
-        //load the mapper list
-        var jsonStr = File.ReadAllText(MapperPaths.OutdatedMapperTreeJson);
-        if (string.IsNullOrWhiteSpace(jsonStr))
-            return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} was empty.");
-
-        return TypedResults.Ok(
-            JsonSerializer.Deserialize(jsonStr, ApiJsonContext.Default.IEnumerableMapperComparisonDto)
-        );
+        return TypedResults.Ok(result);
     }
 }

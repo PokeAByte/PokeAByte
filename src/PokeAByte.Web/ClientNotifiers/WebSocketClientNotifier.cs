@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.SignalR;
 using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
 
 namespace PokeAByte.Web.ClientNotifiers;
 
-public class WebSocketClientNotifier(AppSettings _appSettings, IHubContext<UpdateHub> hubContext) : IClientNotifier
+public class WebSocketClientNotifier(AppSettingsService appSettingsService, IHubContext<UpdateHub> hubContext) : IClientNotifier
 {
     private readonly IHubContext<UpdateHub> _hubContext = hubContext;
 
@@ -25,7 +24,7 @@ public class WebSocketClientNotifier(AppSettings _appSettings, IHubContext<Updat
                     GameName = mapper.Metadata.GameName,
                     GamePlatform = mapper.Metadata.GamePlatform,
                     FileId = mapper.Metadata.FileId,
-                    MapperReleaseVersion = _appSettings.MAPPER_VERSION
+                    MapperReleaseVersion = appSettingsService.Get().MAPPER_VERSION
                 },
                 Properties = mapper.Properties.Values,
                 Glossary = mapper.References.Values.MapToDictionaryGlossaryItemModel()

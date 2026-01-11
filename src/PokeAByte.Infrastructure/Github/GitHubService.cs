@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models;
@@ -17,42 +18,24 @@ public class GitHubService : IGithubService
 
     public IGithubSettings Settings { get; private set; }
 
-    public GitHubService(ILogger<IGithubService> logger, AppSettings appSettings, IClientNotifier clientNotifier)
+    public GitHubService(ILogger<IGithubService> logger, AppSettingsService appSettings, IClientNotifier clientNotifier)
     {
         _logger = logger;
         _clientNotifier = clientNotifier;
-        Settings = LoadSettings(appSettings.GITHUB_TOKEN)
-            ?? new GithubSettings() { Token = appSettings.GITHUB_TOKEN };
+        Settings = LoadSettings(appSettings.Get().GITHUB_TOKEN)
+            ?? new GithubSettings() { Token = appSettings.Get().GITHUB_TOKEN };
     }
 
     private GithubSettings? LoadSettings(string defaultToken = "")
     {
-
-        // Load the json
-        string? jsonData = File.Exists(MapperPaths.GithubApiSettings)
-            ? File.ReadAllText(MapperPaths.GithubApiSettings)
-            : null;
-        // Blank json data, just return 
-        if (string.IsNullOrWhiteSpace(jsonData))
-        {
+        var deserialized = JsonFile.Deserialize(MapperPaths.GithubApiSettings, GithubSettingsContext.Default.GithubSettings, null);
+        if (deserialized is null)
             return null;
-        }
-        try
-        {
-            //Deserialize the data 
-            var deserialized = JsonSerializer.Deserialize(jsonData, GithubSettingsContext.Default.GithubSettings);
-            if (deserialized is null)
-                return null;
 
-            deserialized.Token = string.IsNullOrWhiteSpace(deserialized.Token)
-                ? defaultToken
-                : deserialized.Token;
-            return deserialized;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        deserialized.Token = string.IsNullOrWhiteSpace(deserialized.Token)
+            ? defaultToken
+            : deserialized.Token;
+        return deserialized;
     }
 
     private async Task<string?> ResponseMessageToJson(HttpResponseMessage? responseMessage)

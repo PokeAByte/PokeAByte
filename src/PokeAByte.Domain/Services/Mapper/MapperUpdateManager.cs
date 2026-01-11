@@ -18,19 +18,16 @@ public partial class ManagerJsonContext : JsonSerializerContext
 public class MapperUpdateManager : IMapperUpdateManager
 {
     private readonly ILogger<MapperUpdateManager> _logger;
-    private readonly AppSettings _appSettings;
     private readonly IMapperFileService _mapperFileService;
     private readonly MapperUpdaterSettings _mapperUpdaterSettings;
     private readonly IGithubService _githubService;
 
     public MapperUpdateManager(ILogger<MapperUpdateManager> logger,
-        AppSettings appSettings,
         MapperUpdaterSettings mapperUpdaterSettingsManager,
         IMapperFileService mapperFileService,
         IGithubService githubService)
     {
         _logger = logger;
-        _appSettings = appSettings;
         _mapperUpdaterSettings = mapperUpdaterSettingsManager;
         _mapperFileService = mapperFileService;
         _githubService = githubService;

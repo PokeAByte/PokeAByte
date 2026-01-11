@@ -42,7 +42,7 @@ public static class MapperEndpoints
         app.MapPost("/mapper/set-property-value", UpdatePropertyValueAsync);
     }
 
-    public static IResult GetMapper(IInstanceService instanceService, AppSettings appSettings)
+    public static IResult GetMapper(IInstanceService instanceService, AppSettingsService appSettingsService)
     {
         if (instanceService.Instance == null)
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
@@ -55,7 +55,7 @@ public static class MapperEndpoints
                 FileId = instanceService.Instance.Mapper.Metadata.FileId,
                 GameName = instanceService.Instance.Mapper.Metadata.GameName,
                 GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION,
+                MapperReleaseVersion = appSettingsService.Get().MAPPER_VERSION,
             },
             Properties = instanceService.Instance.Mapper.Properties.Values,
             Glossary = instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
+using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using PokeAByte.Domain.Models.Properties;
 using PokeAByte.Domain.Services.MapperFile;
@@ -17,7 +18,6 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(int))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(double))]
-[JsonSerializable(typeof(AppSettingsDto))]
 [JsonSerializable(typeof(MapperUpdaterSettings))]
 [JsonSerializable(typeof(IGithubSettings))]
 [JsonSerializable(typeof(GithubSettings))]
@@ -27,6 +27,7 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(UpdatePropertyFreezeModel))]
 [JsonSerializable(typeof(UpdatePropertyBytesModel))]
 [JsonSerializable(typeof(MapperModel))]
+[JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(UpdatePropertyValueModel))]
 [JsonSerializable(typeof(List<UpdatePropertyValueModel>))]
 [JsonSerializable(typeof(List<MapperDto>))]
