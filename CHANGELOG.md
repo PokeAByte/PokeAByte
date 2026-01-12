@@ -9,6 +9,8 @@
 
 # 0.10.1
 
+## Bugfixes
+
 - Fixed a silent crash that occurs when running PokeAByte 0.10.0 as the first version used (or a fresh user profile).
 - Fixed defaults in `appsettings.json`.
   - Note that if you have configured your appsettings in the UI, you'll have to reset them if you use the appsettings.json
@@ -16,6 +18,13 @@
 - Fixed performance issues in the UI:
   - Searching for properties (advanced mode) should be a lot more responsive.
   - Frontend should use slightly less CPU and memory.
+
+## Other changes
+
+- Added an icon to the windows executable.
+- Replaced the old blazor favicon with an original icon
+
+The icon is subject to change.
 
 # 0.10.0
 

@@ -4,7 +4,7 @@ export function Footer() {
 	const version = __POKEABYTE_VERSION__;
 	return (
 		<footer>
-			Poke-A-Byte {version} © 2025 ( <a href="/ui/license">AGPL</a> )
+			Poke-A-Byte {version} © 2026 ( <a href="/ui/license">AGPL</a> )
 		</footer>
 	)
 }

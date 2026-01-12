@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PublicSign>false</PublicSign>
     <Company>Scott's Thoughts</Company>
-    <VersionPrefix>0.10.0</VersionPrefix>
+    <VersionPrefix>0.10.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <PublishSingleFile>true</PublishSingleFile>
