@@ -7,6 +7,10 @@
 [Version 0.8.1](#081-2024-11-09)  
   
 
+# 0.10.2
+
+- Fixed properties rendered as drop-downs not updating after a write.
+
 # 0.10.1
 
 ## Bugfixes

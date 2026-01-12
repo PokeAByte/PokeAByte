@@ -65,7 +65,7 @@ export function PropertyEdit({ path }: { path: string }) {
 			setValue(null);
 			setMadeEdit(false);
 		}
-	}, [property, saved, madeEdit, setSaved, setMadeEdit]);
+	}, [saved, setSaved, setMadeEdit]);
 
 
 	let placeholder = "";

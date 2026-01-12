@@ -8,7 +8,7 @@ export function useGameProperty<T>(path: string) {
 	useEffect(
 		() => {
 			const callback = () => {
-				setProperty(Store.getProperty(path))
+				setProperty(structuredClone(Store.getProperty(path)))
 			};
 			return subscribePath(path, callback);
 		},
