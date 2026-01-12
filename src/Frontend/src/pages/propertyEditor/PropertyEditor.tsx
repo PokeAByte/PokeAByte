@@ -48,8 +48,8 @@ function addToPropertyTree(tree: PropertyTreeNode[], paths: string[], depth: num
 			}
 			addToPropertyTree(node.children, [path], depth + 1, node);
 			node.children.sort((a, b) => {
-				if ((a.children?.length ?? 0) === 0) return -1;
-				if ((b.children?.length ?? 0) === 0) return 1;
+				if ((a.children?.length ?? 0) === 0 && (b.children?.length ?? 0) !== 0) return -1;
+				if ((b.children?.length ?? 0) === 0 && (a.children?.length ?? 0) !== 0) return 1;
 				return 0;
 			});
 		}
