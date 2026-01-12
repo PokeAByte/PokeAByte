@@ -66,14 +66,15 @@ function addToPropertyTree(tree: PropertyTreeNode[], paths: string[], depth: num
 export const propertySearchSignal = signal("");
 
 export function PropertyEditor() {
-	const [propertyTree] = useState(() => createPropertyTree(Object.keys(Store.getAllProperties())));
+	const [propertyTree, setPropertyTree] = useState(() => createPropertyTree(Object.keys(Store.getAllProperties())));
 	const mapper = mapperSignal.value;
 	const isConnected = isConnectedSignal.value;
 
 	useEffect(() => {
-		if (!mapper && isConnected) {
+		if (!mapper || !isConnected) {
 			navigateTo("/mappers");
 		}
+		setPropertyTree(createPropertyTree(Object.keys(Store.getAllProperties())));
 	}, [mapper, isConnected])
 
 	if (!isConnected || !mapper) {

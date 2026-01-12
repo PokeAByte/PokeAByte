@@ -10,6 +10,9 @@
 # 0.10.2
 
 - Fixed properties rendered as drop-downs not updating after a write.
+- Fixed property editor not updating correctly when switching between different mappers
+- Fixed a timing issue with the Emulator Data Protocol driver, mainly affecting the Bizhawk tool.
+  It could lead to the UI not showing the correct data for some mappers until the page is refreshed.
 
 # 0.10.1
 

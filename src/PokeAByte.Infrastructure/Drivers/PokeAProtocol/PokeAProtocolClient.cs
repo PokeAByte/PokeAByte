@@ -74,7 +74,7 @@ public class PokeAProtocolClient : IDisposable
         return _sharedMemory;
     }
 
-    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int frameSkip, int timeoutMs = 128)
+    public async ValueTask Setup(ReadBlock[] blocks, int fileSize, int frameSkip, int delayMs)
     {
         try
         {
@@ -82,11 +82,22 @@ public class PokeAProtocolClient : IDisposable
             _fileSize = fileSize;
             await _client!.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
             using var tokenSource = new CancellationTokenSource();
-            tokenSource.CancelAfter(timeoutMs);
+            tokenSource.CancelAfter(128);
             var response = await _client.ReceiveAsync(tokenSource.Token);
             if (response.Buffer[4] == Instructions.SETUP)
             {
                 _connected = true;
+                bool memoryInitialized = false;
+                do
+                {
+                    Span<byte> memory = new byte[_fileSize];
+                    GetMemoryAccessor().CopyBytesToSpan(0, memory);
+                    memoryInitialized = memory.Count((byte)0) != _fileSize;
+                    if (!memoryInitialized)
+                    {
+                        await Task.Delay(delayMs);
+                    }
+                } while(!memoryInitialized);
                 this.WaitForClose();
                 return;
             }

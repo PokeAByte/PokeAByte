@@ -61,7 +61,7 @@ public class PokeAProtocolDriver : IPokeAByteDriver, IPokeAByteFreezeDriver
             {
                 throw new Exception("EDPS Driver: Invalid filesize for the MMF. Can not connect to EDPS.");
             }
-            await _client.Setup(_readBlocks, fileSize, _frameSkip);
+            await _client.Setup(_readBlocks, fileSize, _frameSkip, DelayMsBetweenReads);
         }
         for (int i = 0; i < blocks.Length; i++)
         {
