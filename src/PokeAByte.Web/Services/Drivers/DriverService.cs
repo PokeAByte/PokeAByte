@@ -10,9 +10,6 @@ namespace PokeAByte.Web.Services.Drivers;
 public interface IDriverService
 {
     IStaticMemoryDriver StaticMemory { get; }
-
-    Task<IPokeAByteDriver> GetBizhawkDriver();
-    Task<IPokeAByteDriver> GetRetroArchDriver();
     Task<IPokeAByteDriver?> TestDrivers();
 }
 
@@ -47,7 +44,7 @@ public class DriverService : IDriverService, IAsyncDisposable
         }
     }
 
-    public async Task<IPokeAByteDriver> GetBizhawkDriver()
+    private async Task<IPokeAByteDriver> GetBizhawkDriver()
     {
         await Cleanup();
         _currentDriver = new BizhawkMemoryMapDriver(_appSettings);
@@ -55,7 +52,7 @@ public class DriverService : IDriverService, IAsyncDisposable
         return _currentDriver;
     }
 
-    public async Task<IPokeAByteDriver> GetRetroArchDriver()
+    private async Task<IPokeAByteDriver> GetRetroArchDriver()
     {
         await Cleanup();
         _currentDriver = new RetroArchUdpDriver(_driverLogger, _appSettings);
@@ -63,7 +60,7 @@ public class DriverService : IDriverService, IAsyncDisposable
         return _currentDriver;
     }
 
-    public async Task<IPokeAByteDriver> GetPokeAProtocolDriver()
+    private async Task<IPokeAByteDriver> GetPokeAProtocolDriver()
     {
         await Cleanup();
         _currentDriver = new PokeAProtocolDriver(_appSettings);

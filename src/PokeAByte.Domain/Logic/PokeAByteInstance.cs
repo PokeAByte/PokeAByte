@@ -13,27 +13,17 @@ using PokeAByte.Domain.PokeAByteProperties;
 
 namespace PokeAByte.Domain.Logic;
 
-public class MapperProblem : IProblemDetails
-{
-    public MapperProblem(string title, string detail)
-    {
-        Title = title;
-        Detail = detail;
-    }
-
-    public string Title { get; }
-    public string Detail { get; }
-}
-
 public class PokeAByteInstance : IPokeAByteInstance
 {
     private readonly ILogger<PokeAByteInstance> _logger;
+    private BlockData[] _transferBlocks;
+    private Lock _jsModuleLock = new Lock();
+    private Task? _readLoopTask = null;
+    private List<IPokeAByteProperty> _propertiesChanged = [];
     private ScriptConsole ScriptConsoleAdapter { get; }
     private CancellationTokenSource ReadLoopToken { get; set; }
-    private BlockData[] _transferBlocks;
     private Engine JavascriptEngine { get; set; }
     private ObjectInstance? JavascriptModuleInstance { get; set; }
-    private Lock _jsModuleLock = new Lock();
 
     [MemberNotNullWhen(true, nameof(JavascriptModuleInstance))]
     private bool HasPreprocessor { get; set; }
@@ -51,7 +41,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     public IMemoryManager MemoryContainerManager { get; private set; }
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
-    private Task? _readLoopTask = null;
+    
 
 #if DEBUG
     private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
@@ -73,7 +63,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         ReadLoopToken = new CancellationTokenSource();
 
         // Get the file path from the filesystem provider.
-        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.FileId);
+        Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.Path);
         MemoryAddressBlock[]? blocksToRead = Mapper.PlatformOptions.Ranges;
         // Calculate the blocks to read from the mapper memory addresses.
         if (Driver is not IBizhawkMemoryMapDriver)
@@ -183,7 +173,11 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Start the read loop once successfully running once.
 
         _readLoopTask = Task.Run(ReadLoop);
-        _logger.LogInformation($"Loaded mapper for {Mapper.Metadata.GameName} ({Mapper.Metadata.Id}).");
+        _logger.LogInformation(
+            $"Loaded mapper {Mapper.Metadata.Path} for {Mapper.Metadata.GameName} ({Mapper.Metadata.GamePlatform})"
+            + $"\n\tID {Mapper.Metadata.Id}, version {Mapper.Metadata.Version ?? "unknown"}"
+            + $", mapping {Mapper.Memory.ReadRanges.Sum(x => x.End-x.Start)} bytes"
+        );
     }
 
     private async Task ReadLoop()
@@ -218,7 +212,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
     }
 
-    List<IPokeAByteProperty> _propertiesChanged = [];
+    
 
     private async Task Read()
     {

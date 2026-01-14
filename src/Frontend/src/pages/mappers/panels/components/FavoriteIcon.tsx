@@ -1,20 +1,23 @@
 import { useComputed } from "@preact/signals";
-import { saveSetting, uiSettingsSignal } from "../../../../Contexts/uiSettingsSignal";
+import { getFavoriteId, saveSetting, uiSettingsSignal } from "../../../../Contexts/uiSettingsSignal";
 import { IconButton } from "@/components/IconButton";
+import { MapperFile } from "@/utility/fetch";
 
-export function FavoriteIcon(props: { mapperId: string; }) {
+
+export function FavoriteIcon(props: { mapper: MapperFile; }) {
 	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
+	const id = getFavoriteId(props.mapper);
 	const handleClick = (event: UIEvent) => {
-		if (favoriteIds?.includes(props.mapperId)) {
-			saveSetting("favoriteMappers", favoriteIds?.filter(x => x !== props.mapperId) ?? [] );
+		if (favoriteIds?.includes(id)) {
+			saveSetting("favoriteMappers", favoriteIds?.filter(x => x !== id) ?? [] );
 		} else {
-			saveSetting("favoriteMappers", [...(favoriteIds ?? []), props.mapperId]);
+			saveSetting("favoriteMappers", [...(favoriteIds ?? []), id]);
 		}
 		event.stopPropagation();
 		return false;
 	};
 
-	if (favoriteIds?.includes(props.mapperId)) {
+	if (favoriteIds?.includes(id)) {
 		return (
 			<IconButton onClick={handleClick} title="Remove from favorites" class="text-red" icon="favorite" noBorder />
 		);

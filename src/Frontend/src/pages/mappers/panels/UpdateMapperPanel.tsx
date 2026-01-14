@@ -1,8 +1,6 @@
-import { Store } from "../../../utility/propertyStore"
 import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
-import { MapperUpdate } from "pokeaclient";
 import { mapperFilesSignal, refreshMapperFiles } from "../../../Contexts/mapperFilesSignal";
 import { useEffect, useState } from "preact/hooks";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
@@ -11,14 +9,14 @@ import { WideButton } from "../../../components/WideButton";
 import { Panel } from "@/components/Panel";
 import { Show } from "@preact/signals/utils";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
+import { installMapper, MapperUpdate } from "@/utility/fetch";
 
 export function UpdateMapperPanel() {
-	const filesClient = Store.client.files;
 	const mapperFiles = mapperFilesSignal.value;
 	const [availableUpdates, setAvailableUpdates] = useState<MapperUpdate[]>([]);
 	const [selectedUpdates, sectSelectedUpdates] = useState<string[]>([]);
 	const downloadMappers = useAPI(
-		filesClient.downloadMapperUpdatesAsync, 
+		installMapper, 
 		(_, success) => {
 			if (success) {
 				refreshMapperFiles();
@@ -30,8 +28,8 @@ export function UpdateMapperPanel() {
 	useEffect(() => {
 		setAvailableUpdates(
 			mapperFiles.updates
-				.filter(mapper => !!mapper.currentVersion)
-				.filter(mapper => !!mapper.latestVersion)
+				.filter(mapper => mapper.version)
+				.filter(mapper => mapper.remote_version != mapper.version)
 		);
 		sectSelectedUpdates([]);
 	}, [mapperFiles.updates])
@@ -44,12 +42,12 @@ export function UpdateMapperPanel() {
 	}, [downloadMappers, downloadMappers.wasCalled, downloadMappers.isLoading])
 
 	const handleUpdate = () => {
-		const mappers = availableUpdates.filter(x => selectedUpdates.includes(x.latestVersion.path));
-		downloadMappers.call(mappers);
+		const mappers = availableUpdates.filter(x => selectedUpdates.includes(x.path));
+		downloadMappers.call(mappers.map(x => x.path));
 	}
 
 	const handleUpdateAll = () => {
-		downloadMappers.call(availableUpdates);
+		downloadMappers.call(availableUpdates.map(x => x.path));
 	}
 
 	if (downloadMappers.isLoading || mapperFiles.isLoading) {
@@ -64,7 +62,7 @@ export function UpdateMapperPanel() {
 			<div class="flexy-panel margin-top">
 				<WideButton text="Update selected" color="green" disabled={!selectedUpdates.length} onClick={handleUpdate} />
 				<WideButton text="Update all" color="green" disabled={!availableUpdates.length} onClick={handleUpdateAll} />
-				<WideButton text="Reload mapper list" color="blue" onClick={refreshMapperFiles} />
+				<WideButton text="Check for updates" color="blue" onClick={refreshMapperFiles} />
 				<Show when={advancedModeSignal}>
 					<OpenMapperFolderButton />
 				</Show>
@@ -73,6 +71,13 @@ export function UpdateMapperPanel() {
 				availableMappers={availableUpdates}
 				selectedMappers={selectedUpdates}
 				onMapperSelection={sectSelectedUpdates}
+				installedHeader="Current"
+				availableHeader="New"
+				fallback={
+					mapperFiles.availableMappers.length == 0
+						? <strong>No mappers installed. </strong>
+						: <strong>All installed mappers ({mapperFiles.availableMappers.length}) are up to date.</strong>
+			}
 			/>
 		</Panel>
 	);

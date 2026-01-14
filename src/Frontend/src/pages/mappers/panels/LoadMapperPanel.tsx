@@ -3,12 +3,11 @@ import { Dropdown } from "@/components/Dropdown";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useAPI } from "@/hooks/useAPI";
 import { LoadProgress } from "@/components/LoadProgress";
-import { AvailableMapper } from "pokeaclient";
-import {  mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
+import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
 import { unique } from "@/utility/unique";
 import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
 import { useStorageState } from "@/hooks/useStorageState";
-import { changeMapper } from "@/utility/fetch";
+import { changeMapper, MapperFile } from "@/utility/fetch";
 import { onMapperLoaded as onMapperLoaded } from "./createMapperLoadToast";
 import { Panel } from "@/components/Panel";
 import { FavoriteIcon } from "./components/FavoriteIcon";
@@ -17,12 +16,13 @@ import { Toasts } from "@/notifications/ToastStore";
 import { mapperSignal } from "@/Contexts/mapperSignal";
 import { useComputed } from "@preact/signals";
 import { Show } from "@preact/signals/utils";
+import { beautifyMapperName, getMapperCategory } from "@/utility/mapperName";
 
-function createMapperOption(value: AvailableMapper) {
+function createMapperOption(value: MapperFile) {
 	return {
-		value: value.id,
-		display: value.displayName,
-		extra: <FavoriteIcon mapperId={value.id} />,
+		value: value.path,
+		display: beautifyMapperName(value),
+		extra: <FavoriteIcon mapper={value} />,
 	};
 }
 
@@ -43,7 +43,7 @@ export function LoadMapperPanel() {
 	}, [currentMapper]);
 
 	useEffect(() => {
-		setCurrentMapper(mapperFiles.availableMappers?.find(x => x.id === mapper?.fileId)?.id ?? null);
+		setCurrentMapper(mapperFiles.availableMappers?.find(x => x.path === mapper?.path)?.path ?? null);
 	}, [mapper, mapperFiles.availableMappers]);
 
 	const onLoadMapper = () => {
@@ -66,13 +66,13 @@ export function LoadMapperPanel() {
 
 	const availableCategories = [
 		{ value: "", display: "<No filter>" },
-		...mapperFiles.availableMappers.map(x => x.displayName?.substring(1, x.displayName.indexOf(')')))
+		...mapperFiles.availableMappers.map(x => getMapperCategory(x.path))
 			.filter(unique)
 			.toSorted()
 			.map(x => ({ value: x, display: x }))
 	];
 	const filteredMappers = filter
-		? mapperFiles.availableMappers.filter(x => x.displayName.startsWith(`(${filter})`))
+		? mapperFiles.availableMappers.filter(x => beautifyMapperName(x)?.startsWith(`(${filter})`))
 		: mapperFiles.availableMappers;
 	return (
 		<Panel id="mapper-load" title="Load mapper" defaultOpen>			

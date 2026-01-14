@@ -6,6 +6,21 @@
 [Version 0.9.0](#090)  
 [Version 0.8.1](#081-2024-11-09)  
   
+# 0.11.0
+
+## General
+
+- Reworked how Poke-A-Byte downloads mapper files and how it manages those files after they are downloaded.
+
+## Breaking changes
+
+- Local mapper directories are no longer supported (a "mappers" folder next to the PokeAByte.Web.exe).
+
+## Breaking technical changes
+
+- `GET /mapper-service/get-mappers` now returns a different type of object.
+- `PUT /mapper` Has been removed, please use `PUT /mapper-service/change-mapper`.
+- `PUT /mapper-service/change-mapper` now expects a path, not an ID.
 
 # 0.10.3
 

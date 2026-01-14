@@ -1,5 +1,5 @@
 import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
-import { uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
+import { getFavoriteId, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { useAPI } from "@/hooks/useAPI";
 import { changeMapper } from "@/utility/fetch";
 import { Panel } from "../../../components/Panel";
@@ -8,16 +8,17 @@ import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
 import { useComputed } from "@preact/signals";
 import { LoadProgress } from "@/components/LoadProgress";
+import { beautifyMapperName } from "@/utility/mapperName";
 
 export function FavoritePanel() {
 	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
 	const mapperFileContext = mapperFilesSignal.value;
 	const changeMapperApi = useAPI(changeMapper, onMapperLoaded);
-	const favorites = favoriteIds?.map(id => mapperFileContext.availableMappers?.find(mapper => mapper.id == id))
+	const favorites = favoriteIds?.map(path => mapperFileContext.availableMappers?.find(mapper => getFavoriteId(mapper) == path))
 		.filter(x => !!x);
 
 	if (!favorites?.length) {
-		return null;
+		return <pre>{JSON.stringify(favoriteIds, null, "")}</pre>;
 	}
 	if (changeMapperApi.isLoading) {
 		return (
@@ -31,7 +32,7 @@ export function FavoritePanel() {
 		<Panel id="mapper-favorites" title="Favorite mappers" defaultOpen>
 			<div class="favorites flexy-panel">
 				{favorites?.map((favorite) => {
-					const buttonColors = getMapperColors(favorite.displayName);
+					const buttonColors = getMapperColors(beautifyMapperName(favorite));
 					const style: CSSProperties = {};
 					if (buttonColors) {
 						style.borderColor = buttonColors.border;
@@ -40,10 +41,10 @@ export function FavoritePanel() {
 					}
 					return (
 						<button
-							onClick={() => changeMapperApi.call(favorite.id)}
+							onClick={() => changeMapperApi.call(favorite.path)}
 							style={style}
 						>
-							{favorite.displayName}
+							{beautifyMapperName(favorite)}
 						</button>
 					);
 				})}

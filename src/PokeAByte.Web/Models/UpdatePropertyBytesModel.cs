@@ -1,4 +1,4 @@
-﻿namespace PokeAByte.Domain.Models.Properties;
+﻿namespace PokeAByte.Web.Models;
 
 public record UpdatePropertyBytesModel
 {

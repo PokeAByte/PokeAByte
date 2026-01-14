@@ -1,7 +1,5 @@
 import { useState } from "preact/hooks";
 import { useAPI } from "../../../hooks/useAPI";
-import { Store } from "../../../utility/propertyStore";
-import { ArchivedMapper, ArchivedMappers } from "pokeaclient";
 import { ConfirmationModal } from "../../../components/ConfirmationModal";
 import { mapperFilesSignal, refreshMapperFiles } from "../../../Contexts/mapperFilesSignal";
 import { OpenMapperFolderButton } from "../../../components/OpenMapperFolderButton";
@@ -10,12 +8,12 @@ import { Panel } from "@/components/Panel";
 import { Show } from "@preact/signals/utils";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
 import { Icon } from "@/components/Icon";
+import { deleteArchive, MapperArchive, MapperArchiveRecord, openMapperFolder, restoreMapper } from "@/utility/fetch";
 
 export function RestoreMapperPanel() {
-	const filesClient = Store.client.files;
 	const mapperFiles = mapperFilesSignal.value;
-	const deleteArchiveApi = useAPI(filesClient.deleteMappers, refreshMapperFiles);
-	const restoreArchiveApi = useAPI(filesClient.restoreMapper, refreshMapperFiles);
+	const deleteArchiveApi = useAPI(deleteArchive, refreshMapperFiles);
+	const restoreArchiveApi = useAPI(restoreMapper, refreshMapperFiles);
 	const archives = processArchive(mapperFiles.archives);
 
 	return (
@@ -28,7 +26,7 @@ export function RestoreMapperPanel() {
 			<Show when={advancedModeSignal}>
 				<div class="flexy-panel margin-top">
 					<OpenMapperFolderButton />
-					<WideButton color="blue" onClick={filesClient.openMapperFolder} text="Open archive folder" />
+					<WideButton color="blue" onClick={openMapperFolder} text="Open archive folder" />
 				</div>
 				<br />
 			</Show>
@@ -36,7 +34,7 @@ export function RestoreMapperPanel() {
 				{archives.map((archive) => {
 					return (
 						<MapperRestoreRow
-							key={archive.Path + "" +  archive.Mappers.length}
+							key={archive.Path + "" + archive.Mappers.length}
 							archive={archive}
 							restoreArchive={restoreArchiveApi.call}
 							deleteArchive={deleteArchiveApi.call}
@@ -50,8 +48,8 @@ export function RestoreMapperPanel() {
 
 type MapperRestoreRowProps = {
 	archive: Archive,
-	restoreArchive: (mappers: ArchivedMapper[]) => void,
-	deleteArchive: (mappers: ArchivedMapper[]) => void,
+	restoreArchive: (mappers: string) => void,
+	deleteArchive: (mappers: string) => void,
 }
 
 export function MapperRestoreRow(props: MapperRestoreRowProps) {
@@ -62,7 +60,7 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 		<li class="margin-top">
 			<details>
 				<summary>
-					<Icon name="catching_pokemon"/>
+					<Icon name="catching_pokemon" />
 					<span>
 						{archive.Path} ({archive.Mappers.length} files)
 					</span>
@@ -74,10 +72,10 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 				<div>
 					<ul>
 						{archive.Mappers.map(archivedMapper =>
-							<li key={archivedMapper.fullPath +  archivedMapper.mapper.path}>
-								{archivedMapper.pathDisplayName}/{archivedMapper.mapper.display_name}
+							<li key={archivedMapper.path + archivedMapper.mapper.path}>
+								{archivedMapper.path}/{archivedMapper.mapper.display_name}
 								&nbsp;
-								<i>({archivedMapper.mapper.date_created})</i>
+								<i>({archivedMapper.mapper.version})</i>
 							</li>
 						)}
 					</ul>
@@ -97,16 +95,16 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 						</p>
 						<p>{archive.Path}</p>
 						<ul>
-							{archive.Mappers.map(x =>
-								<li key={x.pathDisplayName}>
-									<span key={x.pathDisplayName}>{x.pathDisplayName}{x.mapper.display_name}</span>
+							{archive.Mappers.map(archive =>
+								<li key={archive.path}>
+									<span>{archive.mapper.path} version {archive.mapper.version}</span>
 								</li>
 							)}
 						</ul>
 					</>
 				}
 				onCancel={() => setRestoreModal(false)}
-				onConfirm={() => restoreArchive(archive.Mappers)}
+				onConfirm={() => restoreArchive(archive.Path)}
 			/>
 			<ConfirmationModal
 				display={deleteModal}
@@ -121,15 +119,15 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 						<p>{archive.Path}</p>
 						<ul>
 							{archive.Mappers.map(x =>
-								<li key={x.pathDisplayName}>
-									<span key={x.pathDisplayName}>{x.pathDisplayName}{x.mapper.display_name}</span>
+								<li key={x.path}>
+									<span key={x.path}>{x.path}{x.mapper.display_name}</span>
 								</li>
 							)}
 						</ul>
 					</>
 				}
 				onCancel={() => setDeleteModal(false)}
-				onConfirm={() => deleteArchive(archive.Mappers)}
+				onConfirm={() => deleteArchive(archive.Path)}
 			/>
 		</li>
 	)
@@ -138,16 +136,16 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 
 type Archive = {
 	Path: string,
-	Mappers: ArchivedMapper[],
+	Mappers: MapperArchive[],
 }
 
-function processArchive(mappers: ArchivedMappers | null) {
+function processArchive(mappers: MapperArchiveRecord | null) {
 	if (!mappers) {
 		return [];
 	}
 	return Object.keys(mappers).reduce<Archive[]>(
 		(accumulator, key) => {
-			const currentPath = extractMapperPath(key);
+			const currentPath = key;
 			const existingBucket = accumulator.find(x => x.Path === currentPath);
 			if (existingBucket) {
 				existingBucket.Mappers.push(...mappers[key])
@@ -162,10 +160,4 @@ function processArchive(mappers: ArchivedMappers | null) {
 		},
 		[]
 	);
-}
-
-function extractMapperPath(path: string) {
-	const fragments = path.split("/");
-	const mapperIndex = fragments.length - 3;
-	return "/" + fragments[mapperIndex];
 }

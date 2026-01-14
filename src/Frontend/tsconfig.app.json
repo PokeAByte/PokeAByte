@@ -25,9 +25,10 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
   },
   "include": [
-    "src"
+    "src",
+    "src/global.d.ts"
   ]
 }
