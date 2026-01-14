@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PokeAByte.Domain.Models.Mappers;
@@ -73,17 +72,6 @@ public class AppSettings
     public void Save()
     {
         var appSettingsPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-        var settingsText = JsonSerializer.Serialize(
-            this, 
-            new JsonSerializerOptions()
-            {
-                WriteIndented = true,
-                TypeInfoResolver = MapperDtoContext.Default
-            }
-        );
-        File.WriteAllText(
-            appSettingsPath, 
-            settingsText
-        );
+        JsonFile.Write(this, appSettingsPath, DomainJson.Default.AppSettings);
     }
 }

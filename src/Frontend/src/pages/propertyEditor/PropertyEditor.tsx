@@ -91,7 +91,8 @@ export function PropertyEditor() {
 		<div class="layout-box margin-top" >
 			<div class="title">
 				<div>
-					<strong>{mapper.gameName}</strong>
+					<strong>{mapper.gameName} </strong>
+					<span>(Mapper version {mapper.version ?? "unknown"})</span>
 				</div>
 				<div>
 					<Show when={advancedModeSignal}>

@@ -1,5 +1,6 @@
 import { getStorageItem } from "@/hooks/useStorageState";
 import { computed, signal } from "@preact/signals";
+import { MapperFile } from "@/utility/fetch";
 
 export type UISettings = {
 	initialized: boolean,
@@ -36,4 +37,11 @@ export function saveSetting<K extends keyof UISettings>(setting: K, value: UISet
 	};
 	uiSettingsSignal.value = settings;
 	window.localStorage.setItem("_uiSettings", JSON.stringify(settings));
+}
+
+export function getFavoriteId(mapper: MapperFile) {
+	return "official_"
+		+ mapper.path.split("/").at(1)?.toLowerCase()
+		+ "_"
+		+ mapper.display_name.replace(".xml", "")
 }

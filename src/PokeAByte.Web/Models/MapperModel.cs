@@ -1,7 +1,6 @@
 ﻿using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models.Properties;
 
-namespace PokeAByte.Domain.Models.Mappers;
+namespace PokeAByte.Web.Models;
 
 public record MapperModel
 {

@@ -7,8 +7,9 @@ public class MetadataSection
     public required Guid Id { get; init; }
     public required string GameName { get; init; }
     public required string GamePlatform { get; init; }
-    public required string FileId { get; init; }
     public required int MapperSyntax { get; set; }
+    public required string? Version { get; init; }
+    public required string Path { get; init; }
 }
 
 public class MemorySection

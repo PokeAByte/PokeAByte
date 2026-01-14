@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
+using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
@@ -23,17 +23,11 @@ public static class MapperServiceEndpoints
         app.MapPut("mapper-service/unload-mapper", UnloadMapperAsync);
     }
 
-    public static IEnumerable<MapperFileModel> GetMappers(IMapperFileService mapperFileService)
-    {
-        return mapperFileService
-            .ListInstalled()
-            .Select(x => new MapperFileModel(x.Id, x.DisplayName));
-    }
+    public static IEnumerable<InstalledMapper> GetMappers(IMapperService mapperService)
+        => mapperService.ListInstalled();
 
     public static bool GetIsConnected(MapperClientService mapperClientService)
-    {
-        return mapperClientService.IsCurrentlyConnected;
-    }
+        => mapperClientService.IsCurrentlyConnected;
 
     public static async Task<IResult> ChangeMapperAsync(MapperClientService mapperClientService, [FromBody] string mapperId)
     {
@@ -104,5 +98,3 @@ public static class MapperServiceEndpoints
     public static Task UnloadMapperAsync(MapperClientService mapperClientService)
         => mapperClientService.UnloadMapper();
 }
-
-public record PropertyUpdateModel(string Path, string Value, bool IsFrozen);

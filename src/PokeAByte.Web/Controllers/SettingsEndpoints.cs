@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 
 namespace PokeAByte.Web;
@@ -22,7 +21,6 @@ public static class SettingsEndpoints
     }
 
     public static IResult ResetAppSettings(
-        [FromServices] IGithubService githubService,
         [FromServices] AppSettings settings)
     {
         var defaults = new AppSettings();
@@ -36,7 +34,6 @@ public static class SettingsEndpoints
     }
 
     public static IResult SaveAppSettings(
-        [FromServices] IGithubService githubService,
         [FromServices] AppSettings settings,
         [FromBody] AppSettingsDto newSettings)
     {
