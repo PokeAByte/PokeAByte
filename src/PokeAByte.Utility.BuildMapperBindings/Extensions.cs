@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PokeAByte.Domain;
 
@@ -40,5 +42,22 @@ public static class Extensions
         }
 
         return true;
+    }
+
+    public static string ToPascalCase(this string value)
+    {
+        string[] words = Regex.Split(value, @"[_\-]");
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+
+        for (int i = 0; i < words.Length; i++)
+        {
+            string word = words[i];
+            if (!string.IsNullOrEmpty(word))
+            {
+                words[i] = textInfo.ToTitleCase(word);
+            }
+        }
+
+        return string.Concat(words);
     }
 }

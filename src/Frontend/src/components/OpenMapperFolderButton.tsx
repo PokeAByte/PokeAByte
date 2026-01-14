@@ -1,10 +1,10 @@
+import { openMapperFolder } from "@/utility/fetch";
 import { Toasts } from "../notifications/ToastStore";
-import { Store } from "../utility/propertyStore";
 import { WideButton } from "./WideButton";
 
 export function OpenMapperFolderButton() {
 	const onClick = () => {
-		Store.client.files.openMapperFolder().then(
+		openMapperFolder().then(
 			() => Toasts.push(`Folder opened. Check your file browser.`, "task_alt", "green")
 		)
 	}

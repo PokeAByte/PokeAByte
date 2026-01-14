@@ -1,14 +1,14 @@
-import { ArchivedMappers, AvailableMapper, MapperUpdate } from "pokeaclient";
-import { Store } from "../utility/propertyStore";
+import { getMappers, MapperFile } from "@/utility/fetch";
 import { effect, signal } from "@preact/signals";
 import { isConnectedSignal } from "./mapperSignal";
+import { getArchivedMappers, getMapperUpdates, MapperArchiveRecord, MapperUpdate } from "@/utility/fetch";
 
 
 export interface MapperFilesData {
 	isLoading: boolean,
-	availableMappers: AvailableMapper[],
+	availableMappers: MapperFile[],
 	updates: MapperUpdate[],
-	archives: ArchivedMappers
+	archives: MapperArchiveRecord
 }
 
 export const mapperFilesSignal = signal<MapperFilesData>({
@@ -29,9 +29,9 @@ export async function refreshMapperFiles() {
 		...mapperFilesSignal.peek(),
 		isLoading: true,
 	};
-	const availableMappers = await Store.client.getMappers() ?? [];
-	const updates = await Store.client.files.getMapperUpdatesAsync() ?? [];
-	const archives = await Store.client.files.getArchivedMappersAsync() ?? {};
+	const availableMappers = await getMappers() ?? [];
+	const updates = await getMapperUpdates() ?? [];
+	const archives = await getArchivedMappers() ?? {};
 	mapperFilesSignal.value = {
 		availableMappers,
 		archives, 

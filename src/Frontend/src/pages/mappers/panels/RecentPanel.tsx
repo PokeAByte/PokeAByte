@@ -13,7 +13,7 @@ export function RecentPanel() {
 	const recentMappers = useComputed(() => uiSettingsSignal.value.recentMappers).value;
 	const mapperFiles = mapperFilesSignal.value;
 	const changeMapperApi = useAPI(changeMapper, onMapperLoaded);
-	const mappers = recentMappers?.map(id => mapperFiles.availableMappers?.find(mapper => mapper.id == id))
+	const mappers = recentMappers?.map(path => mapperFiles.availableMappers?.find(mapper => mapper.path == path))
 		.filter(x => !!x);
 
 	if (!isEnabled || !mappers?.length) {
@@ -24,7 +24,7 @@ export function RecentPanel() {
 		<Panel id="mapper-recent" title="Recently used mappers" defaultOpen>
 			<div class="favorites">
 				{mappers?.map((favorite) => {
-					const buttonColors = getMapperColors(favorite.displayName);
+					const buttonColors = getMapperColors(favorite.display_name);
 					const style: CSSProperties = {};
 					if (buttonColors) {
 						style.borderColor = buttonColors.border;
@@ -34,10 +34,10 @@ export function RecentPanel() {
 					return (
 						<button
 							class="margin-right"
-							onClick={() => changeMapperApi.call(favorite.id)}
+							onClick={() => changeMapperApi.call(favorite.path)}
 							style={style}
 						>
-							{favorite.displayName}
+							{favorite.display_name}
 						</button>
 					);
 				})}
