@@ -1,5 +1,6 @@
 article {
 	padding: var(--margin-1);
+	max-width: 100%;
 }
 .panel {
 	box-shadow: var(--margin-0) var(--margin-0) var(--margin-0) 0px var(--color-surface-0);

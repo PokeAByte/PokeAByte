@@ -61,7 +61,7 @@ export function UpdateMapperPanel() {
 			<span>
 				{selectedUpdates.length} / {availableUpdates.length} Mappers Selected
 			</span>
-			<div class="margin-top">
+			<div class="flexy-panel margin-top">
 				<WideButton text="Update selected" color="green" disabled={!selectedUpdates.length} onClick={handleUpdate} />
 				<WideButton text="Update all" color="green" disabled={!availableUpdates.length} onClick={handleUpdateAll} />
 				<WideButton text="Reload mapper list" color="blue" onClick={refreshMapperFiles} />

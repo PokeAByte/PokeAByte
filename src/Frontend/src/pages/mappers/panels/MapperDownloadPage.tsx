@@ -48,7 +48,7 @@ export function DownloadMapperPanel() {
 			<span>
 				{selectedDownloads.length} / {downloads.length} Mappers Selected
 			</span>
-			<div class="margin-top">
+			<div class="flexy-panel margin-top">
 				<WideButton text="Download selected" color="green" disabled={!selectedDownloads.length} onClick={handleDownload}  />
 				<WideButton text="Download all" color="green" disabled={!downloads.length} onClick={handleDownloadAll}  />
 				<WideButton text="Reload mapper list" color="blue" disabled onClick={refreshMapperFiles}  />

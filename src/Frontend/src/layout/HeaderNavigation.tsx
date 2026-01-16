@@ -18,7 +18,7 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				class={className(mapperActive, "active")}
 			>
 				<Icon name="catching_pokemon" class={className(mapperActive, activeClass)}/>
-				MAPPERS
+				<span class="button-label">MAPPERS</span>
 			</button>
 			<button
 				role="link"
@@ -28,7 +28,7 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				class={className(propertiesActive, "active")}
 				>
 				<Icon name="api" class={className(propertiesActive, activeClass)}/>
-				PROPERTIES
+				<span class="button-label">PROPERTIES</span>
 			</button>
 			<button
 				role="link"
@@ -37,7 +37,7 @@ export function HeaderNavigation({ mapper }: { mapper: Mapper | null }) {
 				onClick={() => setLocation("/settings")}
 				>
 				<Icon name="settings" class={className(settingsActive, activeClass)}/>
-				SETTINGS
+				<span class="button-label">SETTINGS</span>
 			</button>
 		</>
 	)

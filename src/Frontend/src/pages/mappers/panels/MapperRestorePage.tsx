@@ -26,9 +26,9 @@ export function RestoreMapperPanel() {
 				</strong>
 			</div>
 			<Show when={advancedModeSignal}>
-				<div class="row margin-top">
+				<div class="flexy-panel margin-top">
 					<OpenMapperFolderButton />
-					<WideButton color="blue" onClick={filesClient.openMapperFolder} text="Open archive/backup folder" />
+					<WideButton color="blue" onClick={filesClient.openMapperFolder} text="Open archive folder" />
 				</div>
 				<br />
 			</Show>
@@ -66,7 +66,7 @@ export function MapperRestoreRow(props: MapperRestoreRowProps) {
 					<span>
 						{archive.Path} ({archive.Mappers.length} files)
 					</span>
-					<span>
+					<span class="flexy-panel">
 						<WideButton text="Restore" color="green" onClick={() => setRestoreModal(true)} />
 						<WideButton text="Delete" color="red" onClick={() => setDeleteModal(true)} />
 					</span>

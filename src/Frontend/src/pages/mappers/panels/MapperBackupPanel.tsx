@@ -53,7 +53,7 @@ export function MapperBackupPanel() {
 	return (
 		<Panel id="mapper-backup" title="Backup mappers" >		
 			<span>{selectedMappers.length} / {availableMappers.length} Mappers Selected</span>
-			<div class="margin-top">
+			<div class="flexy-panel margin-top">
 				<WideButton 
 					text="Backup selected" 
 					disabled={!selectedMappers.length} 
@@ -70,7 +70,7 @@ export function MapperBackupPanel() {
 					<OpenMapperFolderButton />
 				</Show>
 			</div>
-			<div class="margin-top">
+			<div class="flexy-panel margin-top">
 				<WideButton 
 					text="Archive selected" 
 					disabled={selectedMappers.length === 0} 

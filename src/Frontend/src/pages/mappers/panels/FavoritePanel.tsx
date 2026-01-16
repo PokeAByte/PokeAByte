@@ -7,6 +7,7 @@ import { onMapperLoaded } from "./createMapperLoadToast";
 import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
 import { useComputed } from "@preact/signals";
+import { LoadProgress } from "@/components/LoadProgress";
 
 export function FavoritePanel() {
 	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
@@ -18,10 +19,17 @@ export function FavoritePanel() {
 	if (!favorites?.length) {
 		return null;
 	}
+	if (changeMapperApi.isLoading) {
+		return (
+			<Panel id="mapper-favorites" title="Favorite mappers" defaultOpen>
+				<LoadProgress label="Loading mapper" />
+			</Panel>
+		);
+	}
 
 	return (
 		<Panel id="mapper-favorites" title="Favorite mappers" defaultOpen>
-			<div class="favorites">
+			<div class="favorites flexy-panel">
 				{favorites?.map((favorite) => {
 					const buttonColors = getMapperColors(favorite.displayName);
 					const style: CSSProperties = {};
@@ -32,7 +40,6 @@ export function FavoritePanel() {
 					}
 					return (
 						<button
-							class="margin-right"
 							onClick={() => changeMapperApi.call(favorite.id)}
 							style={style}
 						>

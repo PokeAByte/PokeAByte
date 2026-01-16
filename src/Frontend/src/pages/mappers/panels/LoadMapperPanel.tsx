@@ -57,7 +57,11 @@ export function LoadMapperPanel() {
 	};
 
 	if (changeMapperApi.isLoading) {
-		return <LoadProgress label="Loading mapper" />
+		return (
+			<Panel id="mapper-load" title="Load mapper" defaultOpen>
+				<LoadProgress label="Loading mapper" />
+			</Panel>
+		)
 	}
 
 	const availableCategories = [
@@ -74,7 +78,7 @@ export function LoadMapperPanel() {
 		<Panel id="mapper-load" title="Load mapper" defaultOpen>			
 			<span> Select the mapper you would like to load: </span>
 			<br />
-			<span class="margin-right">
+			<div class="flexy-panel">
 				<Dropdown
 					size={10}
 					tabIndex={-1}
@@ -83,22 +87,20 @@ export function LoadMapperPanel() {
 					value={filter}
 					options={availableCategories}
 				/>
-			</span>
-			<SelectInput
-				size={55}
-				id="mapper-select"
-				onSelection={(option) => setCurrentMapper(option.value)}
-				value={currentMapper}
-				options={filteredMappers.map(createMapperOption)}
-			/>
-			<button ref={loadButtonRef} class="green margin-left wide-button" onClick={onLoadMapper}>
-				Load Mapper
-			</button>
-			<Show when={advancedModeSignal}>
-				<div class="margin-top">
+				<SelectInput
+					size={45}
+					id="mapper-select"
+					onSelection={(option) => setCurrentMapper(option.value)}
+					value={currentMapper}
+					options={filteredMappers.map(createMapperOption)}
+				/>
+				<button ref={loadButtonRef} class="green wide-button" onClick={onLoadMapper}>
+					Load Mapper
+				</button>
+				<Show when={advancedModeSignal}>
 					<OpenMapperFolderButton />
-				</div>
-			</Show>
+				</Show>
+			</div>
 		</Panel>
 	);
 }

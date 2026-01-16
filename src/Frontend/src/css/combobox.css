@@ -2,7 +2,9 @@
 	display: inline-block !important;
 	width: fit-content;
 	position: relative;
+	max-width: calc(100% - var(--margin-0));
 	input {
+		max-width: calc(100% - var(--margin-0));
 		margin-right: 0 !important;
 	}
 	menu {

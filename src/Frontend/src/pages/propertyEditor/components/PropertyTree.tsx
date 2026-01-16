@@ -1,13 +1,12 @@
 
 import { Store } from "../../../utility/propertyStore";
 import { PropertyValue } from "./PropertyValue";
-import { useStorageRecordState } from "../../../hooks/useStorageState";
 import { hiddenOverrideSignal, hiddenProperties } from "../../../Contexts/hiddenPropertySignal";
 import { IfNotHidden } from "../../../components/IfNotHidden";
 import { GameProperty } from "pokeaclient";
 import { propertySearchSignal, PropertyTreeNode } from "../PropertyEditor";
-import { mapperSignal } from "@/Contexts/mapperSignal";
 import { PropertyTreeHeader } from "./PropertyTreeHeader";
+import { propertiesOpenSignal, togglePropertyOpen } from "@/Contexts/openPropertiesSignal";
 
 function matchProperty(property: GameProperty<any>|undefined|null, query: string) {
 	if (!property) {
@@ -18,8 +17,7 @@ function matchProperty(property: GameProperty<any>|undefined|null, query: string
 }
 
 export function PropertyTree({ node }: { node: PropertyTreeNode }) {
-	const mapperId = mapperSignal.peek()!.id;
-	const [isOpen, setIsOpen] = useStorageRecordState(mapperId, node.path, false);
+	const isOpen = propertiesOpenSignal.value[node.path];
 	const override = hiddenOverrideSignal.value;
 	const search = propertySearchSignal.value;
 	const hiddenItemCount = node.children
@@ -44,7 +42,7 @@ export function PropertyTree({ node }: { node: PropertyTreeNode }) {
 	if (!node.children) {
 		return (
 			<IfNotHidden path={node.path}>
-				<PropertyValue mapperId= {mapperId} path={node.path} />
+				<PropertyValue path={node.path} />
 			</IfNotHidden>
 		);
 	}
@@ -56,7 +54,7 @@ export function PropertyTree({ node }: { node: PropertyTreeNode }) {
 		<>
 			<PropertyTreeHeader 
 				isOpen={isOpen}
-				onToggleOpen={() => setIsOpen(!isOpen)}
+				onToggleOpen={() => togglePropertyOpen(node.path)}
 				node={node}
 				entryCount={immediateChildren.length}
 				hiddenEntryCount={hiddenItemCount ?? 0}

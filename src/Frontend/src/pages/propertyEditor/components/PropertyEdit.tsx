@@ -8,8 +8,6 @@ import { PropertyInputSelect } from "./PropertyInputSelect";
 import { useEffect, useState } from "preact/hooks";
 import { IconButton } from "@/components/IconButton";
 
-
-
 export function PropertyEdit({ path }: { path: string }) {
 	const property = useGameProperty(path);
 	const propertyType = property?.type ?? GamePropertyType.int;
@@ -86,6 +84,7 @@ export function PropertyEdit({ path }: { path: string }) {
 					displayValue={(value ?? "").toString()}
 					isReadonly={isReadonly} 
 					onChange={handleUpdate}
+					save={handleSave}
 					placeholder={placeholder}
 				/>
 				: <PropertyTextbox

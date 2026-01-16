@@ -7,6 +7,24 @@
 [Version 0.8.1](#081-2024-11-09)  
   
 
+# Future
+
+## UI
+
+- The "sticky header" and "track recent recent mapper" options now default true.
+- When copying an address via the button, the "0x" prefix is no longer copied with it.
+- Added button to collapse all properties & attributes.
+- When reloading a mapper, a toast notification is now shown on success.
+- Improved layout on small / narrow windows.
+- Improved the behavior of the combined input/select box for properties with reference values.
+
+## Bugfixes
+- Fixed hover effect on icon buttons.
+- Fixed the display of the secondary property name (e.g. "Item -> 0 Potion").
+- Fixed various small layout issues, particularly with margins around input elements and buttons.
+- Fixed vertical alignment of "0x" prefix in attribute table.
+- When loading a mapper via the favorites panel, a loading indicator is now shown.
+
 # 0.10.2
 
 - Fixed properties rendered as drop-downs not updating after a write.

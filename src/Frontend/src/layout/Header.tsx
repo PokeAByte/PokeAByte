@@ -10,7 +10,9 @@ import { useComputed } from "@preact/signals";
 
 async function performReload( preserveFreeze: boolean ) {
 	if (!preserveFreeze) {
-		await Store.reloadMapper();
+		if (await Store.reloadMapper()) {
+			Toasts.push("Reloaded mapper.", "", "green");
+		}
 		return;
 	}
 
@@ -49,7 +51,7 @@ export function Header() {
 
 	return (
 		<header class={isSticky ? "sticky" : ""}>
-			<h1 class={textColor}>
+			<h1 class={"hide-s " + textColor}>
 				Poke-A-Byte
 			</h1>
 			<nav class="tab">
@@ -58,7 +60,7 @@ export function Header() {
 			<div class="mapper-info">
 				{mapper 
 					? <>
-						<span class={`margin-right ${textColor}`}  title={"Current mapper: " + mapper.gameName}>
+						<span class={`hide-s margin-right ${textColor}`}  title={"Current mapper: " + mapper.gameName}>
 							Connected
 						</span>
 						<IconButton
@@ -76,10 +78,10 @@ export function Header() {
 							icon="refresh"
 						/>
 					</>
-					: "No Mapper loaded"
+					: <span class="hide-s">No Mapper loaded</span>
 				}
 				<AdvancedToggle />
-			</div>		
+			</div>
 		</header>
 	);
 }

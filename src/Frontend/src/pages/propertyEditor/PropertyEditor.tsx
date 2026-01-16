@@ -2,7 +2,7 @@ import { Store } from "@/utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
 import { useEffect, useState } from "preact/hooks";
 import { navigateTo } from "@/components/Route";
-import { ForceVisibilityToggle } from "@/components/ForceVisibilityToggle";
+import { CollapseAllButton, ForceVisibilityToggle } from "@/components/ForceVisibilityToggle";
 import { IfNotHidden } from "@/components/IfNotHidden";
 import { IconButton } from "@/components/IconButton";
 import { isConnectedSignal, mapperSignal } from "@/Contexts/mapperSignal";
@@ -57,7 +57,7 @@ function addToPropertyTree(tree: PropertyTreeNode[], paths: string[], depth: num
 			if (node.allChildren?.some((x) => x === node.path + ".species")) {
 				node.secondaryNamePath = node.path + ".species";
 			} else {
-				node.secondaryNamePath = node.path + node.children?.at(0)?.path;
+				node.secondaryNamePath = node.children?.at(0)?.path;
 			}
 		}
 		parent?.allChildren?.push(path)
@@ -97,6 +97,7 @@ export function PropertyEditor() {
 					<Show when={advancedModeSignal}>
 						<ForceVisibilityToggle />
 					</Show>
+					<CollapseAllButton />
 				</div>
 			</div>
 			<PropertySearch />

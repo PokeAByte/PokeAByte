@@ -46,7 +46,7 @@ export function AttributesTable({ path }: { path: string }) {
 					<tr>
 						<th>address</th>
 						<td >
-							<CopyValueIcon onClick={() => clipboardCopy(address ? `0x${address.toUpperCase()}` : "")} />
+							<CopyValueIcon onClick={() => clipboardCopy(address ? `${address.toUpperCase()}` : "")} />
 						</td>
 						<td>{address ? `0x${address.toUpperCase()}` : "-"}</td>
 					</tr>

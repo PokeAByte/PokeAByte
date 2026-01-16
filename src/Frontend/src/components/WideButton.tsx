@@ -9,7 +9,7 @@ type Props = {
 export function WideButton(props: Props) {
 	return (
 		<button 
-			class={`wide-button ${props.color} margin-right`} 
+			class={`wide-button ${props.color}`} 
 			onClick={props.onClick} 
 			type="button"
 			disabled={props.disabled}

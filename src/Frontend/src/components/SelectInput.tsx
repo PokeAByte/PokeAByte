@@ -1,4 +1,4 @@
-import { ComponentChild } from "preact";
+import { ComponentChild, TargetedKeyboardEvent } from "preact";
 import { useRef, useState } from "preact/hooks";
 
 export type SelectOption<V> = { value: V, display: string, extra?: ComponentChild }
@@ -13,6 +13,7 @@ export interface SelectInputProps<V, T extends SelectOption<V>> {
 	placeholder?: string,
 	tabIndex?: number
 	onSelection: (value: SelectOption<V>) => void,
+	onSave?: () => void,
 }
 
 function matchDisplayValue<T>(search: string) {
@@ -56,6 +57,9 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	const handleSelection = (option: SelectOption<Value>) => {
+		if (props.onSave) {
+			inputRef.current?.focus();
+		}
 		props.onSelection(option);
 		setIsOpen(false);
 		setFocusedIndex(-1);
@@ -65,6 +69,8 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 		setIsOpen(!props.isReadonly);
 	}
 	const handleBlur = () => {
+		// RAF makes it so the menu does not close on loss of focus. 
+		// It also makes document.activeElement behave as expected
 		window.requestAnimationFrame(() => {
 			if (divRef.current?.contains(document.activeElement)) {
 				return;
@@ -72,6 +78,14 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 			setIsOpen(false);
 			setFocusedIndex(-1);
 		});
+	}
+
+	const onInput = (event: TargetedKeyboardEvent<HTMLInputElement>) => {
+		if (event.key === "Enter" && props.onSave && valueDisplay === event.currentTarget.value) {
+			props.onSave();
+			event.stopPropagation();
+			event.currentTarget?.blur();
+		}	
 	}
 	const handleKeyDown = (event: KeyboardEvent) => {
 		let newFocus = -1;
@@ -98,8 +112,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 				focusShift = -1;
 				break;
 			case "Escape":
-				inputRef.current?.blur();
-				(optionsContainer.current?.childNodes[focusIndex] as HTMLElement)?.blur();
+				setIsOpen(false);
 				break;
 		}
 		if (focusShift != 0) {
@@ -129,6 +142,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 				onBlur={handleBlur}
 				placeholder={props.placeholder}
 				onInput={(e) => setSearchValue(e.currentTarget.value)}
+				onKeyDown={onInput}
 				readOnly={props.isReadonly}
 				ref={inputRef}
 			/>
@@ -141,6 +155,7 @@ export function SelectInput<Value>(props: SelectInputProps<Value, SelectOption<V
 							onClick={() => handleSelection(x)}
 							class={index === 0 && focusIndex === -1 ? "text-blue" : ""}
 							tabIndex={-1}
+							onBlur={handleBlur}
 						>
 							<span>
 								{x.display}

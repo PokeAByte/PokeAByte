@@ -1,6 +1,5 @@
 import { PropertyEdit } from "./PropertyEdit";
 import { AttributesTable } from "./AttributesTable";
-import { useStorageRecordState } from "../../../hooks/useStorageState";
 import { clipboardCopy } from "../utils/clipboardCopy";
 import { getPropertyFieldValue } from "./PropertyTextbox";
 import { Store } from "@/utility/propertyStore";
@@ -11,15 +10,16 @@ import { hiddenOverrideSignal, hiddenProperties } from "@/Contexts/hiddenPropert
 import { useCallback } from "preact/hooks";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
 import { Show } from "@preact/signals/utils";
+import { attributesOpenSignal, toggleAttibutesOpen } from "@/Contexts/openPropertiesSignal";
 
-export function PropertyValue({ path, mapperId }: { mapperId: string, path: string }) {
-	const [isTableOpen, setTableOpen] = useStorageRecordState(mapperId+"-attributes", path, false);
+export function PropertyValue({ path }: { path: string }) {
+	const isTableOpen = attributesOpenSignal.value[path];
 	const override = hiddenOverrideSignal.value;
 	const bits = useGamePropertyField(path, "bits");
 	const address = useGamePropertyField(path, "address");
-	const toggleTable =  useCallback(
-		() => setTableOpen(!isTableOpen),
-		[setTableOpen, isTableOpen]
+	const toggleTable = useCallback(
+		() => toggleAttibutesOpen(path),
+		[path]
 	);
 	const handleCopyClick = useCallback(() => {
 		const property = Store.getProperty(path);

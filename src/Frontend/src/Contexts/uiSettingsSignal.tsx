@@ -13,8 +13,18 @@ export type UISettings = {
 	recentMappers?: string[],
 }
 
+const defaultSettings = { 
+	initialized: false, 
+	stickyHeader: true,
+	recentlyUsedEnabled: true,
+	openPanels: {} 
+};
+
 export const uiSettingsSignal = signal<UISettings>(
-	getStorageItem("_uiSettings", { initialized: false, openPanels: {} })
+	{
+		...defaultSettings, 
+		...getStorageItem("_uiSettings", {})
+	}
 );
 
 export const advancedModeSignal = computed(() => uiSettingsSignal.value.advancedMode ?? false);

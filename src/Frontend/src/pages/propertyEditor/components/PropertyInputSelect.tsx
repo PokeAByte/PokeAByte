@@ -9,6 +9,7 @@ type Props = {
 	isReadonly?: boolean,
 	placeholder?: string,
 	onChange: (newValue: string|boolean) => void
+	save: () => void
 }
 
 export function PropertyInputSelect({ path, isReadonly, onChange, displayValue, placeholder }: Props) {

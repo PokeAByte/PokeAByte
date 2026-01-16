@@ -66,26 +66,30 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 
 	return (
 		<>
-			<label htmlFor="mapper-filter margin-right">Filter:</label>
-			<input
-				id="mapper-filter"
-				type="text"
-				class="margin-right margin-left"
-				placeholder=""
-				onInput={(event) => setFilter(event.currentTarget.value)}
-			/>
-			{props.onUpdateList &&
-				<WideButton text="Reload mapper list" color="blue" onClick={props.onUpdateList} />
-			}
+			<div class="flexy-panel">
+				<span>
+					<label htmlFor="mapper-filter margin-right">Filter:</label>
+					<input
+						id="mapper-filter"
+						type="text"
+						class="margin-left"
+						placeholder=""
+						onInput={(event) => setFilter(event.currentTarget.value)}
+					/>
+				</span>
+				{props.onUpdateList &&
+					<WideButton text="Reload mapper list" color="blue" onClick={props.onUpdateList} />
+				}
+			</div>
 			<table class="striped">
 				<thead>
 					<tr  >
 						<th>
 							<label class="checkbox">
-								<input  
-									type="checkbox"  
-									checked={selectedMappers.length == mappers.length}  
-									onInput={(e) => selectAll(e.currentTarget.checked)}  
+								<input
+									type="checkbox"
+									checked={selectedMappers.length == mappers.length}
+									onInput={(e) => selectAll(e.currentTarget.checked)}
 								/>
 								<span />
 							</label>

@@ -29,39 +29,3 @@ export function useStorageState<T>(key: string, defaultValue: T): [T, (value: T)
 	return [item, setter]
 }
 
-export function useStorageRecordState<K extends string, V>(
-	name: string,
-	key: K,
-	defaultValue: V
-):[V, (value: V) => void] {
-	const getStoredRecord = useCallback(() => {
-		const json = window.localStorage.getItem(name);
-		let record: Record<K, V> = {} as Record<K, V> ;
-		if (json) {
-			try {
-				record = JSON.parse(json) as Record<K, V>  ?? {};
-			} catch { /* empty */ }
-		}
-		return record;
-	}, [name]);
-
-	const [item, setItem] = useState<V>(
-		() => {
-			const record = getStoredRecord();
-			return record[key] ?? defaultValue;
-		}
-	);
-
-	const setter = useCallback((newValue: V) => {
-		setItem(newValue);
-		const record = getStoredRecord();
-		if (newValue === false) {
-			delete record[key];
-		} else {
-			record[key] = newValue;
-		}
-		window.localStorage.setItem(name, JSON.stringify(record));
-	}, [getStoredRecord, key, name]);
-
-	return [item, setter]
-}

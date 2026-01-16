@@ -70,6 +70,9 @@ main {
 	flex-direction: column;
 	overflow: hidden;
 	background-color: var(--color-surface-1);
+	&>div {
+		padding: 0 var(--margin-0);
+	}
 }
 
 header {
@@ -88,6 +91,7 @@ header {
 	}
 
 	nav {
+		margin: 0 var(--margin-0);
 		display: flex;
 		flex-grow: 0;
 		justify-self: center;
@@ -105,6 +109,7 @@ header {
 		margin: 0;
 		flex-grow: 0;
 		align-self: center;
+		margin-right: var(--margin-0);
 		font-size: 1.5em;
 		font-family: var(--default-font);
 		margin-top: var(--margin-0);
@@ -174,7 +179,14 @@ nav.tab {
 	}
 }
 
-
+.flexy-panel {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--margin-1);
+	button, input {
+		margin-top: 0 !important;
+	}
+}
 
 h2 {
 	margin-bottom: 0;
@@ -269,7 +281,9 @@ table {
 }
 
 .wide-button {
-	min-width: 15em;
+	min-width: 13em;
+	max-width: 100%;
+	padding: var(--margin-0) var(--margin-1)
 }
 
 form>table {
@@ -307,6 +321,7 @@ form>table {
 		&>td {
 			padding: 0 var(--margin-1);
 			display: flex;
+			flex-wrap: wrap;
 		}
 
 		&:nth-of-type(4n-3) {
@@ -334,6 +349,10 @@ form>table {
 
 	&>tbody>tr:nth-child(odd) {
 		background-color: var(--color-tone-0);
+	}
+
+	.property-bytes > span > span {
+		vertical-align: middle;
 	}
 
 	tr {
@@ -378,11 +397,58 @@ form>table {
 	}
 }
 
+@media (max-width: 480px) {
+	.property-table {
+		margin-left: var(--margin-1);
+		width: calc(100% - var(--margin-1));
+		&> tbody > tr, 
+		&> tbody > tr {
+			display: grid;
+			& > * {
+				padding-left: var(--margin-0) !important;
+			}
+			&.leaf > * {
+				height: auto !important;
+			}
+		}
+	}
+	.attributes-table {
+		margin-left: var(--margin-2);
+	}
+}
+
 .favorites {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
 	>button {
 		width: 10em;
+	}
+}
+
+@media (max-width: 1266px) { 
+	main, header {
+		padding: 0 10%;
+	}
+}
+@media (max-width: 960px) {
+	main, header {
+		padding: 0 5%;
+	}
+}
+@media (max-width: 720px) {
+	main, header {
+		padding: 0 var(--margin-1);
+	}
+	.hide-s {
+		display: none;
+	}
+}
+@media (max-width: 480px) {
+	main, header {
+		padding: 0 var(--margin-0);
+	}
+	article {
+		padding: 0 var(--margin-0);
+	}
+	.tab .button-label, .hide-xs {
+		display: none;
 	}
 }
