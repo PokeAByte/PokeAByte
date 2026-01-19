@@ -383,12 +383,13 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             var inputBits = new BitArray(bytes);
             var outputBits = new BitArray(property.Bytes);
-
+            var combinedBytes = new byte[property.Bytes.Length];
             for (var i = 0; i < property.BitIndexes.Length; i++)
             {
                 outputBits[property.BitIndexes[i]] = inputBits[i];
             }
-            outputBits.CopyTo(bytes, 0);
+            outputBits.CopyTo(combinedBytes, 0);
+            bytes = combinedBytes;
         }
 
         if (property.BeforeWriteValueFunction != null && GetModuleFunctionResult(property.BeforeWriteValueFunction, property) == false)
@@ -396,7 +397,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             // They want to do it themselves entirely in Javascript.
             return;
         }
-        
+
         await WriteBytes(property, bytes, freeze);
     }
 
@@ -432,31 +433,23 @@ public class PokeAByteInstance : IPokeAByteInstance
             return;
         }
 
-        if (property.IsFrozen)
-        {
-            // Update value on already frozen property:
-            property.BytesFrozen = bytes;
-        }
-
-        if (bytes.Length != property.Length)
-        {
-            throw new Exception($"Something went wrong with attempting to write bytes for {property.Path}. The bytes to write and the length of the property do not match. Will not proceed.");
-        }
-
-        if (freeze == true)
-        {
-            await this.FreezeProperty(property, bytes);
-        }
-        else if (freeze == false)
-        {
-            await UnfreezeProperty(property);
-        }
         if (property.MemoryContainer != null && property.MemoryContainer != "default")
         {
             var container = (DynamicMemoryContainer)MemoryContainerManager.Namespaces[property.MemoryContainer];
             container.Fill((MemoryAddress)property.Address, bytes);
             this.ExecuteContainerProcessor(property.MemoryContainer, container.GetAllBytes());
             return;
+        }
+        if (freeze == true)
+        {
+            await FreezeProperty(property, bytes);
+        }
+        else if (freeze == false)
+        {
+            await UnfreezeProperty(property);
+        } else if (property.IsFrozen)
+        {
+            property.BytesFrozen = bytes.ToArray();
         }
         await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
@@ -469,7 +462,7 @@ public class PokeAByteInstance : IPokeAByteInstance
             // We have to handle bitfield freezes with normal writes, unforunately. So we have to check that "Bits"
             // is not set or else we create problems as the emulator would write back the entire byte-array unchanged
             // instead of only the bitfield.
-            if (property.Bits == null &&  property.Address != null && Driver is IPokeAByteFreezeDriver freezeDriver)
+            if (property.Bits == null && property.Address != null && Driver is IPokeAByteFreezeDriver freezeDriver)
             {
                 await freezeDriver.Freeze(property.Address.Value, bytesFrozen);
             }
