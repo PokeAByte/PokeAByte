@@ -51,7 +51,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     public IMemoryManager MemoryContainerManager { get; private set; }
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
-    private ManualResetEventSlim _readLoopFinished = new ManualResetEventSlim(false);
+    private Task? _readLoopTask = null;
 
 #if DEBUG
     private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
@@ -163,7 +163,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
         catch (Exception ex)
         {
-            this._readLoopFinished.Set();
             if (ex is JavaScriptException jsException)
             {
                 var location = jsException.Location;
@@ -183,7 +182,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         await ClientNotifier.SendMapperLoaded(Mapper);
         // Start the read loop once successfully running once.
 
-        _ = Task.Run(ReadLoop, ReadLoopToken.Token);
+        _readLoopTask = Task.Run(ReadLoop);
         _logger.LogInformation($"Loaded mapper for {Mapper.Metadata.GameName} ({Mapper.Metadata.Id}).");
     }
 
@@ -216,10 +215,6 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 await OnProcessingAbort.Invoke();
             }
-        }
-        finally
-        {
-            _readLoopFinished.Set();
         }
     }
 
@@ -344,7 +339,10 @@ public class PokeAByteInstance : IPokeAByteInstance
     public async ValueTask DisposeAsync()
     {
         await ReadLoopToken.CancelAsync();
-        _readLoopFinished.Wait();
+        if (_readLoopTask != null)
+        {
+            await _readLoopTask;
+        }
         Mapper.Dispose();
         JavascriptEngine?.Dispose();
         await Driver.Disconnect();

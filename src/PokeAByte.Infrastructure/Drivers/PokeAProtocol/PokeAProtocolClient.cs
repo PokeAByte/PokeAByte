@@ -87,6 +87,7 @@ public class PokeAProtocolClient : IDisposable
             if (response.Buffer[4] == Instructions.SETUP)
             {
                 _connected = true;
+                int retry = 0;
                 bool memoryInitialized = false;
                 do
                 {
@@ -95,9 +96,16 @@ public class PokeAProtocolClient : IDisposable
                     memoryInitialized = memory.Count((byte)0) != _fileSize;
                     if (!memoryInitialized)
                     {
+                        retry++;
                         await Task.Delay(delayMs);
                     }
-                } while(!memoryInitialized);
+                } while(!memoryInitialized && retry < 2);
+                if (!memoryInitialized)
+                {    
+                    throw new PokeAByteException(
+                        $"Poke-A-Protocol setup timed failed. Did you select the right mapper for the current game?."
+                    );
+                }
                 this.WaitForClose();
                 return;
             }
