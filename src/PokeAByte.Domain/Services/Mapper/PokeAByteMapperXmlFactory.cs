@@ -93,7 +93,7 @@ public static class PokeAByteMapperXmlFactory
             {
                 try
                 {
-                    var type = x.GetAttributeValue("type") switch
+                    PropertyType type = x.GetAttributeValue("type") switch
                     {
                         "binaryCodedDecimal" => PropertyType.BinaryCodedDecimal,
                         "bitArray" => PropertyType.BitArray,
@@ -106,27 +106,24 @@ public static class PokeAByteMapperXmlFactory
                         _ => throw new Exception($"Unknown property type {x.GetAttributeValue("type")}."),
                     };
 
-                    var variables = new PropertyAttributes()
-                    {
-                        Path = x.GetElementPath(),
-                        Type = type,
-                        MemoryContainer = x.GetOptionalAttributeValue("memoryContainer"),
-                        Address = x.GetOptionalAttributeValue("address"),
-                        Length = x.GetOptionalAttributeValueAsInt("length") ?? 1,
-                        Size = x.GetOptionalAttributeValueAsInt("size"),
-                        Bits = x.GetOptionalAttributeValue("bits"),
-                        Reference = x.GetOptionalAttributeValue("reference"),
-                        Description = x.GetOptionalAttributeValue("description"),
-                        Value = x.GetOptionalAttributeValue("value"),
-                        ReadFunction = x.GetOptionalAttributeValue("read-function"),
-                        WriteFunction = x.GetOptionalAttributeValue("write-function"),
-                        AfterReadValueExpression = x.GetOptionalAttributeValue("after-read-value-expression"),
-                        AfterReadValueFunction = x.GetOptionalAttributeValue("after-read-value-function"),
-                        BeforeWriteValueFunction = x.GetOptionalAttributeValue("before-write-value-function"),
-                        EndianType = endianType,
-                    };
-
-                    return new PokeAByteProperty(variables);
+                    return new PokeAByteProperty(
+                        x.GetElementPath(),
+                        endianType,
+                        type,
+                        x.GetOptionalAttributeValue("memoryContainer"),
+                        x.GetOptionalAttributeValue("address"),
+                        x.GetOptionalAttributeValueAsInt("length") ?? 1,
+                        x.GetOptionalAttributeValueAsInt("size"),
+                        x.GetOptionalAttributeValue("bits"),
+                        x.GetOptionalAttributeValue("reference"),
+                        x.GetOptionalAttributeValue("description"),
+                        x.GetOptionalAttributeValue("value"),
+                        x.GetOptionalAttributeValue("read-function"),
+                        x.GetOptionalAttributeValue("write-function"),
+                        x.GetOptionalAttributeValue("after-read-value-expression"),
+                        x.GetOptionalAttributeValue("after-read-value-function"),
+                        x.GetOptionalAttributeValue("before-write-value-function")
+                    );
                 }
                 catch (Exception ex)
                 {

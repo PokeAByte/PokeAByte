@@ -11,6 +11,7 @@
 ## General
 
 - Reworked how Poke-A-Byte downloads mapper files and how it manages those files after they are downloaded.
+- Properties of type `binaryCodedDecimal`  can now be written to.
 
 ## Breaking changes
 

@@ -1,0 +1,124 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace PokeAByte.Domain.Test.WriteTests;
+
+public class WriteIntegerTests
+{
+    [Fact]
+    public async Task WriteLittleEndianInteger()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([0, 0, 0, 0]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            clientnotifier,
+            MapperTestHelper.CreateMapper(
+                """<property name="0" type="int" length="4" address="0x00" />""",
+                "0x00", "0x03", "GB"
+            ),
+            driver
+        );
+
+        await instance.Read();
+        await instance.Read();
+        Assert.Equal(0, clientnotifier.PropertyChanges[0].Value);
+        clientnotifier.ResetChanges();
+
+        await instance.WriteValue(instance.Mapper.get_property("test.0"), "256", false);
+        await instance.Read();
+        Assert.Single(driver.Writes);
+        Assert.Equal([0, 0, 1, 0], driver.Writes.Last().Bytes);
+        Assert.Equal(256, clientnotifier.PropertyChanges.Last().Value);
+    }
+
+    [Fact]
+    public async Task WriteBigEndian()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([0, 0, 0, 0]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            clientnotifier,
+            MapperTestHelper.CreateMapper(
+                """<property name="0" type="int" length="4" address="0x00" />""",
+                "0x00", "0x03", "NDS"
+            ),
+            driver
+        );
+
+        await instance.Read();
+        await instance.Read();
+        Assert.Equal(0, clientnotifier.PropertyChanges[0].Value);
+        clientnotifier.ResetChanges();
+
+        await instance.WriteValue(instance.Mapper.get_property("test.0"), "256", false);
+        await instance.Read();
+        Assert.Single(driver.Writes);
+        Assert.True(driver.LastWriteMatches([0, 1, 0, 0]));
+        Assert.Equal(256, clientnotifier.PropertyChanges.Last().Value);
+    }
+
+    [Fact]
+    public async Task WriteBits()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([0]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            clientnotifier,
+            MapperTestHelper.CreateMapper(
+                """<property name="0" type="int" length="1" address="0x00" bits="4-7" />""",
+                "0x00", "0x03", "NDS"
+            ),
+            driver
+        );
+
+        await instance.Read();
+        await instance.Read();
+        Assert.Equal(0, clientnotifier.PropertyChanges[0].Value);
+        clientnotifier.ResetChanges();
+
+        await instance.WriteValue(instance.Mapper.get_property("test.0"), "15", false);
+        await instance.Read();
+        Assert.Single(driver.Writes);
+        Assert.Equal([0b1111_0000], driver.Writes.Last().Bytes);
+        Assert.Equal(15, clientnotifier.PropertyChanges.Last().Value);
+    }
+
+    [Fact]
+    public async Task WriteBitsFreeze()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([1]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            clientnotifier,
+            MapperTestHelper.CreateMapper(
+                """<property name="0" type="int" length="1" address="0x00" bits="4" />""",
+                "0x00", "0x03", "NDS"
+            ),
+            driver
+        );
+
+        await instance.Read();
+        await instance.Read();
+        clientnotifier.ResetChanges();
+
+        await instance.WriteValue(instance.Mapper.get_property("test.0"), 0b1, true);
+        await instance.Read();
+        Assert.Equal([0b0001_0001], driver.Writes.Last().Bytes);
+        driver.Writes.Clear();
+
+        driver.SetData([0xFF]);
+        await instance.Read();
+        Assert.NotEmpty(driver.Writes);
+        Assert.Equal([0xFF], driver.Writes.Last().Bytes);
+        driver.Writes.Clear();
+
+        driver.SetData([0x00]);
+        await instance.Read();
+        Assert.NotEmpty(driver.Writes);
+        Assert.Equal([0x10], driver.Writes.Last().Bytes);
+        driver.Writes.Clear();
+
+    }
+}

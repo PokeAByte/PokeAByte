@@ -27,32 +27,49 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    public PokeAByteProperty(PropertyAttributes attributes)
+    public PokeAByteProperty(
+        string path,
+        EndianTypes EndianType,
+        PropertyType type,
+        string? memoryContainer,
+        string? address,
+        int length,
+        int? size,
+        string? bits,
+        string? reference,
+        string? description,
+        string? value,
+        string? readFunction = null,
+        string? writeFunction = null,
+        string? afterReadValueExpression = null,
+        string? afterReadValueFunction = null,
+        string? beforeWriteValueFunction = null
+    )
     {
-        Path = attributes.Path;
-        Type = attributes.Type;
-        _endian = attributes.EndianType;
+        Path = path;
+        Type = type;
+        _endian = EndianType;
 
-        MemoryContainer = attributes.MemoryContainer;
-        AddressString = attributes.Address;
-        OriginalAddressString = attributes.Address ?? ""; ;
-        Length = attributes.Length;
-        Size = attributes.Size;
-        Bits = attributes.Bits;
-        Reference = attributes.Reference;
-        Description = attributes.Description;
-        Value = attributes.Value;
-        StaticValue = attributes.Value;
+        MemoryContainer = memoryContainer;
+        AddressString = address;
+        OriginalAddressString = address ?? ""; ;
+        Length = length;
+        Size = size;
+        Bits = bits;
+        Reference = reference;
+        Description = description;
+        Value = value;
+        StaticValue = value;
         Bytes = [];
 
-        ReadFunction = attributes.ReadFunction;
-        WriteFunction = attributes.WriteFunction;
+        ReadFunction = readFunction;
+        WriteFunction = writeFunction;
 
-        AfterReadValueExpression = attributes.AfterReadValueExpression;
-        AfterReadValueFunction = attributes.AfterReadValueFunction;
+        AfterReadValueExpression = afterReadValueExpression;
+        AfterReadValueFunction = afterReadValueFunction;
 
-        BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
-        if (Type == PropertyType.String && Reference == null)
+        BeforeWriteValueFunction = beforeWriteValueFunction;
+        if (type == PropertyType.String && reference == null)
         {
             Reference = "defaultCharacterMap";
         }
@@ -118,7 +135,22 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 }
                 throw new ArgumentException("Invalid value format for byte array property. Expected '[255, 255, ...]'");
             case PropertyType.BinaryCodedDecimal:
-                throw new NotImplementedException();
+                {
+                    int integerValue = int.Parse(value);
+                    int digits = value.ToString().Length;
+                    var result = new byte[(digits/2+1)];
+                    int byteIndex = digits/2;
+                    while(integerValue > 0)
+                    {
+                        var lowerDigit = integerValue % 10;
+                        integerValue /=10;
+                        var upperDigit = integerValue % 10;
+                        integerValue /=10;
+                        result[byteIndex] = (byte)(((upperDigit & 0x0F) << 4) | lowerDigit);
+                        byteIndex--;
+                    }
+                    return [.. result.TakeLast(Length)];
+                }
             case PropertyType.BitArray:
                 throw new NotImplementedException();
             case PropertyType.Bool:

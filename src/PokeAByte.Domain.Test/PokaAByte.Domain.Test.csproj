@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AssemblyName>PokeAByte.Domain.Test</AssemblyName>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Extensions.Logging.Mock" Version="10.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+		<PackageReference Include="coverlet.collector" Version="6.0.4" />
+		<PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
+		<PackageReference Include="Voyager.UnitTestLogger" Version="1.2.0" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="../PokeAByte.Domain/PokeAByte.Domain.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<DotNetCliToolReference Include="ReportGenerator" Version="4.8.12" />
+	</ItemGroup>
+	<ItemGroup> 
+		<Content Include="src\**\*.js" CopyToOutputDirectory="Always" TargetPath="scripts\%(Filename)%(Extension)" />
+	</ItemGroup>
+</Project>
