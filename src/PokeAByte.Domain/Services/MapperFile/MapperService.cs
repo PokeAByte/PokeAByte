@@ -81,8 +81,6 @@ public class MapperService : IMapperService
         }
     }
 
-
-
     private bool CopyMapper(string mapperPath, string sourceDirectory, string targetDirectory, bool overwrite = false)
     {
         var fullTargetPath = Path.Combine(targetDirectory, mapperPath);
@@ -241,7 +239,7 @@ public class MapperService : IMapperService
 
     private void Save() => JsonFile.Write(_managedMappers, MapperTreePath, DomainJson.Default.ListMapperFile);
 
-    public List<ArchivedMapperFile> ListArchived()
+    public IEnumerable<ArchivedMapperFile> ListArchived()
     {
         if (!Directory.Exists(MapperArchivePath))
         {

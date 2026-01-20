@@ -43,7 +43,7 @@ public interface IMapperService
     /// Get the list of currently archvied mapper files.
     /// </summary>
     /// <returns> The list of <see cref="ArchivedMapperFile"/> items. </returns>
-    List<ArchivedMapperFile> ListArchived();
+    IEnumerable<ArchivedMapperFile> ListArchived();
 
     /// <summary>
     /// Lists all mappers currently in the users mapper directory. 

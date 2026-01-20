@@ -41,7 +41,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     public IMemoryManager MemoryContainerManager { get; private set; }
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
-    
+
 
 #if DEBUG
     private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
@@ -65,7 +65,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         // Get the file path from the filesystem provider.
         Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.Path);
         MemoryAddressBlock[]? blocksToRead = Mapper.PlatformOptions.Ranges;
-        
+
         // Calculate the blocks to read from the mapper memory addresses.
         if (Mapper.Memory.ReadRanges.Any())
         {
@@ -169,7 +169,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         _logger.LogInformation(
             $"Loaded mapper {Mapper.Metadata.Path} for {Mapper.Metadata.GameName} ({Mapper.Metadata.GamePlatform})"
             + $"\n\tID {Mapper.Metadata.Id}, version {Mapper.Metadata.Version ?? "unknown"}"
-            + $", mapping {Mapper.Memory.ReadRanges.Sum(x => x.End-x.Start)} bytes"
+            + $", mapping {Mapper.Memory.ReadRanges.Sum(x => x.End - x.Start)} bytes"
         );
     }
 
@@ -183,7 +183,7 @@ public class PokeAByteInstance : IPokeAByteInstance
                 {
                     foreach (var item in this.MemoryContainerManager.Namespaces)
                     {
-                        if (item.Value is DynamicMemoryContainer dynamicContainer && dynamicContainer.IsDirty)
+                        if (item.Value is DynamicMemoryContainer { IsDirty: true } dynamicContainer)
                         {
                             this.ExecuteContainerProcessor(item.Key, dynamicContainer.GetAllBytes());
                             dynamicContainer.ClearDirtyFlag();
@@ -205,21 +205,9 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
     }
 
-    
-
-    private async Task Read()
+    public async Task Read()
     {
         await Driver.ReadBytes(_transferBlocks);
-
-#if DEBUG
-        if (DebugOutputMemoryLayoutToFilesystem)
-        {
-            var memoryContainerPath = Path.GetFullPath(Path.Combine(BuildEnvironment.BinaryDirectoryPokeAByteFilePath, "..", "..", "..", "..", "..", "..", "PokeAByte.IntegrationTests", "Data", $"{Mapper.Metadata.Id}-0.json"));
-
-            File.WriteAllText(memoryContainerPath, JsonSerializer.Serialize(_transferBlocks));
-            DebugOutputMemoryLayoutToFilesystem = false;
-        }
-#endif
 
         // Preprocessor
         if (HasPreprocessor)
@@ -311,10 +299,9 @@ public class PokeAByteInstance : IPokeAByteInstance
         if (JavascriptModuleInstance == null) throw new Exception("JavascriptModuleInstance is null.");
         lock (_jsModuleLock)
         {
-            JavascriptModuleInstance.Get("containerprocessor")?.Call(
-                JsValue.FromObject(JavascriptEngine, container),
-                JsValue.FromObject(JavascriptEngine, bytes)
-            );
+            JavascriptModuleInstance
+                .Get("containerprocessor")
+                ?.Call(JsValue.FromObject(JavascriptEngine, container), JsValue.FromObject(JavascriptEngine, bytes));
         }
     }
 

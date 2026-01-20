@@ -22,23 +22,23 @@ public static class AddressMath
                 addressExpression.Parameters[variable.Key] = variable.Value;
             }
             var result = addressExpression.Evaluate();
-            if (result is double doubleResult)
+            switch(result)
             {
-                address = (uint)doubleResult;
-                return true;
-            }
-            else
-            {
-                if (uint.TryParse(result?.ToString(), out address))
-                {
+                case double doubleResult:
+                    address = (uint)doubleResult;
                     return true;
-                }
-                else
-                {
-                    address = 0x00;
-                    return false;
-                }
+                default:
+                    if (uint.TryParse(result?.ToString(), out address))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        address = 0x00;
+                        return false;
+                    }
             }
+
 
         }
         catch (Exception ex)

@@ -118,7 +118,22 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                 }
                 throw new ArgumentException("Invalid value format for byte array property. Expected '[255, 255, ...]'");
             case PropertyType.BinaryCodedDecimal:
-                throw new NotImplementedException();
+                {
+                    int integerValue = int.Parse(value);
+                    int digits = value.ToString().Length;
+                    var result = new byte[(digits/2+1)];
+                    int byteIndex = digits/2;
+                    while(integerValue > 0)
+                    {
+                        var lowerDigit = integerValue % 10;
+                        integerValue /=10;
+                        var upperDigit = integerValue % 10;
+                        integerValue /=10;
+                        result[byteIndex] = (byte)(((upperDigit & 0x0F) << 4) | lowerDigit);
+                        byteIndex--;
+                    }
+                    return [.. result.TakeLast(Length)];
+                }
             case PropertyType.BitArray:
                 throw new NotImplementedException();
             case PropertyType.Bool:
