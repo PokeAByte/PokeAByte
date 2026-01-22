@@ -219,7 +219,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         await Driver.ReadBytes(_transferBlocks);
 
 #if DEBUG
-        if (MemoryContainerManager is not IStaticMemoryDriver && DebugOutputMemoryLayoutToFilesystem)
+        if (DebugOutputMemoryLayoutToFilesystem)
         {
             var memoryContainerPath = Path.GetFullPath(Path.Combine(BuildEnvironment.BinaryDirectoryPokeAByteFilePath, "..", "..", "..", "..", "..", "..", "PokeAByte.IntegrationTests", "Data", $"{Mapper.Metadata.Id}-0.json"));
 

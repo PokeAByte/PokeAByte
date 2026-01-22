@@ -21,6 +21,8 @@
 - `GET /mapper-service/get-mappers` now returns a different type of object.
 - `PUT /mapper` Has been removed, please use `PUT /mapper-service/change-mapper`.
 - `PUT /mapper-service/change-mapper` now expects a path, not an ID.
+- Removed the "StaticMemoryDriver".
+- `PUT /driver/memory` has been removed (allowed to interact with the StaticMemoryDriver)
 
 # 0.10.3
 

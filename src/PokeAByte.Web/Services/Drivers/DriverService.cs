@@ -1,6 +1,5 @@
 ﻿using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Infrastructure.Drivers.Bizhawk;
 using PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 using PokeAByte.Infrastructure.Drivers.UdpPolling;
@@ -9,7 +8,6 @@ namespace PokeAByte.Web.Services.Drivers;
 
 public interface IDriverService
 {
-    IStaticMemoryDriver StaticMemory { get; }
     Task<IPokeAByteDriver?> TestDrivers();
 }
 
@@ -20,20 +18,15 @@ public class DriverService : IDriverService, IAsyncDisposable
     private int _currentAttempt = 0;
     private readonly AppSettings _appSettings;
     private readonly ILogger<RetroArchUdpDriver> _driverLogger;
-    private readonly IStaticMemoryDriver _staticMemory;
     private IPokeAByteDriver? _currentDriver;
 
     public DriverService(
         AppSettings appSettings,
-        ILogger<RetroArchUdpDriver> driverLogger,
-        IStaticMemoryDriver staticMemory)
+        ILogger<RetroArchUdpDriver> driverLogger)
     {
         _appSettings = appSettings;
         _driverLogger = driverLogger;
-        _staticMemory = staticMemory;
     }
-
-    public IStaticMemoryDriver StaticMemory => _staticMemory;
 
     private async Task Cleanup()
     {
@@ -85,10 +78,6 @@ public class DriverService : IDriverService, IAsyncDisposable
             else if (await RetroArchUdpDriver.Probe(_appSettings))
             {
                 return await GetRetroArchDriver();
-            }
-            else if (await StaticMemoryDriver.Probe(_appSettings))
-            {
-                return _staticMemory;
             }
             _currentAttempt += 1;
             await Task.Delay(MaxPauseMs);

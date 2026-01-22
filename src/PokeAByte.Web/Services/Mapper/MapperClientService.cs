@@ -100,7 +100,7 @@ public class MapperClientService(
 
     public async Task<Result> WritePropertyData(string propertyPath, object? value, bool isFrozen)
     {
-        if (string.IsNullOrEmpty(propertyPath) )
+        if (string.IsNullOrEmpty(propertyPath))
         {
             return Result.Failure(Error.StringIsNullOrEmpty);
         }

@@ -76,11 +76,6 @@ public interface IPokeAByteDriver
 
 public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
 
-public interface IStaticMemoryDriver : IPokeAByteDriver
-{
-    Task SetMemoryFragment(string filename);
-}
-
 public interface IPokeAByteFreezeDriver
 {
     public Task Freeze(MemoryAddress address, byte[] bytes);
