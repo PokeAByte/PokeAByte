@@ -30,6 +30,7 @@ export function PropertyInputSelect(props: Props) {
 			value={props.value}
 			options={options}
 			isReadonly={props.isReadonly}
+			onSave={props.save}
 			placeholder={props.placeholder}
 			onSelection={handleSelection} 
 		/>

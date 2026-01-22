@@ -11,6 +11,7 @@
 
 ## UI
 
+### Improvements 
 - The "sticky header" and "track recent recent mapper" options now default true.
 - When copying an address via the button, the "0x" prefix is no longer copied with it.
 - Added button to collapse all properties & attributes.
@@ -18,12 +19,49 @@
 - Improved layout on small / narrow windows.
 - Improved the behavior of the combined input/select box for properties with reference values.
 
-## Bugfixes
+### Bugfixes
 - Fixed hover effect on icon buttons.
 - Fixed the display of the secondary property name (e.g. "Item -> 0 Potion").
 - Fixed various small layout issues, particularly with margins around input elements and buttons.
 - Fixed vertical alignment of "0x" prefix in attribute table.
 - When loading a mapper via the favorites panel, a loading indicator is now shown.
+
+## Core
+
+### Improvements
+- Clients can now write the integer value of a reference property as well as the string value.
+
+For example if the byte value `20` is mapped to `"Potion"`, writing `20` is now allowed, but was previously met with an error.
+
+- Properties reading from select bits of a memory byte now behave more consistently when freezing their values.
+
+When freezing a property with `bits="1"` to `1` and then writing to the property with `bits="2"`, previously 
+the value of bit 2 would have been overwritten. 
+
+So, before:
+```
+Property A: write and freeze 1 to bit 1:
+00000000 -> 00000001
+Property B: write 1 to bit 2:
+00000001 -> 00000011
+Property A: Is frozen, but byte was modified. Reapply value:
+00000011 -> 00000001
+```
+
+Now:
+```
+Property A: write and freeze 1 to bit 1:
+00000000 -> 00000001
+Property B: write 1 to bit 2:
+00000001 -> 00000011
+Property A: Is frozen, but byte was modified, ensure bit stays the same:
+00000011 -> 00000011
+```
+
+## Bugfixes
+
+- Writing boolean values to a `bit` now works properly.
+- Fixed some potential deadlocks (hangs).
 
 # 0.10.2
 
