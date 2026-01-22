@@ -234,13 +234,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         }
 #endif
 
-        // Setup at start of loop
-        _propertiesChanged.Clear();
-        foreach (var property in Mapper.Properties.Values)
-        {
-            property.FieldsChanged = FieldChanges.None;
-        }
-
         // Preprocessor
         if (HasPreprocessor)
         {
@@ -300,6 +293,15 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 _logger.LogError(ex, $"Could not send property change events.");
                 throw new MapperException($"Could not send property change events.", ex);
+            }
+            finally
+            {
+                // Reset property change tracking:
+                foreach (var property in _propertiesChanged)
+                {
+                    property.FieldsChanged = FieldChanges.None;
+                }
+                _propertiesChanged.Clear();
             }
         }
     }
@@ -459,10 +461,12 @@ public class PokeAByteInstance : IPokeAByteInstance
         else if (freeze == false)
         {
             await UnfreezeProperty(property);
-        } else if (property.IsFrozen)
+        }
+        else if (property.IsFrozen)
         {
             property.BytesFrozen = bytes.ToArray();
         }
+
         await Driver.WriteBytes((MemoryAddress)property.Address, bytes);
     }
 
@@ -478,7 +482,6 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 await freezeDriver.Freeze(property.Address.Value, bytesFrozen);
             }
-            await ClientNotifier.SendPropertiesChanged([property]);
         }
     }
 
@@ -492,7 +495,6 @@ public class PokeAByteInstance : IPokeAByteInstance
             {
                 await freezeDriver.Unfreeze(property.Address.Value);
             }
-            await ClientNotifier.SendPropertiesChanged([property]);
         }
     }
 

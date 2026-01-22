@@ -60,6 +60,7 @@ Property A: Is frozen, but byte was modified, ensure bit stays the same:
 
 ## Bugfixes
 
+- Fixed a timing issue with notifying clients about certain property changes (mainly affected freezing).
 - Writing boolean values to a `bit` now works properly.
 - Fixed some potential deadlocks (hangs).
 
