@@ -38,7 +38,6 @@ public static class Startup
         services.AddSingleton<IDownloadService, DownloadService>();
         services.AddSingleton<ScriptConsole>();
         services.AddSingleton<IMapperService, MapperService>();
-        services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<IInstanceService, InstanceService>();
         services.AddSingleton<IDriverService, DriverService>();
         services.AddSingleton<RequestLogMiddleware>();
