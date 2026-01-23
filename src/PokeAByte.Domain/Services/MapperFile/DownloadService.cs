@@ -28,13 +28,12 @@ public class DownloadService : IDownloadService
         }
     }
 
-    public DownloadService(AppSettings appSettings, ILogger<DownloadService> logger, IClientNotifier clientNotifier, HttpClient client)
+    public DownloadService(ILogger<DownloadService> logger, IClientNotifier clientNotifier, HttpClient client)
     {
         _httpClient = client;
         _logger = logger;
         _clientNotifier = clientNotifier;
-        Settings = JsonFile.Read(GithubSettingsFile, DomainJson.Default.DownloadSettings)
-            ?? new() { Token = appSettings.GITHUB_TOKEN };
+        Settings = JsonFile.Read(GithubSettingsFile, DomainJson.Default.DownloadSettings) ?? new();
         _lastFetch = JsonFile.Read(LastFetchPath, DomainJson.Default.GithubUpdate);
     }
 

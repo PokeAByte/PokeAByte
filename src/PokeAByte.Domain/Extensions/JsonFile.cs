@@ -10,6 +10,17 @@ internal static class JsonFile
         File.WriteAllText(path, JsonSerializer.Serialize(value, typeInfo));
     }
 
+    /// <summary>
+    /// Deserializes the file with the given path, or returns the fallback value if one of the following is true:
+    /// - The file does not exist.
+    /// - The file is empty
+    /// - The deserializers threw an exception.
+    /// - The deserialized JSON is null.
+    /// </summary>
+    /// <typeparam name="T"> The type of the deserialized object. </typeparam>
+    /// <param name="path"> Path to the JSON file. </param>
+    /// <param name="typeInfo"> The JsonTypeInfo to deserialize with. </param>
+    /// <returns> The deserialized object or fallback value. </returns>
     internal static T? Read<T>(string path, JsonTypeInfo<T> typeInfo) where T : class
     {
         if (!File.Exists(path))

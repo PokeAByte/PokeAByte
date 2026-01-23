@@ -33,7 +33,7 @@ public static class Startup
             options.SerializerOptions.Converters.Add(new ByteArrayJsonConverter());
         });
 
-        services.AddSingleton<AppSettings>();
+        services.AddSingleton<AppSettingsService>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         services.AddSingleton<IDownloadService, DownloadService>();
         services.AddSingleton<ScriptConsole>();
