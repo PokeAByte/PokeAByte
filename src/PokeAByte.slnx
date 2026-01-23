@@ -5,9 +5,6 @@
   <Project Path="PokeAByte.Infrastructure/PokeAByte.Infrastructure.csproj">
     <BuildType Project="Release" />
   </Project>
-  <Project Path="PokeAByte.Integrations.BizHawk/PokeAByte.Integrations.BizHawk.csproj">
-    <BuildType Project="Release" />
-  </Project>
   <Project Path="PokeAByte.Protocol.BizHawk/PokeAByte.Protocol.BizHawk.csproj">
     <BuildType Project="Release" />
   </Project>

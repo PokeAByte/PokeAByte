@@ -1,6 +1,5 @@
 ﻿using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Infrastructure.Drivers.Bizhawk;
 using PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 using PokeAByte.Infrastructure.Drivers.UdpPolling;
 
@@ -20,9 +19,7 @@ public class DriverService : IDriverService, IAsyncDisposable
     private readonly ILogger<RetroArchUdpDriver> _driverLogger;
     private IPokeAByteDriver? _currentDriver;
 
-    public DriverService(
-        AppSettings appSettings,
-        ILogger<RetroArchUdpDriver> driverLogger)
+    public DriverService(AppSettings appSettings, ILogger<RetroArchUdpDriver> driverLogger)
     {
         _appSettings = appSettings;
         _driverLogger = driverLogger;
@@ -35,14 +32,6 @@ public class DriverService : IDriverService, IAsyncDisposable
             await _currentDriver.Disconnect();
             _currentDriver = null;
         }
-    }
-
-    private async Task<IPokeAByteDriver> GetBizhawkDriver()
-    {
-        await Cleanup();
-        _currentDriver = new BizhawkMemoryMapDriver(_appSettings);
-        await _currentDriver.EstablishConnection();
-        return _currentDriver;
     }
 
     private async Task<IPokeAByteDriver> GetRetroArchDriver()
@@ -70,10 +59,6 @@ public class DriverService : IDriverService, IAsyncDisposable
             if (await PokeAProtocolDriver.Probe(_appSettings))
             {
                 return await GetPokeAProtocolDriver();
-            }
-            if (await BizhawkMemoryMapDriver.Probe(_appSettings))
-            {
-                return await GetBizhawkDriver();
             }
             else if (await RetroArchUdpDriver.Probe(_appSettings))
             {
