@@ -3,10 +3,7 @@ using Microsoft.Extensions.FileProviders;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models;
-using PokeAByte.Domain.Services.Mapper;
-using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Infrastructure.Drivers;
-using PokeAByte.Infrastructure.Github;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
@@ -21,7 +18,7 @@ public static class Startup
     public static void ConfigureServices(this IServiceCollection services)
     {
         services.AddCors();
-
+        services.AddHttpClient();
         services.AddSignalR()
             .AddJsonProtocol(
                 (options) =>
@@ -37,21 +34,15 @@ public static class Startup
         });
 
         services.AddSingleton<AppSettings>();
-        services.AddSingleton<ScriptConsole>();
-        services.AddSingleton<IMapperFileService, MapperFileService>();
-        services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
+        services.AddSingleton<IDownloadService, DownloadService>();
+        services.AddSingleton<ScriptConsole>();
+        services.AddSingleton<IMapperService, MapperService>();
+        services.AddSingleton<IStaticMemoryDriver, StaticMemoryDriver>();
         services.AddSingleton<IInstanceService, InstanceService>();
         services.AddSingleton<IDriverService, DriverService>();
         services.AddSingleton<RequestLogMiddleware>();
 
-        services.AddScoped<IGithubService, GitHubService>();
-        services.AddScoped(x =>
-            {
-                var logger = x.GetRequiredService<ILogger<MapperUpdaterSettings>>();
-                return MapperUpdaterSettings.Load(logger);
-            });
-        services.AddScoped<IMapperUpdateManager, MapperUpdateManager>();
         services.AddScoped<MapperClientService>();
     }
 

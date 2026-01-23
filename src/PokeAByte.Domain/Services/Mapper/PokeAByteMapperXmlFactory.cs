@@ -9,7 +9,7 @@ namespace PokeAByte.Domain.Mapper;
 
 static class PokeAByteMapperXmlHelpers
 {
-    public static IEnumerable<XAttribute> GetAttributesWithVars(this XDocument doc)
+    internal static IEnumerable<XAttribute> GetAttributesWithVars(this XDocument doc)
     {
         var properties = doc.Descendants("properties") ?? throw new Exception("Unable to locate <properties>");
 
@@ -20,7 +20,8 @@ static class PokeAByteMapperXmlHelpers
     }
 
     static string[] AttributesThatCanBeNormalized { get; } = ["address", "preprocessor"];
-    public static List<XAttribute> GetAttributesThatCanBeNormalized(this XDocument doc)
+    
+    internal static List<XAttribute> GetAttributesThatCanBeNormalized(this XDocument doc)
     {
         var properties = doc.Descendants("properties") ?? throw new Exception("Unable to locate <properties>");
 
@@ -54,17 +55,18 @@ public static class PokeAByteMapperXmlFactory
         }
     }
 
-    public static MetadataSection GetMetadata(XDocument doc, string fileId)
+    public static MetadataSection GetMetadata(XDocument doc, string path)
     {
         var root = doc.Element("mapper") ?? throw new Exception($"Unable to find <mapper> root element.");
 
         return new MetadataSection()
         {
             Id = Guid.Parse(root.GetAttributeValue("id")),
-            FileId = fileId,
             GameName = root.GetAttributeValue("name"),
             GamePlatform = root.GetAttributeValue("platform"),
             MapperSyntax = root.GetOptionalAttributeValueAsInt("syntax") ?? 1,
+            Version = root.GetOptionalAttributeValue("version"),
+            Path = path,
         };
     }
 
@@ -164,7 +166,7 @@ public static class PokeAByteMapperXmlFactory
             });
     }
 
-    public static IPokeAByteMapper LoadMapperFromFile(string mapperContents, string fileId)
+    public static IPokeAByteMapper LoadMapperFromFile(string mapperContents, string path)
     {
         var doc = XDocument.Parse(mapperContents.Replace("{", string.Empty).Replace("}", string.Empty));
 
@@ -213,10 +215,10 @@ public static class PokeAByteMapperXmlFactory
         {
             attr.Value = attr.Value.NormalizeMemoryAddresses();
         }
-        var metaData = GetMetadata(doc, fileId);
+        var metaData = GetMetadata(doc, path);
         if (metaData.MapperSyntax > CURRENT_SYNTAX)
         {
-            throw new MapperException($"The mapper {metaData.FileId} is too new. Please update Poke-A-Byte.");
+            throw new MapperException($"The mapper {metaData.Path} is too new. Please update Poke-A-Byte.");
         }
         IPlatformOptions platformOptions = metaData.GamePlatform switch
         {

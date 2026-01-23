@@ -16,7 +16,7 @@ public class Program
             builder.Logging.ClearProviders();
             builder.Logging.AddPokeAByteLogger(o =>
             {
-                o.LogLevel = LogLevel.Information;
+                o.LogLevel = LogLevel.Debug;
                 o.LogFile = BuildEnvironment.LogFilePath;
                 o.AddOverride("Microsoft.Hosting.Lifetime", LogLevel.Information);
                 o.AddOverride("Microsoft", LogLevel.Warning);
@@ -36,6 +36,7 @@ public class Program
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex);
             logger?.LogCritical(ex, "Poke-A-Byte startup failed!");
         }
     }

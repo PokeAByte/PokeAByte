@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
@@ -49,14 +48,7 @@ public static class MapperEndpoints
 
         var model = new MapperModel()
         {
-            Meta = new MapperMetaModel()
-            {
-                Id = instanceService.Instance.Mapper.Metadata.Id,
-                FileId = instanceService.Instance.Mapper.Metadata.FileId,
-                GameName = instanceService.Instance.Mapper.Metadata.GameName,
-                GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION,
-            },
+            Meta = MapperMetaModel.FromMapperSection(instanceService.Instance.Mapper.Metadata),
             Properties = instanceService.Instance.Mapper.Properties.Values,
             Glossary = instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
         };
@@ -64,12 +56,12 @@ public static class MapperEndpoints
     }
 
     public static async Task<IResult> PutMapper(
-        IMapperFileService mapperFileService,
+        IMapperService mapperService,
         IDriverService driverService,
         IInstanceService instanceService,
         [FromBody] MapperReplaceModel model)
     {
-        var mapperContent = await mapperFileService.LoadContentAsync(model.Id);
+        var mapperContent = await mapperService.LoadContentAsync(model.Path);
         switch (model.Driver)
         {
             case DriverModels.Bizhawk:
@@ -94,15 +86,7 @@ public static class MapperEndpoints
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var meta = instance.Mapper.Metadata;
-        var model = new MapperMetaModel
-        {
-            Id = meta.Id,
-            GameName = meta.GameName,
-            FileId = meta.FileId,
-            GamePlatform = meta.GamePlatform,
-            MapperReleaseVersion = appSettings.MAPPER_VERSION,
-        };
-        return TypedResults.Ok(model);
+        return TypedResults.Ok(MapperMetaModel.FromMapperSection(meta));
     }
 
     public static IResult GetProperties(IInstanceService instanceService)

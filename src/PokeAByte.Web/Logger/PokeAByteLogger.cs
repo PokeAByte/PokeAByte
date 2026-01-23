@@ -69,7 +69,7 @@ internal sealed class PokeAByteLogger(string name, LoggerConfiguration config, L
     /// <returns> The exception information as a string. </returns>
     private string FormatException(Exception exception)
     {
-        string stacktrace = ReformatStacktrace(exception.StackTrace ?? "");
+        string stacktrace = exception.StackTrace ?? "";
         var baseException = GetJintBaseException(exception);
         string name = baseException.GetType().Name;
         string message = exception.Message;

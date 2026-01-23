@@ -1,9 +1,6 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
-using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Services.MapperFile;
 using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web;
@@ -14,122 +11,74 @@ public static class FilesEndpoints
 {
     public static void MapFilesEndpoints(this WebApplication app)
     {
-        app.MapGet("/files/mappers", GetMapperFiles);
+        app.MapGet("/files/mappers", GetMappers);
         app.MapGet("/files/mapper/check_for_updates", CheckForUpdatesAsync);
         app.MapGet("/files/mapper/get_updates", GetUpdatesAsync);
         app.MapPost("/files/mapper/download_updates", DownloadMapperUpdatesAsync);
         app.MapGet("/files/mapper/get_archived", GetArchivedMappersAsync);
         app.MapPost("/files/mapper/archive_mappers", ArchiveMappers);
         app.MapPost("/files/mapper/backup_mappers", BackupMappers);
-        app.MapGet("/files/open_mapper_archive_folder", () => XPlatHelper.OpenFileManager(MapperPaths.MapperLocalArchiveDirectory));
-        app.MapGet("/files/open_mapper_folder", () => XPlatHelper.OpenFileManager(MapperPaths.MapperDirectory));
+        app.MapGet("/files/open_mapper_archive_folder", () => XPlatHelper.OpenFileManager(MapperService.MapperArchivePath));
+        app.MapGet("/files/open_mapper_folder", () => XPlatHelper.OpenFileManager(MapperService.MapperDirectory));
         app.MapPost("/files/mapper/delete_mappers", DeleteMappers);
         app.MapPost("/files/mapper/restore_mappers", RestoreMapper);
     }
 
-    public static void DeleteMappers(
-        IMapperFileService mapperFileService,
-        [FromBody] IEnumerable<ArchivedMapperDto> archivedMappers)
+    public static void DeleteMappers(IMapperService mapperService, [FromBody] string archivePath)
     {
-        mapperFileService.DeleteMappersFromArchive(archivedMappers);
+        mapperService.DeleteArchive(archivePath);
     }
 
-    public static void RestoreMapper(IMapperFileService mapperFileService, List<ArchivedMapperDto> archivedMappers)
+    public static void RestoreMapper(IMapperService mapperService, [FromBody] string archivePath)
     {
-        mapperFileService.RestoreMappersFromArchive(archivedMappers);
-        mapperFileService.Refresh(); // Update the mapper list
+        mapperService.Restore(archivePath);
     }
 
-    public static IResult ArchiveMappers(IMapperFileService mapperFileService, List<MapperDto> mappers)
+    public static IResult ArchiveMappers(IMapperService mapperService, List<string> mappers)
     {
-        foreach (var mapper in mappers)
-        {
-            var relativeJsPath = mapper.Path
-                [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
-            var mapperPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.Path}";
-            var jsPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{relativeJsPath}";
-            mapperFileService.ArchiveFile(mapper.Path, mapperPath);
-            mapperFileService.ArchiveFile(relativeJsPath, jsPath);
-        }
-        mapperFileService.ArchiveDirectory(MapperPaths.MapperArchiveDirectory);
-        mapperFileService.Refresh(); // Update the mapper list
-        return TypedResults.Ok();
+        return mapperService.Archive(mappers)
+            ? TypedResults.Ok()
+            : TypedResults.InternalServerError();
     }
 
-    public static IResult BackupMappers(IMapperFileService mapperFileService, List<MapperDto> mappers)
+    public static async Task<IResult> BackupMappers(IMapperService mapperService, List<string> mappers)
     {
-        foreach (var mapper in mappers)
-        {
-            var relativeJsPath = mapper.Path
-                [..mapper.Path.IndexOf(".xml", StringComparison.Ordinal)] + ".js";
-            var mapperPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{mapper.Path}";
-            var jsPath = $"{MapperPaths.MapperDirectory.Replace("\\", "/")}/{relativeJsPath}";
-            mapperFileService.BackupFile(mapper.Path, mapperPath);
-            mapperFileService.BackupFile(relativeJsPath, jsPath);
-        }
-        return TypedResults.Ok();
+        return await mapperService.Backup(mappers)
+            ? TypedResults.Ok()
+            : TypedResults.InternalServerError();
     }
 
-    public static Dictionary<string, IEnumerable<ArchivedMapperDto>> GetArchivedMappersAsync(
-        IMapperFileService mapperFileService)
+    public static Dictionary<string, IEnumerable<ArchivedMapperFile>> GetArchivedMappersAsync(
+        IMapperService mapperService)
     {
-        return mapperFileService.ListArchived()
-            .GroupBy(x => x.FullPath)
+        return mapperService.ListArchived()
+            .GroupBy(x => x.Path)
             .Select(
-                x => new KeyValuePair<string, IEnumerable<ArchivedMapperDto>>(x.Key, x)
+                x => new KeyValuePair<string, IEnumerable<ArchivedMapperFile>>(x.Key, x)
             )
             .ToDictionary();
     }
 
 
     public static async Task<IResult> DownloadMapperUpdatesAsync(
-        IMapperUpdateManager updateManager,
-        IGithubService githubService,
-        IMapperFileService mapperFileService,
-        [FromBody] IEnumerable<MapperComparisonDto> mappers)
+        IMapperService mapperService, 
+        [FromBody] List<string> mapperPaths)
     {
-        var mapperDownloads = mappers
-            .Select(m => m.LatestVersion ??
-                (m.CurrentVersion ?? throw new InvalidOperationException("Current Version and Latest version are both null."))
-            )
-            .ToList();
-        var downloadedMappers = await githubService.DownloadMappersAsync(mapperDownloads);
-        if (downloadedMappers.Count > 0)
+        if (await mapperService.DownloadAsync(mapperPaths))
         {
-            await updateManager.SaveUpdatedMappersAsync(downloadedMappers);
-            mapperFileService.Refresh();
             return TypedResults.Ok();
         }
-        return TypedResults.InternalServerError("");
+        return TypedResults.InternalServerError();
     }
 
-    public static IEnumerable<MapperFileModel> GetMapperFiles(IMapperFileService mapperFileService)
+    public static IEnumerable<InstalledMapper> GetMappers(IMapperService mapperService)
     {
-        return mapperFileService.ListInstalled().Select(x => new MapperFileModel(x.Id, x.DisplayName));
+        return mapperService.ListInstalled();
     }
 
-    public static async Task<bool> CheckForUpdatesAsync(IMapperFileService mapperFileService, IMapperUpdateManager updateManager)
-    {
-        mapperFileService.Refresh();
-        //check for updates
-        var updatesFound = await updateManager.CheckForUpdates();
-        return updatesFound;
-    }
+    public static bool CheckForUpdatesAsync(IMapperService mapperService)
+        => mapperService.UpdateRemoteMappers();
 
-    public static async Task<IResult> GetUpdatesAsync(IMapperUpdateManager updateManager)
-    {
-        await updateManager.CheckForUpdates();
-        if (!File.Exists(MapperPaths.OutdatedMapperTreeJson))
-        {
-            return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} does not exist locally.");
-        }
-        //load the mapper list
-        var jsonStr = File.ReadAllText(MapperPaths.OutdatedMapperTreeJson);
-        if (string.IsNullOrWhiteSpace(jsonStr))
-            return TypedResults.BadRequest($"{MapperPaths.OutdatedMapperTreeJson} was empty.");
-
-        return TypedResults.Ok(
-            JsonSerializer.Deserialize(jsonStr, ApiJsonContext.Default.IEnumerableMapperComparisonDto)
-        );
-    }
+    public static async Task<IEnumerable<RemoteMapperFile>> GetUpdatesAsync(IMapperService mapperService)
+        => mapperService.ListRemote();
 }

@@ -59,21 +59,4 @@ public static partial class Extensions
 
         return value;
     }
-
-    public static string ToPascalCase(this string value)
-    {
-        string[] words = Regex.Split(value, @"[_\-]");
-        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-
-        for (int i = 0; i < words.Length; i++)
-        {
-            string word = words[i];
-            if (!string.IsNullOrEmpty(word))
-            {
-                words[i] = textInfo.ToTitleCase(word);
-            }
-        }
-
-        return string.Concat(words);
-    }
 }

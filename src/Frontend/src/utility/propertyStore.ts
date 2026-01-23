@@ -32,14 +32,14 @@ export class PropertyStore {
 	}
 
 	reloadMapper = async () => {
-		const mapperFileId = this.client.getMapper()?.fileId;
-		if (!mapperFileId) {
+		const path = this.client.getMapper()?.path;
+		if (!path) {
 			return;
 		}
 		this._suppressUpdate = true;
 		await Store.client.unloadMapper();
 		Toasts.clearErrors();
-		const success = await Store.client.changeMapper(mapperFileId);
+		const success = await Store.client.changeMapper(path);
 		const interval = window.setInterval(() => {
 			if (this.getMapper()) {
 				this._suppressUpdate = false;				
