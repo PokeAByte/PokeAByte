@@ -14,6 +14,8 @@
 
 ## Breaking changes
 
+- **The legacy BizHawk driver has been removed.** You can still use the `EDPS.Bizhawk.dll` with the emulator protocol driver
+  if you wish to continue using BizHawk. 
 - Local mapper directories are no longer supported (a "mappers" folder next to the PokeAByte.Web.exe).
 
 ## Breaking technical changes

@@ -74,8 +74,6 @@ public interface IPokeAByteDriver
     bool SupportsFreeze { get; }
 }
 
-public interface IBizhawkMemoryMapDriver : IPokeAByteDriver { }
-
 public interface IPokeAByteFreezeDriver
 {
     public Task Freeze(MemoryAddress address, byte[] bytes);

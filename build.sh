@@ -21,9 +21,8 @@ for entry in "${!targets[@]}"; do
     build $entry
 done
 
-# Build the bizhawk DLLs:
+# Build the bizhawk DLL:
 dotnet publish PokeAByte.Protocol.BizHawk -o artifacts/github/ -c Release
-dotnet publish PokeAByte.Integrations.BizHawk -o artifacts/github/ -c Release
 
 # If "--publish" flag is set, use the github cli to create a release:
 if [[ $1 == *--publish* ]] then

@@ -1,5 +1,4 @@
-﻿using PokeAByte.Domain;
-using PokeAByte.Domain.Mapper;
+﻿using PokeAByte.Domain.Mapper;
 using PokeAByte.Utility.BuildMapperBindings;
 
 // Load XML file paths.
@@ -12,7 +11,7 @@ foreach (var xmlFilePath in filePaths)
     try
     {
         var contents = await File.ReadAllTextAsync(xmlFilePath);
-        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(contents,  xmlFilePath);
+        var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(contents, xmlFilePath);
 
         // Create child directory if not exists.
         if (mapper.Metadata.GamePlatform.Any(x => char.IsLetter(x) == false && char.IsNumber(x) == false))

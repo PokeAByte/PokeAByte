@@ -12,9 +12,6 @@ export function DepreciationNotices(props: { mapperId: string | null; }) {
 	if (driverApi.result === "RetroArch") {
 		return <RetroarchWarning />;
 	}
-	if (driverApi.result === "Bizhawk") {
-		return <BizhawkWarning />;
-	}
 	return null;
 }
 
@@ -30,23 +27,6 @@ export function RetroarchWarning() {
 				{" "}<a target="_blank" href="https://github.com/PokeAByte/PokeAByte/blob/main/docs/HowTo.md">
 					compatible emulator
 				</a>.
-			</p>
-		</Warning>
-	)
-}
-
-export function BizhawkWarning() {
-	return (
-		<Warning flag="_bizhawkDepreciation">
-			<h2>Notice:</h2>
-			<p >
-				The external tools "Poke-A-Byte Integration" and "Poke-A-Byte STP Tool" are deprecated. <br/>
-				If you wish to continue using BizHawk as your emulator, please switch to the "Emulator Data Protocol Server".
-				<br/>
-				<a target="_blank" href="https://github.com/PokeAByte/PokeAByte/blob/main/docs/HowTo.md">
-					Information as to how can be found here.
-				</a>
-				<br/>Support for these tools will be removed in the Future.
 			</p>
 		</Warning>
 	)
