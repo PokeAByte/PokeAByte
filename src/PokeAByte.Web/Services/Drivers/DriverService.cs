@@ -1,4 +1,5 @@
-﻿using PokeAByte.Domain.Interfaces;
+﻿using PokeAByte.Domain;
+using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 using PokeAByte.Infrastructure.Drivers.UdpPolling;
@@ -15,13 +16,13 @@ public class DriverService : IDriverService, IAsyncDisposable
     public static readonly int MaxAttempts = 25;
     private const int MaxPauseMs = 50;
     private int _currentAttempt = 0;
-    private readonly AppSettings _appSettings;
+    private readonly AppSettingsService _appSettingsService;
     private readonly ILogger<RetroArchUdpDriver> _driverLogger;
     private IPokeAByteDriver? _currentDriver;
 
-    public DriverService(AppSettings appSettings, ILogger<RetroArchUdpDriver> driverLogger)
+    public DriverService( AppSettingsService settingsService, ILogger<RetroArchUdpDriver> driverLogger)
     {
-        _appSettings = appSettings;
+        _appSettingsService = settingsService;
         _driverLogger = driverLogger;
     }
 
@@ -37,7 +38,7 @@ public class DriverService : IDriverService, IAsyncDisposable
     private async Task<IPokeAByteDriver> GetRetroArchDriver()
     {
         await Cleanup();
-        _currentDriver = new RetroArchUdpDriver(_driverLogger, _appSettings);
+        _currentDriver = new RetroArchUdpDriver(_driverLogger, _appSettingsService.Get());
         await _currentDriver.EstablishConnection();
         return _currentDriver;
     }
@@ -45,7 +46,7 @@ public class DriverService : IDriverService, IAsyncDisposable
     private async Task<IPokeAByteDriver> GetPokeAProtocolDriver()
     {
         await Cleanup();
-        _currentDriver = new PokeAProtocolDriver(_appSettings);
+        _currentDriver = new PokeAProtocolDriver(_appSettingsService.Get());
         await _currentDriver.EstablishConnection();
         return _currentDriver;
     }
@@ -56,11 +57,11 @@ public class DriverService : IDriverService, IAsyncDisposable
         // Test the drivers
         while (_currentAttempt < MaxAttempts)
         {
-            if (await PokeAProtocolDriver.Probe(_appSettings))
+            if (await PokeAProtocolDriver.Probe(_appSettingsService.Get()))
             {
                 return await GetPokeAProtocolDriver();
             }
-            else if (await RetroArchUdpDriver.Probe(_appSettings))
+            else if (await RetroArchUdpDriver.Probe(_appSettingsService.Get()))
             {
                 return await GetRetroArchDriver();
             }

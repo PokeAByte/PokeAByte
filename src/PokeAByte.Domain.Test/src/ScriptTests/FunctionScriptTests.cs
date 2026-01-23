@@ -1,6 +1,8 @@
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace PokeAByte.Domain.Test.ScriptTests;
@@ -147,6 +149,13 @@ public class FunctionScriptTests
         Assert.True(driver.LastWriteMatches([5, 6, 7, 8]));
         Assert.Equal(new byte[] { 5, 6, 7, 8 }, instance.Mapper.get_property_value("test.script"));
         Assert.Equal(new byte[] { 5, 6, 7, 8 }, instance.Mapper.get_property_value("test.game"));
+
+        var logger = MapperTestHelper.ScriptLogger;
+        Assert.Contains(logger.GetSpyData(), x => x.LogLevel == LogLevel.Trace && x.Content == "trace");
+        Assert.Contains(logger.GetSpyData(), x => x.LogLevel == LogLevel.Debug && x.Content == "debug");
+        Assert.Contains(logger.GetSpyData(), x => x.LogLevel == LogLevel.Information && x.Content == "info");
+        Assert.Contains(logger.GetSpyData(), x => x.LogLevel == LogLevel.Warning && x.Content == "warn");
+        Assert.Contains(logger.GetSpyData(), x => x.LogLevel == LogLevel.Error && x.Content == "error");
     }
 
     [Fact]

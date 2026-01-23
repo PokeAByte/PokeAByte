@@ -1,14 +1,10 @@
-
-
 namespace PokeAByte.Domain.Test.MapperServiceTests;
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
 using RichardSzalay.MockHttp;
 using Voyager.UnitTestLogger;
@@ -38,7 +34,6 @@ public class DownloadServiceTests : MapperTestBase
             );
 
         var service = new DownloadService(
-            new AppSettings(),
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)
@@ -60,6 +55,7 @@ public class DownloadServiceTests : MapperTestBase
     public async Task FetchesCommitWithAuthentication()
     {
         var mockHttp = new MockHttpMessageHandler();
+        File.WriteAllText("./github_api_settings.json", """{ "token": "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" }""");
         var commitLookupRequest = mockHttp
             .Expect("https://api.github.com/repos/PokeAByte/mappers/commits/main")
             .WithHeaders("Authorization", "Bearer 9jg37l6ytcv3yrq9ti9jpcrd01de5eux")
@@ -75,7 +71,6 @@ public class DownloadServiceTests : MapperTestBase
             );
 
         var service = new DownloadService(
-            new AppSettings() { GITHUB_TOKEN = "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" },
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)
@@ -97,7 +92,6 @@ public class DownloadServiceTests : MapperTestBase
     public async Task FetchesMapperTree()
     {
         CreateLastFetchFile();
-
         var mockHttp = new MockHttpMessageHandler();
         var request = mockHttp
             .Expect("https://cdn.jsdelivr.net/gh/PokeAByte/mappers@c37c3ce931ee9f245e41b2fe5722f6d1ed9afdd1/mapper_tree.json")
@@ -112,7 +106,6 @@ public class DownloadServiceTests : MapperTestBase
             );
 
         var service = new DownloadService(
-            new AppSettings() { GITHUB_TOKEN = "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" },
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)
@@ -148,7 +141,6 @@ public class DownloadServiceTests : MapperTestBase
             );
 
         var service = new DownloadService(
-            new AppSettings() { GITHUB_TOKEN = "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" },
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)
@@ -183,7 +175,6 @@ public class DownloadServiceTests : MapperTestBase
             .Respond("application/json", "null");
 
         var service = new DownloadService(
-            new AppSettings() { GITHUB_TOKEN = "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" },
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)
@@ -205,7 +196,6 @@ public class DownloadServiceTests : MapperTestBase
         var mockHttp = new MockHttpMessageHandler();
 
         var service = new DownloadService(
-            new AppSettings() { GITHUB_TOKEN = "9jg37l6ytcv3yrq9ti9jpcrd01de5eux" },
             new SpyLog<DownloadService>(),
             new TestClientNotifier(),
             new HttpClient(mockHttp)

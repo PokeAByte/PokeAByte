@@ -164,10 +164,12 @@ export function GithubSettingsPanel() {
 						<span class={status.color}>{status.message}</span>
 					}
 					<br />
-					<WideButton text="Test settings" color="blue" onClick={testGithubSettings} />
-					<WideButton text="Open GitHub link" color="purple" onClick={openGithubLink} />
-					<button class="wide-button green" type="submit" >Save settings</button>
-					<WideButton text="Clear settings" color="red" onClick={() => setClearModal(true)} />
+					<div class="flexy-panel">
+						<WideButton text="Test settings" color="blue" onClick={testGithubSettings} />
+						<WideButton text="Open GitHub link" color="purple" onClick={openGithubLink} />
+						<button class="wide-button green" type="submit" >Save settings</button>
+						<WideButton text="Clear settings" color="red" onClick={() => setClearModal(true)} />
+					</div>
 					<ConfirmationModal
 						display={clearModal}
 						title="Warning"

@@ -17,6 +17,8 @@
 
 - **The legacy BizHawk driver has been removed.** You can still use the `EDPS.Bizhawk.dll` with the emulator protocol driver
   if you wish to continue using BizHawk. 
+- The general application settings are no longer read from `appsettings.json`  but instead stored in the Poke-A-Byte 
+  configuration directory (where the mappers are also stored). 
 - Local mapper directories are no longer supported (a "mappers" folder next to the PokeAByte.Web.exe).
 
 ## Breaking technical changes

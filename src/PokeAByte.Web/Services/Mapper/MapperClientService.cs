@@ -10,8 +10,7 @@ public class MapperClientService(
     ILogger<MapperClientService> logger,
     IInstanceService instanceService,
     IMapperService mapperService,
-    IDriverService driverService
-)
+    IDriverService driverService)
 {
     private int _currentAttempt = 0;
     public static readonly int MaxAttempts = 10;

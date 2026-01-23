@@ -40,7 +40,7 @@ public static class MapperEndpoints
         app.MapPost("/mapper/set-property-value", UpdatePropertyValueAsync);
     }
 
-    public static IResult GetMapper(IInstanceService instanceService, AppSettings appSettings)
+    public static IResult GetMapper(IInstanceService instanceService, AppSettingsService appSettingsService)
     {
         if (instanceService.Instance == null)
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());

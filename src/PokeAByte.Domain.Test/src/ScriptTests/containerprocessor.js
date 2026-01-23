@@ -3,6 +3,11 @@ export function containerprocessor(container, containerBytes) {
 		return;
 	}
 	__console.log("wrote container bytes back to main memory");
+	__console.trace("trace");
+	__console.debug("debug");
+	__console.info("info");
+	__console.warn("warn");
+	__console.error("error");
 	__driver.WriteBytes(0, containerBytes);
 }
 

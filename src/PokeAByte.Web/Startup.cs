@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.FileProviders;
+using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models;
@@ -33,7 +34,7 @@ public static class Startup
             options.SerializerOptions.Converters.Add(new ByteArrayJsonConverter());
         });
 
-        services.AddSingleton<AppSettings>();
+        services.AddSingleton<AppSettingsService>();
         services.AddSingleton<IClientNotifier, WebSocketClientNotifier>();
         services.AddSingleton<IDownloadService, DownloadService>();
         services.AddSingleton<ScriptConsole>();
