@@ -8,4 +8,6 @@ This also means that it's possible to write a string to an `int` property.
 
 For example `0xFF` is `255` instead of `-127` on an int of length = 1.
 
+3. The `write-function` script callback does not actually have access to the bytes that should be written.
 
+This seems to have been broken for a while now. At least since 0.8.0.

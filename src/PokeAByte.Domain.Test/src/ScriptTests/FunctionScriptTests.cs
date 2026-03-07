@@ -1,8 +1,6 @@
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace PokeAByte.Domain.Test.ScriptTests;
@@ -149,6 +147,37 @@ public class FunctionScriptTests
         Assert.True(driver.LastWriteMatches([5, 6, 7, 8]));
         Assert.Equal(new byte[] { 5, 6, 7, 8 }, instance.Mapper.get_property_value("test.script"));
         Assert.Equal(new byte[] { 5, 6, 7, 8 }, instance.Mapper.get_property_value("test.game"));
+    }
+
+    [Fact]
+    public async Task WriteFunctionCanBlock()
+    {
+        var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var driver = new TestDriver([1, 2]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            new TestClientNotifier(),
+            MapperTestHelper.CreateMapper(
+                """
+                <property name="property" type="byteArray" length="2" address="0x00" write-function="write" />
+                """,
+                memoryStart: "0x00",
+                memoryEnd: "0x04",
+                system: "GB"
+            ),
+            driver,
+            Path.Combine(currentFolder, "scripts/writefunction.js"),
+            currentFolder
+        );
+
+        await instance.Read();
+        await instance.Read();
+
+        Assert.Equal(new byte[] { 1, 2 }, instance.Mapper.get_property_value("test.property"));
+
+        await instance.WriteBytes(instance.Mapper.get_property("test.script"), [3, 4], false);
+
+        await instance.Read();
+        Assert.Equal(new byte[] { 1, 2 }, instance.Mapper.get_property_value("test.property"));
     }
 
     [Fact]
