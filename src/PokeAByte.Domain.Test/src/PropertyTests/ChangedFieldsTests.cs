@@ -13,20 +13,17 @@ public class ChangedFieldsTests
     public async Task SetsCorrectFlags()
     {
         var property = new PokeAByteProperty(
-            new PropertyAttributes()
-            {
-                Path = "test",
-                Type = PropertyType.BinaryCodedDecimal,
-                MemoryContainer = null,
-                Address = null,
-                Length = 1,
-                Size = null,
-                Bits = null,
-                Reference = null,
-                Description = null,
-                Value = null,
-                EndianType = EndianTypes.LittleEndian,
-            }
+            path: "test",
+            EndianType: EndianTypes.LittleEndian,
+            type: PropertyType.BinaryCodedDecimal,
+            memoryContainer: null,
+            address: null,
+            length: 1,
+            size: null,
+            bits: null,
+            reference: null,
+            description: null,
+            value: null
         );
         // Reset the changes from the initialization:
         property.FieldsChanged = FieldChanges.None;

@@ -27,32 +27,49 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         }
     }
 
-    public PokeAByteProperty(PropertyAttributes attributes)
+    public PokeAByteProperty(
+        string path,
+        EndianTypes EndianType,
+        PropertyType type,
+        string? memoryContainer,
+        string? address,
+        int length,
+        int? size,
+        string? bits,
+        string? reference,
+        string? description,
+        string? value,
+        string? readFunction = null,
+        string? writeFunction = null,
+        string? afterReadValueExpression = null,
+        string? afterReadValueFunction = null,
+        string? beforeWriteValueFunction = null
+    )
     {
-        Path = attributes.Path;
-        Type = attributes.Type;
-        _endian = attributes.EndianType;
+        Path = path;
+        Type = type;
+        _endian = EndianType;
 
-        MemoryContainer = attributes.MemoryContainer;
-        AddressString = attributes.Address;
-        OriginalAddressString = attributes.Address ?? ""; ;
-        Length = attributes.Length;
-        Size = attributes.Size;
-        Bits = attributes.Bits;
-        Reference = attributes.Reference;
-        Description = attributes.Description;
-        Value = attributes.Value;
-        StaticValue = attributes.Value;
+        MemoryContainer = memoryContainer;
+        AddressString = address;
+        OriginalAddressString = address ?? ""; ;
+        Length = length;
+        Size = size;
+        Bits = bits;
+        Reference = reference;
+        Description = description;
+        Value = value;
+        StaticValue = value;
         Bytes = [];
 
-        ReadFunction = attributes.ReadFunction;
-        WriteFunction = attributes.WriteFunction;
+        ReadFunction = readFunction;
+        WriteFunction = writeFunction;
 
-        AfterReadValueExpression = attributes.AfterReadValueExpression;
-        AfterReadValueFunction = attributes.AfterReadValueFunction;
+        AfterReadValueExpression = afterReadValueExpression;
+        AfterReadValueFunction = afterReadValueFunction;
 
-        BeforeWriteValueFunction = attributes.BeforeWriteValueFunction;
-        if (Type == PropertyType.String && Reference == null)
+        BeforeWriteValueFunction = beforeWriteValueFunction;
+        if (type == PropertyType.String && reference == null)
         {
             Reference = "defaultCharacterMap";
         }

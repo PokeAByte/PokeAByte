@@ -114,7 +114,7 @@ public class PokeAProtocolClient : IDisposable
         {
             throw new PokeAByteException(
                 $"Poke-A-Protocol setup timed out. Check if mapper matches running game.", 
-                ex.Message
+                ex
             );
         }
     }
