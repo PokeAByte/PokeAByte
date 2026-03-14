@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
@@ -29,7 +28,6 @@ public static class MapperEndpoints
     public static void MapMapperEndpoints(this WebApplication app)
     {
         app.MapGet("/mapper", GetMapper);
-        app.MapPut("/mapper", PutMapper);
         app.MapGet("/mapper/meta", GetMeta);
         app.MapGet("/mapper/properties", GetProperties);
         app.MapGet("/mapper/properties/{**path}/", GetProperty);
@@ -49,42 +47,11 @@ public static class MapperEndpoints
 
         var model = new MapperModel()
         {
-            Meta = new MapperMetaModel()
-            {
-                Id = instanceService.Instance.Mapper.Metadata.Id,
-                FileId = instanceService.Instance.Mapper.Metadata.FileId,
-                GameName = instanceService.Instance.Mapper.Metadata.GameName,
-                GamePlatform = instanceService.Instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION,
-            },
+            Meta = MapperMetaModel.FromMapperSection(instanceService.Instance.Mapper.Metadata),
             Properties = instanceService.Instance.Mapper.Properties.Values,
             Glossary = instanceService.Instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel()
         };
         return TypedResults.Ok(model);
-    }
-
-    public static async Task<IResult> PutMapper(
-        IMapperFileService mapperFileService,
-        IDriverService driverService,
-        IInstanceService instanceService,
-        [FromBody] MapperReplaceModel model)
-    {
-        var mapperContent = await mapperFileService.LoadContentAsync(model.Id);
-        switch (model.Driver)
-        {
-            case DriverModels.Bizhawk:
-                await instanceService.LoadMapper(mapperContent, await driverService.GetBizhawkDriver());
-                break;
-            case DriverModels.RetroArch:
-                await instanceService.LoadMapper(mapperContent, await driverService.GetRetroArchDriver());
-                break;
-            case DriverModels.StaticMemory:
-                await instanceService.LoadMapper(mapperContent, driverService.StaticMemory);
-                break;
-            default:
-                return TypedResults.BadRequest("A valid driver was not supplied.");
-        }
-        return TypedResults.Ok();
     }
 
     public static IResult GetMeta(IInstanceService instanceService, AppSettings appSettings)
@@ -94,15 +61,7 @@ public static class MapperEndpoints
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         var meta = instance.Mapper.Metadata;
-        var model = new MapperMetaModel
-        {
-            Id = meta.Id,
-            GameName = meta.GameName,
-            FileId = meta.FileId,
-            GamePlatform = meta.GamePlatform,
-            MapperReleaseVersion = appSettings.MAPPER_VERSION,
-        };
-        return TypedResults.Ok(model);
+        return TypedResults.Ok(MapperMetaModel.FromMapperSection(meta));
     }
 
     public static IResult GetProperties(IInstanceService instanceService)

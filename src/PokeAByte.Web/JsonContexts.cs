@@ -2,12 +2,9 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Logic;
+using PokeAByte.Domain.Models;
 using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Models.Properties;
-using PokeAByte.Domain.Services.MapperFile;
-using PokeAByte.Infrastructure.Github;
-using PokeAByte.Web.Controllers;
+using PokeAByte.Web.Models;
 
 namespace PokeAByte.Web;
 
@@ -18,9 +15,7 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(double))]
 [JsonSerializable(typeof(AppSettingsDto))]
-[JsonSerializable(typeof(MapperUpdaterSettings))]
-[JsonSerializable(typeof(IGithubSettings))]
-[JsonSerializable(typeof(GithubSettings))]
+[JsonSerializable(typeof(DownloadSettings))]
 [JsonSerializable(typeof(PropertyUpdateModel))]
 [JsonSerializable(typeof(ProblemDetails))]
 [JsonSerializable(typeof(MapperReplaceModel))]
@@ -29,17 +24,17 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(MapperModel))]
 [JsonSerializable(typeof(UpdatePropertyValueModel))]
 [JsonSerializable(typeof(List<UpdatePropertyValueModel>))]
-[JsonSerializable(typeof(List<MapperDto>))]
-[JsonSerializable(typeof(IEnumerable<MapperFileModel>))]
-[JsonSerializable(typeof(IEnumerable<MapperFileData>))]
+[JsonSerializable(typeof(List<MapperFile>))]
+[JsonSerializable(typeof(IEnumerable<InstalledMapper>))]
 [JsonSerializable(typeof(IPokeAByteProperty), GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(IProblemDetails), GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(MapperProblem), GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(IList<IPokeAByteProperty>), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(List<MapperComparisonDto>))]
-[JsonSerializable(typeof(IEnumerable<MapperComparisonDto>))]
+[JsonSerializable(typeof(List<RemoteMapperFile>))]
+[JsonSerializable(typeof(IEnumerable<RemoteMapperFile>))]
 [JsonSerializable(typeof(List<UpdateMemoryModel>))]
-[JsonSerializable(typeof(List<ArchivedMapperDto>))]
-[JsonSerializable(typeof(IEnumerable<ArchivedMapperDto>))]
-[JsonSerializable(typeof(Dictionary<string, IEnumerable<ArchivedMapperDto>>))]
+[JsonSerializable(typeof(List<ArchivedMapperFile>))]
+[JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(IEnumerable<ArchivedMapperFile>))]
+[JsonSerializable(typeof(Dictionary<string, IEnumerable<ArchivedMapperFile>>))]
 public partial class ApiJsonContext : JsonSerializerContext { }

@@ -1,18 +1,17 @@
 
 import type { JSX, TargetedInputEvent } from "preact";
 import { useCallback, useEffect, useReducer, useRef, useState } from "preact/hooks";
-import { Store } from "@/utility/propertyStore";
 import { useAPI } from "@/hooks/useAPI";
-import { GithubSettings } from "pokeaclient";
+
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { WideButton } from "@/components/WideButton";
 import { Panel } from "@/components/Panel";
+import { getGithubLink, getGithubSettings, GitHubSettings, saveGitHubSettings, testGithubSettings as testSettings } from "@/utility/fetch";
 
 export function GithubSettingsPanel() {
-	const filesClient = Store.client.files;
 	const [status, setStatus] = useState({ color: "", message: "" });
 	const [formState, setFieldState] = useReducer(
-		(data, update: { fieldId: keyof GithubSettings, value: string }) => {
+		(data, update: { fieldId: keyof GitHubSettings, value: string }) => {
 			const newState = structuredClone(data);
 			newState[update.fieldId] = update.value;
 			return newState;
@@ -24,10 +23,10 @@ export function GithubSettingsPanel() {
 
 	const setField = (e: TargetedInputEvent<HTMLInputElement>) => {
 		if (e.currentTarget) {
-			setFieldState({ fieldId: e.currentTarget.name as keyof GithubSettings, value: e.currentTarget.value })
+			setFieldState({ fieldId: e.currentTarget.name as keyof GitHubSettings, value: e.currentTarget.value })
 		}
 	};
-	const githubSettings = useAPI(Store.client.files.getGithubSettings);
+	const githubSettings = useAPI(getGithubSettings);
 	const githubSettingsResult = githubSettings.result;
 	useEffect(() => {
 		setFieldState({ fieldId: "owner", value: githubSettingsResult?.owner ?? "" });
@@ -46,32 +45,32 @@ export function GithubSettingsPanel() {
 		[]
 	);
 	const clearSettings = useCallback(() => {
-		filesClient.saveGithubSettings(formState).then(
+		saveGitHubSettings({}).then(
 			(ok) => {
 				if (ok) {
 					setStatus({ color: "success-text", message: "Successfully cleared settings!" });
 				} else {
 					setStatus({ color: "error-text", message: "Failed to save github settings!!" });
 				}
+				githubSettings.call();
+				setClearModal(false);
 			}
 		);
-		setClearModal(false);
-		githubSettings.call();
-	}, [githubSettings, filesClient, formState]);
+	}, [githubSettings]);
 
 	if (!githubSettings.wasCalled || githubSettings.isLoading) {
 		return <></>;
 	}
 
 	const openGithubLink = () => {
-		filesClient.getGithubLink().then(uri => {
+		getGithubLink().then(uri => {
 			if (uri !== null) {
 				window.open(uri, "_blank")
 			}
 		});
 	}
 	const testGithubSettings = () => {
-		filesClient.testGithubSettingsAsync().then(response => {
+		testSettings().then(response => {
 			if (response?.startsWith("Successfully")) {
 				setStatus({ color: "success-text", message: response });
 			} else if (response?.startsWith("Failed")) {
@@ -80,7 +79,7 @@ export function GithubSettingsPanel() {
 		});
 	}
 	const onSubmit = (event: JSX.TargetedSubmitEvent<HTMLFormElement>) => {
-		filesClient.saveGithubSettings({
+		saveGitHubSettings({
 			owner: formData?.get("owner") as string ?? "",
 			repo: formData?.get("repo") as string ?? "",
 			dir: formData?.get("dir") as string ?? "",
@@ -167,7 +166,7 @@ export function GithubSettingsPanel() {
 					<br />
 					<WideButton text="Test settings" color="blue" onClick={testGithubSettings} />
 					<WideButton text="Open GitHub link" color="purple" onClick={openGithubLink} />
-					<WideButton text="Save settings" color="green" onClick={openGithubLink} />
+					<button class="wide-button green" type="submit" >Save settings</button>
 					<WideButton text="Clear settings" color="red" onClick={() => setClearModal(true)} />
 					<ConfirmationModal
 						display={clearModal}

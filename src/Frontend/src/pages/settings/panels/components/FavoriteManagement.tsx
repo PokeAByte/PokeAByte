@@ -1,7 +1,8 @@
 import { IconButton } from "@/components/IconButton";
 import { WideButton } from "@/components/WideButton";
 import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
-import { saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
+import { getFavoriteId, saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
+import { beautifyMapperName } from "@/utility/mapperName";
 import { useComputed } from "@preact/signals";
 
 /** Renders a table of favorite mappers with buttons to change their order or delete them. */
@@ -37,7 +38,7 @@ export function FavoriteManagement() {
 		}
 	};
 	const mapperFiles = mapperFilesSignal.value;
-	const favorites = favoriteIds?.map(id => mapperFiles.availableMappers?.find(mapper => mapper.id == id))
+	const favorites = favoriteIds?.map(id => mapperFiles.availableMappers?.find(mapper => getFavoriteId(mapper) == id))
 		.filter(x => !!x);
 
 	return (
@@ -49,20 +50,20 @@ export function FavoriteManagement() {
 				<table class="striped">
 					<tbody>
 						{favorites?.map((favorite, index) => {
-							return <tr key={favorite.id}>
+							return <tr key={favorite.path}>
 								<td>
-									<span class="margin-left">{favorite.displayName}</span>
+									<span class="margin-left">{beautifyMapperName(favorite)}</span>
 								</td>
 								<td>
 									<IconButton
-										onClick={() => removeFavorite(favorite.id)}
+										onClick={() => removeFavorite(favorite.path)}
 										class="margin-left margin-right text-red"
 										icon="delete"
 										title="Remove"
 									/>
 									{index + 1 < favorites.length &&
 										<IconButton
-											onClick={() => moveFavoriteDown(favorite.id)}
+											onClick={() => moveFavoriteDown(favorite.path)}
 											class="margin-right"
 											icon="arrow_downward"
 											title="Move down"
@@ -70,7 +71,7 @@ export function FavoriteManagement() {
 									}
 									{index > 0 &&
 										<IconButton
-											onClick={() => moveFavoriteUp(favorite.id)}
+											onClick={() => moveFavoriteUp(favorite.path)}
 											class="margin-right float-right"
 											icon="arrow_upward"
 											title="Move up"

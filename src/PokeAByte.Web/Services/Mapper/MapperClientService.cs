@@ -1,8 +1,7 @@
 ﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
-using PokeAByte.Domain.Models.Mappers;
-using PokeAByte.Domain.Models.Properties;
+using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
 
 namespace PokeAByte.Web.Services.Mapper;
@@ -10,17 +9,13 @@ namespace PokeAByte.Web.Services.Mapper;
 public class MapperClientService(
     ILogger<MapperClientService> logger,
     IInstanceService instanceService,
-    IMapperFileService mapperFileService,
-    AppSettings appSettings,
+    IMapperService mapperService,
     IDriverService driverService
 )
 {
     private int _currentAttempt = 0;
     public static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
-
-    //Todo: change this in settings
-    public string LoadedDriver { get; set; } = DriverModels.Bizhawk;
 
     public bool IsCurrentlyConnected => instanceService.Instance != null;
 
@@ -100,16 +95,7 @@ public class MapperClientService(
             return Result.Failure<MapperMetaModel>(Error.MapperNotLoaded);
         }
 
-        return Result.Success(
-            new MapperMetaModel()
-            {
-                Id = instance.Mapper.Metadata.Id,
-                FileId = instance.Mapper.Metadata.FileId,
-                GameName = instance.Mapper.Metadata.GameName,
-                GamePlatform = instance.Mapper.Metadata.GamePlatform,
-                MapperReleaseVersion = appSettings.MAPPER_VERSION,
-            }
-        );
+        return Result.Success(MapperMetaModel.FromMapperSection(instance.Mapper.Metadata));
     }
 
     public async Task<Result> WritePropertyData(string propertyPath, object? value, bool isFrozen)
@@ -158,7 +144,7 @@ public class MapperClientService(
         }
 
         // Get the file path from the filesystem provider.
-        var mapperContent = await mapperFileService.LoadContentAsync(mapperId);
+        var mapperContent = await mapperService.LoadContentAsync(mapperId);
         var instance = instanceService.Instance;
         if (instance == null)
         {

@@ -251,6 +251,13 @@ table {
 	&.striped {
 		thead {
 			background-color: var(--color-surface-2);
+			
+		}
+		th, td {
+			padding-right: var(--margin-0);			
+			&:not(:first-child) {
+				padding-left: var(--margin-0);
+			}
 		}
 		tbody {
 			& > tr:nth-child(even) {

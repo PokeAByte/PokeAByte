@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using PokeAByte.Web.Json;
 
-namespace PokeAByte.Domain.Models.Properties;
+namespace PokeAByte.Web.Models;
 
 public record UpdatePropertyValueModel
 {

@@ -1,4 +1,3 @@
-using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 
@@ -22,7 +21,7 @@ public class InstanceService(
     private IPokeAByteInstance? _instance = null;
     public IPokeAByteInstance? Instance => _instance;
 
-    public async Task LoadMapper(MapperContent MapperContent, IPokeAByteDriver driver)
+    public async Task LoadMapper(MapperContent mapperContent, IPokeAByteDriver driver)
     {
         logger.LogDebug("Creating PokeAByte mapper instance...");
         if (_instance != null)
@@ -31,7 +30,7 @@ public class InstanceService(
         }
         try
         {
-            _instance = new PokeAByteInstance(instanceLogger, scriptConsoleAdapter, clientNotifier, MapperContent, driver);
+            _instance = new PokeAByteInstance(instanceLogger, scriptConsoleAdapter, clientNotifier, mapperContent, driver);
             _instance.OnProcessingAbort += HandleProcessingAbort;
             await _instance.StartProcessing();
         }

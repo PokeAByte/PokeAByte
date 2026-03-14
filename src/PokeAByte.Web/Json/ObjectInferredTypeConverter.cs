@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PokeAByte.Domain.Models.Properties;
+namespace PokeAByte.Web.Json;
 
 public class ObjectToInferredTypesConverter : JsonConverter<object>
 {
@@ -20,13 +20,6 @@ public class ObjectToInferredTypesConverter : JsonConverter<object>
 
     public override void Write(Utf8JsonWriter writer, object objectToWrite, JsonSerializerOptions options)
     {
-        var runtimeType = objectToWrite.GetType();
-        if (runtimeType == typeof(object))
-        {
-            writer.WriteStartObject();
-            writer.WriteEndObject();
-            return;
-        }
-        JsonSerializer.Serialize(writer, objectToWrite, runtimeType, options);
+        throw new NotImplementedException();
     }
 }
