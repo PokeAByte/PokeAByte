@@ -8,7 +8,7 @@ export function DepreciationNotices(props: { mapperId: string | null; }) {
 	const driverApi = useAPI(getDriverName);
 	useEffect(() => {
 		driverApi.call();
-	}, [props.mapperId]);
+	}, [props.mapperId, driverApi]);
 	if (driverApi.result === "RetroArch") {
 		return <RetroarchWarning />;
 	}
@@ -46,7 +46,7 @@ export function Warning(props: { flag: string, children: ComponentChildren}) {
 				dialogRef.current.showModal();
 			}
 		},
-		[dialogRef]
+		[dialogRef, props.flag]
 	);
 	if (disabled || closed) {
 		return null;

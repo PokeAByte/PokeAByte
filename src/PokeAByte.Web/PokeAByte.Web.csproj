@@ -29,8 +29,8 @@
     <Exec Command="npm run build" WorkingDirectory="../Frontend" />
   </Target>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup>
