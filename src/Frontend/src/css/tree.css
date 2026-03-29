@@ -26,9 +26,6 @@ table.tree {
 	.combobox > input {
 		contain: none;
 	}
-	input[role="switch"] {
-		height: 29.25px;
-	}
 
 	.icon-button, input, button, .combobox {
 		margin: 0 var(--margin-0) 0 0;
