@@ -183,7 +183,7 @@ public class FunctionScriptTests
 
         Assert.Equal(new byte[] { 1, 2 }, instance.Mapper.get_property_value("test.property"));
 
-        await instance.WriteBytes(instance.Mapper.get_property("test.script"), [3, 4], false);
+        await instance.WriteBytes(instance.Mapper.get_property("test.property"), [3, 4], false);
 
         await instance.Read();
         Assert.Equal(new byte[] { 1, 2 }, instance.Mapper.get_property_value("test.property"));

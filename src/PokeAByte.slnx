@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/PokeAByte.Domain.Test/">
+    <Project Path="PokeAByte.Domain.Test/PokaAByte.Domain.Test.csproj" />
+  </Folder>
   <Project Path="PokeAByte.Domain/PokeAByte.Domain.csproj">
     <BuildType Project="Release" />
   </Project>

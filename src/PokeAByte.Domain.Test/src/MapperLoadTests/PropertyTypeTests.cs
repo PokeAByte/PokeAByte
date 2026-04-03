@@ -4,7 +4,7 @@ using Xunit;
 
 namespace PokeAByte.Domain.Test.MapperLoadTests;
 
-public class PropertyTypeTests
+public class PropertyAttributeTests
 {
     [Fact]
     public async Task ThrowsOnBogusDataType()
@@ -36,9 +36,9 @@ public class PropertyTypeTests
             exception.Message
         );
     }
-
+    
     [Fact]
-    public async Task DoesNotThrowOnDefinedTypes()
+    public async Task AcceptsValidTypes()
     {
         var clientnotifier = new TestClientNotifier();
         var driver = new TestDriver([0]);
@@ -63,5 +63,64 @@ public class PropertyTypeTests
             driver
         );
         Assert.Equal(8, instance.Mapper.Properties.Count);
+    }
+
+    [Fact]
+    public async Task ThrowsOnInvalidAddress()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([0]);
+        var exception = Assert.Throws<Exception>(() =>
+        {
+            return MapperTestHelper.CreateTestInstance(
+                clientnotifier,
+                """
+                <mapper id="8213664d-a1e8-4d4c-a569-1c57be540d46" name="TestMapper" platform="GBA">
+                    <properties>
+                        <test>
+                            <property name="0" type="bool" length="1" address="0x100000000000" />
+                        </test>
+                    </properties>
+                </mapper>
+                """,
+                driver
+            );
+        });
+
+        Assert.Equal(
+            """Unable to translate 0x100000000000 into a memory address / uint32.""",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task ParsesAddressVariables()
+    {
+        var clientnotifier = new TestClientNotifier();
+        var driver = new TestDriver([0]);
+        var instance = MapperTestHelper.CreateTestInstance(
+            clientnotifier,
+            """
+            <mapper 
+                id="8213664d-a1e8-4d4c-a569-1c57be540d46" 
+                name="TestMapper" 
+                platform="GBA"
+                xmlns:var="https://schemas.pokeabyte.io/attributes/var">
+            >
+                <classes>
+                    <custom>
+                        <property name="math" address="{address} + 0x0F" type="int" />
+                    </custom>
+                </classes>
+                <properties>
+                    <just>
+                        <class name="incredible" type="custom" var:address="0x01"/>
+                    </just>
+                </properties>
+            </mapper>
+            """,
+            driver
+        );
+        Assert.Equal("1 + 15", instance.Mapper.Properties["just.incredible.math"].OriginalAddressString);
     }
 }

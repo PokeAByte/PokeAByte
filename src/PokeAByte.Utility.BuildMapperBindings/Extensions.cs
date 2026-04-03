@@ -60,4 +60,16 @@ public static class Extensions
 
         return string.Concat(words);
     }
+
+    public static string? GetElementActualName(this XElement el)
+    {
+        if (el.Name.LocalName is "property" || el.Name.LocalName is "class")
+        {
+            return el.GetAttributeValue("name").Replace("-", string.Empty);
+        }
+        else
+        {
+            return el.Name.LocalName.Replace("-", string.Empty);
+        }
+    }
 }

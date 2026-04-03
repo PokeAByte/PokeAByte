@@ -32,28 +32,11 @@ public static class MapperXmlExtensions
     public static int? GetOptionalAttributeValueAsInt(this XElement el, string name) =>
         el.Attribute(name) != null ? int.Parse(el.GetAttributeValue(name)) : null;
 
-    public static string? GetElementActualName(this XElement el)
-    {
-        if (el.Name.LocalName is "property" || el.Name.LocalName is "class")
-        {
-            return el.GetAttributeValue("name").Replace("-", string.Empty);
-        }
-        else
-        {
-            return el.Name.LocalName.Replace("-", string.Empty);
-        }
-    }
-
     static string? GetElementPathName(this XElement el)
     {
-        if (el.Name.LocalName is "class")
-        {
-            return el.GetAttributeValue("name");
-        }
-        else
-        {
-            return el.Name.LocalName;
-        }
+        return el.Name.LocalName is "class" 
+            ? el.GetAttributeValue("name") 
+            : el.Name.LocalName;
     }
 
     public static string GetElementPath(this XElement element)
