@@ -8,7 +8,8 @@ export function DepreciationNotices(props: { mapperId: string | null; }) {
 	const driverApi = useAPI(getDriverName);
 	useEffect(() => {
 		driverApi.call();
-	}, [props.mapperId, driverApi]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.mapperId]);
 	if (driverApi.result === "RetroArch") {
 		return <RetroarchWarning />;
 	}
