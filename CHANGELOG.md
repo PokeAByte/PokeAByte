@@ -12,6 +12,7 @@
 - Reworked how Poke-A-Byte downloads mapper files and how it manages those files after they are downloaded.
 - Properties of type `binaryCodedDecimal`  can now be written to.
 - Updated the JavaScript engine, which should lower memory and CPU utilization a little on certain mappers.
+- Made a small optimization in game memory management, reducing CPU work in the gen 3, 4 and 5 mappers by about 20%.
 
 ## Breaking changes
 

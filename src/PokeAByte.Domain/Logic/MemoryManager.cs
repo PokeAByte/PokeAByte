@@ -58,7 +58,7 @@ public class MemoryManager : IMemoryManager
         {
             return DefaultNamespace.GetReadonlyBytes(memoryAddress, length, skipCheck);
         }
-        return Namespaces[area].GetReadonlyBytes(memoryAddress, length);
+        return Namespaces[area].GetReadonlyBytes(memoryAddress, length, skipCheck);
     }
 
     public byte[] GetAllBytes(string? area)
@@ -118,6 +118,10 @@ public class DynamicMemoryContainer : IMemoryNamespace
 
     public ReadOnlySpan<byte> GetReadonlyBytes(MemoryAddress memoryAddress, int length, bool skipCheck = false)
     {
+        if (length < 0)
+        {
+            throw new Exception($"Cannot retrieve bytes starting at {memoryAddress.ToHexdecimalString()} because getting {length} bytes is invalid.");
+        }
         for (int i = 0; i < Fragments.Count; i++)
         {
             IByteArray? fragment = Fragments[i];
@@ -125,11 +129,11 @@ public class DynamicMemoryContainer : IMemoryNamespace
             {
                 int offset = (int)(memoryAddress - fragment.StartingAddress);
 
-                if (!skipCheck && (offset < 0 || offset >= fragment.Data.Length || length < 0 || (offset + length) > fragment.Data.Length))
+                if (offset < 0 || (offset + length) > fragment.Data.Length)
                 {
                     throw new Exception($"Cannot retrieve bytes starting at {memoryAddress.ToHexdecimalString()} (starting address at {fragment.StartingAddress.ToHexdecimalString()} because getting {length} bytes would overflow the fragment array.");
                 }
-                return fragment.Data.AsSpan()[offset..(offset + length)];
+                return fragment.Data.AsSpan(offset, length);
             }
         }
 
@@ -170,13 +174,12 @@ public class ByteArray : IByteArray
         {
             throw new Exception($"The destination array is not long enough. The destination array has a length of {Data.Length} where the source array has a length of {data.Length}.");
         }
-        data.AsSpan().CopyTo(Data.AsSpan().Slice(offset, data.Length));
+        data.AsSpan().CopyTo(Data.AsSpan(offset, data.Length));
     }
 
     public bool Contains(MemoryAddress memoryAddress)
     {
-        var relativeAddr = memoryAddress - StartingAddress;
-        return relativeAddr < Data.Length;
+        return memoryAddress - StartingAddress < Data.Length;
     }
 
     public IByteArray Slice(int offset, int length)
