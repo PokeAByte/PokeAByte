@@ -129,24 +129,31 @@ i[role="button"]:focus-visible {
 
 span.input-addon {
 	margin-top: var(--margin-0);
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	border: 2px solid var(--color-border-0);
 	&:focus-within {
 		outline: 2px dashed var(--color-blue);
 	}
+	&:has(input:hover) {
+		border-color: var(--color-border-1);
+	}
+	&:has(input[disabled]) {
+		border: 2px solid var(--color-border-0);
+	}
 	input {
+		border: none;
 		min-height: 19px;
+		box-sizing: border-box;
 		margin-top: 0;
-		border-right-style: dashed;
 		&:focus-visible {
 			outline: none;
 		}
 	}
 	button, .icon-button {
-		margin-top: 0;
-		font-size: 19px;
-		border-style: solid;
-		vertical-align: top;
-		border-left: 0 !important;
+		border: none !important;
+		box-shadow: none !important;
+		margin-top: 0;	
 		&:focus-visible {
 			outline: none;
 			color: var(--color-blue)
