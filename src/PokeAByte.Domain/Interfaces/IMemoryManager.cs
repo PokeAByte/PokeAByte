@@ -139,6 +139,7 @@ public interface IMemoryNamespace
     /// <param name="length"> Lenght of the target memory. </param>
     /// <returns> A <see cref="IByteArray"/> instance. </returns>
     IByteArray get_bytes(MemoryAddress memoryAddress, int length);
+    byte[] get_raw_bytes(MemoryAddress memoryAddress, int length);
 
     /// <summary>
     /// Reads 2 bytes starting at the target address as a little endian unsigned short.

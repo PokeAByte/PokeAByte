@@ -7,24 +7,24 @@ export function useAPI<T extends (...args: any[]) => Promise<any>>(
 	const [isLoading, setLoading] = useState(false);
 	const [wasCalled, setCalled] = useState(false);
 	const [result, setResult] = useState<Awaited<ReturnType<T>> | null>(null)
-	const call = (...args: Parameters<T>) => {
+	const call = async (...args: Parameters<T>) => {
 		setLoading(true);
-		setCalled(true)
-		api(...args)
-			.then((result) => {
-				setLoading(false);
-				setResult(result);
-				if (chain) {
-					chain(true, result);
-				}
-			})
-			.catch(() => {
-				setLoading(false)
-				setResult(null);
-				if (chain) {
-					chain(false, null);
-				}
-			});
+		setCalled(true);
+		let result = null;
+		let success = false;
+		try {
+			result = await api(...args);
+			success = true;
+		} catch (exception) {
+			result = null;
+			console.warn(exception);
+		} finally {
+			setResult(result);
+			setLoading(false);
+			if (chain) {
+				chain(success, result);
+			}
+		}
 	}
 	const reset = () => {
 		setCalled(false);

@@ -15,7 +15,7 @@ export const mapperFilesSignal = signal<MapperFilesData>({
 	availableMappers: [],
 	updates: [],
 	archives: {}, 
-	isLoading: true,
+	isLoading: false,
 });
 
 effect(() => {
@@ -29,14 +29,21 @@ export async function refreshMapperFiles() {
 		...mapperFilesSignal.peek(),
 		isLoading: true,
 	};
-	const availableMappers = await getMappers() ?? [];
-	const updates = await getMapperUpdates() ?? [];
-	const archives = await getArchivedMappers() ?? {};
-	mapperFilesSignal.value = {
-		availableMappers,
-		archives, 
-		updates,
-		isLoading: false
-	};
+	let availableMappers: MapperFile[] = [];
+	let updates: MapperUpdate[] = [];
+	let archives: MapperArchiveRecord = {};
+	
+	try {
+		availableMappers = await getMappers() ?? [];
+		updates = await getMapperUpdates() ?? [];
+		archives = await getArchivedMappers() ?? {};
+	} finally {
+		mapperFilesSignal.value = {
+			availableMappers,
+			archives, 
+			updates,
+			isLoading: false
+		};
+	}
 }
 

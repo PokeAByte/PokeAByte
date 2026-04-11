@@ -24,7 +24,7 @@ export function AppSettingsPanel() {
 		setDialog(false);
 	})
 	useEffect(
-		() => generalSettings.call(),
+		() => { generalSettings.call() },
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);

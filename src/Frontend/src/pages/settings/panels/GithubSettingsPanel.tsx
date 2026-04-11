@@ -40,7 +40,7 @@ export function GithubSettingsPanel() {
 	const formRef = useRef<HTMLFormElement | null>(null);
 	const formData = formRef.current ? new FormData(formRef.current) : null;
 	useEffect(
-		() => githubSettings.call(),
+		() => { githubSettings.call() },
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);

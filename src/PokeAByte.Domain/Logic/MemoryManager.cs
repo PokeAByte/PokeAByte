@@ -147,6 +147,11 @@ public class DynamicMemoryContainer : IMemoryNamespace
         // TODO: Container might have multiple fragments.
         return this.Fragments.FirstOrDefault()?.Data ?? [];
     }
+
+    public byte[] get_raw_bytes(uint memoryAddress, int length)
+    {
+        return GetReadonlyBytes(memoryAddress, length).ToArray();
+    }
 }
 
 public class ByteArray : IByteArray

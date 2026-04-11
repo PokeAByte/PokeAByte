@@ -82,4 +82,9 @@ public class StaticMemoryContainer : IMemoryNamespace
     {
         return Data.ToArray();
     }
+
+    public byte[] get_raw_bytes(uint memoryAddress, int length)
+    {
+        return GetReadonlyBytes(memoryAddress, length).ToArray();
+    }
 }
