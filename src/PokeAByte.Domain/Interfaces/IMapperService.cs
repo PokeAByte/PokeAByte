@@ -12,14 +12,14 @@ public interface IMapperService
     /// </summary>
     /// <param name="paths"> The paths (relative to the mapper directory) to archive. </param>
     /// <returns> True if the archive was succesfully created. </returns>
-    bool Archive(IEnumerable<string> paths);
-    
+    bool Archive(List<string> paths);
+
     /// <summary>
     /// Backup the specified mappers.
     /// </summary>
     /// <param name="paths"> The paths (relative to the mapper directory) to back up. </param>
     /// <returns> True if the backup was succesfully created. </returns>
-    Task<bool> Backup(IEnumerable<string> paths);
+    Task<bool> Backup(List<string> paths);
 
     /// <summary>
     /// Deletes target archive.
@@ -67,7 +67,7 @@ public interface IMapperService
     /// <summary>
     /// Restore a mapper archive or backup.
     /// </summary>
-    /// <param name="archivePath"> The path to the archive/backup folder. See <see cref="ArchivedMapperFile.Path">. </param>
+    /// <param name="archivePath"> The path to the archive/backup folder. See <see cref="ArchivedMapperFile.Path"/>. </param>
     /// <returns></returns>
     bool Restore(string archivePath);
 
