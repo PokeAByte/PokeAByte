@@ -50,7 +50,8 @@ public class PokeAProtocolClient : IDisposable
 
     public ValueTask<int> SendToEmulatorAsync(IEmulatorInstruction instruction)
     {
-        if (!_connected) {
+        if (!_connected)
+        {
             ConnectionClosed();
         }
         return _client.SendAsync(instruction.GetByteArray(), _remoteEndpoint);
@@ -70,7 +71,7 @@ public class PokeAProtocolClient : IDisposable
                 throw ConnectionClosed();
             }
         }
-        
+
         return _sharedMemory;
     }
 
@@ -88,7 +89,7 @@ public class PokeAProtocolClient : IDisposable
             {
                 _connected = true;
                 int retry = 0;
-                bool memoryInitialized = false;
+                bool memoryInitialized;
                 do
                 {
                     Span<byte> memory = new byte[_fileSize];
@@ -99,21 +100,20 @@ public class PokeAProtocolClient : IDisposable
                         retry++;
                         await Task.Delay(delayMs);
                     }
-                } while(!memoryInitialized && retry < 2);
+                } while (!memoryInitialized && retry < 2);
                 if (!memoryInitialized)
-                {    
+                {
                     throw new PokeAByteException(
                         $"Poke-A-Protocol setup timed failed. Did you select the right mapper for the current game?."
                     );
                 }
                 this.WaitForClose();
-                return;
             }
         }
         catch (Exception ex)
         {
             throw new PokeAByteException(
-                $"Poke-A-Protocol setup timed out. Check if mapper matches running game.", 
+                $"Poke-A-Protocol setup timed out. Check if mapper matches running game.",
                 ex
             );
         }
@@ -122,10 +122,11 @@ public class PokeAProtocolClient : IDisposable
     public void Read(ulong position, BlockData block, int timeoutMs = 64)
     {
         var memoryAccessor = GetMemoryAccessor();
-        if (!_connected) {
+        if (!_connected)
+        {
             throw ConnectionClosed();
         }
-        
+
         memoryAccessor.CopyBytesToSpan(position, block.Data.Span);
     }
 

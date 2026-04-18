@@ -140,7 +140,6 @@ public interface IPokeAByteMapper : IDisposable
     /// </remarks>
     public void copy_properties(string sourcePath, string destinationPath)
     {
-        var pathSpan = destinationPath.AsSpan();
         int destPathLength = destinationPath.Length;
 
         foreach (var key in Properties.Keys.Where(key => key.AsSpan().StartsWith(destinationPath)))

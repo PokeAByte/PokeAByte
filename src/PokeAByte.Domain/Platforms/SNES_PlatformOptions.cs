@@ -6,7 +6,7 @@ public class SNES_PlatformOptions : IPlatformOptions
 {
     /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.LittleEndian;
-    
+
     /// <inheritdoc/>
     public uint MemorySize { get; } = 0x7FFFFF;
 

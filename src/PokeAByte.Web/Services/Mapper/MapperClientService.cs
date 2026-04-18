@@ -1,6 +1,5 @@
 ﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Drivers;
 
@@ -151,15 +150,8 @@ public class MapperClientService(
         }
         logger.LogDebug("Replacing mapper.");
 
-        if (driver is IPokeAByteDriver)
-        {
-            await instanceService.LoadMapper(mapperContent, driver);
-            logger.LogInformation($"'{driver.ProperName}' driver loaded.");
-        }
-        else
-        {
-            logger.LogError("A valid driver was not supplied.");
-        }
+        await instanceService.LoadMapper(mapperContent, driver);
+        logger.LogInformation($"'{driver.ProperName}' driver loaded.");
         return instanceService.Instance != null;
     }
 }

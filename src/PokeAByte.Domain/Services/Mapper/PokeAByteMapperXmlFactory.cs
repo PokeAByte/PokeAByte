@@ -20,7 +20,7 @@ static class PokeAByteMapperXmlHelpers
     }
 
     static string[] AttributesThatCanBeNormalized { get; } = ["address", "preprocessor"];
-    
+
     internal static List<XAttribute> GetAttributesThatCanBeNormalized(this XDocument doc)
     {
         var properties = doc.Descendants("properties") ?? throw new Exception("Unable to locate <properties>");
@@ -149,7 +149,7 @@ public static class PokeAByteMapperXmlFactory
                     Values = el.Elements().Select(y =>
                     {
                         var key = ToULong(y.GetAttributeValue("key"));
-                        object? value = null;
+                        object? value;
 
                         var valueStr = y.GetOptionalAttributeValue("value");
                         if (string.IsNullOrEmpty(valueStr)) { value = null; }

@@ -20,7 +20,7 @@ class Program
             return;
         }
         var saved = MapperTreeUtility.SaveChanges(dir, mappers);
-        Console.WriteLine(saved is false ? "Failed to save file." : "Saved file.");
+        Console.WriteLine(!saved ? "Failed to save file." : "Saved file.");
         Console.ReadKey();
     }
 }

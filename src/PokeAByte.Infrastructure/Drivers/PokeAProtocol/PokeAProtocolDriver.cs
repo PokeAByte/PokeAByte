@@ -111,10 +111,11 @@ public class PokeAProtocolDriver : IPokeAByteDriver, IPokeAByteFreezeDriver
             return;
         }
         await _client.SendToEmulatorAsync(
-            new FreezeInstruction() { 
-                Address = address, 
-                Data = bytes, 
-                Length = bytes.Length 
+            new FreezeInstruction()
+            {
+                Address = address,
+                Data = bytes,
+                Length = bytes.Length
             }
         );
     }

@@ -1,6 +1,5 @@
 ﻿using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models;
 using PokeAByte.Infrastructure.Drivers.PokeAProtocol;
 using PokeAByte.Infrastructure.Drivers.UdpPolling;
 
@@ -20,7 +19,7 @@ public class DriverService : IDriverService, IAsyncDisposable
     private readonly ILogger<RetroArchUdpDriver> _driverLogger;
     private IPokeAByteDriver? _currentDriver;
 
-    public DriverService( AppSettingsService settingsService, ILogger<RetroArchUdpDriver> driverLogger)
+    public DriverService(AppSettingsService settingsService, ILogger<RetroArchUdpDriver> driverLogger)
     {
         _appSettingsService = settingsService;
         _driverLogger = driverLogger;
@@ -74,6 +73,5 @@ public class DriverService : IDriverService, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await this.Cleanup();
-        return;
     }
 }

@@ -3,7 +3,6 @@ using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
-using PokeAByte.Web.Services.Drivers;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
@@ -80,12 +79,11 @@ public static class MapperEndpoints
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
         path = path.StripEndingRoute();
 
-        var prop = instance.Mapper.Properties[path];
-        if (prop == null)
+        if (instance.Mapper.Properties.TryGetValue(path, out var prop))
         {
-            return TypedResults.NotFound();
+            return TypedResults.Ok(prop);
         }
-        return TypedResults.Ok(prop);
+        return TypedResults.NotFound();
     }
 
     public static IResult GetValueAsync(IInstanceService instanceService, string path)
@@ -95,12 +93,11 @@ public static class MapperEndpoints
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
         path = path.StripEndingRoute();
-        var prop = instance.Mapper.Properties[path];
-        if (prop == null)
+        if (!instance.Mapper.Properties.TryGetValue(path, out var prop))
         {
             return TypedResults.NotFound();
         }
-        if (prop.Value != null && prop.Value is string == false && prop.Value is int == false)
+        if (prop.Value != null && !(prop.Value is string) && !(prop.Value is int))
         {
             return TypedResults.BadRequest($"{prop.Path} is an object and cannot be converted to text.");
         }

@@ -60,7 +60,7 @@ internal class GameDataProcessor : IDisposable
             totalSize += setup.Data[i].Length;
             blocks[i] = setup.Data[i];
         }
-        if (totalSize == 0 || rejectedBlocks > setup.BlockCount / 2 )
+        if (totalSize == 0 || rejectedBlocks > setup.BlockCount / 2)
         {
             throw new InvalidDataException("Setup instruction came with invalid block sizes. ");
         }
@@ -102,7 +102,7 @@ internal class GameDataProcessor : IDisposable
     {
         DomainLayout layout = _platform.Domains
             .Where(x => x.Start <= instruction.Address)
-            .FirstOrDefault(x => x.End >= instruction.Address + instruction.Data.Length -1);
+            .FirstOrDefault(x => x.End >= instruction.Address + instruction.Data.Length - 1);
 
         var domain = domains[layout.DomainId];
         if (domain == null)
@@ -124,13 +124,13 @@ internal class GameDataProcessor : IDisposable
     {
         DomainLayout layout = _platform.Domains
             .Where(x => x.Start <= instruction.Address)
-            .FirstOrDefault(x => x.End >= instruction.Address + instruction.Data.Length -1);
+            .FirstOrDefault(x => x.End >= instruction.Address + instruction.Data.Length - 1);
         var domain = domains[layout.DomainId];
         if (domain == null || instruction.Data.Length == 0)
         {
             return;
         }
-        
+
         domain.Enter();
         for (int i = 0; i < instruction.Data.Length; i++)
         {
@@ -166,7 +166,7 @@ internal class GameDataProcessor : IDisposable
     }
     internal void WriteFreezes(IMemoryDomains memoryDomains)
     {
-        lock(_freezes)
+        lock (_freezes)
         {
             foreach (var freeze in _freezes)
             {
@@ -232,23 +232,23 @@ internal class GameDataProcessor : IDisposable
 
     internal void AddFreeze(FreezeInstruction instruction)
     {
-        lock(_freezes)
+        lock (_freezes)
         {
             var index = _freezes.FindIndex(x => x.Address == instruction.Address);
             if (index >= 0)
             {
                 _freezes[index] = instruction;
-            } 
+            }
             else
             {
-                _freezes.Add(instruction);            
+                _freezes.Add(instruction);
             }
         }
     }
 
     internal void RemoveFreeze(UnfreezeInstruction instruction)
     {
-        lock(_freezes)
+        lock (_freezes)
         {
             var index = _freezes.FindLastIndex(x => x.Address == instruction.Address);
             if (index >= 0)

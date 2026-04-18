@@ -1,7 +1,8 @@
 namespace PokeAByte.Web.Middleware;
 
-public class RequestLogMiddleware : IMiddleware {
-	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+public class RequestLogMiddleware : IMiddleware
+{
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {

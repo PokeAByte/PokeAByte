@@ -73,7 +73,7 @@ public class ReferenceItems
     /// <summary>
     /// Find a reference key-value pair by its value.
     /// </summary>
-    /// <param name="key"> The value of the desired item. </param>
+    /// <param name="value"> The value of the desired item. </param>
     /// <returns> The found item or <see langword="null"/> if no item with that value exists. </returns>
     public ReferenceItem GetFirstByValue(object? value)
     {

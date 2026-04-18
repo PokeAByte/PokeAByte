@@ -1,4 +1,3 @@
-using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using PokeAByte.Protocol;
 
@@ -17,28 +16,25 @@ internal static class MacOSShmConstants
 /// <summary>
 /// Workaround wrapper for .NET trying to use real files on macOS.
 /// </summary>
-partial class MacOSSharedMemory: ISharedMemory
+partial class MacOSSharedMemory : ISharedMemory
 {
     [LibraryImport("libSystem.dylib", EntryPoint = "shm_open", StringMarshalling = StringMarshalling.Utf8)]
     private static partial int ShmOpen(string path, int oflag, int mode);
 
     [LibraryImport("libSystem.dylib", EntryPoint = "mmap")]
-    private unsafe static partial byte *MemoryMap(byte *addr, nuint length, int prot, int flags, int fildes, nuint offset);
+    private unsafe static partial byte* MemoryMap(byte* addr, nuint length, int prot, int flags, int fildes, nuint offset);
 
     [LibraryImport("libSystem.dylib", EntryPoint = "close")]
     private static partial void Close(int fd);
 
-    private int _fileSize;
     private bool _disposed;
 
-    private unsafe byte *_mapping;
+    private readonly unsafe byte* _mapping;
 
-    private int _fileDescriptor = -1;
+    private readonly int _fileDescriptor;
 
     public MacOSSharedMemory(int fileSize)
     {
-        _fileSize = fileSize;
-        
         // Important to note: This file does not actually exist on the filesystem, so we have to blindly call shm_open
         // and check if it succeeded.
         _fileDescriptor = ShmOpen(
@@ -46,7 +42,8 @@ partial class MacOSSharedMemory: ISharedMemory
             MacOSShmConstants.O_RDONLY,
             MacOSShmConstants.S_IRUSR | MacOSShmConstants.S_IWUSR
         );
-        if (_fileDescriptor < 0) {
+        if (_fileDescriptor < 0)
+        {
             throw new Exception("failed to open macOS MMF: shared memory object could not be opened");
         }
 
@@ -54,12 +51,13 @@ partial class MacOSSharedMemory: ISharedMemory
         // because it'll complain about not supporting seeking.
         unsafe
         {
-            _mapping = MemoryMap(null, (nuint)_fileSize, MacOSShmConstants.PROT_READ, MacOSShmConstants.MAP_SHARED, _fileDescriptor, 0);
-        
+            _mapping = MemoryMap(null, (nuint)fileSize, MacOSShmConstants.PROT_READ, MacOSShmConstants.MAP_SHARED, _fileDescriptor, 0);
+
             // Note: fileSize > 4 MiB will cause mmap to fail due to macOS's weird limits.
             //
             // You can temporarily override this with `sudo sysctl -w kern.sysv.shmmax=<desired size in bytes>`
-            if ((IntPtr)_mapping == -1) {
+            if ((IntPtr)_mapping == -1)
+            {
                 Close(_fileDescriptor);
                 throw new Exception("failed to open macOS MMF: memory mapping failed");
             }
@@ -68,7 +66,8 @@ partial class MacOSSharedMemory: ISharedMemory
 
     public void CopyBytesToSpan(ulong offset, Span<byte> destination)
     {
-        unsafe {
+        unsafe
+        {
             var span = new Span<byte>(_mapping + (nuint)offset, destination.Length);
             span.CopyTo(destination);
         }
@@ -76,10 +75,12 @@ partial class MacOSSharedMemory: ISharedMemory
 
     public void Dispose()
     {
-        if (!_disposed) {
+        if (!_disposed)
+        {
             _disposed = true;
 
-            if (_fileDescriptor < 0) {
+            if (_fileDescriptor < 0)
+            {
                 Close(_fileDescriptor);
             }
         }

@@ -63,7 +63,7 @@ public class PokeAByteInstance : IPokeAByteInstance
 
         // Get the file path from the filesystem provider.
         Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.Path);
-        MemoryAddressBlock[]? blocksToRead = Mapper.PlatformOptions.Ranges;
+        MemoryAddressBlock[] blocksToRead = Mapper.PlatformOptions.Ranges;
 
         // Calculate the blocks to read from the mapper memory addresses.
         if (Mapper.Memory.ReadRanges.Any())
@@ -110,11 +110,10 @@ public class PokeAByteInstance : IPokeAByteInstance
         engineOptions.Interop.ExceptionHandler = (_) => true;
         engineOptions.Interop.TrackObjectWrapperIdentity = true;
         engineOptions.Interop.ObjectConverters.Add(new JintUnit8ArrayConverter());
-        
+
         if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
         {
-
-            engineOptions.EnableModules(mapperContent.ScriptRoot, true);
+            engineOptions.EnableModules(mapperContent.ScriptRoot);
 
             JavascriptEngine = new Engine(engineOptions)
                 .SetValue("__console", ScriptConsoleAdapter)
@@ -149,7 +148,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         {
             if (ex is JavaScriptException jsException)
             {
-                var location = jsException.Location;
                 throw new MapperException($"Error in mapper script: {jsException.Message}", ex);
             }
             else
@@ -178,7 +176,7 @@ public class PokeAByteInstance : IPokeAByteInstance
     {
         try
         {
-            while (ReadLoopToken.IsCancellationRequested == false)
+            while (!ReadLoopToken.IsCancellationRequested)
             {
                 if (HasContainerProcessor)
                 {

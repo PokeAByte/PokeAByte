@@ -43,18 +43,17 @@ public static class TsGenerator
             case "property":
                 {
                     var referenceType = el.GetOptionalAttributeValue("reference");
-                    if (string.IsNullOrEmpty(referenceType) == false)
+                    if (!string.IsNullOrEmpty(referenceType))
                     {
                         XElement referenceNode;
                         try
                         {
-                            referenceNode = el?.Document?.Descendants("references")?.Descendants(referenceType)?.Single() ??
+                            referenceNode = el.Document?.Descendants("references")?.Descendants(referenceType)?.Single() ??
                                             throw new Exception($"Unable to determine reference type {referenceType}.");
                         }
                         catch (Exception)
                         {
-                                            throw new Exception($"Unable to determine reference type {referenceType}.");
-                            
+                            throw new Exception($"Unable to determine reference type {referenceType}.");
                         }
 
                         var referenceNodeType = referenceNode.GetOptionalAttributeValue("type") ?? "string";
@@ -97,7 +96,7 @@ public static class TsGenerator
 
     static string GetTypescriptTupleTypes(this XElement el)
     {
-        if (el.IsArray() == false)
+        if (!el.IsArray())
         {
             throw new Exception($"Cannot get typescript tuple types for element because it is not an array. ${el}");
         }
@@ -241,7 +240,7 @@ public static class TsGenerator
 
                 var enumName = GetEnumKeyName(x.Value?.ToString() ?? string.Empty);
 
-                if (string.IsNullOrEmpty(enumName) == false)
+                if (!string.IsNullOrEmpty(enumName))
                 {
                     result.AppendLine($"{enumName} = '{x.Value?.ToString()?.Replace("'", "\\'")}',");
                 }
@@ -269,7 +268,6 @@ public static class TsGenerator
         result.AppendLine(string.Empty);
 
         // Properties
-        var meta = PokeAByteMapperXmlFactory.GetMetadata(doc, "");
         result.AppendLine("export class MapperClient extends AbstractMapperClient {");
 
         result.AppendLine("properties = {");

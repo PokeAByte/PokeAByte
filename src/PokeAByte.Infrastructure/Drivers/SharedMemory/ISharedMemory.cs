@@ -9,9 +9,12 @@ public interface ISharedMemory
 
     static ISharedMemory Get(int fileSize)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
             return new MacOSSharedMemory(fileSize);
-        } else {
+        }
+        else
+        {
             return new MemoryMappedFileSharedMemory(fileSize);
         }
     }

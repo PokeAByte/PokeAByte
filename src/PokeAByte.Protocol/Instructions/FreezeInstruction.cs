@@ -5,7 +5,7 @@ namespace PokeAByte.Protocol;
 /// <summary>
 /// Instruct emulator to freeze a byte sequence in memory.
 /// </summary>
-public struct FreezeInstruction: IEmulatorInstruction
+public struct FreezeInstruction : IEmulatorInstruction
 {
     public static Metadata Metadata = new(Instructions.FREEZE, 0x00);
 

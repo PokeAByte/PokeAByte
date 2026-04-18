@@ -9,7 +9,7 @@ internal sealed class PokeAByteLogger(string name, LoggerConfiguration config, L
         ? name.Split(".").Last()
         : name;
     private LogLevel _loggerLevel = config.GetMinimumLevel(name);
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default!;
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
     public bool IsEnabled(LogLevel logLevel) => logLevel >= _loggerLevel;
 
@@ -51,8 +51,8 @@ internal sealed class PokeAByteLogger(string name, LoggerConfiguration config, L
 
     private Exception GetJintBaseException(Exception ex)
     {
-        
-        while(ex.InnerException != null && ex is not JavaScriptException)
+
+        while (ex.InnerException != null && ex is not JavaScriptException)
         {
             ex = ex.InnerException;
         }
@@ -115,7 +115,7 @@ internal sealed class PokeAByteLogger(string name, LoggerConfiguration config, L
         {
             var fullEntry = exception == null
                 ? formatter(state, exception)
-                : formatter(state, null) + "\n" + exception.ToString();
+                : formatter(state, null) + "\n" + exception;
             fileWriter.Log(now, logLevel, name, fullEntry);
         }
     }

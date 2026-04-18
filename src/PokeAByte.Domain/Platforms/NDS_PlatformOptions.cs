@@ -6,7 +6,7 @@ public class NDS_PlatformOptions : IPlatformOptions
 {
     /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
-    
+
     /// <inheritdoc/>
     public uint MemorySize => 0x2400000;
 

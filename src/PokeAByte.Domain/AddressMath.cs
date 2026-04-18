@@ -22,7 +22,7 @@ public static class AddressMath
                 addressExpression.Parameters[variable.Key] = variable.Value;
             }
             var result = addressExpression.Evaluate();
-            switch(result)
+            switch (result)
             {
                 case double doubleResult:
                     address = (uint)doubleResult;

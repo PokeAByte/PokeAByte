@@ -159,7 +159,7 @@ public interface IPokeAByteProperty
 
     /// <summary>
     /// Whether the property value is frozen. Whenever PokeAByte detects a change in <see cref="Bytes"/> from the 
-    /// emulator, it immediately instructs the emulator to write the <see cref="FrozenBytes"/> back to the game memory
+    /// emulator, it immediately instructs the emulator to write the <see cref="BytesFrozen"/> back to the game memory
     /// at the properties <see cref="Address"/>.
     /// </summary>
     /// <remarks>

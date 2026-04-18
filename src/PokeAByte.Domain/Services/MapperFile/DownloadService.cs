@@ -149,7 +149,7 @@ public class DownloadService : IDownloadService
             //Add them to the list
             return new MapperDownloadDto(
                 xmlPath,
-                string.IsNullOrEmpty(xmlData) 
+                string.IsNullOrEmpty(xmlData)
                     ? throw new Exception($"Missing XML. CDN returned no data for mapper '{path}'.")
                     : xmlData,
                 jsPath,
@@ -174,8 +174,6 @@ public class DownloadService : IDownloadService
             clientRequest.Headers.Add("Authorization", authToken);
         }
         var result = await _httpClient.SendAsync(clientRequest);
-        if (result is null)
-            return false;
         return result.IsSuccessStatusCode;
     }
 

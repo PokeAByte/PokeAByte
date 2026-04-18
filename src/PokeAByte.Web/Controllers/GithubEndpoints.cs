@@ -10,7 +10,7 @@ public static class GithubEndpoints
         app.MapPost("/files/save_github_settings", SaveGithubSettingsAsync);
         app.MapGet("/files/get_github_settings", (IDownloadService downloadService) => downloadService.Settings);
         app.MapGet("/files/test_github_settings", TestGithubSettingsAsync);
-        app.MapGet("/files/get_github_link", 
+        app.MapGet("/files/get_github_link",
             (IDownloadService downloadService) => downloadService.Settings.GetGithubUrl()
         );
     }

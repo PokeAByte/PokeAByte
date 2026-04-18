@@ -6,10 +6,10 @@ public class NES_PlatformOptions : IPlatformOptions
 {
     /// <inheritdoc/>
     public EndianTypes EndianType { get; } = EndianTypes.BigEndian;
-    
+
     /// <inheritdoc/>
     public uint MemorySize { get; } = 0x07FF;
-    
+
     /// <inheritdoc/>
     public MemoryAddressBlock[] Ranges { get; } = [
         new("Block 0", 0x0000, 0x00FF),

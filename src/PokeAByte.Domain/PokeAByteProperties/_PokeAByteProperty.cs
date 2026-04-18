@@ -52,7 +52,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
 
         MemoryContainer = memoryContainer;
         AddressString = address;
-        OriginalAddressString = address ?? ""; ;
+        OriginalAddressString = address ?? "";
         Length = length;
         Size = size;
         Bits = bits;
@@ -137,22 +137,20 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             case PropertyType.BinaryCodedDecimal:
                 {
                     int integerValue = int.Parse(value);
-                    int digits = value.ToString().Length;
-                    var result = new byte[(digits/2+1)];
-                    int byteIndex = digits/2;
-                    while(integerValue > 0)
+                    int digits = value.Length;
+                    var result = new byte[(digits / 2 + 1)];
+                    int byteIndex = digits / 2;
+                    while (integerValue > 0)
                     {
                         var lowerDigit = integerValue % 10;
-                        integerValue /=10;
+                        integerValue /= 10;
                         var upperDigit = integerValue % 10;
-                        integerValue /=10;
+                        integerValue /= 10;
                         result[byteIndex] = (byte)(((upperDigit & 0x0F) << 4) | lowerDigit);
                         byteIndex--;
                     }
                     return [.. result.TakeLast(Length)];
                 }
-            case PropertyType.BitArray:
-                throw new NotImplementedException();
             case PropertyType.Bool:
             case PropertyType.Bit:
                 return bool.Parse(value) ? [0x01] : [0x00];
@@ -177,7 +175,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                     var terminatorKey = computedReference.Values.First(x => x.Value == null);
                     var terminator = BitConverter.GetBytes(terminatorKey.Key).Take(charSize);
                     return [
-                        ..items.SelectMany(x => BitConverter.GetBytes(x?.Key ?? terminatorKey.Key).Take(charSize)),
+                        ..items.SelectMany(x => BitConverter.GetBytes(x.Key).Take(charSize)),
                         ..terminator
                     ];
                 }
@@ -222,7 +220,7 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         {
             _isMemoryAddressSolved = false;
         }
-        if (_addressExpression != null && _isMemoryAddressSolved == false)
+        if (_addressExpression != null && !_isMemoryAddressSolved)
         {
             try
             {
@@ -287,7 +285,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
                         outputBits.CopyTo(combinedBytes, 0);
                         BytesFrozen = Bytes = combinedBytes;
                         _ = instance.Driver.WriteBytes(address.Value, combinedBytes);
-                    } else
+                    }
+                    else
                     {
                         _ = instance.Driver.WriteBytes(address.Value, BytesFrozen);
                     }
@@ -306,8 +305,8 @@ public partial class PokeAByteProperty : IPokeAByteProperty
             Console.WriteLine(e);
             throw new Exception($"Unable to retrieve bytes for property '{Path}': {e.Message}");
         }
-        
-        this.Bytes = bytes.ToArray();        
+
+        this.Bytes = bytes.ToArray();
 
         // Store the original, full value
         FullValue = ToValue(in bytes, instance.Mapper);

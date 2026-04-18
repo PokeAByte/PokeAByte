@@ -32,7 +32,7 @@ public class MemoryManager : IMemoryManager
     /// <inheritdoc />
     public IByteArray Get(string? area, MemoryAddress memoryAddress, int length)
     {
-        if (area == null || area == "default" )
+        if (area == null || area == "default")
         {
             return DefaultNamespace.get_bytes(memoryAddress, length);
         }
@@ -85,7 +85,7 @@ public class DynamicMemoryContainer : IMemoryNamespace
 
         for (int i = 0; i < Fragments.Count; i++)
         {
-            IByteArray? fragment = Fragments[i];
+            IByteArray fragment = Fragments[i];
             if (fragment.Contains(memoryAddress))
             {
                 try
@@ -124,7 +124,7 @@ public class DynamicMemoryContainer : IMemoryNamespace
         }
         for (int i = 0; i < Fragments.Count; i++)
         {
-            IByteArray? fragment = Fragments[i];
+            IByteArray fragment = Fragments[i];
             if (fragment.Contains(memoryAddress))
             {
                 int offset = (int)(memoryAddress - fragment.StartingAddress);
@@ -140,7 +140,7 @@ public class DynamicMemoryContainer : IMemoryNamespace
         throw new Exception($"Memory address {memoryAddress.ToHexdecimalString()} is not contained in any fragment in the namespace.");
     }
 
-    public byte get_byte(MemoryAddress memoryAddress) => get_bytes(memoryAddress, 1).get_byte(0);
+    public byte get_byte(MemoryAddress memoryAddress) => get_bytes(memoryAddress, 1).get_byte();
 
     public byte[] GetAllBytes()
     {

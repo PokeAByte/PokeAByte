@@ -4,7 +4,6 @@ using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
 using PokeAByte.Domain.Logic;
 using PokeAByte.Domain.Models;
-using PokeAByte.Infrastructure.Drivers;
 using PokeAByte.Web.ClientNotifiers;
 using PokeAByte.Web.Controllers;
 using PokeAByte.Web.Hubs;
@@ -52,7 +51,7 @@ public static class Startup
         // Configure the HTTP request pipeline.
         app.UseCors(x =>
         {
-            x.SetIsOriginAllowed(x => true);
+            x.SetIsOriginAllowed(_ => true);
             x.AllowAnyMethod();
             x.AllowAnyHeader();
             x.AllowCredentials();

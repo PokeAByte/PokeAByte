@@ -7,7 +7,7 @@ public static class MapperXmlExtensions
     static string ReplaceStart(this string input, string oldValue, string newValue)
     {
         return input.StartsWith(oldValue)
-            ? string.Concat(newValue, input.AsSpan(oldValue.Length)) 
+            ? string.Concat(newValue, input.AsSpan(oldValue.Length))
             : input;
     }
 
@@ -32,10 +32,10 @@ public static class MapperXmlExtensions
     public static int? GetOptionalAttributeValueAsInt(this XElement el, string name) =>
         el.Attribute(name) != null ? int.Parse(el.GetAttributeValue(name)) : null;
 
-    static string? GetElementPathName(this XElement el)
+    static string GetElementPathName(this XElement el)
     {
-        return el.Name.LocalName is "class" 
-            ? el.GetAttributeValue("name") 
+        return el.Name.LocalName is "class"
+            ? el.GetAttributeValue("name")
             : el.Name.LocalName;
     }
 

@@ -7,5 +7,5 @@ public record InstalledMapper(
     string DisplayName,
     string Path,
     string? Version,
-    [property: JsonPropertyName("type")] MapperFileType Type 
+    [property: JsonPropertyName("type")] MapperFileType Type
 ) : MapperFile(DisplayName, Path, Version);

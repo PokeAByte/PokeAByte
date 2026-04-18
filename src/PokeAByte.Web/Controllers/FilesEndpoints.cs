@@ -56,7 +56,7 @@ public static class FilesEndpoints
 
 
     public static async Task<IResult> DownloadMapperUpdatesAsync(
-        IMapperService mapperService, 
+        IMapperService mapperService,
         [FromBody] List<string> mapperPaths)
     {
         return await mapperService.DownloadAsync(mapperPaths)
@@ -64,7 +64,7 @@ public static class FilesEndpoints
             : TypedResults.InternalServerError();
     }
 
-    public static IEnumerable<InstalledMapper> GetMappers(IMapperService mapperService) 
+    public static IEnumerable<InstalledMapper> GetMappers(IMapperService mapperService)
         => mapperService.ListInstalled();
 
     public static Task<bool> CheckForUpdatesAsync(IMapperService mapperService)

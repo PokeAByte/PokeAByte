@@ -11,6 +11,6 @@ public record RemoteMapperFile(
     string DisplayName,
     string Path,
     string? Version,
-    [property: JsonPropertyName("remote_version")] string? RemoteVersion 
-): MapperFile(DisplayName, Path, Version);
+    [property: JsonPropertyName("remote_version")] string? RemoteVersion
+) : MapperFile(DisplayName, Path, Version);
 

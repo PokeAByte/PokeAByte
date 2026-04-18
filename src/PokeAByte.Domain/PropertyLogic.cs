@@ -93,7 +93,7 @@ public static class PropertyLogic
     {
         if (reference == null) { throw new Exception("ReferenceObject is NULL."); }
 
-        string?[] results = [];
+        string?[] results;
         if (Size > 1)
         {
             // For strings that have characters mapper to more than a single byte.

@@ -22,10 +22,11 @@ public class StaticMemoryContainer : IMemoryNamespace
     internal Memory<byte> GetMemory(uint firstAddress, uint lastAddress)
     {
         int length = (int)(lastAddress - firstAddress);
-        if (!this.CheckRange(firstAddress, length)) {
-            throw new ArgumentException($"Address range ({firstAddress:X} - {firstAddress+length:X}) not within the memory boundaries.");
+        if (!this.CheckRange(firstAddress, length))
+        {
+            throw new ArgumentException($"Address range ({firstAddress:X} - {firstAddress + length:X}) not within the memory boundaries.");
         }
-        return Data.Slice((int)(firstAddress-_offset), length);
+        return Data.Slice((int)(firstAddress - _offset), length);
     }
 
     public IList<IByteArray> Fragments => [new ByteArray(0, this.Data.ToArray())];
@@ -53,7 +54,7 @@ public class StaticMemoryContainer : IMemoryNamespace
         }
         try
         {
-            return Data.Span.Slice((int)(address-_offset), length);
+            return Data.Span.Slice((int)(address - _offset), length);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -66,7 +67,7 @@ public class StaticMemoryContainer : IMemoryNamespace
         return GetReadonlyBytes(address, 1)[0];
     }
 
-    public bool Contains(uint address) => address >= 0 && address < Data.Length;
+    public bool Contains(uint address) => address < Data.Length;
 
     public IByteArray get_bytes(uint address, int length)
     {

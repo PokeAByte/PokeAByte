@@ -50,7 +50,7 @@ public interface IPokeAByteDriver
     /// <param name="transferBlocks"> The blocks to read and for transporting the data. </param>
     /// <remarks> 
     /// The memory bytes are written back into the <see cref="BlockData.Data"/> byte array of each block in the
-    /// <paramref name="transferBlocks"> parameter.
+    /// <paramref name="transferBlocks"/> parameter.
     /// </remarks>
     /// <returns> An awaitable task. </returns>
     ValueTask ReadBytes(BlockData[] transferBlocks);

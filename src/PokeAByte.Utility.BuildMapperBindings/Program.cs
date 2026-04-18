@@ -14,7 +14,7 @@ foreach (var xmlFilePath in filePaths)
         var mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(contents, xmlFilePath);
 
         // Create child directory if not exists.
-        if (mapper.Metadata.GamePlatform.Any(x => char.IsLetter(x) == false && char.IsNumber(x) == false))
+        if (mapper.Metadata.GamePlatform.Any(x => !char.IsLetter(x) && !char.IsNumber(x)))
         {
             throw new Exception("Invalid characters in game platform.");
         }

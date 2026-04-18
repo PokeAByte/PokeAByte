@@ -5,7 +5,7 @@ namespace PokeAByte.Protocol;
 /// <summary>
 /// Instruct emulator to drop a previously instructed freeze. 
 /// </summary>
-public struct UnfreezeInstruction: IEmulatorInstruction
+public struct UnfreezeInstruction : IEmulatorInstruction
 {
     public static Metadata Metadata = new(Instructions.UNFREEZE, 0x00);
 

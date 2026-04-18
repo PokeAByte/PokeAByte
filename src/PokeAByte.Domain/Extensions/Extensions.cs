@@ -9,7 +9,7 @@ public static partial class Extensions
     private static partial Regex HexdecimalMemoryAddress();
     public static string ToHexdecimalString(this MemoryAddress value) => $"0x{value:X2}";
     public static string ToHexdecimalString(this byte value) => ((uint)value).ToHexdecimalString();
-    
+
     /// <summary>
     /// Parse a hex memory address into a uint. 
     /// </summary>

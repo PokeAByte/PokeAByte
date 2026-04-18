@@ -13,7 +13,7 @@ public sealed class PokeAByteLoggerProvider : ILoggerProvider
     public PokeAByteLoggerProvider(IOptionsMonitor<LoggerConfiguration> config)
     {
         _currentConfig = config.CurrentValue;
-        _fileWriter = new LogFileWriter(_currentConfig.LogFile, _currentConfig.FileSizeLimit);        
+        _fileWriter = new LogFileWriter(_currentConfig.LogFile, _currentConfig.FileSizeLimit);
         _onChangeToken = config.OnChange(updatedConfig => _currentConfig = updatedConfig);
     }
 

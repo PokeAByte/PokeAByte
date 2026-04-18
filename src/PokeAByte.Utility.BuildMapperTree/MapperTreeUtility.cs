@@ -39,12 +39,13 @@ public static class MapperTreeUtility
     }
 
 
-    private static MapperFile CreateMapperEntry(string baseDirectory, string filepath, string version = "") {
+    private static MapperFile CreateMapperEntry(string baseDirectory, string filepath, string version = "")
+    {
         if (!File.Exists(filepath))
             throw new Exception($"Failed to open file {filepath}.");
         var file = new FileInfo(filepath);
         var path = filepath[baseDirectory.Length..].Replace("\\", "/");
-        return new MapperFile(file.Name, path, version);    
+        return new MapperFile(file.Name, path, version);
     }
 
     public static List<MapperFile> GenerateMapperDtoTree(string baseDirectory)

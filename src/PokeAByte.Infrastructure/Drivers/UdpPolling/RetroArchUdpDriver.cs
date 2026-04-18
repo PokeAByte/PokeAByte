@@ -13,18 +13,18 @@ namespace PokeAByte.Infrastructure.Drivers.UdpPolling;
 /// </summary>
 public class RetroArchUdpDriver : IPokeAByteDriver
 {
-    private static uint GetLoopbackMtu()		
+    private static uint GetLoopbackMtu()
     {
-        var loopbackDevice = NetworkInterface.GetAllNetworkInterfaces()		
+        var loopbackDevice = NetworkInterface.GetAllNetworkInterfaces()
             .FirstOrDefault(x => x.NetworkInterfaceType == NetworkInterfaceType.Loopback);
-		
-        if (loopbackDevice == null)		
-        {		
+
+        if (loopbackDevice == null)
+        {
             // fallback to what seems to be the macOS default, which is smaller than on all other platforms.		
-            return 16384u;		
-        }		
-        var result = (uint)loopbackDevice.GetIPProperties().GetIPv4Properties().Mtu;		
-        return result;		
+            return 16384u;
+        }
+        var result = (uint)loopbackDevice.GetIPProperties().GetIPv4Properties().Mtu;
+        return result;
     }
 
     // MTU minus some overhead, divided by 3 because we get 3 characters per byte requested:		

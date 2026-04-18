@@ -8,19 +8,18 @@ using PokeAByte.Domain.Models.Mappers;
 
 internal record AbsoluteMapperPaths(string Xml, string? Script);
 
-internal record MapperFileData(string Path, string XmlContent, string? ScriptContent);
 
 public class MapperService : IMapperService
 {
     public static string MapperArchivePath = Path.Combine(BuildEnvironment.ConfigurationDirectory, "MapperArchives");
     public static string MapperDirectory = Path.Combine(BuildEnvironment.ConfigurationDirectory, "Mappers");
     internal static string MapperTreeFilename = "mapper_tree.json";
-    private static string MapperTreePath = Path.Combine(MapperDirectory, MapperTreeFilename);
-    private static string RemoteMapperFilePath = Path.Combine(MapperDirectory, "remote_mappers.json");
+    private static readonly string MapperTreePath = Path.Combine(MapperDirectory, MapperTreeFilename);
+    private static readonly string RemoteMapperFilePath = Path.Combine(MapperDirectory, "remote_mappers.json");
 
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
-    private IDownloadService _downloadService;
+    private readonly IDownloadService _downloadService;
     public List<MapperFile> _managedMappers;
     public List<MapperFile>? _remoteMappers;
     public List<MapperFile> _unmanagedMappers = [];
@@ -58,7 +57,7 @@ public class MapperService : IMapperService
     {
         _managedMappers = (JsonFile.Read(MapperTreePath, DomainJson.Default.ListMapperFile) ?? [])
             // Normalize the mapper path. Previous versions did not remove the leading "/" when saving the .json:
-            .Select(x => x with { Path = Path.AsRelative(x.Path) })
+            .Select(x => x with { Path = Path.Normalize(Path.AsRelative(x.Path)) })
             .ToList();
 
         var removedMappers = _managedMappers.RemoveAll(x => !File.Exists(Path.Combine(MapperDirectory, x.Path)));
@@ -72,7 +71,7 @@ public class MapperService : IMapperService
         UpdateUnmanagedMappers();
 
         if (_unmanagedMappers.Any())
-        {   
+        {
             _logger.LogInformation("Found mapper on disk are not in the mapper_tree.json and can't be updated.");
         }
     }
@@ -82,7 +81,7 @@ public class MapperService : IMapperService
     {
         // Find mapper XML files that are not in the _managedMappers list:
         _unmanagedMappers = Directory.GetFiles(MapperDirectory, "*.xml", SearchOption.AllDirectories)
-            .Select(x => Path.GetRelativePath(MapperDirectory, x))              // normalize path
+            .Select(x => Path.Normalize(Path.GetRelativePath(MapperDirectory, x)))              // normalize path
             .Where(path => !_managedMappers.Any(x => x.Path == path))           // check if it's managed
             .Select(path => new MapperFile(Path.GetFileName(path), path, null)) // create model.
             .ToList();
@@ -182,7 +181,7 @@ public class MapperService : IMapperService
                 remote => remote.Path,
                 (a, b) => new { Remote = a, Installed = b }
             )
-            ?.Select(x => new RemoteMapperFile(
+            .Select(x => new RemoteMapperFile(
                 x.Remote.DisplayName,
                 x.Remote.Path,
                 x.Installed?.Version,
@@ -197,8 +196,8 @@ public class MapperService : IMapperService
         var mapperContents = await File.ReadAllTextAsync(absolutePaths.Xml);
 
         return new MapperContent(
-            path, 
-            mapperContents, 
+            path,
+            mapperContents,
             absolutePaths.Script, // We don't load the JS content here, because the JavaScript engine takes a path.
             ScriptRoot: MapperDirectory
         );
@@ -260,10 +259,10 @@ public class MapperService : IMapperService
             foreach (var mapperPath in Directory.GetFiles(archivePath, "*.xml", SearchOption.AllDirectories))
             {
                 result.Add(new ArchivedMapperFile(
-                    Path: Path.GetRelativePath(MapperArchivePath, archivePath),
+                    Path: Path.Normalize(Path.GetRelativePath(MapperArchivePath, archivePath)),
                     Mapper: new MapperFile(
                         Path.GetFileName(mapperPath),
-                        Path.GetRelativePath(archivePath, mapperPath),
+                        Path.Normalize(Path.GetRelativePath(archivePath, mapperPath)),
                         GetMapperVersion(mapperPath)
                     )
                 ));
@@ -276,7 +275,6 @@ public class MapperService : IMapperService
     {
         var archiveDirectory = Path.Combine(MapperArchivePath, archivePath);
         var archiveFiles = Directory.GetFiles(archiveDirectory, "*xml", SearchOption.AllDirectories);
-        var restoreFiles = new List<MapperFileData>();
         // Move existing mappers into a new archive:
         var conflictArchivePath = Path.Combine(MapperArchivePath, GetArchiveName());
         foreach (var archivedMapper in archiveFiles.Select(x => Path.GetRelativePath(archiveDirectory, x)))
@@ -301,7 +299,7 @@ public class MapperService : IMapperService
             _managedMappers.RemoveAll(x => x.Path == archivedMapper);
             _managedMappers.Add(new MapperFile(
                 Path.GetFileName(archivedMapper),
-                archivedMapper,
+                Path.Normalize(archivedMapper),
                 GetMapperVersion(Path.Combine(MapperDirectory, archivedMapper))
             ));
         }
@@ -315,7 +313,7 @@ public class MapperService : IMapperService
         Directory.Delete(Path.Combine(MapperArchivePath, archivePath), recursive: true);
     }
 
-    public async Task<bool> Backup(IEnumerable<string> paths)
+    public async Task<bool> Backup(List<string> paths)
     {
         string destinationFolder = Path.Combine(MapperArchivePath, GetBackupName());
         foreach (var path in paths)
@@ -326,10 +324,10 @@ public class MapperService : IMapperService
                 return false;
             }
         }
-        return true; ;
+        return true;
     }
 
-    public bool Archive(IEnumerable<string> paths)
+    public bool Archive(List<string> paths)
     {
         string destinationFolder = Path.Combine(MapperArchivePath, GetArchiveName());
         foreach (var path in paths)
@@ -351,7 +349,7 @@ public class MapperService : IMapperService
             {
                 File.Delete(Path.SetJsExtension(fullPath));
             }
-            _managedMappers.RemoveAll(x => x.Path == path);
+            _managedMappers.RemoveAll(x => x.Path == Path.Normalize(path));
         }
         Save();
         return true;

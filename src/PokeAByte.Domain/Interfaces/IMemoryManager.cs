@@ -113,7 +113,8 @@ public interface IMemoryNamespace
     /// Get a <see cref="ReadOnlySpan{T}"/> over the target memory in this namepsace.
     /// </summary>
     /// <param name="memoryAddress"> Starting address of the target memory. </param>
-    /// <param name="length"> Lenght of the target memory. </param>
+    /// <param name="length"> Length of the target memory. </param>
+    /// <param name="skipCheck"> Whether the bounds check on the address and length can safely be skipped. </param>
     /// <returns> The <see cref="ReadOnlySpan{T}"/>. </returns>
     /// <remarks> 
     /// Implementations of this interface method may throw if the memory address or length are out of bounds

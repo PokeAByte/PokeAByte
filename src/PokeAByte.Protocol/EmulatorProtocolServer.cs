@@ -36,7 +36,7 @@ public class EmulatorProtocolServer : IDisposable
     {
         if (!_disposed)
         {
-            _listener.BeginReceive(OnData, new {});
+            _listener.BeginReceive(OnData, new { });
         }
     }
 
@@ -53,7 +53,6 @@ public class EmulatorProtocolServer : IDisposable
 
     private void HandleMessage(byte[] message, IPEndPoint endpoint)
     {
-        var protocolVersion = message[0];
         var instructionType = message[4];
         if (_disposed || message[5] != 0)
         {
@@ -108,17 +107,15 @@ public class EmulatorProtocolServer : IDisposable
         {
             return;
         }
-        if (_listener != null)
+        var close = new CloseInstruction(toClient: true).GetByteArray();
+        foreach (var remote in _clients)
         {
-            var close = new CloseInstruction(toClient: true).GetByteArray();
-            foreach (var remote in _clients)
-            {
-                _listener.Send(close, close.Length, remote);
-            }
+            _listener.Send(close, close.Length, remote);
         }
+
         _disposed = true;
         _thread?.Abort();
-        _listener?.Dispose();
+        _listener.Dispose();
     }
 
     public void Start()

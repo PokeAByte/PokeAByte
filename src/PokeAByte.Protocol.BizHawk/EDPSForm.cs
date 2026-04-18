@@ -34,7 +34,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
     {
         SuspendLayout();
 
-        base.Text = "Emulator Data Protocol Server";
+        Text = "Emulator Data Protocol Server";
         ShowInTaskbar = false;
 
         ClientSize = new(300, 60);
@@ -101,7 +101,8 @@ public sealed class EDPSForm : Form, IExternalToolForm
             this._processor = new GameDataProcessor(platform, instruction, MainLabel);
             this._processor.UpdateGameMemory(MemoryDomains!);
             return true;
-        } catch (Exception)
+        }
+        catch (Exception)
         {
             return false;
         }

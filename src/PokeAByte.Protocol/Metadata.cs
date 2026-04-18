@@ -22,7 +22,7 @@ public static class SharedConstants
 
     public static string GetMmfPath()
     {
-        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) 
+        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
             ? SharedConstants.MemoryMappedFilePathOSX
             : SharedConstants.MemoryMappedFilePathLinux;
     }
