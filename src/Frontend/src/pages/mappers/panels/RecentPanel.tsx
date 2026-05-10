@@ -7,6 +7,7 @@ import { onMapperLoaded } from "./createMapperLoadToast";
 import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
 import { useComputed } from "@preact/signals";
+import { beautifyMapperName } from "@/utility/mapperName";
 
 export function RecentPanel() {
 	const isEnabled = useComputed(() => uiSettingsSignal.value.recentlyUsedEnabled).value;
@@ -22,9 +23,10 @@ export function RecentPanel() {
 
 	return (
 		<Panel id="mapper-recent" title="Recently used mappers" defaultOpen>
-			<div class="favorites">
+			<div class="favorites flexy-panel">
 				{mappers?.map((favorite) => {
-					const buttonColors = getMapperColors(favorite.display_name);
+					const mapperName = beautifyMapperName(favorite);
+					const buttonColors = getMapperColors(mapperName);
 					const style: CSSProperties = {};
 					if (buttonColors) {
 						style.borderColor = buttonColors.border;
@@ -33,11 +35,10 @@ export function RecentPanel() {
 					}
 					return (
 						<button
-							class="margin-right"
 							onClick={() => changeMapperApi.call(favorite.path)}
 							style={style}
 						>
-							{favorite.display_name}
+							{mapperName}
 						</button>
 					);
 				})}

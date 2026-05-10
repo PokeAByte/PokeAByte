@@ -32,7 +32,8 @@ export function FavoritePanel() {
 		<Panel id="mapper-favorites" title="Favorite mappers" defaultOpen>
 			<div class="favorites flexy-panel">
 				{favorites?.map((favorite) => {
-					const buttonColors = getMapperColors(beautifyMapperName(favorite));
+					const mapperName = beautifyMapperName(favorite);
+					const buttonColors = getMapperColors(mapperName);
 					const style: CSSProperties = {};
 					if (buttonColors) {
 						style.borderColor = buttonColors.border;
@@ -44,7 +45,7 @@ export function FavoritePanel() {
 							onClick={() => changeMapperApi.call(favorite.path)}
 							style={style}
 						>
-							{beautifyMapperName(favorite)}
+							{mapperName}
 						</button>
 					);
 				})}
