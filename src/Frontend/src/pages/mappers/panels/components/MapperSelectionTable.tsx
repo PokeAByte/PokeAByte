@@ -70,7 +70,7 @@ export function MapperSelectionTable(props: MapperSelectionTableProps) {
 
 	return (
 		<>
-			<div class="flexy-panel">
+			<div class="flexy-panel margin-top">
 				<span>
 					<label htmlFor="mapper-filter margin-right">Filter:</label>
 					<input
