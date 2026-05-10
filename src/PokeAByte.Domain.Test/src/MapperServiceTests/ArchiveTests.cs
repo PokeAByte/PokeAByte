@@ -71,7 +71,7 @@ public class ArchiveTests : MapperTestBase
         Assert.NotEmpty(service.ListInstalled());
         Assert.True(File.Exists("./Mappers/test/custom.xml"));
 
-        result = service.Archive(service.ListInstalled().Select(mapper => mapper.Path));
+        result = service.Archive(service.ListInstalled().Select(mapper => mapper.Path).ToList());
 
         Assert.True(result);
         Assert.Empty(service.ListInstalled());
