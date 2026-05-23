@@ -7,6 +7,11 @@
 
 # 0.11.0
 
+## Bugfixes
+- When trying to rearrange favorites in the UI settings, favorites got deleted or would not be moved.
+
+# 0.11.0
+
 ## General
 
 - Reworked how Poke-A-Byte downloads mapper files and how it manages those files after they are downloaded.
