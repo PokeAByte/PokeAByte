@@ -5,7 +5,7 @@
 [Version 0.10.0](#0100)  
 [Version 0.9.2](#093)  
 
-# 0.11.0
+# 0.11.1
 
 ## Bugfixes
 - When trying to rearrange favorites in the UI settings, favorites got deleted or would not be moved.
