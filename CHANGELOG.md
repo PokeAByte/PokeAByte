@@ -5,6 +5,12 @@
 [Version 0.10.0](#0100)  
 [Version 0.9.2](#093)  
 
+# Future
+
+## General
+
+- Improved logging for when a mapper contains multiple overlapping glossary values.
+
 # 0.11.1
 
 ## Bugfixes

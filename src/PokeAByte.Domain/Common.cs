@@ -67,7 +67,17 @@ public class ReferenceItems
     /// <returns> The found item or <see langword="null"/> if no item with that key exists. </returns>
     public ReferenceItem? GetSingleOrDefaultByKey(ulong key)
     {
-        return Values.SingleOrDefault(x => x.Key == key);
+        try
+        {
+            return Values.SingleOrDefault(x => x.Key == key);
+        }
+        catch (InvalidOperationException)
+        {
+            throw new PokeAByteException(
+                $"Can not determine reference value. The glossary for '{this.Name}' contains more than one value "
+                + $"for the key '{key}' (0x{key:X})."
+            );
+        }
     }
 
     /// <summary>
