@@ -5,7 +5,7 @@
 [Version 0.10.0](#0100)  
 [Version 0.9.2](#093)  
 
-# Future
+# 0.11.2
 
 ## Bugfixes
 
