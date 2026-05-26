@@ -180,14 +180,14 @@ internal class GameDataProcessor : IDisposable
     /// mapped file.
     /// </summary>
     /// <param name="memoryDomains"> The BizHawk memory domains to be used for memory access. </param>
-    internal void UpdateGameMemory(IMemoryDomains memoryDomains)
+    internal void UpdateGameMemory(IMemoryDomains memoryDomains, bool force = false)
     {
         while (_writeQueue.Count > 0)
         {
             WriteToGameMemory(_writeQueue.Dequeue(), memoryDomains);
         }
 
-        if (_skippedFrames > _frameSkip)
+        if (_skippedFrames > _frameSkip || force)
         {
             _skippedFrames = 0;
         }

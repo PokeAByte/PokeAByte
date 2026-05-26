@@ -99,7 +99,7 @@ public sealed class EDPSForm : Form, IExternalToolForm
         try
         {
             this._processor = new GameDataProcessor(platform, instruction, MainLabel);
-            this._processor.UpdateGameMemory(MemoryDomains!);
+            this._processor.UpdateGameMemory(MemoryDomains!, force: true);
             return true;
         }
         catch (Exception)

@@ -7,6 +7,10 @@
 
 # Future
 
+## Bugfixes
+
+- `EDPS.Bizhawk.dll` would fail with Nintendo DS games.
+
 ## General
 
 - Improved logging for when a mapper contains multiple overlapping glossary values.
