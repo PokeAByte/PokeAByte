@@ -10,6 +10,7 @@
 ## Bugfixes
 
 - `EDPS.Bizhawk.dll` would fail with Nintendo DS games.
+- The button "Check for updates" did not properly fetch new mapper information from GitHub.
 
 ## General
 

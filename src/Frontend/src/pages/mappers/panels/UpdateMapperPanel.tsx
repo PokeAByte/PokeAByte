@@ -62,7 +62,7 @@ export function UpdateMapperPanel() {
 			<div class="flexy-panel margin-top">
 				<WideButton text="Update selected" color="green" disabled={!selectedUpdates.length} onClick={handleUpdate} />
 				<WideButton text="Update all" color="green" disabled={!availableUpdates.length} onClick={handleUpdateAll} />
-				<WideButton text="Check for updates" color="blue" onClick={refreshMapperFiles} />
+				<WideButton text="Check for updates" color="blue" onClick={() => refreshMapperFiles(true)} />
 				<Show when={advancedModeSignal}>
 					<OpenMapperFolderButton />
 				</Show>

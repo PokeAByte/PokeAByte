@@ -24,7 +24,7 @@ effect(() => {
 	}
 })
 
-export async function refreshMapperFiles() {
+export async function refreshMapperFiles(forceUpdateCheck: boolean = false) {
 	mapperFilesSignal.value = {
 		...mapperFilesSignal.peek(),
 		isLoading: true,
@@ -35,7 +35,7 @@ export async function refreshMapperFiles() {
 	
 	try {
 		availableMappers = await getMappers() ?? [];
-		updates = await getMapperUpdates() ?? [];
+		updates = await getMapperUpdates(forceUpdateCheck) ?? [];
 		archives = await getArchivedMappers() ?? {};
 	} finally {
 		mapperFilesSignal.value = {

@@ -105,9 +105,13 @@ export type MapperFile = {
 export type MapperUpdate = MapperFile & { remote_version : string};
 export const getMappers = () =>fetchGet<MapperFile[]>("/mapper-service/get-mappers");
 
-export async function getMapperUpdates() {
+export async function getMapperUpdates(force: boolean = false) {
+	if (force) {
+		return await fetchGet<MapperUpdate[]>("/files/mapper/check_for_updates");
+	}
 	return await fetchGet<MapperUpdate[]>("/files/mapper/get_updates");
 }
+
 export type MapperArchive = {
 	path: string,
 	mapper: MapperFile,
