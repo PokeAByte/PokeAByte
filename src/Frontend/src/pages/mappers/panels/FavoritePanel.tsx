@@ -18,7 +18,7 @@ export function FavoritePanel() {
 		.filter(x => !!x);
 
 	if (!favorites?.length) {
-		return <pre>{JSON.stringify(favoriteIds, null, "")}</pre>;
+		return null;
 	}
 	if (changeMapperApi.isLoading) {
 		return (
