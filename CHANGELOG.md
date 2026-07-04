@@ -9,6 +9,7 @@
 
 ## Bugfixes
 - Fixed debug information being shown in some edgecases when the user has outdated favorites.
+- Fixed a bug where new users would be unable to download mappers.
 
 # 0.11.2
 

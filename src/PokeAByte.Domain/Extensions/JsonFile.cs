@@ -7,6 +7,10 @@ internal static class JsonFile
 {
     internal static void Write<T>(T value, string path, JsonTypeInfo<T> typeInfo)
     {
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        }
         File.WriteAllText(path, JsonSerializer.Serialize(value, typeInfo));
     }
 
