@@ -11,6 +11,9 @@
 - Fixed debug information being shown in some edgecases when the user has outdated favorites.
 - Fixed a bug where new users would be unable to download mappers.
 
+## General
+- Updated the JavaScript engine, which may improve performance very slightly on some mappers.
+
 # 0.11.2
 
 ## Bugfixes

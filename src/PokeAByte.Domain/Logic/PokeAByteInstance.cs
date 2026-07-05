@@ -108,7 +108,7 @@ public class PokeAByteInstance : IPokeAByteInstance
         engineOptions.Host.StringCompilationAllowed = false;
         // Makes some javascript exceptions easier to follow with better stacktraces:
         engineOptions.Interop.ExceptionHandler = (_) => true;
-        engineOptions.Interop.TrackObjectWrapperIdentity = true;
+        engineOptions.Interop.CacheRecentObjectWrappers = true;
         engineOptions.Interop.ObjectConverters.Add(new JintUnit8ArrayConverter());
 
         if (mapperContent.ScriptRoot != null && mapperContent.ScriptPath != null)
