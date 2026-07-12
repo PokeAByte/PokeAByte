@@ -1,11 +1,8 @@
-[Version 0.11.0](#0110)  
+[Version 0.11.3](#0113)  
 [Version 0.10.3](#0103)  
-[Version 0.10.2](#0102)  
-[Version 0.10.1](#0101)  
-[Version 0.10.0](#0100)  
 [Version 0.9.2](#093)  
 
-# 0.11.3 (future)
+# 0.11.3
 
 ## Bugfixes
 - Fixed debug information being shown in some edgecases when the user has outdated favorites.
