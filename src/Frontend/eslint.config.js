@@ -19,7 +19,6 @@ export default tseslint.config(
 		},
 		rules: {
 			...reactHooks.configs.recommended.rules,
-			// ...react.configs.recommended.rules,
 			"@typescript-eslint/no-explicit-any": "off",
 			"react/jsx-curly-brace-presence": "warn"
 		},

@@ -38,7 +38,7 @@ export function GithubSettingsPanel() {
 	}, [githubSettingsResult, setFieldState])
 	const [clearModal, setClearModal] = useState<boolean>(false);
 	const formRef = useRef<HTMLFormElement | null>(null);
-	const formData = formRef.current ? new FormData(formRef.current) : null;
+
 	useEffect(
 		() => { githubSettings.call() },
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,6 +79,7 @@ export function GithubSettingsPanel() {
 		});
 	}
 	const onSubmit = (event: JSX.TargetedSubmitEvent<HTMLFormElement>) => {
+		const formData = formRef.current ? new FormData(formRef.current) : null;
 		saveGitHubSettings({
 			owner: formData?.get("owner") as string ?? "",
 			repo: formData?.get("repo") as string ?? "",
