@@ -12,16 +12,29 @@ public class MetadataSection
     public required string Path { get; init; }
 }
 
+/// <summary>
+/// The memory configuration of the mapper.
+/// </summary>
 public class MemorySection
 {
+    /// <summary>
+    /// Defines the memory reanges to read from the emulator.
+    /// </summary>
     public ReadRange[] ReadRanges { get; init; } = [];
 }
 
-
-
-public class ReadRange
+/// <summary>
+/// A range of memory to read from the emulator.
+/// </summary>
+public readonly struct ReadRange
 {
+    /// <summary>
+    /// The address to start reading from.
+    /// </summary>
     public uint Start { get; init; }
+    /// <summary>
+    /// The address to stop reading at, inclusive.
+    /// </summary>
     public uint End { get; init; }
 }
 

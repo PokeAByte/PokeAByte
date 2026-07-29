@@ -1,26 +1,20 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PokeAByte.Domain;
 using PokeAByte.Domain.Interfaces;
-using PokeAByte.Domain.Models;
 using PokeAByte.Web.Models;
 using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web.Controllers;
 
-static class MapperHelper
-{
-    public static Dictionary<string, IEnumerable<GlossaryItemModel>> MapToDictionaryGlossaryItemModel(
-        this IEnumerable<ReferenceItems> glossaryList)
-    {
-        var dictionary = new Dictionary<string, IEnumerable<GlossaryItemModel>>();
-
-        foreach (var item in glossaryList)
-        {
-            dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel(x.Key, x.Value));
-        }
-        return dictionary;
-    }
-}
+using SetPropertyFrozenResult = Results<BadRequest<ProblemDetails>, NotFound, BadRequest<string> , Ok>;
+using GetGlossaryResult = Results<BadRequest<ProblemDetails>, Ok<Dictionary<string, IEnumerable<GlossaryItemModel>>>>;
+using GetValueResult = Results<BadRequest<ProblemDetails>, NotFound, BadRequest<string>, ContentHttpResult>;
+using GetGlossaryPageResult = Results<BadRequest<ProblemDetails>, NotFound, Ok<IEnumerable<GlossaryItemModel>>>;
+using GetPropertyResult = Results<NotFound, BadRequest<ProblemDetails>, Ok<IPokeAByteProperty>>;
+using GetPropertiesResult = Results<BadRequest<ProblemDetails>, Ok<IEnumerable<IPokeAByteProperty>>>;
+using GetMetaResult = Results<BadRequest<ProblemDetails>, Ok<MapperMetaModel>>;
+using GetMapperResult = Results<BadRequest<ProblemDetails>, Ok<MapperModel>>;
 
 public static class MapperEndpoints
 {
@@ -33,13 +27,25 @@ public static class MapperEndpoints
         app.MapGet("/mapper/glossary", GetGlossary);
         app.MapGet("/mapper/glossary/{key}", GetGlossaryPage);
         app.MapGet("/mapper/values/{**path}/", GetValueAsync);
-        app.MapPost("/mapper/set-property-frozen", FreezePropertyAsync);
-        app.MapPost("/mapper/set-property-bytes", UpdatePropertyBytesAsync);
-        app.MapPost("/mapper/set-properties-by-bits", UpdatePropertyByBitsAsync);
-        app.MapPost("/mapper/set-property-value", UpdatePropertyValueAsync);
+        app.MapPost("/mapper/set-property-frozen", SetPropertyFrozenAsync);
+        app.MapPost("/mapper/set-property-bytes", SetPropertyBytesAsync);
+        app.MapPost("/mapper/set-properties-by-bits", SetPropertiesByBits);
+        app.MapPost("/mapper/set-property-value", SetPropertyValueAsync);
     }
 
-    public static IResult GetMapper(IInstanceService instanceService, AppSettingsService appSettingsService)
+    public static Dictionary<string, IEnumerable<GlossaryItemModel>> MapToDictionaryGlossaryItemModel(
+        this IEnumerable<ReferenceItems> glossaryList)
+    {
+        var dictionary = new Dictionary<string, IEnumerable<GlossaryItemModel>>();
+
+        foreach (var item in glossaryList)
+        {
+            dictionary[item.Name] = item.Values.Select(x => new GlossaryItemModel(x.Key, x.Value));
+        }
+        return dictionary;
+    }
+
+    public static GetMapperResult GetMapper(IInstanceService instanceService, AppSettingsService appSettingsService)
     {
         if (instanceService.Instance == null)
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
@@ -53,7 +59,15 @@ public static class MapperEndpoints
         return TypedResults.Ok(model);
     }
 
-    public static IResult GetMeta(IInstanceService instanceService, AppSettings appSettings)
+    /// <summary>
+    /// Get the meta-data of the currently loaded mapper.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <returns>
+    /// HTTP 200 With the JSON-serialized mapper metadata. <br/>
+    /// HTTP 400 If no mapper is currently loaded.
+    /// </returns>
+    public static GetMetaResult GetMeta(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -63,30 +77,64 @@ public static class MapperEndpoints
         return TypedResults.Ok(MapperMetaModel.FromMapperSection(meta));
     }
 
-    public static IResult GetProperties(IInstanceService instanceService)
+    /// <summary>
+    /// Get the list of all properties of the currently loaded mapper with their current values.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <returns>
+    /// <returns>
+    /// HTTP 200 With the JSON-serialized IPokeAByteProperty list. <br/>
+    /// HTTP 400 If no mapper is currently loaded.
+    /// </returns>
+    /// </returns>
+    public static GetPropertiesResult GetProperties(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
         if (instance == null)
+        {   
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+        }
 
-        return TypedResults.Ok(instance.Mapper.Properties.Values);
+        return TypedResults.Ok((IEnumerable<IPokeAByteProperty>)instance.Mapper.Properties.Values);
     }
 
-    public static IResult GetProperty(IInstanceService instanceService, [FromRoute] string path)
+    /// <summary>
+    /// Get thhe property for the target path.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="path"> The path of the target property.</param>
+    /// <returns>
+    /// HTTP 200 With the JSON-serialized IPokeAByteProperty. <br/>
+    /// HTTP 400 If no mapper is currently loaded. <br/>
+    /// HTTP 404 If the target property does not exist.
+    /// </returns>
+    public static GetPropertyResult GetProperty(IInstanceService instanceService, [FromRoute] string path)
     {
         var instance = instanceService.Instance;
         if (instance == null)
+        {   
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+        }
         path = path.StripEndingRoute();
 
-        if (instance.Mapper.Properties.TryGetValue(path, out var prop))
+        if (instance.Mapper.Properties.TryGetValue(path, out var property))
         {
-            return TypedResults.Ok(prop);
+            return TypedResults.Ok(property);
         }
         return TypedResults.NotFound();
     }
 
-    public static IResult GetValueAsync(IInstanceService instanceService, string path)
+    /// <summary>
+    /// Get the value of the target property as plain text.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="path"> The path of the property to read. </param>
+    /// <returns>
+    /// HTTP 200 With the string representation of the value as plain text. <br/>
+    /// HTTP 400 If no mapper is currently loaded. <br/>
+    /// HTTP 404 If the target property does not exist.
+    /// </returns>
+    public static GetValueResult GetValueAsync(IInstanceService instanceService, string path)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -101,20 +149,33 @@ public static class MapperEndpoints
         {
             return TypedResults.BadRequest($"{prop.Path} is an object and cannot be converted to text.");
         }
-        return Results.Text(prop.Value?.ToString() ?? string.Empty);
+        return TypedResults.Text(prop.Value?.ToString() ?? string.Empty);
     }
 
-    public static async Task<IResult> FreezePropertyAsync(
+    /// <summary>
+    /// Freezes or unfreezes the value of the target property. Whenever a frozen property changes, Poke-A-Byte will ask 
+    /// the emulator to write the frozen value back into the games memory. Some emulators also support freezing the 
+    /// respective memory internally.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="request"> The request payload. </param>
+    /// <returns>
+    /// HTTP 200 if the property could be frozen. <br/>
+    /// HTTP 400 If no mapper is currently loaded. <br/>
+    /// HTTP 404 if the target property does not exist. <br/>
+    /// HTTP 501 if an error occured during the freezing or if the target property is read-only.
+    /// </returns>
+    public static async Task<SetPropertyFrozenResult> SetPropertyFrozenAsync(
         IInstanceService instanceService,
-        [FromBody] UpdatePropertyFreezeModel model)
+        [FromBody] SetPropertyFrozenRequest request)
     {
         var instance = instanceService.Instance;
         if (instance == null)
+        {   
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
+        }
 
-        var path = model.Path.StripEndingRoute();
-
-        var prop = instance.Mapper.Properties[path];
+        var prop = instance.Mapper.Properties[request.Path.StripEndingRoute()];
 
         if (prop == null)
         {
@@ -126,7 +187,7 @@ public static class MapperEndpoints
             return TypedResults.BadRequest("Property is read only.");
         }
 
-        if (model.Freeze)
+        if (request.Freeze)
         {
             await instance.FreezeProperty(prop, prop.Bytes);
         }
@@ -137,7 +198,16 @@ public static class MapperEndpoints
         return TypedResults.Ok();
     }
 
-    public static IResult GetGlossary(IInstanceService instanceService)
+    /// <summary>
+    /// Returns the glossary of the current mapper. The glossary is the collection of refereences and their reference
+    /// values.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <returns>
+    /// - HTTP 200 with the JSON glossary data.
+    /// - HTTP 400 if no mapper is currently loaded.
+    /// </returns>
+    public static GetGlossaryResult GetGlossary(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -146,7 +216,16 @@ public static class MapperEndpoints
         return TypedResults.Ok(instance.Mapper.References.Values.MapToDictionaryGlossaryItemModel());
     }
 
-    public static IResult GetGlossaryPage(IInstanceService instanceService, [FromRoute] string key)
+    /// <summary>
+    /// Returns the list of reference items for the target glossary entry (aka "reference" on IPokeAByteProperty). 
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <returns>
+    /// - HTTP 200 with the JSON glossary data.
+    /// - HTTP 400 if no mapper is currently loaded.
+    /// - HTTP 403 if the glossary has no entry for the target key.
+    /// </returns>
+    public static GetGlossaryPageResult GetGlossaryPage(IInstanceService instanceService, [FromRoute] string key)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -165,13 +244,25 @@ public static class MapperEndpoints
         }
     }
 
-    public static async Task<IResult> UpdatePropertyValueAsync(IInstanceService instanceService, [FromBody] UpdatePropertyValueModel model)
+    /// <summary>
+    /// Writes a new value to the target property. Poke-A-Byte will also ask the emulator to update the respective 
+    /// memory in the game.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="request"> The request data. </param>
+    /// <returns>
+    /// HTTP 200 if the property was succesfully updated. <br/>
+    /// HTTP 403 if the target property is read-only. <br/>
+    /// HTTP 404 if the target property does not exist. <br/>
+    /// HTTP 501 if an error occured during the update.
+    /// </returns>
+    public static async Task<IResult> SetPropertyValueAsync(IInstanceService instanceService, [FromBody] SetPropertyValueRequest request)
     {
         var instance = instanceService.Instance;
         if (instance == null)
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
-        var path = model.Path.StripEndingRoute();
+        var path = request.Path.StripEndingRoute();
         if (path.Contains('/'))
         {
             path = path.Replace('/', '.');
@@ -189,12 +280,14 @@ public static class MapperEndpoints
             return TypedResults.BadRequest("Property is read only.");
         }
 
-        await instance.WriteValue(prop, model.Value, model.Freeze);
+        await instance.WriteValue(prop, request.Value, request.Freeze);
 
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> UpdatePropertyByBitsAsync(IInstanceService instanceService, List<UpdatePropertyValueModel> model)
+    public static async Task<IResult> SetPropertiesByBits(
+        IInstanceService instanceService, 
+        List<SetPropertyValueRequest> model)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -206,7 +299,7 @@ public static class MapperEndpoints
         if (model.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
             return TypedResults.BadRequest("Values cannot be null.");
         //Convert BitProperty to GameHookBitProperty
-        var gameHookProperties = model
+        var properties = model
             .Select(x =>
             {
                 var path = x.Path.StripEndingRoute().FromRouteToPath();
@@ -217,12 +310,12 @@ public static class MapperEndpoints
             })
             .ToDictionary();
         //Make sure the addresses are the same
-        var baseAddress = gameHookProperties.First().Key.Address;
-        var baseType = gameHookProperties.First().Key.Type;
-        var baseLength = gameHookProperties.First().Key.Length;
+        var baseAddress = properties.First().Key.Address;
+        var baseType = properties.First().Key.Type;
+        var baseLength = properties.First().Key.Length;
         if (baseAddress is null || baseLength == 0)
             return TypedResults.BadRequest("Address or length for property is null.");
-        if (gameHookProperties.Any(x =>
+        if (properties.Any(x =>
                     x.Key.Address != baseAddress.Value ||
                     x.Key.Type != baseType ||
                     x.Key.Length != baseLength))
@@ -232,11 +325,11 @@ public static class MapperEndpoints
         {
             //Construct the updated byte array from value
             var outputByteArray = MultiplePropertiesUpdater
-                .ConstructUpdatedBytes(gameHookProperties, instance.Mapper);
+                .ConstructUpdatedBytes(properties, instance.Mapper);
             //Update only the first property since WriteBytes will overwrite the entire address space 
             //of this property. We are maintaining the original set of bytes before overwriting only
             //the values 
-            await instance.WriteBytes(gameHookProperties.First().Key, outputByteArray, false);
+            await instance.WriteBytes(properties.First().Key, outputByteArray, false);
         }
         catch (Exception e)
         {
@@ -245,7 +338,19 @@ public static class MapperEndpoints
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> UpdatePropertyBytesAsync(IInstanceService instanceService, [FromBody] UpdatePropertyBytesModel model)
+    /// <summary>
+    /// Writes a new value to the target property by setting the underlying bytes directly and calculating a new value 
+    /// from there. Poke-A-Byte will also ask the emulator to update the respective memory in the game.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="model"> The request data. </param>
+    /// <returns>
+    /// HTTP 200 if updating the property value via it's underlying bytes was successful. <br/>
+    /// HTTP 403 if the target property is read-only. <br/>
+    /// HTTP 404 if the target property does not exist. <br/>
+    /// HTTP 501 if an error occured during the update.
+    /// </returns>
+    public static async Task<IResult> SetPropertyBytesAsync(IInstanceService instanceService, [FromBody] SetPropertyBytesRequest model)
     {
         var instance = instanceService.Instance;
         if (instance == null)
@@ -253,20 +358,19 @@ public static class MapperEndpoints
 
         var path = model.Path.StripEndingRoute().FromRouteToPath();
         var actualBytes = Array.ConvertAll(model.Bytes, x => (byte)x);
+        var property = instance.Mapper.Properties[path];
 
-        var prop = instance.Mapper.Properties[path];
-
-        if (prop == null)
+        if (property == null)
         {
             return TypedResults.NotFound();
         }
 
-        if (prop.IsReadOnly)
+        if (property.IsReadOnly)
         {
             return TypedResults.BadRequest("Property is read only.");
         }
 
-        await instance.WriteBytes(prop, actualBytes, model.Freeze);
+        await instance.WriteBytes(property, actualBytes, model.Freeze);
 
         return TypedResults.Ok();
     }
