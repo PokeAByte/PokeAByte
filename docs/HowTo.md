@@ -25,7 +25,9 @@
 
 ### Retroarch, Super Shuckie 1
 
-Support for RetroArch and Super Shuckie 1 will be discontinued in the future.
+The driver for talking to RetroArch and Super Shuckie 1 may be discontinued in the future. If you have any problems with using Poke-A-Byte, please consider using one of the other emulators first.
+
+Performance with these emulators will be degraded as the method of retrieving data is very inefficient. You may not be able to speed up the game as much as you wish to as a result, especially on games that require a lot of memory to be read.
 
 ## 2. Downloading and opening Poke-A-Byte
 

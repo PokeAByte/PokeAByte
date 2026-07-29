@@ -226,4 +226,43 @@ public class FunctionScriptTests
         await Task.Delay(10);
         Assert.Equal(new byte[] { 5, 6, 7, 8 }, instance.Mapper.get_property_value("test.game"));
     }
+
+    [Fact]
+    public async Task StaticMemeoryContainerTests()
+    {
+        var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var driver = new TestDriver([1, 2, 3, 4]);
+        await using var instance = MapperTestHelper.CreateTestInstance(
+            new TestClientNotifier(),
+            MapperTestHelper.CreateMapper(
+                """
+                <property name="raw" type="int" address="0x00" length="4" read-function="read_raw_bytes" />
+                <property name="data" type="int" address="0x00" length="4" read-function="read_all_bytes" />
+                """,
+                memoryStart: "0x00",
+                memoryEnd: "0x04",
+                system: "GB"
+            ),
+            driver,
+            Path.Combine(currentFolder, "scripts/memory_container_test.js"),
+            currentFolder
+        );
+
+        await instance.Read();
+
+        await driver.WriteBytes(0, [5, 6, 7, 8]);
+
+        await instance.Read();
+
+        var logs = MapperTestHelper.InstanceLogger.GetSpyData().Where(x => x.LogLevel ==  LogLevel.Error);
+        Assert.Empty(logs);
+
+        var scriptLogs = MapperTestHelper.ScriptLogger.GetSpyData().Where(x => x.LogLevel ==  LogLevel.Information).ToList();
+        Assert.NotEmpty(scriptLogs);
+        Assert.Equal("get_raw_bytes: [1,2,3,4]", scriptLogs[0].Content);
+        Assert.Equal("GetAllBytes: [1,2,3,4,0,0]", scriptLogs[1].Content);
+        Assert.Equal("get_raw_bytes: [5,6,7,8]", scriptLogs[2].Content);
+        Assert.Equal("GetAllBytes: [5,6,7,8,0,0]", scriptLogs[3]?.Content);
+    }
+
 }

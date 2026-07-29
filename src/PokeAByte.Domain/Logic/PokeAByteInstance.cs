@@ -41,11 +41,6 @@ public class PokeAByteInstance : IPokeAByteInstance
     public Dictionary<string, object?> State { get; private set; }
     public Dictionary<string, object?> Variables { get; private set; }
 
-
-#if DEBUG
-    private bool DebugOutputMemoryLayoutToFilesystem { get; set; } = false;
-#endif
-
     public PokeAByteInstance(
         ILogger<PokeAByteInstance> logger,
         ScriptConsole scriptConsoleAdapter,

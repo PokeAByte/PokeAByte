@@ -5,8 +5,6 @@ using PokeAByte.Web.Helper;
 
 namespace PokeAByte.Web;
 
-public class RestAPI { }
-
 public static class FilesEndpoints
 {
     public static void MapFilesEndpoints(this WebApplication app)

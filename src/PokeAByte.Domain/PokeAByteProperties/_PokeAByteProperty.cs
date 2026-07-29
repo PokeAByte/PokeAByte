@@ -125,10 +125,10 @@ public partial class PokeAByteProperty : IPokeAByteProperty
         switch (Type)
         {
             case PropertyType.ByteArray:
-                if (value.StartsWith("[") && value.EndsWith("]"))
+                if (value.StartsWith('[') && value.EndsWith(']'))
                 {
                     var bytes = value.Substring(1, value.Length - 2)
-                        .Split(",")
+                        .Split(',')
                         .Select(static x => x.Trim())
                         .Select(byte.Parse);
                     return bytes.ToArray();
@@ -317,12 +317,11 @@ public partial class PokeAByteProperty : IPokeAByteProperty
     public byte[] BytesFromBits(byte[] bytes)
     {
         if (BitIndexes == null) return bytes;
-        int[] indexes = BitIndexes;
         var i = 0;
         var inputBits = new BitArray(bytes);
         var outputBits = new BitArray(bytes.Length * 8);
 
-        foreach (var x in indexes)
+        foreach (var x in BitIndexes)
         {
             outputBits[i] = inputBits[x];
             i += 1;

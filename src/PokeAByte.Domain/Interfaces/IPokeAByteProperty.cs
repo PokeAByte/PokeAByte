@@ -1,75 +1,10 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace PokeAByte.Domain.Interfaces;
 
-[JsonSerializable(typeof(byte))]
-public partial class ConverterContext : JsonSerializerContext;
-
-public class ByteArrayJsonConverter : JsonConverter<byte[]>
-{
-    public override byte[] Read(
-        ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        if (reader.TokenType != JsonTokenType.StartArray)
-        {
-            throw new JsonException();
-        }
-        reader.Read();
-
-        var elements = new List<byte>();
-
-        while (reader.TokenType != JsonTokenType.EndArray)
-        {
-            elements.Add(JsonSerializer.Deserialize(ref reader, ConverterContext.Default.Byte)!);
-
-            reader.Read();
-        }
-
-        return elements.ToArray();
-    }
-
-    public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
-    {
-        writer.WriteStartArray();
-
-        foreach (byte item in value)
-        {
-            JsonSerializer.Serialize(writer, item, ConverterContext.Default.Byte);
-        }
-
-        writer.WriteEndArray();
-    }
-}
-
-[JsonConverter(typeof(JsonStringEnumConverter<PropertyType>))]
-public enum PropertyType : byte
-{
-    [JsonStringEnumMemberName("binaryCodedDecimal")]
-    BinaryCodedDecimal,
-
-    [JsonStringEnumMemberName("bitArray")]
-    BitArray,
-
-    [JsonStringEnumMemberName("bool")]
-    Bool,
-
-    [JsonStringEnumMemberName("bit")]
-    Bit,
-
-    [JsonStringEnumMemberName("int")]
-    Int,
-
-    [JsonStringEnumMemberName("string")]
-    String,
-
-    [JsonStringEnumMemberName("uint")]
-    Uint,
-
-    [JsonStringEnumMemberName("byteArray")]
-    ByteArray
-}
-
+/// <summary>
+/// The game property data that clients receive and can interact with.
+/// </summary>
 public interface IPokeAByteProperty
 {
     /// <summary>
@@ -128,6 +63,15 @@ public interface IPokeAByteProperty
     [JsonPropertyName("reference")]
     string? Reference { get; }
 
+    /// <summary>
+    /// Describes which bits are being read from the game memory to derive the value. <br/>
+    /// </summary>
+    /// <value>
+    /// One of the following formats: <br/>
+    /// Single bit: `"y"` (e.g. `"0"`) <br/>
+    /// Range: `"x-y"` (e.g. `"0-3"`) <br/>
+    /// Array: `"x,y,z"` (e.g. `"0,2,4,8"`)
+    /// </value>
     [JsonPropertyName("bits")]
     string? Bits { get; }
 
@@ -137,6 +81,20 @@ public interface IPokeAByteProperty
     [JsonPropertyName("description")]
     string? Description { get; }
 
+    /// <summary>
+    /// The value derived from the game memory.
+    /// </summary>
+    /// <value>
+    /// Can have be of the following .NET types depending on <see cref="Type"/>: <br/>
+    /// <see cref="PropertyType.BinaryCodedDecimal"/> -> int <br/>
+    /// <see cref="PropertyType.BitArray"/> -> bool[] <br/>
+    /// <see cref="PropertyType.Bool"/> -> bool <br/>
+    /// <see cref="PropertyType.Bit"/> -> bool <br/>
+    /// <see cref="PropertyType.Int"/> -> int <br/>
+    /// <see cref="PropertyType.String"/> -> string <br/>
+    /// <see cref="PropertyType.Uint"/> -> uint <br/>
+    /// <see cref="PropertyType.ByteArray"/> -> byte[]
+    /// </value>
     [JsonPropertyName("value")]
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     object? Value { get; set; }
@@ -160,7 +118,8 @@ public interface IPokeAByteProperty
     /// <summary>
     /// Whether the property value is frozen. Whenever PokeAByte detects a change in <see cref="Bytes"/> from the 
     /// emulator, it immediately instructs the emulator to write the <see cref="BytesFrozen"/> back to the game memory
-    /// at the properties <see cref="Address"/>.
+    /// at the properties <see cref="Address"/>. <br/>
+    /// Emulators fully supporting the "emulator data protocol" may also freeze the memory internally.
     /// </summary>
     /// <remarks>
     /// This is a derived property and will be true if <see cref="BytesFrozen"/> is not empty. 
