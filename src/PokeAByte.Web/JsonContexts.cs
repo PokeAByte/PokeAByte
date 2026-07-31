@@ -31,7 +31,6 @@ namespace PokeAByte.Web;
 [JsonSerializable(typeof(MapperProblem), GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(IList<IPokeAByteProperty>), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(IEnumerable<RemoteMapperFile>))]
-[JsonSerializable(typeof(List<UpdateMemoryModel>))]
 [JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(IEnumerable<ArchivedMapperFile>))]
 [JsonSerializable(typeof(Dictionary<string, IEnumerable<ArchivedMapperFile>>))]

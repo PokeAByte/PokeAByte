@@ -27,7 +27,7 @@ The mapper element **SHOULD** specify a `syntax` attribute if configuration feat
 | 3      | 0.9.1   |
 | 4      | 0.10.0  |
 
-If a user tries to load a mapper for a syntax version that is higher than the currently supported one, they will instead get a warning and directions to upgrade Poke-A-Byte. This is especially important if you use certain JavaScript functionality, detailed below.
+If a user tries to load a mapper for a syntax version that is higher than the currently supported one, they will instead get a warning and directions to upgrade Poke-A-Byte. This is especially important if you use certain JavaScript functionality, detailed in the [JavaScript documentation](MapperScript.md).
 
 ## `property`
 
@@ -50,9 +50,9 @@ The `property` element has the following attributes:
 | after-read-value-function   | No        | string           | *see JavaScript documentation* |
 | before-write-value-function | No        | string           | *see JavaScript documentation* |
 
-[1]: One of the following strings: "binaryCodedDecimal", "bitArray", "bool", "int", "string", "uint", "byteArray".
-[2]: Either a hexadecimal memory address like `0x89AB` or a mathematical expression such as `{var} + 2`.
-[3]: Either a single integer like `2`, a range like `0-3`, or list of integers like `1, 3, 5, 7`
+[1]: One of the following strings: "binaryCodedDecimal", "bitArray", "bool", "int", "string", "uint", "byteArray". "byteArray" requires mapper syntax >= 2.  
+[2]: Either a hexadecimal memory address like `0x89AB` or a mathematical expression such as `{var} + 2`.  
+[3]: Either a single integer like `2`, a range like `0-3`, or list of integers like `1, 3, 5, 7`  
 
 For a detailed explanation of what the attributes do, please refer to the XML documentation on the IPokeAByteProperty members, as indicated by the "members" column.
 

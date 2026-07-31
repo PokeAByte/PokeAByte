@@ -285,21 +285,39 @@ public static class MapperEndpoints
         return TypedResults.Ok();
     }
 
+    /// <summary>
+    /// Update the value of multiple properties that reference the same game memory at the same time, as setting them 
+    /// individually one after the other may cause individual bits to be reset by the later request. <br/>
+    /// All properties to update must have the same address and must have a non-null non-empty value to be set.
+    /// </summary>
+    /// <param name="instanceService"></param>
+    /// <param name="request"> The property updates to perform. </param>
+    /// <returns>
+    /// HTTP 200 if all properties were succesfully updated. <br/>
+    /// HTTP 400 If no mapper is currently laoded. <br/>
+    /// HTTP 400 If no properties were specified. <br/>
+    /// HTTP 400 If one of the property updates has an invalid value. <br/>
+    /// HTTP 400 If one of the property updates targets the wrong address. <br/>
+    /// HTTP 403 if the target property is read-only. <br/>
+    /// HTTP 404 if the target property does not exist. <br/>
+    /// HTTP 501 if an error occured during the update.
+    /// </returns>
     public static async Task<IResult> SetPropertiesByBits(
         IInstanceService instanceService, 
-        List<SetPropertyValueRequest> model)
+        List<SetPropertyValueRequest> request)
     {
         var instance = instanceService.Instance;
         if (instance == null)
             return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
 
-        if (model.Count == 0)
+        if (request.Count == 0)
             return TypedResults.BadRequest("Properties count is zero.");
+        
         //Make sure all values exist
-        if (model.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
+        if (request.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
             return TypedResults.BadRequest("Values cannot be null.");
         //Convert BitProperty to GameHookBitProperty
-        var properties = model
+        var properties = request
             .Select(x =>
             {
                 var path = x.Path.StripEndingRoute().FromRouteToPath();

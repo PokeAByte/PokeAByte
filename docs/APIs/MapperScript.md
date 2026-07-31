@@ -25,7 +25,9 @@ You can also import the following interfaces from the `game_functions` module:
 import { pokemon } from "game_functions";
 ```
 
-Where `pokemon` is an instance of `PokemonFunctions` with `Encrypt(int gen, byte[] data)` and `Decrypt(int gen, byte[] data)` functions.
+Where `pokemon` is an instance of `PokemonFunctions` with `Encrypt(int gen, byte[] data)` and `Decrypt(int gen, byte[] data)` functions.  
+
+**Important**: The `game_functions` module requires mapper syntax >= 4.
 
 ## Standard functions
 
@@ -44,6 +46,8 @@ If the function returns false, Poke-A-Byte will not send any property updates to
 `containerprocessor(container: string, containerBytes: number[]) ` (requires syntax 4 or higher)
 
 Is called when a property with a non-default `memoryContainer` was updated. This is useful for games that encrypt parts of their memory. You can decrypt that memory in the preprocessor function and write the decrypted data into a `decrypted` memoryContainer. When a user - or an external tool - updates a property that reads from this decrypted container, the `containerprocessor` function is called. You can then re-encrypt the memory and use the `__driver` interface to update the game itself.
+
+**Important**: The `containerprocessor` functionality requires mapper syntax >= 2.
 
 Contrast with `before-write-value-function` and `write-function`.
 
@@ -143,6 +147,7 @@ const __mapper: {
 	 * suffix in the destinationPath prefix. 
 	 * E.g. if you have properties `foo.A, foo.B, foo.C` and `bar.B, bar.C` and call this function with
 	 * copy_properties("A", "B") then the values for `foo.B` and `foo.C` are copied to `bar.B` and `bar.C` respectively.
+	 * **IMPORTANT**: Requires mapper syntax 1
 	 */
 	copy_properties(sourcePath: string, destinationPath: string ): void,
 }
