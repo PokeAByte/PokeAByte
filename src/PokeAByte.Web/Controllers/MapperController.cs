@@ -307,53 +307,28 @@ public static class MapperEndpoints
         List<SetPropertyValueRequest> request)
     {
         var instance = instanceService.Instance;
-        if (instance == null)
-            return TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem());
-
         if (request.Count == 0)
+        {   
             return TypedResults.BadRequest("Properties count is zero.");
-        
-        //Make sure all values exist
-        if (request.Any(x => x.Value is null || string.IsNullOrEmpty(x.Value!.ToString())))
-            return TypedResults.BadRequest("Values cannot be null.");
-        //Convert BitProperty to GameHookBitProperty
-        var properties = request
-            .Select(x =>
+        }
+
+        var updates = request.Select(x =>
             {
                 var path = x.Path.StripEndingRoute().FromRouteToPath();
-                //Since we are already checking if the value is null, we shouldn't need to worry
-                //about it being string.Empty. I just want to stop the compiler from complaining 
-                return new KeyValuePair<IPokeAByteProperty, string>
-                    (instance.Mapper.Properties[path], x.Value?.ToString() ?? string.Empty);
-            })
-            .ToDictionary();
-        //Make sure the addresses are the same
-        var baseAddress = properties.First().Key.Address;
-        var baseType = properties.First().Key.Type;
-        var baseLength = properties.First().Key.Length;
-        if (baseAddress is null || baseLength == 0)
-            return TypedResults.BadRequest("Address or length for property is null.");
-        if (properties.Any(x =>
-                    x.Key.Address != baseAddress.Value ||
-                    x.Key.Type != baseType ||
-                    x.Key.Length != baseLength))
-            return TypedResults.BadRequest("Addresses or types for the properties are not the same.");
+                return new KeyValuePair<string, string>(path, x.Value?.ToString() ?? string.Empty);
+            });
 
-        try
+        WriteMultipleResult? result = instance is null ? null : await instance.WriteMultiple(updates);
+        return result switch
         {
-            //Construct the updated byte array from value
-            var outputByteArray = MultiplePropertiesUpdater
-                .ConstructUpdatedBytes(properties, instance.Mapper);
-            //Update only the first property since WriteBytes will overwrite the entire address space 
-            //of this property. We are maintaining the original set of bytes before overwriting only
-            //the values 
-            await instance.WriteBytes(properties.First().Key, outputByteArray, false);
-        }
-        catch (Exception e)
-        {
-            return TypedResults.BadRequest(e.ToString());
-        }
-        return TypedResults.Ok();
+            null => TypedResults.BadRequest(ApiHelper.MapperNotLoadedProblem()),
+            WriteMultipleResult.InvalidPaths => TypedResults.BadRequest("One or more properties do not exist"),
+            WriteMultipleResult.InvalidValue => TypedResults.BadRequest("Values cannot be null."),
+            WriteMultipleResult.InvalidLengthOrAddress => TypedResults.BadRequest("Address or length for property is null."),
+            WriteMultipleResult.InvalidProperty => TypedResults.BadRequest("Addresses or types for the properties are not the same."),
+            WriteMultipleResult.Success => TypedResults.Ok(),
+            _ => TypedResults.InternalServerError(),
+        };
     }
 
     /// <summary>

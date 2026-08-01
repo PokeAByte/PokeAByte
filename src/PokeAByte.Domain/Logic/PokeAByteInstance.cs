@@ -55,7 +55,6 @@ public class PokeAByteInstance : IPokeAByteInstance
         Variables = [];
         ClientNotifier = clientNotifier;
         ReadLoopToken = new CancellationTokenSource();
-
         // Get the file path from the filesystem provider.
         Mapper = PokeAByteMapperXmlFactory.LoadMapperFromFile(mapperContent.Xml, mapperContent.Path);
         MemoryAddressBlock[] blocksToRead = Mapper.PlatformOptions.Ranges;
@@ -317,6 +316,51 @@ public class PokeAByteInstance : IPokeAByteInstance
         JavascriptEngine?.Dispose();
         await Driver.Disconnect();
         await ClientNotifier.SendInstanceReset();
+    }
+
+    public async Task<WriteMultipleResult> WriteMultiple(IEnumerable<KeyValuePair<string, string>> updates)
+    {
+        var firstProperty = Mapper.Properties[updates.First().Key];
+        var baseAddress = firstProperty.Address;
+        var baseType = firstProperty.Type;
+        var baseLength = firstProperty.Length;
+        if (baseAddress is null || baseLength == 0)
+        {
+            return WriteMultipleResult.InvalidLengthOrAddress;
+        }
+        int totalBitCount = 0;
+        var outputByteArray = new byte[firstProperty.Length];
+        var outputBits = new BitArray(firstProperty.BytesFromFullValue(Mapper));
+
+        foreach(var update in updates)
+        {
+            if (!Mapper.Properties.ContainsKey(update.Key))
+            {
+                return WriteMultipleResult.InvalidPaths;
+            }
+
+            var property = (PokeAByteProperty)Mapper.Properties[update.Key] ;
+            if (property.Address != baseAddress || property.Length != baseLength || property.Type != baseType)
+            {
+                return WriteMultipleResult.InvalidProperty;
+            }
+
+            if (string.IsNullOrEmpty(update.Value))
+            {
+                return WriteMultipleResult.InvalidValue;
+            }
+            totalBitCount += property.BitIndexes?.Length ?? 0;
+
+            var inputBits = new BitArray(property.BytesFromValue(update.Value, Mapper));
+            for (var i = 0; i < property.BitIndexes?.Length; i++)
+            {
+                outputBits[property.BitIndexes[i]] = inputBits[i];
+            }
+        }
+
+        outputBits.CopyTo(outputByteArray, 0);
+        await WriteBytes(firstProperty, outputByteArray, false);
+        return WriteMultipleResult.Success;
     }
 
     public async Task WriteValue(IPokeAByteProperty target, object? value, bool? freeze)
