@@ -31,7 +31,10 @@ public class Program
             LogVersion(app);
             app.ConfigureApp();
             var runTask = app.RunAsync();
-            Process.Start(new ProcessStartInfo("http://localhost:8085/ui/mappers") { UseShellExecute = true });
+            if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+            {
+                Process.Start(new ProcessStartInfo("http://localhost:8085/ui/mappers") { UseShellExecute = true });
+            }
             await runTask;
         }
         catch (Exception ex)

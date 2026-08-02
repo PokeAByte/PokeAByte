@@ -24,6 +24,10 @@ done
 # Build the bizhawk DLL:
 dotnet publish PokeAByte.Protocol.BizHawk -o artifacts/github/ -c Release
 
+# dev build to generate the openAPI spec:
+dotnet build PokeAByte.Web -c Debug
+mv PokeAByte.Web/obj/PokeAByte.Web.json artifacts/github/PokeAByte_OpenAPI.json
+
 # If "--publish" flag is set, use the github cli to create a release:
 if [[ $1 == *--publish* ]] then
 	cd artifacts/github

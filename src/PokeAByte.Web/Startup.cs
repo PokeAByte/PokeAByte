@@ -13,10 +13,15 @@ using PokeAByte.Web.Services.Mapper;
 
 namespace PokeAByte.Web;
 
-public static class Startup
+internal static class Startup
 {
+    private static string[] _openApiAllowList = ["driver", "mapper", "mapper-service"];
+
     public static void ConfigureServices(this IServiceCollection services)
     {
+        services.AddOpenApi(
+            x => x.ShouldInclude = (item) => _openApiAllowList.Contains(item.RelativePath?.Split('/').First())
+        );
         services.AddCors();
         services.AddHttpClient();
         services.AddSignalR()
@@ -57,19 +62,28 @@ public static class Startup
             x.AllowCredentials();
         });
 
-        var embeddedFileProvider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
-        app.UseSpaStaticFiles(new() { FileProvider = embeddedFileProvider });
-        app.UseSpa(configuration =>
+
+        if (app.Environment.IsDevelopment())
         {
-            configuration.Options.DefaultPageStaticFileOptions = new() { FileProvider = embeddedFileProvider };
-            configuration.Options.DefaultPage = "/index.html";
-            configuration.Options.DefaultPageStaticFileOptions?.OnPrepareResponse = (context) =>
+            app.MapOpenApi();
+        }
+
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {        
+            var embeddedFileProvider = new ManifestEmbeddedFileProvider(Assembly.GetEntryAssembly()!);
+            app.UseSpaStaticFiles(new() { FileProvider = embeddedFileProvider });
+            app.UseSpa(configuration =>
             {
-                context.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
-                context.Context.Response.Headers.Append("X-Clacks-Overhead", "GNU Terry Pratchett");
-                context.Context.Response.Headers.Append("Expires", "-1");
-            };
-        });
+                configuration.Options.DefaultPageStaticFileOptions = new() { FileProvider = embeddedFileProvider };
+                configuration.Options.DefaultPage = "/index.html";
+                configuration.Options.DefaultPageStaticFileOptions?.OnPrepareResponse = (context) =>
+                {
+                    context.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+                    context.Context.Response.Headers.Append("X-Clacks-Overhead", "GNU Terry Pratchett");
+                    context.Context.Response.Headers.Append("Expires", "-1");
+                };
+            });
+        }
         app.UseMiddleware<RequestLogMiddleware>();
         app.MapHub<UpdateHub>("/updates");
 
@@ -77,7 +91,7 @@ public static class Startup
         app.MapGithubEndpoints();
         app.MapDriverEndpoints();
         app.MapMapperEndpoints();
-        app.MapMapperServiceEndpoints();
+        app.MapMapperFileEndpoints();
         app.MapSettingsEndpoints();
 
         app.MapGet("/favicon.png", () => Results.File(ApiHelper.EmbededResources.Favicon, contentType: "image/png"));

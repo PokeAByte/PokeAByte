@@ -6,6 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<DebugType>embedded</DebugType>
 		<RootNamespace>PokeAByte.Domain</RootNamespace>
+		<PublishReferencesDocumentationFiles>False</PublishReferencesDocumentationFiles>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

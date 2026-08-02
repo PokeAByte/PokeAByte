@@ -12,9 +12,12 @@ public class MapperClientService(
     IDriverService driverService)
 {
     private int _currentAttempt = 0;
-    public static readonly int MaxAttempts = 10;
+    private static readonly int MaxAttempts = 10;
     private const int MaxWaitMs = 50;
 
+    /// <summary>
+    /// Whether Poke-A-Byte currently has a connection to an emulator and a mapper loaded.
+    /// </summary>
     public bool IsCurrentlyConnected => instanceService.Instance != null;
 
     public async Task<Result> ChangeMapper(string mapperId)
@@ -128,21 +131,23 @@ public class MapperClientService(
         }
     }
 
+    /// <summary>
+    /// Stop processing of the current mapper, disconnect the driver and unload the mapper.
+    /// </summary>
+    /// <returns> An awaitable task. </returns>
     public async Task UnloadMapper()
     {
         await instanceService.StopProcessing();
     }
 
-    private async Task<bool> LoadMapper(string mapperId, IPokeAByteDriver driver)
+    private async Task<bool> LoadMapper(string path, IPokeAByteDriver driver)
     {
         // Load the mapper file.
-        if (string.IsNullOrEmpty(mapperId))
+        if (string.IsNullOrEmpty(path))
         {
-            throw new ArgumentException("ID was NULL or empty.", nameof(mapperId));
+            throw new ArgumentException("Path must not be NULL or empty.", nameof(path));
         }
-
-        // Get the file path from the filesystem provider.
-        var mapperContent = await mapperService.LoadContentAsync(mapperId);
+        var mapperContent = await mapperService.LoadContentAsync(path);
         var instance = instanceService.Instance;
         if (instance == null)
         {

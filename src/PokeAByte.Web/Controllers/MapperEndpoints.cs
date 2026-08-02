@@ -16,7 +16,7 @@ using GetPropertiesResult = Results<BadRequest<ProblemDetails>, Ok<IEnumerable<I
 using GetMetaResult = Results<BadRequest<ProblemDetails>, Ok<MapperMetaModel>>;
 using GetMapperResult = Results<BadRequest<ProblemDetails>, Ok<MapperModel>>;
 
-public static class MapperEndpoints
+internal static class MapperEndpoints
 {
     public static void MapMapperEndpoints(this WebApplication app)
     {
@@ -63,10 +63,8 @@ public static class MapperEndpoints
     /// Get the meta-data of the currently loaded mapper.
     /// </summary>
     /// <param name="instanceService"></param>
-    /// <returns>
-    /// HTTP 200 With the JSON-serialized mapper metadata. <br/>
-    /// HTTP 400 If no mapper is currently loaded.
-    /// </returns>
+    /// <returns> The JSON-serialized mapper metadata. </returns>
+    /// <response code="400"> If no mapper is currently loaded. </response>
     public static GetMetaResult GetMeta(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
@@ -81,12 +79,8 @@ public static class MapperEndpoints
     /// Get the list of all properties of the currently loaded mapper with their current values.
     /// </summary>
     /// <param name="instanceService"></param>
-    /// <returns>
-    /// <returns>
-    /// HTTP 200 With the JSON-serialized IPokeAByteProperty list. <br/>
-    /// HTTP 400 If no mapper is currently loaded.
-    /// </returns>
-    /// </returns>
+    /// <returns> The JSON-serialized IPokeAByteProperty list. </returns>
+    /// <response code="400"> If no mapper is currently loaded. </response>
     public static GetPropertiesResult GetProperties(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
@@ -99,15 +93,13 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Get thhe property for the target path.
+    /// Get the property for the target path.
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="path"> The path of the target property.</param>
-    /// <returns>
-    /// HTTP 200 With the JSON-serialized IPokeAByteProperty. <br/>
-    /// HTTP 400 If no mapper is currently loaded. <br/>
-    /// HTTP 404 If the target property does not exist.
-    /// </returns>
+    /// <returns> The JSON-serialized IPokeAByteProperty. </returns>
+    /// <response code="400"> If no mapper is currently loaded. </response>
+    /// <response code="404"> If the target property does not exist. </response>
     public static GetPropertyResult GetProperty(IInstanceService instanceService, [FromRoute] string path)
     {
         var instance = instanceService.Instance;
@@ -129,11 +121,9 @@ public static class MapperEndpoints
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="path"> The path of the property to read. </param>
-    /// <returns>
-    /// HTTP 200 With the string representation of the value as plain text. <br/>
-    /// HTTP 400 If no mapper is currently loaded. <br/>
-    /// HTTP 404 If the target property does not exist.
-    /// </returns>
+    /// <returns> The string representation of the value as plain text. </returns>
+    /// <response code="400"> If no mapper is currently loaded. </response>
+    /// <response code="404"> If the target property does not exist. </response>
     public static GetValueResult GetValueAsync(IInstanceService instanceService, string path)
     {
         var instance = instanceService.Instance;
@@ -159,12 +149,10 @@ public static class MapperEndpoints
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="request"> The request payload. </param>
-    /// <returns>
-    /// HTTP 200 if the property could be frozen. <br/>
-    /// HTTP 400 If no mapper is currently loaded. <br/>
-    /// HTTP 404 if the target property does not exist. <br/>
-    /// HTTP 501 if an error occured during the freezing or if the target property is read-only.
-    /// </returns>
+    /// <response code="200"> If the property could be frozen. </response>
+    /// <response code="400"> If no mapper is currently loaded. </response>
+    /// <response code="404"> If the target property does not exist. </response>
+    /// <response code="501"> If an error occured during the freezing or if the target property is read-only. </response>
     public static async Task<SetPropertyFrozenResult> SetPropertyFrozenAsync(
         IInstanceService instanceService,
         [FromBody] SetPropertyFrozenRequest request)
@@ -199,14 +187,13 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Returns the glossary of the current mapper. The glossary is the collection of refereences and their reference
+    /// Get the glossary of the current mapper. <br/> 
+    /// The glossary is the collection of refereences and their reference.
     /// values.
     /// </summary>
     /// <param name="instanceService"></param>
-    /// <returns>
-    /// - HTTP 200 with the JSON glossary data.
-    /// - HTTP 400 if no mapper is currently loaded.
-    /// </returns>
+    /// <returns> The JSON serialized glossary data. </returns>
+    /// <response code="400"> if no mapper is currently loaded. </response>
     public static GetGlossaryResult GetGlossary(IInstanceService instanceService)
     {
         var instance = instanceService.Instance;
@@ -217,14 +204,13 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Returns the list of reference items for the target glossary entry (aka "reference" on IPokeAByteProperty). 
+    /// Get the list of items for glossary entry. 
     /// </summary>
     /// <param name="instanceService"></param>
-    /// <returns>
-    /// - HTTP 200 with the JSON glossary data.
-    /// - HTTP 400 if no mapper is currently loaded.
-    /// - HTTP 403 if the glossary has no entry for the target key.
-    /// </returns>
+    /// <param name="key"> The name of the reference to get the keys and values for. </param>
+    /// <returns> The JSON serialized glossary data. </returns>
+    /// <response code="400"> if no mapper is currently loaded. </response>
+    /// <response code="404"> if the glossary has no entry for the target key. </response>
     public static GetGlossaryPageResult GetGlossaryPage(IInstanceService instanceService, [FromRoute] string key)
     {
         var instance = instanceService.Instance;
@@ -245,17 +231,15 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Writes a new value to the target property. Poke-A-Byte will also ask the emulator to update the respective 
-    /// memory in the game.
+    /// Write a value to target property. <br/> 
+    /// Poke-A-Byte will also ask the emulator to update the respective memory in the game.
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="request"> The request data. </param>
-    /// <returns>
-    /// HTTP 200 if the property was succesfully updated. <br/>
-    /// HTTP 403 if the target property is read-only. <br/>
-    /// HTTP 404 if the target property does not exist. <br/>
-    /// HTTP 501 if an error occured during the update.
-    /// </returns>
+    /// <response code="200"> If the property was succesfully updated. </response>
+    /// <response code="403"> If the target property is read-only. </response>
+    /// <response code="404"> If the target property does not exist. </response>
+    /// <response code="501"> If an error occured during the update. </response>
     public static async Task<IResult> SetPropertyValueAsync(IInstanceService instanceService, [FromBody] SetPropertyValueRequest request)
     {
         var instance = instanceService.Instance;
@@ -286,22 +270,22 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Update the value of multiple properties that reference the same game memory at the same time, as setting them 
-    /// individually one after the other may cause individual bits to be reset by the later request. <br/>
-    /// All properties to update must have the same address and must have a non-null non-empty value to be set.
+    /// Update the value of multiple related properties. <br/> 
+    /// Properties must all reference the same address and have the same length. This method is for as setting them 
+    /// all to the correct value at the same time, as individual writes would conflict with one another when the same
+    /// underlying game memory is updated. <br/>
+    /// All values for their respective target properties must not be null or empty.
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="request"> The property updates to perform. </param>
-    /// <returns>
-    /// HTTP 200 if all properties were succesfully updated. <br/>
-    /// HTTP 400 If no mapper is currently laoded. <br/>
-    /// HTTP 400 If no properties were specified. <br/>
-    /// HTTP 400 If one of the property updates has an invalid value. <br/>
-    /// HTTP 400 If one of the property updates targets the wrong address. <br/>
-    /// HTTP 403 if the target property is read-only. <br/>
-    /// HTTP 404 if the target property does not exist. <br/>
-    /// HTTP 501 if an error occured during the update.
-    /// </returns>
+    /// <response code="200"> If all properties were succesfully updated. </response>
+    /// <response code="400"> If no mapper is currently laoded. </response>
+    /// <response code="400"> If no properties were specified. </response>
+    /// <response code="400"> If one of the property updates has an invalid value. </response>
+    /// <response code="400"> If one of the property updates targets the wrong address. </response>
+    /// <response code="403"> if the target property is read-only. </response>
+    /// <response code="404"> if the target property does not exist. </response>
+    /// <response code="501"> if an error occured during the update. </response>
     public static async Task<IResult> SetPropertiesByBits(
         IInstanceService instanceService, 
         List<SetPropertyValueRequest> request)
@@ -332,17 +316,16 @@ public static class MapperEndpoints
     }
 
     /// <summary>
-    /// Writes a new value to the target property by setting the underlying bytes directly and calculating a new value 
-    /// from there. Poke-A-Byte will also ask the emulator to update the respective memory in the game.
+    /// Update a property from a byte array. <br/>
+    /// The value of the target property will be calculated from the given bytes and the bytes will be directly written 
+    /// to the game memory.
     /// </summary>
     /// <param name="instanceService"></param>
     /// <param name="model"> The request data. </param>
-    /// <returns>
-    /// HTTP 200 if updating the property value via it's underlying bytes was successful. <br/>
-    /// HTTP 403 if the target property is read-only. <br/>
-    /// HTTP 404 if the target property does not exist. <br/>
-    /// HTTP 501 if an error occured during the update.
-    /// </returns>
+    /// <response code="200"> if updating the property value via it's underlying bytes was successful. </response>
+    /// <response code="403"> if the target property is read-only. </response>
+    /// <response code="404"> if the target property does not exist. </response>
+    /// <response code="501"> if an error occured during the update. </response>
     public static async Task<IResult> SetPropertyBytesAsync(IInstanceService instanceService, [FromBody] SetPropertyBytesRequest model)
     {
         var instance = instanceService.Instance;

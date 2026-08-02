@@ -9,9 +9,9 @@ namespace PokeAByte.Web.Controllers;
 [Produces("application/json")]
 [Consumes("application/json")]
 [Route("mapper-service")]
-public static class MapperServiceEndpoints
+internal static class MapperFileEndpoints
 {
-    public static void MapMapperServiceEndpoints(this WebApplication app)
+    public static void MapMapperFileEndpoints(this WebApplication app)
     {
         app.MapGet("mapper-service/get-mappers", GetMappers);
         app.MapGet("mapper-service/is-connected", GetIsConnected);
@@ -23,6 +23,11 @@ public static class MapperServiceEndpoints
         app.MapPut("mapper-service/unload-mapper", UnloadMapperAsync);
     }
 
+    /// <summary>
+    /// Get the list of available mappers.
+    /// </summary>
+    /// <param name="mapperService"></param>
+    /// <returns> The list of currently available mappers. </returns>
     public static IEnumerable<InstalledMapper> GetMappers(IMapperService mapperService)
         => mapperService.ListInstalled();
 
