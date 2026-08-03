@@ -100,11 +100,10 @@ export class PropertyStore {
 
 	getMapper = () => this.client.getMapper();
 
-
 	getProperty = <T = any>(path: string) => this.client.getProperty<T>(path);
-	getAllProperties = (): Record<string, GameProperty> => this.client["_properties"];
-	getGlossary = (): Glossary|null => this.client.getGlossary();
 
+	getAllProperties = (): Record<string, GameProperty> => this.client["_properties"];
+	
 	getGlossaryItem = (item: string) => {
 		const glossary = this.client.getGlossary();
 		if (!glossary) {

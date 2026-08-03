@@ -1,6 +1,6 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { Store } from "../utility/propertyStore";
-import { AdvancedToggle } from "../components/AdvancedToggle";
+import { AdvancedToggle } from "./AdvancedToggle";
 import { GameProperty } from "pokeaclient";
 import { IconButton } from "@/components/IconButton";
 import { uiSettingsSignal } from "../Contexts/uiSettingsSignal";
@@ -64,14 +64,14 @@ export function Header() {
 							Connected
 						</span>
 						<IconButton
-							noBorder
+							disableBorder
 							title="Unload Mapper" 
 							class="text-red" 
 							onClick={Store.client.unloadMapper}
 							icon="clear"
 						/>
 						<IconButton
-							noBorder
+							disableBorder
 							title="Reload Mapper" 
 							class="text-purple" 
 							onClick={reloadMapper}

@@ -1,5 +1,5 @@
 import { Icon } from "@/components/Icon";
-import { useLocation } from "@/components/Route";
+import { useLocation } from "@/routing/useLocation";
 import { className } from "@/utility/className";
 import { Mapper } from "pokeaclient";
 

@@ -4,7 +4,7 @@ import { clipboardCopy } from "../utils/clipboardCopy";
 import { getPropertyFieldValue } from "./PropertyTextbox";
 import { Store } from "@/utility/propertyStore";
 import { CopyValueIcon } from "./CopyValueIcon";
-import { VisibilityToggle } from "@/components/VisibilityToggle";
+import { VisibilityToggle } from "@/pages/propertyEditor/components/VisibilityToggle";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";
 import { hiddenOverrideSignal, hiddenProperties } from "@/Contexts/hiddenPropertySignal";
 import { useCallback } from "preact/hooks";

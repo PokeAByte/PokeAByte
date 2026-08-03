@@ -6,7 +6,8 @@ import { useAPI } from "@/hooks/useAPI";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { WideButton } from "@/components/WideButton";
 import { Panel } from "@/components/Panel";
-import { getGithubLink, getGithubSettings, GitHubSettings, saveGitHubSettings, testGithubSettings as testSettings } from "@/utility/fetch";
+import { getGithubLink, getGithubSettings, saveGitHubSettings, testGithubSettings as testSettings } from "@/api/fetch";
+import { GitHubSettings } from "@/api/types";
 
 export function GithubSettingsPanel() {
 	const [status, setStatus] = useState({ color: "", message: "" });
@@ -175,14 +176,11 @@ export function GithubSettingsPanel() {
 						display={clearModal}
 						title="Warning"
 						confirmLabel="Reset"
-						text={
-							<p>
-								Are you sure you want to delete your current settings and set them to default?
-							</p>
-						}
 						onCancel={() => setClearModal(false)}
 						onConfirm={() => clearSettings()}
-					/>
+					>
+						<p>Are you sure you want to delete your current settings and set them to default?</p>
+					</ConfirmationModal>
 				</form>
 			</div>
 		</Panel>

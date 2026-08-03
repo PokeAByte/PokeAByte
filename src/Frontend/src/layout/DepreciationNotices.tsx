@@ -1,6 +1,6 @@
 import { useAPI } from "@/hooks/useAPI";
 import { useStorageState } from "@/hooks/useStorageState";
-import { getDriverName } from "@/utility/fetch";
+import { getDriverName } from "@/api/fetch";
 import { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 

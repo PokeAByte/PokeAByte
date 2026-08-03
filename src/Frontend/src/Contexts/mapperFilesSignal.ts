@@ -1,7 +1,8 @@
-import { getMappers, MapperFile } from "@/utility/fetch";
+import { getMappers } from "@/api/fetch";
 import { effect, signal } from "@preact/signals";
 import { isConnectedSignal } from "./mapperSignal";
-import { getArchivedMappers, getMapperUpdates, MapperArchiveRecord, MapperUpdate } from "@/utility/fetch";
+import { getArchivedMappers, getMapperUpdates } from "@/api/fetch";
+import { MapperArchiveRecord, MapperFile, MapperUpdate } from "@/api/types";
 
 
 export interface MapperFilesData {

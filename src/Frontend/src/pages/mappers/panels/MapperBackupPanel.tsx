@@ -2,7 +2,8 @@ import { useState, useEffect } from "preact/hooks";
 import { LoadProgress } from "@/components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "@/hooks/useAPI";
-import { archiveMappers, backupMappers, MapperUpdate, openArchiveFolder } from "@/utility/fetch";
+import { archiveMappers, backupMappers, openArchiveFolder } from "@/api/fetch";
+import { MapperUpdate } from "@/api/types";
 import { mapperFilesSignal, refreshMapperFiles } from "@/Contexts/mapperFilesSignal";
 import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
 import { WideButton } from "@/components/WideButton";
@@ -16,8 +17,6 @@ export function MapperBackupPanel() {
 	const [selectedMappers, setSelectedMappers] = useState<string[]>([]);
 	const archiveMappersApi = useAPI(archiveMappers, refreshMapperFiles);
 	const backupApi = useAPI(backupMappers, refreshMapperFiles);
-	// Load available mappers:
-
 	// Process loaded mappers:
 	useEffect(() => {
 		setAvailableMappers(mapperFiles.updates.filter(mapper => !!mapper.version) ?? []);

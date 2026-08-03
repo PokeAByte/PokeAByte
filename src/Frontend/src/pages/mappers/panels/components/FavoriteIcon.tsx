@@ -1,8 +1,7 @@
 import { useComputed } from "@preact/signals";
 import { getFavoriteId, saveSetting, uiSettingsSignal } from "../../../../Contexts/uiSettingsSignal";
 import { IconButton } from "@/components/IconButton";
-import { MapperFile } from "@/utility/fetch";
-
+import { MapperFile } from "@/api/types";
 
 export function FavoriteIcon(props: { mapper: MapperFile; }) {
 	const favoriteIds = useComputed(() => uiSettingsSignal.value.favoriteMappers).value;
@@ -19,10 +18,10 @@ export function FavoriteIcon(props: { mapper: MapperFile; }) {
 
 	if (favoriteIds?.includes(id)) {
 		return (
-			<IconButton onClick={handleClick} title="Remove from favorites" class="text-red" icon="favorite" noBorder />
+			<IconButton onClick={handleClick} title="Remove from favorites" class="text-red" icon="favorite" disableBorder />
 		);
 	}
 	return (
-		<IconButton onClick={handleClick} title="Add to favorites" icon="favorite_border" noBorder />
+		<IconButton onClick={handleClick} title="Add to favorites" icon="favorite_border" disableBorder />
 	);
 }

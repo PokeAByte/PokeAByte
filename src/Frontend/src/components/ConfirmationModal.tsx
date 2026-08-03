@@ -1,10 +1,14 @@
-import { ComponentChild } from "preact";
+import { ComponentChild, TargetedToggleEvent } from "preact";
 import { useRef, useEffect } from "preact/hooks";
 
 type ModalProps = {
+	/** Whether or not to display the modal / dialog. */
 	display: boolean;
+	/** The title of the modal. */
 	title?: string;
-	text: string | ComponentChild;
+	/** The text / content of the modal. */
+	children: ComponentChild;
+	/** The label for the confirmation button. */
 	confirmLabel: string;
 	/** Callback invoked when the user confirms the action. */
 	onConfirm: () => void;
@@ -27,14 +31,22 @@ export function ConfirmationModal(props: ModalProps) {
 		[dialogRef, props.display]
 	);
 
+	const onToggle = (event: TargetedToggleEvent<HTMLDialogElement>) => {
+		if (event.newState === "closed") {
+			props.onCancel();
+		}
+	}
+
 	if (!props.display) {
 		return null;
 	}
 	return (
-		<dialog ref={dialogRef} onToggle={(e) => e.newState === "closed" && props.onCancel()}>
+		<dialog ref={dialogRef} onToggle={onToggle}>
 			{props.title && <h2>{props.title}</h2>}
-			<p>{props.text}</p>
 			<div>
+				{props.children}
+			</div>
+			<div class="buttons">
 				<button class="margin-right" onClick={props.onCancel}>
 					CANCEL
 				</button>

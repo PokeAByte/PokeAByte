@@ -1,8 +1,16 @@
 import { saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
-import { PanelProps } from "../pages/mappers/MapperPage";
 import { useEffect } from "preact/hooks";
 import { useComputed } from "@preact/signals";
+import { ComponentChild } from "preact";
 
+export type PanelProps = {
+	title: string, 
+	defaultOpen?: boolean, 
+	children: ComponentChild,
+	id: string
+}
+
+/** A collapsible panel with a title. */
 export function Panel(props: PanelProps) {
 	const openPanels = useComputed(() => uiSettingsSignal.value.openPanels).value;
 	const setOpen = (isOpen: boolean) => {

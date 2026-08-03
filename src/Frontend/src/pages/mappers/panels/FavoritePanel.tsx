@@ -1,9 +1,9 @@
 import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
 import { getFavoriteId, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
 import { useAPI } from "@/hooks/useAPI";
-import { changeMapper } from "@/utility/fetch";
+import { changeMapper } from "@/api/fetch";
 import { Panel } from "../../../components/Panel";
-import { onMapperLoaded } from "./createMapperLoadToast";
+import { onMapperLoaded } from "./onMapperLoaded";
 import { CSSProperties } from "preact";
 import { getMapperColors } from "@/utility/getMapperColors";
 import { useComputed } from "@preact/signals";

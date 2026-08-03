@@ -1,8 +1,8 @@
+import { MapperFile } from "@/api/types";
 import { IconButton } from "@/components/IconButton";
 import { WideButton } from "@/components/WideButton";
 import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
 import { getFavoriteId, saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
-import { MapperFile } from "@/utility/fetch";
 import { beautifyMapperName } from "@/utility/mapperName";
 import { useComputed } from "@preact/signals";
 

@@ -1,4 +1,4 @@
-import { navigateTo } from "@/components/Route";
+import { navigateTo } from "@/routing/navigateTo";
 import { Toasts } from "../../../notifications/ToastStore";
 
 export function onMapperLoaded(_: boolean, result: boolean | string | null) {

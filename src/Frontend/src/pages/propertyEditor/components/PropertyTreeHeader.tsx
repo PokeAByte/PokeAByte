@@ -1,4 +1,4 @@
-import { VisibilityToggle } from "@/components/VisibilityToggle";
+import { VisibilityToggle } from "@/pages/propertyEditor/components/VisibilityToggle";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
 import { Show } from "@preact/signals/utils";
 import { useGamePropertyField } from "../hooks/useGamePropertyField";

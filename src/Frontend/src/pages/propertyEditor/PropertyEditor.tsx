@@ -1,8 +1,9 @@
 import { Store } from "@/utility/propertyStore";
 import { PropertyTree } from "./components/PropertyTree";
 import { useEffect, useState } from "preact/hooks";
-import { navigateTo } from "@/components/Route";
-import { CollapseAllButton, ForceVisibilityToggle } from "@/components/ForceVisibilityToggle";
+import { navigateTo } from "@/routing/navigateTo";
+import { ForceVisibilityToggle } from "@/pages/mappers/panels/components/ForceVisibilityToggle";
+import { CollapseAllButton } from "@/pages/mappers/panels/components/CollapseAllButton";
 import { IfNotHidden } from "@/components/IfNotHidden";
 import { IconButton } from "@/components/IconButton";
 import { isConnectedSignal, mapperSignal } from "@/Contexts/mapperSignal";

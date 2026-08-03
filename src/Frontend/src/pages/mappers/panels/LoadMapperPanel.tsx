@@ -7,8 +7,8 @@ import { mapperFilesSignal } from "@/Contexts/mapperFilesSignal";
 import { unique } from "@/utility/unique";
 import { OpenMapperFolderButton } from "@/components/OpenMapperFolderButton";
 import { useStorageState } from "@/hooks/useStorageState";
-import { changeMapper, MapperFile } from "@/utility/fetch";
-import { onMapperLoaded as onMapperLoaded } from "./createMapperLoadToast";
+import { changeMapper } from "@/api/fetch";
+import { onMapperLoaded as onMapperLoaded } from "./onMapperLoaded";
 import { Panel } from "@/components/Panel";
 import { FavoriteIcon } from "./components/FavoriteIcon";
 import { advancedModeSignal, saveSetting, uiSettingsSignal } from "@/Contexts/uiSettingsSignal";
@@ -17,6 +17,7 @@ import { mapperSignal } from "@/Contexts/mapperSignal";
 import { useComputed } from "@preact/signals";
 import { Show } from "@preact/signals/utils";
 import { beautifyMapperName, getMapperCategory } from "@/utility/mapperName";
+import { MapperFile } from "@/api/types";
 
 function createMapperOption(value: MapperFile) {
 	return {

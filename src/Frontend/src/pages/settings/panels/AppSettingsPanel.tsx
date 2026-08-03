@@ -2,7 +2,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useAPI } from "@/hooks/useAPI";
-import { AppSettingsModel, getAppSettings, resetAppSettings, saveAppSettings } from "@/utility/fetch";
+import { getAppSettings, resetAppSettings, saveAppSettings } from "@/api/fetch";
+import { AppSettingsModel } from "@/api/types";
 import { Toasts } from "@/notifications/ToastStore";
 import { TargetedInputEvent } from "preact";
 import { Panel } from "@/components/Panel";
@@ -147,14 +148,11 @@ export function AppSettingsPanel() {
 					display={dialog}
 					title="Warning"
 					confirmLabel="Reset"
-					text={
-						<p>
-							Are you sure you want to delete your current settings and set them to default?
-						</p>
-					}
 					onCancel={() => setDialog(false)}
 					onConfirm={doReset.call}
-				/>
+				>
+					<p>Are you sure you want to delete your current settings and set them to default?</p>
+				</ConfirmationModal>
 			</form>
 		</Panel>
 	)

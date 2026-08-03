@@ -1,4 +1,6 @@
 import { useState,  useEffect } from "preact/hooks";
+import { installMapper } from "@/api/fetch";
+import { MapperUpdate } from "@/api/types";
 import { LoadProgress } from "../../../components/LoadProgress";
 import { MapperSelectionTable } from "./components/MapperSelectionTable";
 import { useAPI } from "../../../hooks/useAPI";
@@ -9,7 +11,6 @@ import { WideButton } from "../../../components/WideButton";
 import { Panel } from "@/components/Panel";
 import { Show } from "@preact/signals/utils";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
-import { installMapper, MapperUpdate } from "@/utility/fetch";
 
 export function DownloadMapperPanel() {
 	const mapperFiles = mapperFilesSignal.value;

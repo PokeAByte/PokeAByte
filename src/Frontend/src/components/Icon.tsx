@@ -1,4 +1,4 @@
-
+/** Renders a material icon */
 export function Icon(props: {name: string, class?: string}) {
 	return (
 		<i

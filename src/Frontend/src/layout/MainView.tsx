@@ -1,5 +1,6 @@
 
-import { navigateTo, Switch } from "@/components/Route";
+import { navigateTo } from "@/routing/navigateTo";
+import { Switch } from "@/routing/Switch";
 import { LoadProgress } from "../components/LoadProgress";
 import { PropertyEditor } from "../pages/propertyEditor/PropertyEditor";
 import MapperPage from "../pages/mappers/MapperPage";

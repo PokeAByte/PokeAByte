@@ -1,7 +1,7 @@
 import { Dispatch, StateUpdater, useEffect, useState } from "preact/hooks";
 import { WideButton } from "../../../../components/WideButton";
 import { ComponentChildren } from "preact";
-import { MapperUpdate } from "@/utility/fetch";
+import { MapperUpdate } from "@/api/types";
 
 type MapperSelectionTableProps = {
 	onMapperSelection: Dispatch<StateUpdater<string[]>>,

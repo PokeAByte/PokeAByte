@@ -9,7 +9,8 @@ import { WideButton } from "../../../components/WideButton";
 import { Panel } from "@/components/Panel";
 import { Show } from "@preact/signals/utils";
 import { advancedModeSignal } from "@/Contexts/uiSettingsSignal";
-import { installMapper, MapperUpdate } from "@/utility/fetch";
+import { MapperUpdate } from "@/api/types";
+import { installMapper } from "@/api/fetch";
 
 export function UpdateMapperPanel() {
 	const mapperFiles = mapperFilesSignal.value;
