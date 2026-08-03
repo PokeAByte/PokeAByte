@@ -2,6 +2,15 @@
 [Version 0.10.3](#0103)  
 [Version 0.9.2](#093)  
 
+# 0.11.4
+
+This is a housekeeping release focused on documentation improvements and refactoring.
+
+- Updated various packages.
+- Added an [OpenAPI specification](https://en.wikipedia.org/wiki/OpenAPI_Specification) to the release artifacts.
+- Overhauled the [manual documentation](https://github.com/PokeAByte/PokeAByte/tree/main/docs) detailing how mappers work.
+- Fixed a bug where the frontend would fail to refresh the list of installed mappers in some cases.
+
 # 0.11.3
 
 ## Bugfixes
