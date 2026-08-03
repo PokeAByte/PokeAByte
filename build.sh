@@ -36,5 +36,5 @@ if [[ $1 == *--publish* ]] then
 	awk '/^# /{if (version) exit; version=1} version {print}' ../../../CHANGELOG.md > release_notes.md
 	# Create the github release. Argument 2 is the release tag given in the workflow input.
 	# The release is marked as a draft so that a human maintainer can make sure the script worked properly.
-	gh release create $2 *.{zip,dll} -t "Version $2" -F release_notes.md -d
+	gh release create $2 *.{zip,dll,json} -t "Version $2" -F release_notes.md -d
 fi
