@@ -1,4 +1,4 @@
-import { ChangedField, GameProperty, Glossary, PokeAClient, ProblemDetails } from "pokeaclient";
+import { ChangedField, GameProperty, PokeAClient, ProblemDetails } from "pokeaclient";
 import { Toasts } from "../notifications/ToastStore";
 
 type Callback = () => void;

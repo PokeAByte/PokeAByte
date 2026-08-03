@@ -33,21 +33,15 @@
     <Exec Command="npm run build" WorkingDirectory="../Frontend" />
   </Target>
   <ItemGroup>
+    <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
+    <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.9" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'=='Debug'">
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.10">
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.10" Condition="'$(Configuration)'=='Debug'">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
-    <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
