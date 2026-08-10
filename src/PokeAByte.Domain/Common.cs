@@ -87,7 +87,8 @@ public class ReferenceItems
     /// <returns> The found item or <see langword="null"/> if no item with that value exists. </returns>
     public ReferenceItem GetFirstByValue(object? value)
     {
-        return Values.FirstOrDefault(x => string.Equals(x.Value?.ToString(), value?.ToString(), StringComparison.Ordinal)) ?? throw new Exception($"Missing dictionary value for '{value}', value was not found in reference list {Name}.");
+        return Values.FirstOrDefault(x => string.Equals(x.Value?.ToString(), value?.ToString(), StringComparison.Ordinal)) 
+            ?? throw new Exception($"Missing dictionary value for '{value}', value was not found in reference list {Name}.");
     }
 }
 

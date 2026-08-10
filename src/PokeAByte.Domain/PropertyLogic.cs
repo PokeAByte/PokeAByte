@@ -100,7 +100,7 @@ public static class PropertyLogic
             results = data.Chunk(Size.Value).Select(b =>
             {
                 var value = b.ReverseBytesIfBE(_endian).get_ulong_be();
-                var referenceItem = reference.Values.SingleOrDefault(x => x.Key == value);
+                var referenceItem = reference.GetSingleOrDefaultByKey(value);
                 return referenceItem?.Value?.ToString() ?? null;
             }).ToArray();
             // Return the completed string buffer.
@@ -113,7 +113,7 @@ public static class PropertyLogic
         for (; i < data.Length; i++)
         {
             var key = data[i];
-            var referenceItem = reference.Values.SingleOrDefault(x => x.Key == key);
+            var referenceItem = reference.GetSingleOrDefaultByKey(key);
             if (referenceItem?.Value == null)
             {
                 break;
