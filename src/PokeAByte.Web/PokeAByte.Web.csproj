@@ -35,10 +35,10 @@
   <ItemGroup>
     <ProjectReference Include="..\PokeAByte.Domain\PokeAByte.Domain.csproj" />
     <ProjectReference Include="..\PokeAByte.Infrastructure\PokeAByte.Infrastructure.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.10" Condition="'$(Configuration)'=='Debug'">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.11" Condition="'$(Configuration)'=='Debug'">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

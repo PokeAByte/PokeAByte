@@ -6,12 +6,12 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Extensions.Logging.Mock" Version="10.0.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
 		<PackageReference Include="coverlet.collector" Version="10.0.1" />
-		<PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
+		<PackageReference Include="RichardSzalay.MockHttp" Version="7.1.0" />
 		<PackageReference Include="Voyager.UnitTestLogger" Version="1.2.0" />
 		<PackageReference Include="xunit" Version="2.9.3" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
